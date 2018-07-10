@@ -103,7 +103,7 @@ def Program(fileNameModel, verboseprint, smoothing, smoothing_factor,
     print("--- Get centerlines\n")
     inlet, outlets = get_centers(surface, dir_path)
     centerlines = compute_centerlines(inlet, outlets, fileNameCenterlines,
-                                          capped_surface, resampling=0.1)
+                                          capped_surface, resampling=0.1, endPoint=0)
     tol = get_tolerance(centerlines)
 
     if aneurysm:
@@ -192,24 +192,33 @@ def Program(fileNameModel, verboseprint, smoothing, smoothing_factor,
             num_outlets_after = compute_centers(surface_uncapped, test_capped=True)[1]
 
             if num_outlets != num_outlets_after:
-                for i in range(num_outlets):
-                    lines = [ExtractSingleLine(centerlines, j) for j in range(num_outlets) if j != i]
-                    tmp_centerlines = merge_data(lines)
+                surface = vmtkSmoother(surface, "laplace", iterations=200)
+                WritePolyData(surface, fileNameSurfaceSmooth)
+                print(("ERROR: Automatic clipping failed. You have to open {} and " + \
+                        "manually clipp the branch which still is capped. " + \
+                        "Overwrite the current {} and restart the script.").format(
+                        fileNameSurfaceSmooth, fileNameSurfaceSmooth))
+                sys.exit(0)
 
-                    tmp_uncapped = uncapp_surface(surface, tmp_centerlines, filename=None)
-                    if num_outlets == compute_centers(tmp_uncapped, test_capped=True)[1]:
-                        surface = vmtkSmoother(tmp_uncapped, "laplace", iterations=200)
-                        WritePolyData(surface, fileNameSurfaceSmooth)
-                        print(("ERROR: Automatic clipping failed. You have to open {} and " + \
-                              "manually clipp the branch which still is capped. " + \
-                              "Overwrite the current {} and restart the script.").format(
-                                  fileNameSurfaceSmooth, int(num_outlets_after - num_outlets),
-                                  fileNameSurfaceSmooth))
-                        sys.exit(0)
-                else:
-                    WritePolyData(surface_uncapped, fileNameSurfaceSmooth)
-                    print("ERROR: Something went wrong with the capping. Please overwrite" + \
-                          " the file {} with a manually capped version.".format(fileNameSurfaceSmooth))
+                #for i in range(num_outlets):
+                #    lines = [ExtractSingleLine(centerlines, j) for j in range(num_outlets) if j != i]
+                #    tmp_centerlines = merge_data(lines)
+                #    tmp_uncapped = uncapp_surface(surface, tmp_centerlines, filename=None)
+
+                #    WritePolyData(tmp_uncapped, "tmp_uncapped{}.vtp".format(i))
+                #    WritePolyData(tmp_centerlines, "tmp_centerline{}.vtp".format(i))
+                #    if num_outlets == compute_centers(tmp_uncapped, test_capped=True)[1]:
+                #        surface = vmtkSmoother(tmp_uncapped, "laplace", iterations=200)
+                #        WritePolyData(surface, fileNameSurfaceSmooth)
+                #        print(("ERROR: Automatic clipping failed. You have to open {} and " + \
+                #              "manually clipp the branch which still is capped. " + \
+                #              "Overwrite the current {} and restart the script.").format(
+                #                  fileNameSurfaceSmooth, fileNameSurfaceSmooth))
+                #        break
+                #else:
+                #    print("ERROR: Something went wrong with the capping. Please overwrite" + \
+                #          " the file {} with a manually capped version.".format(fileNameSurfaceSmooth))
+
             surface = surface_uncapped
 
             # Smoothing to improve the quality of the elements

@@ -506,7 +506,7 @@ def get_array_cell(arrayName, line, k=1):
 
 # TODO: Get bounds and compute polyballs based on that
 #       bounds = surface.GetBounds()
-def create_new_surface(completeVoronoiDiagram, polyBallImageSize=[200, 200, 200]):
+def create_new_surface(completeVoronoiDiagram, polyBallImageSize=[280, 280, 280]):
     # Get the x,y, and z range of the completeVoronoiDiagram
     modeller = vtkvmtk.vtkvmtkPolyBallModeller()
     if version < 6:
@@ -1177,34 +1177,17 @@ def compute_centers(polyData, case_path=None, test_capped=False):
     area = []
     center = []
     for i in range(int(region_array.max()) + 1):
-        # Extract points for this opening
-        index = (region_array == i).nonzero()[0]
-        n = index.shape[0]
-        tmp_points = np.zeros((n, 3))
-        if n <= 5:
-            continue
+        # Compute area
+        boundary = threshold(outputs, "RegionId", lower=i-0.1, upper=i+0.1,
+                            type="between", source=0)
 
-        # Sort to be ordred clockwise
-        for j in range(3):
-            x = points[index][:, j]
-            x_end = x[2::2].tolist()
-            x_end.reverse()
-            x1 = [x[0]] + x[1::2].tolist() + x_end
-            tmp_points[:, j] = x1
+        delaunay_filter = vtk.vtkDelaunay2D()
+        delaunay_filter.SetInputData(boundary)
+        delaunay_filter.Update()
+        area.append(compute_area(delaunay_filter.GetOutput()))
 
-        # Insert points into VTK object
-        points_vtk = vtk.vtkPoints()
-        [points_vtk.InsertNextPoint(tmp_points[k]) for k in range(n)]
-
-        # Make polygon
-        polygon = vtk.vtkPolygon()
-        polygon.GetPoints().DeepCopy(points_vtk)
-        polygon.GetPointIds().SetNumberOfIds(n)
-        for j in range(n):
-            polygon.GetPointIds().SetId(j, j)
-
-        area.append(polygon.ComputeArea())
-        center.append(np.array(compute_bary_center(tmp_points)))
+        # Get center
+        center.append(np.mean(points[(region_array == i).nonzero()[0]], axis=0))
 
     # Store the center and area
     inlet_ind = area.index(max(area))
