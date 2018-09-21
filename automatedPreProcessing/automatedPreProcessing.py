@@ -29,6 +29,7 @@ def str2bool(arg):
     else:
         raise argparse.ArgumentTypeError('Boolean value expected.')
 
+
 def Program(fileNameModel, verboseprint, smoothing, smoothing_factor,
             smooth_aneurysm, meshingMethod, aneurysm,
             createFlowext, viz, configPath, numberOfSacPoints, coarsening_factor):
@@ -273,7 +274,7 @@ def Program(fileNameModel, verboseprint, smoothing, smoothing_factor,
             extender.Execute()
 
             surface = extender.Surface
-            surface = vmtkSmoother(surface, "laplace", iterations=100)
+            surface = vmtkSmoother(surface, "laplace", iterations=200)
             WritePolyData(surface, fileNameModelFlowExt)
 
         else:
@@ -286,7 +287,7 @@ def Program(fileNameModel, verboseprint, smoothing, smoothing_factor,
     if not path.isfile(fileNameFlowCenterlines):
         print("--- Compute the model centerlines with flow extension.")
         # Compute the centerlines.
-        inlet, outlets = get_centers(surface, dir_path, flowext=True)
+        inlet, outlets = get_centers(surface, path.join(dir_path, caseName), flowext=True)
         centerlines = compute_centerlines(inlet, outlets,
                                              fileNameFlowCenterlines,
                                              capped_surface, resampling = 0.5)
@@ -376,7 +377,6 @@ def Program(fileNameModel, verboseprint, smoothing, smoothing_factor,
         #                                np.array(misr_max_center[k][2] + z[i]).tolist()[0]])
 
         print("--- Saving probes points in: ", fileNameProbePoints)
-        print(listProbePoints)
         dataNumpy = np.array(listProbePoints)
         dataNumpy.dump(fileNameProbePoints)
     else:
@@ -483,7 +483,6 @@ def Program(fileNameModel, verboseprint, smoothing, smoothing_factor,
             script_file.close()
 
         run_simulation(configPath, dir_path, caseName)
-
 
 
 if __name__ == "__main__":
