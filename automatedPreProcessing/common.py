@@ -8,7 +8,6 @@ import numpy as np
 import sys
 import re
 from os import path, listdir
-from IPython import embed
 import math
 
 # Global array names
@@ -531,69 +530,9 @@ def create_new_surface(completeVoronoiDiagram, polyBallImageSize=[280, 280, 280]
     return envelope
 
 
-def get_relevant_outlets_tavel(surface, dir_path):
-    # Check if info exists
-    if not path.isfile(path.join(dir_path, "info.txt")):
-        provide_relevant_outlets_tawss(surface, dir_path)
-
-    # Open info
-    parameters = get_parameters(dir_path)
-    relevant_outlets = []
-    inlet = []
-    for key, value in parameters.items():
-        if key.startswith("tavel_relevant_outlet_"):
-            relevant_outlets.append(value)
-        elif key.startswith("tavel_inlet"):
-            inlet = value
-
-    if relevant_outlets == []:
-        inlet, relevant_outlets = provide_relevant_outlets_inlet_tavel(surface, dir_path)
-
-    return inlet, relevant_outlets
-
-
-def get_relevant_outlets_tawss(surface, dir_path):
-    # Check if info exists
-    if not path.isfile(path.join(dir_path, "info.txt")):
-        provide_relevant_outlets_tawss(surface, dir_path)
-
-    # Open info
-    parameters = get_parameters(dir_path)
-    relevant_outlets = []
-    inlet = []
-    for key, value in parameters.items():
-        if key.startswith("tawss_relevant_outlet_"):
-            relevant_outlets.append(value)
-        elif key.startswith("tawss_inlet"):
-            inlet = value
-
-    if relevant_outlets == []:
-        inlet, relevant_outlets = provide_relevant_outlets_inlet_tawss(surface, dir_path)
-
-    return inlet, relevant_outlets
-
-
-def get_relevant_outlets(surface, dir_path):
-    # Check if info exists
-    if not path.isfile(path.join(dir_path, "info.txt")):
-        provide_relevant_outlets(surface, dir_path)
-
-    # Open info
-    parameters = get_parameters(dir_path)
-    relevant_outlets = []
-    for key, value in parameters.items():
-        if key.startswith("relevant_outlet_"):
-            relevant_outlets.append(value)
-
-    if relevant_outlets == []:
-        relevant_outlets = provide_relevant_outlets(surface, dir_path)
-
-    return relevant_outlets
-
-
 def get_aneurysm_dome(surface, dir_path):
     # Check if info exists
-    if not path.isfile(path.join(dir_path, "info.txt")):
+    if not path.isfile(path.join(dir_path, dir_path + ".txt")):
         provide_aneurysm_points(surface, dir_path)
 
     # Open info
@@ -622,77 +561,6 @@ def centerline_div(centerline1, centerline2, tol):
             break
 
     return i
-
-
-def provide_relevant_outlets_tavel(surface, dir_path=None):
-    # Fix surface
-    cleaned_surface = surface_cleaner(surface)
-    triangulated_surface = triangulate_surface(cleaned_surface)
-
-    # Select seeds
-    SeedSelector = vmtkPickPointSeedSelector()
-    SeedSelector.SetSurface(triangulated_surface)
-    SeedSelector.Execute()
-
-    aneurysmSeedIds = SeedSelector.GetTargetSeedIds()
-    get_point = surface.GetPoints().GetPoint
-    points = [list(get_point(aneurysmSeedIds.GetId(i))) for i in range(aneurysmSeedIds.GetNumberOfIds())]
-    info = {}
-
-    if dir_path is not None:
-        info["tavel_inlet"] = points[0]
-        for i in range(1, len(points)):
-            info["tavel_relevant_outlet_%d" % (i-1)] = points[i]
-            write_parameters(info, dir_path)
-
-    return points[0], points[1:]
-
-
-def provide_relevant_outlets_tawss(surface, dir_path=None):
-    # Fix surface
-    cleaned_surface = surface_cleaner(surface)
-    triangulated_surface = triangulate_surface(cleaned_surface)
-
-    # Select seeds
-    SeedSelector = vmtkPickPointSeedSelector()
-    SeedSelector.SetSurface(triangulated_surface)
-    SeedSelector.Execute()
-
-    aneurysmSeedIds = SeedSelector.GetTargetSeedIds()
-    get_point = surface.GetPoints().GetPoint
-    points = [list(get_point(aneurysmSeedIds.GetId(i))) for i in range(aneurysmSeedIds.GetNumberOfIds())]
-    info = {}
-
-    if dir_path is not None:
-        info["tawss_inlet"] = points[0]
-        for i in range(1, len(points)):
-            info["tawss_relevant_outlet_%d" % (i-1)] = points[i]
-            write_parameters(info, dir_path)
-
-    return points[0], points[1:]
-
-
-def provide_relevant_outlets(surface, dir_path=None):
-    # Fix surface
-    cleaned_surface = surface_cleaner(surface)
-    triangulated_surface = triangulate_surface(cleaned_surface)
-
-    # Select seeds
-    SeedSelector = vmtkPickPointSeedSelector()
-    SeedSelector.SetSurface(triangulated_surface)
-    SeedSelector.Execute()
-
-    aneurysmSeedIds = SeedSelector.GetTargetSeedIds()
-    get_point = surface.GetPoints().GetPoint
-    points = [list(get_point(aneurysmSeedIds.GetId(i))) for i in range(aneurysmSeedIds.GetNumberOfIds())]
-    info = {}
-
-    if dir_path is not None:
-        for i in range(len(points)):
-            info["relevant_outlet_%d" % i] = points[i]
-            write_parameters(info, dir_path)
-
-    return points
 
 
 def provide_aneurysm_points(surface, dir_path=None):
@@ -796,7 +664,7 @@ def surface_cleaner(surface):
 
 def get_area(dir_path):
     # Check if info exists
-    if not path.isfile(path.join(dir_path, "info.txt")):
+    if not path.isfile(path.join(dir_path, dir_path + ".txt")):
         compute_centers(surface, dir_path)
 
     # Open info
@@ -818,7 +686,7 @@ def get_area(dir_path):
 
 def get_centers(surface, dir_path, flowext=False):
     # Check if info exists
-    if flowext or not path.isfile(path.join(dir_path, "info.txt")):
+    if flowext or not path.isfile(path.join(dir_path, dir_path + ".txt")):
         compute_centers(surface, dir_path)
 
     # Open info
@@ -1453,12 +1321,12 @@ def GramSchmidt(V):
     return E
 
 
-def get_parameters(folder):
+def get_parameters(dir_path):
     # If info.txt file, return an empty dict
-    if not path.isfile(path.join(folder, "info.txt")): return {}
+    if not path.isfile(dir_path + ".txt"): return {}
 
     # Get text
-    f = open(path.join(folder, "info.txt"), "r")
+    f = open(dir_path + ".txt", "r")
     text = f.read()
     f.close()
     text = text.split("\n")
@@ -1481,9 +1349,9 @@ def get_parameters(folder):
     return data
 
 
-def write_parameters(data, folder):
+def write_parameters(data, dir_path):
     # Get old parameters
-    parameters = get_parameters(folder)
+    parameters = get_parameters(dir_path)
 
     # Add new parameters (can overwrite old as well)
     for key, value in data.items():
@@ -1494,7 +1362,7 @@ def write_parameters(data, folder):
     text = "\n".join(text)
 
     # Write text
-    f = open(path.join(folder, "info.txt"), "w")
+    f = open(dir_path + ".txt", "w")
     f.write(text)
     f.close()
 
@@ -1632,7 +1500,7 @@ def move_past_sphere(centerline, center, r, start, step=-1, stop=0, X=0.8):
     return tempPoint, r
 
 
-def dist_sphere_curv(surface, centerlines, sac_center, misr_max, fileName):
+def dist_sphere_curv(surface, centerlines, sac_center, misr_max, fileName, factor):
     # Get longest centerline
     length = []
     for i in range(centerlines.GetNumberOfLines()):
@@ -1731,12 +1599,14 @@ def dist_sphere_diam(surface, centerlines, sac_center, misr_max, fileName, facto
                                                         sac_center[i],
                                                         maxDistance=100,
                                                         distanceScale=0.2 / (misr_max[i] * 2.))
+    if len(sac_center) == 0:
+        element_size *= factor
+    else:
+        distance_to_spheres_array = get_array("DistanceToSpheres", distance_to_sphere)
+        element_size = np.minimum(element_size, distance_to_spheres_array)*factor
 
-    distance_to_spheres_array = get_array("DistanceToSpheres", distance_to_sphere)
-    element_size = np.minimum(element_size, distance_to_spheres_array)*factor
     vtk_array = create_vtk_array(element_size, "Size")
     distance_to_sphere.GetPointData().AddArray(vtk_array)
-    #distance_to_sphere.GetPointData().RemoveArray("DistanceToCenterlines")
     WritePolyData(distance_to_sphere, fileName)
 
     return distance_to_sphere

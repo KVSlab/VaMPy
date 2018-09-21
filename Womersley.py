@@ -1,4 +1,5 @@
-from __future__ import print_function
+# This file is modified from CBCFLOW
+
 # Copyright (C) 2010-2014 Simula Research Laboratory
 #
 # This file is part of CBCFLOW.
@@ -16,7 +17,8 @@ from __future__ import print_function
 # You should have received a copy of the GNU Lesser General Public License
 # along with CBCFLOW. If not, see <http://www.gnu.org/licenses/>.
 
-from dolfin import Expression, Mesh, MeshFunction, error, SubsetIterator, MPI, ds, assemble, Constant, sqrt,FacetNormal, as_vector, mpi_comm_world, SpatialCoordinate
+from dolfin import (UserExpression, Mesh, MeshFunction, SubsetIterator, MPI, ds,
+assemble, Constant, sqrt, FacetNormal, as_vector, SpatialCoordinate)
 
 import numpy as np
 
@@ -54,9 +56,9 @@ def compute_radius(mesh, facet_domains, ind, center):
         ent = facet.entities(0)
         for v in ent:
             p = geom.point(v)
-            r2 = sum((p[j] - center[j])**2 for j in xrange(d))
+            r2 = sum((p[j] - center[j])**2 for j in range(d))
             maxr2 = max(maxr2, r2)
-    r = MPI.max(mpi_comm_world(), sqrt(maxr2))
+    r = MPI.max(MPI.comm_world, sqrt(maxr2))
     return r
 
 
@@ -75,12 +77,12 @@ def compute_boundary_geometry_acrn(mesh, ind, facet_domains):
         return None
 
     # Compute barycenter by integrating x components over all facets
-    c = [assemble(x[i]*dsi) / A for i in xrange(d)]
+    c = [assemble(x[i]*dsi) / A for i in range(d)]
 
     # Compute average normal (assuming boundary is actually flat)
     n = FacetNormal(mesh)
-    ni = np.array([assemble(n[i]*dsi) for i in xrange(d)])
-    n_len = np.sqrt(sum([ni[i]**2 for i in xrange(d)])) # Should always be 1!?
+    ni = np.array([assemble(n[i]*dsi) for i in range(d)])
+    n_len = np.sqrt(sum([ni[i]**2 for i in range(d)])) # Should always be 1!?
     normal = ni/n_len
 
     # Compute radius by taking max radius of boundary points
@@ -123,110 +125,31 @@ def fourier_coefficients(x, y, T, N):
     return ck
 
 
-class WomersleyComponent2(Expression):
-    # Subclassing the expression class restricts the number of arguments, args is therefore a dict of arguments.
-    def __init__(self, args): # TODO: Document args properly
-        Expression.__init__(self)
-
-        # Spatial args
-        self.radius = args["radius"]
-        self.center = args["center"]
-        self.normal = args["normal"]
-        self.normal_component = args["normal_component"]
-
-        # Temporal args
-        self.period = args["period"]
-        self.Qn = args["Qn"]
-
-        # Physical args
-        self.nu = args["nu"]
-
-        # Internal state
-        self._t = None
-        self._scale_value = 1.0
-
-        # Precomputation
-        self._values = np.zeros(10000)
-        self._ys = np.linspace(0.0, 1.0, len(self._values))
-        self._precompute_bessel_functions()
-        self._precompute_y_coeffs()
-
-    def _precompute_bessel_functions(self):
-        '''Calculate the Bessel functions of the Womersley profile'''
-        self.omega = 2 * np.pi / self.period
-        self.N = len(self.Qn)
-        self.ns = np.arange(1, self.N)
-
-        # Allocate for 0...N-1
-        alpha = np.zeros(self.N, dtype=np.complex)
-        self.beta = np.zeros(self.N, dtype=np.complex)
-        self.jn0_betas = np.zeros(self.N, dtype=np.complex)
-        self.jn1_betas = np.zeros(self.N, dtype=np.complex)
-
-        # Compute vectorized for 1...N-1 (keeping element 0 in arrays to make indexing work out later)
-        alpha[1:] = self.radius * np.sqrt(self.ns * (self.omega / self.nu))
-        self.beta[1:] = alpha[1:] * np.sqrt(1j**3)
-        self.jn0_betas[1:] = jn(0, self.beta[1:])
-        self.jn1_betas[1:] = jn(1, self.beta[1:])
-
-    def _precompute_y_coeffs(self):
-        "Compute intermediate terms for womersley function."
-        n = len(self._values)
-        self._y_coeffs = np.zeros((n,self.N), dtype=np.complex)
-        pir2 = np.pi * self.radius**2
-        for i, y in enumerate(self._ys):
-            self._y_coeffs[i,0] = (2*self.Qn[0]/pir2) * (1 - y**2)
-            for n in self.ns:
-                tmp1 = self.Qn[n] / pir2
-                tmp2 = 1.0 - jn(0, self.beta[n]*y) / self.jn0_betas[n]
-                tmp3 = 1.0 - 2.0*self.jn1_betas[n] / (self.beta[n]*self.jn0_betas[n])
-                self._y_coeffs[i,n] = tmp1 * (tmp2 / tmp3)
-
-    def set_t(self, t):
-        # Compute time dependent coeffs once
-        self._t = float(t) % self.period
-        self._expnt = np.exp((self.omega * self._t * 1j) * self.ns)
-
-        # Compute values for this time for each y
-        n = len(self._values)
-        for i in xrange(n):
-            # Multiply complex coefficients for x with complex exponential functions in time
-            wom = (self._y_coeffs[i,0] + np.dot(self._y_coeffs[i,1:], self._expnt)).real
-
-            # Scale by negative normal direction and scale_value
-            self._values[i] = -self.normal_component * self._scale_value * wom
-
-    def eval(self, value, x):
-        y = np.sqrt(x_to_r2(x, self.center, self.normal)) / self.radius
-        nm = len(self._values) - 1
-        yi = max(0, min(nm, int(round(y*nm))))
-        value[0] = self._values[yi]
-
-
-class WomersleyComponent1(Expression):
+class WomersleyComponent(UserExpression):
     # Subclassing the expression class restricts the number of arguments, args
     # is therefore a dict of arguments.
-    def init(self, args):
+    def __init__(self, radius, center, normal, normal_component, period, nu, element, Q=None,
+                 V=None):
         # Spatial args
-        self.radius = args["radius"]
-        self.center = args["center"]
-        self.normal = args["normal"]
-        self.normal_component = args["normal_component"]
+        self.radius = radius
+        self.center = center
+        self.normal = normal
+        self.normal_component = normal_component
 
         # Temporal args
-        self.period = args["period"]
-        if "Q" in args:
-            assert "V" not in args, "Cannot provide both Q and V!"
-            self.Qn = args["Q"]
+        self.period = period
+        if Q is not None:
+            assert V is None, "Cannot provide both Q and V!"
+            self.Qn = Q
             self.N = len(self.Qn)
-        elif "V" in args:
-            self.Vn = args["V"]
+        elif V is not None:
+            self.Vn = V
             self.N = len(self.Vn)
         else:
-            error("Invalid transient data type, missing argument 'Q' or 'V'.")
+            raise ValueError("Invalid transient data type, missing argument 'Q' or 'V'.")
 
         # Physical args
-        self.nu = args["nu"]
+        self.nu = nu
 
         # Internal state
         self.t = None
@@ -235,6 +158,8 @@ class WomersleyComponent1(Expression):
         # Precomputation
         self._precompute_bessel_functions()
         self._all_r_dependent_coeffs = {}
+
+        super().__init__(element=element)
 
     def _precompute_bessel_functions(self):
         '''Calculate the Bessel functions of the Womersley profile'''
@@ -272,7 +197,7 @@ class WomersleyComponent1(Expression):
                 r_dependent_coeffs[n] = (self.Qn[n] / pir2) * (j0bn - jn(0,
                                             bn*y)) / (j0bn - (2.0/bn)*j1bn)
         else:
-            error("Missing Vn or Qn!")
+            raise ValueError("Missing Vn or Qn!")
         return r_dependent_coeffs
 
     def _get_r_dependent_coeffs(self, y):
@@ -302,7 +227,7 @@ class WomersleyComponent1(Expression):
 
 
 def make_womersley_bcs(t, Q, mesh, nu, area, center, radius, normal,
-                       v_degree, scale_to=None, coeffstype="Q",
+                       element, scale_to=None, coeffstype="Q",
                        N=1001, num_fourier_coefficients=20, **NS_namespace):
     """Generate a list of expressions for the components of a Womersley profile."""
     # Compute transient profile as interpolation of given coefficients
@@ -312,25 +237,18 @@ def make_womersley_bcs(t, Q, mesh, nu, area, center, radius, normal,
     # Compute fourier coefficients of transient profile
     timedisc = np.linspace(0, period, N)
 
-    #from matplotlib.pyplot import plot, savefig
-    #plot(timedisc, transient_profile(timedisc))
-    #savefig("series.png")
-    #sys.exit(0)
     Cn = fourier_coefficients(timedisc, transient_profile, period, num_fourier_coefficients)
 
     # Create Expressions for each direction
     expressions = []
     for ncomp in normal:
-        args = {
-            "radius": radius,
-            "center": center,
-            "normal": normal,
-            "normal_component": ncomp,
-            "period": period,
-            "nu": nu,
-            }
-        args[coeffstype] = Cn
-        expressions.append(WomersleyComponent1(degree=v_degree))
-        expressions[-1].init(args)
+        if coeffstype == "Q":
+            Q = Cn
+            V = None
+        elif coeffstype == "V":
+            V = Cn
+            Q = None
+        expressions.append(WomersleyComponent(radius, center, normal, ncomp, period, nu,
+                                              element, Q=Q, V=V))
 
     return expressions

@@ -13,7 +13,6 @@ import ImportData
 import ToolRepairSTL
 
 from os import path
-from IPython import embed
 from vmtk import vmtkscripts
 
 import vtk
@@ -75,7 +74,7 @@ def Program(fileNameModel, verboseprint, smoothing, smoothing_factor,
         else:
             surface = ReadPolyData(fileNameClippedModel)
 
-    parameters = get_parameters(dir_path)
+    parameters = get_parameters(path.join(dir_path, caseName))
 
     if not "check_surface" in parameters.keys():
         surface = surface_cleaner(surface)
@@ -91,7 +90,7 @@ def Program(fileNameModel, verboseprint, smoothing, smoothing_factor,
                                 "Nan coordinates or some other shenanigans."))
         else:
             parameters["check_surface"] = True
-            write_parameters(parameters, dir_path)
+            write_parameters(parameters, path.join(dir_path, caseName))
 
     # Capp surface if open
     if not compute_centers(surface, test_capped=True):
@@ -101,19 +100,19 @@ def Program(fileNameModel, verboseprint, smoothing, smoothing_factor,
 
     # Get centerlines
     print("--- Get centerlines\n")
-    inlet, outlets = get_centers(surface, dir_path)
+    inlet, outlets = get_centers(surface, path.join(dir_path, caseName))
     centerlines = compute_centerlines(inlet, outlets, fileNameCenterlines,
                                           capped_surface, resampling=0.1, endPoint=0)
     tol = get_tolerance(centerlines)
 
     if aneurysm:
-        aneurysms = get_aneurysm_dome(capped_surface, dir_path)
+        aneurysms = get_aneurysm_dome(capped_surface, path.join(dir_path, caseName))
         centerlineAnu = compute_centerlines(inlet, aneurysms, filenameAneurysmCenterlines,
                                   capped_surface, resampling=0.1)
 
         # Extract the aneurysm centerline
         sac_centerline = []
-        info = get_parameters(dir_path)
+        info = get_parameters(path.join(dir_path, caseName))
         num_anu = info["number_of_aneurysms"]
 
         # Compute mean distance between points
@@ -362,7 +361,6 @@ def Program(fileNameModel, verboseprint, smoothing, smoothing_factor,
         # voronoi diagram which is closest to that part compared to any ther
         # centerlines. Then randomly chose among those points. For now, simply
         # add just one point (sac_center).
-        #embed()
         #numberOfPoints = numberOfSacPoints
         #for k in range(num_anu):
         #    u = np.random.uniform(0.0, 1.0, (numberOfPoints, 1))
@@ -378,6 +376,7 @@ def Program(fileNameModel, verboseprint, smoothing, smoothing_factor,
         #                                np.array(misr_max_center[k][2] + z[i]).tolist()[0]])
 
         print("--- Saving probes points in: ", fileNameProbePoints)
+        print(listProbePoints)
         dataNumpy = np.array(listProbePoints)
         dataNumpy.dump(fileNameProbePoints)
     else:
@@ -391,7 +390,7 @@ def Program(fileNameModel, verboseprint, smoothing, smoothing_factor,
     flowSplitting.CheckTotalFlowRate(network, verboseprint)
 
     # BSL method for mean inlet flow rate.
-    parameters = get_parameters(dir_path)
+    parameters = get_parameters(path.join(dir_path, caseName))
     meanInflow = 0.27 * parameters["inlet_area"]
 
     # Extract the surface mesh of the wall

@@ -1,13 +1,14 @@
-#from ..NSfracStep import *
 import numpy as np
-from fenicstools import Probes
+#from fenicstools import Probes
+from oasis.problems.NSfracStep import *
 from os import path, makedirs, getcwd
 import pickle
 from Womersley import *
-from safe_write import *
+
+set_log_level(50)
 
 # Override some problem specific parameters
-def problem_parameters(commandline_kwargs, NS_parameters, **NS_namespace):
+def problem_parameters(commandline_kwargs, NS_parameters, NS_expressions, **NS_namespace):
     if "restart_folder" in commandline_kwargs.keys():
         restart_folder = commandline_kwargs["restart_folder"]
         f = open(path.join(restart_folder, 'params.dat'), 'r')
@@ -37,8 +38,8 @@ def problem_parameters(commandline_kwargs, NS_parameters, **NS_namespace):
             krylov_solvers = dict(monitor_convergence=False)
         )
 
-	caseName = NS_parameters["mesh_path"].split(".")[0]
-	NS_parameters["folder"] = path.join(NS_parameters["folder"], caseName)
+    caseName = NS_parameters["mesh_path"].split(".")[0]
+    NS_parameters["folder"] = path.join(NS_parameters["folder"], caseName)
 
 # Create a mesh
 def mesh(mesh_path, **NS_namespace):
@@ -55,8 +56,8 @@ def create_bcs(u_, t, NS_expressions, V, Q, area_ratio, mesh, folder, mesh_path,
 
     # Extract flow split ratios
     # TODO: Should be a json / cpickle type
-    info = open(path.join(path.dirname(path.abspath(__file__)), mesh_path.split(".")[0],
-                          "{}.txt".format(mesh_path.split(".")[0])), "r").readlines()
+    info = open(path.join(path.dirname(path.abspath(__file__)), mesh_path.split(".")[0] \
+                           + ".txt"), "r").readlines()
     for line in info:
         if "inlet_area" in line:
             inlet_area = float(line.split(":")[-1])
@@ -75,7 +76,7 @@ def create_bcs(u_, t, NS_expressions, V, Q, area_ratio, mesh, folder, mesh_path,
     t_values *= 1000
     tmp_a, tmp_c, tmp_r, tmp_n = compute_boundary_geometry_acrn(mesh, id_in[0], fd)
     inlet = make_womersley_bcs(t_values, Q_values, mesh, nu, tmp_a,
-                                  tmp_c, tmp_r, tmp_n, velocity_degree)
+                                  tmp_c, tmp_r, tmp_n, V.ufl_element())
     NS_expressions["inlet"] = inlet
 
     # Set start time equal to t_0
@@ -93,7 +94,7 @@ def create_bcs(u_, t, NS_expressions, V, Q, area_ratio, mesh, folder, mesh_path,
     for i, ID in enumerate(id_out):
         p_initial = area_out[i] / sum(area_out)
         outflow = Expression("p", p=p_initial, degree=pressure_degree)
-        bc = DirichletBC(Q, outflow, ID)
+        bc = DirichletBC(Q, outflow, fd, ID)
         bc_p.append(bc)
         NS_expressions[ID] = outflow
         print(ID,  p_initial)
@@ -102,8 +103,8 @@ def create_bcs(u_, t, NS_expressions, V, Q, area_ratio, mesh, folder, mesh_path,
     wall = Constant(0.0)
 
     # Create Boundary conditions for the velocity
-    bc_wall = DirichletBC(V, wall, 0)
-    bc_inlet = [DirichletBC(V, inlet[i], id_in[0]) for i in range(3)]
+    bc_wall = DirichletBC(V, wall, fd, 0)
+    bc_inlet = [DirichletBC(V, inlet[i], fd, id_in[0]) for i in range(3)]
 
     # Return boundary conditions in dictionary
     return dict(u0=[bc_inlet[0], bc_wall],
@@ -112,7 +113,7 @@ def create_bcs(u_, t, NS_expressions, V, Q, area_ratio, mesh, folder, mesh_path,
                 p=bc_p)
 
 def get_file_paths(folder):
-    if MPI.rank(mpi_comm_world()) == 0:
+    if MPI.rank(MPI.comm_world) == 0:
         counter = 1
         to_check = path.join(folder, "data", "%s")
         while path.isdir(to_check % str(counter)):
@@ -125,14 +126,16 @@ def get_file_paths(folder):
     else:
         counter = 0
 
-    counter = MPI.max(mpi_comm_world(), counter)
+    counter = MPI.max(MPI.comm_world, counter)
 
     common_path = path.join(folder, "data", str(counter), "VTK")
-    file_u = [path.join(common_path, "u%d.h5" % i) for i in range(3)]
-    file_p = path.join(common_path, "p.h5")
-    file_nu = path.join(common_path, "nut.h5")
-    file_u_mean = [path.join(common_path, "u%d_mean.h5" % i) for i in range(3)]
-    files = {"u": file_u, "p": file_p, "u_mean": file_u_mean, "nut": file_nu}
+    file_u = [path.join(common_path, "u%d.xdmf" % i) for i in range(3)]
+    file_p = path.join(common_path, "p.xdmf")
+    file_nu = path.join(common_path, "nut.xdmf")
+    file_u_mean = [path.join(common_path, "u%d_mean.xdmf" % i) for i in range(3)]
+    file_u_mean_vec = path.join(common_path, "u_mean.xdmf")
+    files = {"u": file_u, "p": file_p, "u_mean": file_u_mean, "nut": file_nu,
+             "u_mean_vec": file_u_mean_vec}
 
     return files
 
@@ -140,27 +143,23 @@ def get_file_paths(folder):
 def pre_solve_hook(mesh, V, Q, newfolder, folder, u_, mesh_path,
                    restart_folder, velocity_degree, **NS_namespace):
 
-    Vv = VectorFunctionSpace(mesh, 'CG', velocity_degree)
-
     # Create point for evaluation
     fd = MeshFunction("size_t", mesh, 2, mesh.domains())
     n = FacetNormal(mesh)
     eval_dict = {}
-    rel_path = path.join(path.dirname(path.abspath(__file__)), mesh_path.split(".")[0],
-                        "{}_probe_point".format(mesh_path.split(".")[0]))
+    rel_path = path.join(path.dirname(path.abspath(__file__)), mesh_path.split(".")[0] + \
+                        "_probe_point")
     probe_points = np.load(rel_path)
 
     # Store points file in checkpoint
-    if MPI.rank(mpi_comm_world()) == 0:
+    if MPI.rank(MPI.comm_world) == 0:
         probe_points.dump(path.join(newfolder, "Checkpoint", "points"))
 
-    eval_dict["centerline_u_x_probes"] = Probes(probe_points.flatten(), V)
-    eval_dict["centerline_u_y_probes"] = Probes(probe_points.flatten(), V)
-    eval_dict["centerline_u_z_probes"] = Probes(probe_points.flatten(), V)
-    eval_dict["centerline_p_probes"] = Probes(probe_points.flatten(), Q)
-
-    # Link for io
-    hdf5_link = HDF5Link().link
+    # FIXME: Commet in after fixing fenicstools compability for FEniCS 2018.1
+    #eval_dict["centerline_u_x_probes"] = Probes(probe_points.flatten(), V)
+    #eval_dict["centerline_u_y_probes"] = Probes(probe_points.flatten(), V)
+    #eval_dict["centerline_u_z_probes"] = Probes(probe_points.flatten(), V)
+    #eval_dict["centerline_p_probes"] = Probes(probe_points.flatten(), Q)
 
     if restart_folder is None:
         # Get files to store results
@@ -169,8 +168,23 @@ def pre_solve_hook(mesh, V, Q, newfolder, folder, u_, mesh_path,
     else:
         files = NS_namespace["files"]
 
-    return dict(eval_dict=eval_dict, fd=fd, n=n, hdf5_link=hdf5_link,
-                files=files, uv=Function(Vv, name="Velocity"))
+    writer = {}
+    for key, value in files.items():
+        if isinstance(value, list):
+            values = value
+            for i, value in enumerate(values):
+                writer[key + str(i)] = XDMFFile(MPI.comm_world, value)
+                writer[key + str(i)].parameters["flush_output"] = True
+                writer[key + str(i)].parameters["functions_share_mesh"] = True
+                writer[key + str(i)].parameters["rewrite_function_mesh"] = False
+        else:
+            writer[key] = XDMFFile(MPI.comm_world, value)
+            writer[key].parameters["flush_output"] = True
+            writer[key].parameters["functions_share_mesh"] = True
+            writer[key].parameters["rewrite_function_mesh"] = False
+
+    return dict(eval_dict=eval_dict, fd=fd, n=n, writer=writer)
+
 
 def beta(err, p):
     if p < 0:
@@ -184,26 +198,23 @@ def beta(err, p):
         else:
             return 1  + 5*err**2
 
+
 def w(P):
     return 1 / ( 1 + 20*abs(P))
 
 
-def temporal_hook(u_, p_, p, Q, mesh, tstep, compute_flux,
-                  dump_stats, eval_dict, newfolder, id_in, files, id_out,
-                  fd, n, store_data, hdf5_link, NS_expressions,
-                  area_ratio, t, uv, **NS_namespace):
+def temporal_hook(u_, p_, p, Q, mesh, tstep, compute_flux, dump_stats, eval_dict,
+                  newfolder, id_in, writer, id_out, fd, n, store_data, NS_expressions,
+                  area_ratio, t, **NS_namespace):
 
     # Update boundary condition
     for uc in NS_expressions["inlet"]:
         uc.set_t(t)
 
     # Compute flux and update pressure condition
-    if tstep > 2 and tstep % 1  == 0:
+    if tstep > 2 and tstep % 1 == 0:
 
         Q_in = abs(assemble(dot(u_, n)*ds(id_in[0], domain=mesh, subdomain_data=fd)))
-        if MPI.rank(mpi_comm_world()) == 0:
-            print("tstep", tstep, "Q_in =", Q_in)
-
         Q_outs =  []
         for i, out_id in enumerate(id_out):
             Q_out = abs(assemble(dot(u_, n)*ds(out_id, domain=mesh, subdomain_data=fd)))
@@ -243,48 +254,51 @@ def temporal_hook(u_, p_, p, Q, mesh, tstep, compute_flux,
             else:
                 NS_expressions[out_id].p  = p_old * beta(R_err,p_old) * M_err ** E
 
-    if MPI.rank(mpi_comm_world()) == 0 and tstep % 10 == 0:
+    if MPI.rank(MPI.comm_world) == 0 and tstep % 10 == 0:
         print("="*10, tstep, "="*10)
-        print("Sum of Q_out = ", sum(Q_outs), " Q_in = ", Q_in)
-        print("(" + str(out_id) + ") New pressure", NS_expressions[out_id].p,
-                " | Old pressure", p_old)
-        print("(" + str(out_id) + " " + str(area_ratio[i]) + ") Ideal: " \
-                + str(Q_ideal) + "   Actual: " + str(Q_out) + "\n")
+        print("Sum of Q_out = {:0.4f} Q_in = {:0.4f}".format(sum(Q_outs), Q_in))
+        for i, out_id in enumerate(id_out):
+            print(("({:d}) New pressure {:0.4f} | Old pressure " + \
+                   "{:0.4f}").format(out_id, NS_expressions[out_id].p, p_old))
+        for i, out_id in enumerate(id_out):
+            print(("({:d}) area ratio {:0.4f}, ideal: {:0.4f} actual:" + \
+                  " {:0.4f}").format(out_id, area_ratio[i], Q_ideal, Q_out))
         print()
 
-   # Sample velocity in points
-    eval_dict["centerline_u_x_probes"](u_[0])
-    eval_dict["centerline_u_y_probes"](u_[1])
-    eval_dict["centerline_u_z_probes"](u_[2])
-    eval_dict["centerline_p_probes"](p_)
+    # FIXME: Comment in with fenicstools is compatible
+    # Sample velocity in points
+    #eval_dict["centerline_u_x_probes"](u_[0])
+    #eval_dict["centerline_u_y_probes"](u_[1])
+    #eval_dict["centerline_u_z_probes"](u_[2])
+    #eval_dict["centerline_p_probes"](p_)
 
     # Store sampled velocity
-    if tstep % dump_stats == 0:
-        filepath = path.join(newfolder, "Stats")
-        if MPI.rank(mpi_comm_world()) == 0:
-            if not path.exists(filepath):
-                makedirs(filepath)
+    #if tstep % dump_stats == 0:
+    #    filepath = path.join(newfolder, "Stats")
+    #    if MPI.rank(MPI.comm_world) == 0:
+    #        if not path.exists(filepath):
+    #            makedirs(filepath)
 
-        arr_u_x = eval_dict["centerline_u_x_probes"].array()
-        arr_u_y = eval_dict["centerline_u_y_probes"].array()
-        arr_u_z = eval_dict["centerline_u_z_probes"].array()
-        arr_p = eval_dict["centerline_p_probes"].array()
+        #arr_u_x = eval_dict["centerline_u_x_probes"].array()
+        #arr_u_y = eval_dict["centerline_u_y_probes"].array()
+        #arr_u_z = eval_dict["centerline_u_z_probes"].array()
+        #arr_p = eval_dict["centerline_p_probes"].array()
 
         # Dump stats
-        if MPI.rank(mpi_comm_world()) == 0:
-            num = eval_dict["centerline_u_x_probes"].number_of_evaluations()
-            pp = (path.join(filepath, "u_x_%s.probes" % str(tstep)))
-            arr_u_x.dump(path.join(filepath, "u_x_%s.probes" % str(tstep)))
-            arr_u_y.dump(path.join(filepath, "u_y_%s.probes" % str(tstep)))
-            arr_u_z.dump(path.join(filepath, "u_z_%s.probes" % str(tstep)))
-            arr_p.dump(path.join(filepath, "p_%s.probes" % str(tstep)))
+        #if MPI.rank(MPI.comm_world) == 0:
+        #    num = eval_dict["centerline_u_x_probes"].number_of_evaluations()
+        #    pp = (path.join(filepath, "u_x_%s.probes" % str(tstep)))
+        #    arr_u_x.dump(path.join(filepath, "u_x_%s.probes" % str(tstep)))
+        #    arr_u_y.dump(path.join(filepath, "u_y_%s.probes" % str(tstep)))
+        #    arr_u_z.dump(path.join(filepath, "u_z_%s.probes" % str(tstep)))
+        #    arr_p.dump(path.join(filepath, "p_%s.probes" % str(tstep)))
 
         # Clear stats
-        MPI.barrier(mpi_comm_world())
-        eval_dict["centerline_u_x_probes"].clear()
-        eval_dict["centerline_u_y_probes"].clear()
-        eval_dict["centerline_u_z_probes"].clear()
-        eval_dict["centerline_p_probes"].clear()
+        #MPI.barrier(MPI.comm_world)
+        #eval_dict["centerline_u_x_probes"].clear()
+        #eval_dict["centerline_u_y_probes"].clear()
+        #eval_dict["centerline_u_z_probes"].clear()
+        #eval_dict["centerline_p_probes"].clear()
 
     # Save velocity and pressure
     if tstep % store_data == 0:
@@ -294,13 +308,7 @@ def temporal_hook(u_, p_, p, Q, mesh, tstep, compute_flux,
         u_[2].rename("u2", "velocity-z")
         p_.rename("p", "pressure")
 
-        # Store files 
+        # Store files
         components = {"u0": u_[0], "u1": u_[1], "u2": u_[2], "p": p_}
-
         for key in components.keys():
-            field_name = "velocity" if "u" in key else "pressure"
-            if "u" in key and key != "nut":
-                f = files["u"][int(key[-1])]
-            else:
-                f = files[key]
-            save_hdf5(f, field_name, components[key], tstep, hdf5_link)
+            writer[key].write_checkpoint(components[key], components[key].name(), t)
