@@ -217,6 +217,9 @@ def temporal_hook(u_, p_, p, Q, mesh, tstep, compute_flux, dump_stats, eval_dict
         Q_in = abs(assemble(dot(u_, n)*ds(id_in[0], domain=mesh, subdomain_data=fd)))
         Q_outs =  []
         for i, out_id in enumerate(id_out):
+            if MPI.rank(MPI.comm_world) == 0 and tstep % 10 == 0 and i == 0:
+                print("="*10, tstep, "="*10)
+
             Q_out = abs(assemble(dot(u_, n)*ds(out_id, domain=mesh, subdomain_data=fd)))
             Q_outs.append(Q_out)
 
@@ -238,31 +241,30 @@ def temporal_hook(u_, p_, p, Q, mesh, tstep, compute_flux, dump_stats, eval_dict
                 E = -1 * ( 1 + R_err / R_optimal )
 
 
-        # 1) Linear update to converge first 100 tsteps of first cycle
-        delta = (R_optimal - R_actual) / R_optimal
-        if tstep < 100:
-            h = 0.1
-            if p_old > 1 and delta < 0:
-                NS_expressions[out_id].p  = p_old
-            else:
-                NS_expressions[out_id].p  = p_old * ( 1 - delta*h)
+            # 1) Linear update to converge first 100 tsteps of first cycle
+            delta = (R_optimal - R_actual) / R_optimal
+            if tstep < 100:
+                h = 0.1
+                if p_old > 1 and delta < 0:
+                    NS_expressions[out_id].p  = p_old
+                else:
+                    NS_expressions[out_id].p  = p_old * ( 1 - delta*h)
 
-        # 2) Dual pressure BC
-        else:
-            if p_old > 2 and delta < 0:
-                NS_expressions[out_id].p  = p_old
+            # 2) Dual pressure BC
             else:
-                NS_expressions[out_id].p  = p_old * beta(R_err,p_old) * M_err ** E
+                if p_old > 2 and delta < 0:
+                    NS_expressions[out_id].p  = p_old
+                else:
+                    NS_expressions[out_id].p  = p_old * beta(R_err,p_old) * M_err ** E
+
+            if MPI.rank(MPI.comm_world) == 0 and tstep % 10 == 0:
+                print(("({:d}) New pressure {:0.4f} | Old pressure " + \
+                        "{:0.4f}").format(out_id, NS_expressions[out_id].p, p_old))
+                print(("({:d}) A_{:d}/A_tot: {:0.4f}, Q_ideal: {:0.4f} Q_actual:" + \
+                        " {:0.4f}").format(out_id, out_id, area_ratio[i], Q_ideal, Q_out))
 
     if MPI.rank(MPI.comm_world) == 0 and tstep % 10 == 0:
-        print("="*10, tstep, "="*10)
         print("Sum of Q_out = {:0.4f} Q_in = {:0.4f}".format(sum(Q_outs), Q_in))
-        for i, out_id in enumerate(id_out):
-            print(("({:d}) New pressure {:0.4f} | Old pressure " + \
-                   "{:0.4f}").format(out_id, NS_expressions[out_id].p, p_old))
-        for i, out_id in enumerate(id_out):
-            print(("({:d}) area ratio {:0.4f}, ideal: {:0.4f} actual:" + \
-                  " {:0.4f}").format(out_id, area_ratio[i], Q_ideal, Q_out))
         print()
 
     # FIXME: Comment in with fenicstools is compatible
