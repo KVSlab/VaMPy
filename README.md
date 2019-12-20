@@ -5,7 +5,8 @@ and boundary conditions, then install Oasis, and you can run the problem with:
 
 FEniCS 2018.1.0 or later available:
 ```
-git clone https://github.com/mikaem/Oasiscd Oasispython setup.py install  # (or "pip install .", add "--user" if you are on a cluster)
+git clone https://github.com/mikaem/Oasiscd Oasis
+python setup.py install  # (or "pip install .", add "--user" if you are on a cluster)
 cd ..
 ````
 vmtk available:
