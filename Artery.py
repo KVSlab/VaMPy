@@ -1,5 +1,5 @@
 import numpy as np
-#from fenicstools import Probes
+from fenicstools import Probes
 from oasis.problems.NSfracStep import *
 from os import path, makedirs, getcwd
 import pickle
@@ -149,17 +149,16 @@ def pre_solve_hook(mesh, V, Q, newfolder, folder, u_, mesh_path,
     eval_dict = {}
     rel_path = path.join(path.dirname(path.abspath(__file__)), mesh_path.split(".")[0] + \
                         "_probe_point")
-    # FIXME: Comment in after fixing fenicstools compability for FEniCS 2018.1
-    #probe_points = np.load(rel_path)
+    probe_points = np.load(rel_path, allow_pickle=True)
 
     # Store points file in checkpoint
-    #if MPI.rank(MPI.comm_world) == 0:
-    #    probe_points.dump(path.join(newfolder, "Checkpoint", "points"))
+    if MPI.rank(MPI.comm_world) == 0:
+        probe_points.dump(path.join(newfolder, "Checkpoint", "points"))
 
-    #eval_dict["centerline_u_x_probes"] = Probes(probe_points.flatten(), V)
-    #eval_dict["centerline_u_y_probes"] = Probes(probe_points.flatten(), V)
-    #eval_dict["centerline_u_z_probes"] = Probes(probe_points.flatten(), V)
-    #eval_dict["centerline_p_probes"] = Probes(probe_points.flatten(), Q)
+    eval_dict["centerline_u_x_probes"] = Probes(probe_points.flatten(), V)
+    eval_dict["centerline_u_y_probes"] = Probes(probe_points.flatten(), V)
+    eval_dict["centerline_u_z_probes"] = Probes(probe_points.flatten(), V)
+    eval_dict["centerline_p_probes"] = Probes(probe_points.flatten(), Q)
 
     if restart_folder is None:
         # Get files to store results
@@ -266,40 +265,39 @@ def temporal_hook(u_, p_, p, Q, mesh, tstep, compute_flux, dump_stats, eval_dict
                   " {:0.4f}").format(out_id, area_ratio[i], Q_ideals[i], Q_outs[i]))
         print()
 
-    # FIXME: Comment in when fenicstools is compatible
     # Sample velocity in points
-    #eval_dict["centerline_u_x_probes"](u_[0])
-    #eval_dict["centerline_u_y_probes"](u_[1])
-    #eval_dict["centerline_u_z_probes"](u_[2])
-    #eval_dict["centerline_p_probes"](p_)
+    eval_dict["centerline_u_x_probes"](u_[0])
+    eval_dict["centerline_u_y_probes"](u_[1])
+    eval_dict["centerline_u_z_probes"](u_[2])
+    eval_dict["centerline_p_probes"](p_)
 
     # Store sampled velocity
-    #if tstep % dump_stats == 0:
-    #    filepath = path.join(newfolder, "Stats")
-    #    if MPI.rank(MPI.comm_world) == 0:
-    #        if not path.exists(filepath):
-    #            makedirs(filepath)
+    if tstep % dump_stats == 0:
+        filepath = path.join(newfolder, "Stats")
+        if MPI.rank(MPI.comm_world) == 0:
+            if not path.exists(filepath):
+                makedirs(filepath)
 
-        #arr_u_x = eval_dict["centerline_u_x_probes"].array()
-        #arr_u_y = eval_dict["centerline_u_y_probes"].array()
-        #arr_u_z = eval_dict["centerline_u_z_probes"].array()
-        #arr_p = eval_dict["centerline_p_probes"].array()
+        arr_u_x = eval_dict["centerline_u_x_probes"].array()
+        arr_u_y = eval_dict["centerline_u_y_probes"].array()
+        arr_u_z = eval_dict["centerline_u_z_probes"].array()
+        arr_p = eval_dict["centerline_p_probes"].array()
 
         # Dump stats
-        #if MPI.rank(MPI.comm_world) == 0:
-        #    num = eval_dict["centerline_u_x_probes"].number_of_evaluations()
-        #    pp = (path.join(filepath, "u_x_%s.probes" % str(tstep)))
-        #    arr_u_x.dump(path.join(filepath, "u_x_%s.probes" % str(tstep)))
-        #    arr_u_y.dump(path.join(filepath, "u_y_%s.probes" % str(tstep)))
-        #    arr_u_z.dump(path.join(filepath, "u_z_%s.probes" % str(tstep)))
-        #    arr_p.dump(path.join(filepath, "p_%s.probes" % str(tstep)))
+        if MPI.rank(MPI.comm_world) == 0:
+            num = eval_dict["centerline_u_x_probes"].number_of_evaluations()
+            pp = (path.join(filepath, "u_x_%s.probes" % str(tstep)))
+            arr_u_x.dump(path.join(filepath, "u_x_%s.probes" % str(tstep)))
+            arr_u_y.dump(path.join(filepath, "u_y_%s.probes" % str(tstep)))
+            arr_u_z.dump(path.join(filepath, "u_z_%s.probes" % str(tstep)))
+            arr_p.dump(path.join(filepath, "p_%s.probes" % str(tstep)))
 
         # Clear stats
-        #MPI.barrier(MPI.comm_world)
-        #eval_dict["centerline_u_x_probes"].clear()
-        #eval_dict["centerline_u_y_probes"].clear()
-        #eval_dict["centerline_u_z_probes"].clear()
-        #eval_dict["centerline_p_probes"].clear()
+        MPI.barrier(MPI.comm_world)
+        eval_dict["centerline_u_x_probes"].clear()
+        eval_dict["centerline_u_y_probes"].clear()
+        eval_dict["centerline_u_z_probes"].clear()
+        eval_dict["centerline_p_probes"].clear()
 
     # Save velocity and pressure
     if tstep % store_data == 0:

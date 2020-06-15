@@ -1,5 +1,3 @@
-###!/usr/bin/python
-
 from __future__ import print_function # Python 2 / 3 support
 
 # Local imports
