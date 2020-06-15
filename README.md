@@ -1,15 +1,15 @@
 # Aneurysm_workflow
 
-This is a collection of scripts to run an aneurysm problem with Oasis. There are also scripts for a large variation of post-processing from simple WSS to more advanced turbulence metrics, and to a wide variarity of morphological parameters. The latter is implemented through automated neckplane detection, but these scripts are not adapted to this pipeline, but are here simply for convenience.
+This is a collection of scripts to run an aneurysm problem with Oasis. There are also scripts for a variety of post-processing; WSS-based matrics, more advanced turbulence metrics, and a variety of morphological parameters. The latter is implemented through automated neck plane detection, but are not adapted to the `Aneurysm_workflow` pipeline and are here merely for convenience.
 
 ## Authors
-These script was written by
+These scripts was written by
 - Aslak Wigdahl Bergersen
 - Christophe Chnafa
 - Henrik A. Kjeldsberg
 
 ## Installation
-You can choose how to install the dependencies, but the fastest way to get started is to first install anaconda or minicoda on your computer. Then create two environment, one for `vmtk/vtk` and one for `fenics` by executing the following in a terminal:
+You can choose how to install the dependencies, but the fastest way to get started is to first install anaconda or minicoda on your computer. Then create two environments, one for `vmtk/vtk` and one for `fenics` by executing the following in a terminal:
 ```
 conda create -n vtk -c vmtk python=3.6 itk vtk vmtk paramiko
 conda create -n fenics -c conda-forge fenics
@@ -40,7 +40,7 @@ pip install . 
 ```
 
 ## Usage
-First use the automatedPreProcessing to create a mesh, boundary conditions, and probes for sampling. 
+First, use the automatedPreProcessing to create a mesh, boundary conditions, and probes for sampling. 
 
 ```
 conda deactivate
@@ -58,4 +58,4 @@ conda activate fenics
 oasis NSfracStep problem=Artery mesh_path=test/Case_test_71.xml.gz
 ```
 
-Finally you can create the WSS from the CFD simulation:
+Finally, you can create the WSS from the CFD simulation:
