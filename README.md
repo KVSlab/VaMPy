@@ -1,7 +1,7 @@
 # Aneurysm_workflow
 
 This is a collection of scripts to run an aneurysm problem with Oasis. First use the automatedPreProcessing to create a mesh
-and boundary conditions, then install Oasis, and you can run the problem with:
+and boundary conditions, then run the CFD simulation with Oasis, and post-process the results using the , and you can run the problem with:
 
 FEniCS 2019.1.0 or later available:
 ```
@@ -22,3 +22,13 @@ FEniCS 2019.1.0 or later available:
 ```
 oasis NSfracStep problem=Artery mesh_path=test/Case_test_71.xml.gz
 ```
+
+You might run into a problem with vmtk (1.4) if using python 3. To fix this, please [follow these instructions](https://morphman.readthedocs.io/en/latest/installation.html#basic-installation) for fixing the centerline problem. For fixing mesh writing change line 263 to:
+```
+file = open(self.OutputFileName, 'rb')
+````
+and line 267 to
+```
+gzfile = gzip.open(self.OutputFileName, 'wb')
+```
+Please note that these changes are fixed in the development version of vmtk, but a new version has not been released in a long time.
