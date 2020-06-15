@@ -15,7 +15,7 @@ conda create -n vtk -c vmtk python=3.6 itk vtk vmtk paramiko
 conda create -n fenics -c conda-forge fenics
 ```
 
-You might run into a problem with vmtk (1.4) if using python 3. To fix this, please [follow these instructions](https://morphman.readthedocs.io/en/latest/installation.html#basic-installation) for fixing the centerline problem. For fixing mesh writing change line 263 to:
+You might run into a problem with vmtk (1.4) if using python 3. To fix this, please [follow these instructions](https://morphman.readthedocs.io/en/latest/installation.html#basic-installation) for fixing the centerline problem. For fixing mesh writing change line 263 of vmtkmeshwriter.py (using the same path as described in the link) to:
 ```
 file = open(self.OutputFileName, 'rb')
 ````
