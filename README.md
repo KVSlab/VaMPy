@@ -3,9 +3,10 @@
 This is a collection of scripts to run an aneurysm problem with Oasis. First use the automatedPreProcessing to create a mesh
 and boundary conditions, then install Oasis, and you can run the problem with:
 
-FEniCS 2018.1.0 or later available:
+FEniCS 2019.1.0 or later available:
 ```
-git clone https://github.com/mikaem/Oasiscd Oasis
+git clone https://github.com/mikaem/Oasis
+cd Oasis
 python setup.py install  # (or "pip install .", add "--user" if you are on a cluster)
 cd ..
 ````
