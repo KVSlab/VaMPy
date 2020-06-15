@@ -18,7 +18,7 @@ python automatedPreProcessing.py -m diameter -i ../test/Case_test_71.vtp --aneur
 cd ..
 ```
 
-FEniCS 2018.1.0 or later available:
+FEniCS 2019.1.0 or later available:
 ```
 oasis NSfracStep problem=Artery mesh_path=test/Case_test_71.xml.gz
 ```
