@@ -39,22 +39,23 @@ cd fenicstools
 pip install . 
 ```
 
+If you have a cleaner install instruction please edit the above. Now, all that is left is to clone the `Aneurysm_workflow` repository:
+```
+git clone https://github.com/KVSLab/Aneurysm_workflow.git
+cd Aneurysm_workflow
+```
+
 ## Usage
 First, use the automatedPreProcessing to create a mesh, boundary conditions, and probes for sampling. 
 
 ```
-conda deactivate
-conda activate vtk
-git clone https://github.com/KVSLab/Aneurysm_workflow.git
-cd Aneurysm_workflow/automatedPreProcessing
-python automatedPreProcessing.py -m diameter -i ../test/Case_test_71.vtp --aneurysm False -c 1.3
-cd ..
+conda deactivate && conda activate vtk
+python automatedPreProcessing/automatedPreProcessing.py -m diameter -i test/Case_test_71.vtp --aneurysm False -c 1.3
 ```
 
 Then run a CFD simulation for two cycles with 10 000 time steps per cycle and default parameters with Oasis:
 ```
-conda deactivate
-conda activate fenics
+conda deactivate && conda activate fenics
 oasis NSfracStep problem=Artery mesh_path=test/Case_test_71.xml.gz
 ```
 
