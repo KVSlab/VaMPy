@@ -1,13 +1,15 @@
+import pickle
+from os import path, makedirs, getcwd
+
 import numpy as np
 from fenicstools import Probes
 from oasis.problems.NSfracStep import *
-from os import path, makedirs, getcwd
-import pickle
-from Womersley import *
+
+from Womersley import make_womersley_bcs, compute_boundary_geometry_acrn
 
 set_log_level(50)
 
-# Override some problem specific parameters
+
 def problem_parameters(commandline_kwargs, NS_parameters, NS_expressions, **NS_namespace):
     if "restart_folder" in commandline_kwargs.keys():
         restart_folder = commandline_kwargs["restart_folder"]
@@ -15,7 +17,8 @@ def problem_parameters(commandline_kwargs, NS_parameters, NS_expressions, **NS_n
         NS_parameters.update(pickle.load(f))
         NS_parameters['restart_folder'] = restart_folder
     else:
-        # Parameters are in mm and ms
+        # Override some problem specific parameters
+        # parameters are in mm and ms
         NS_parameters.update(
             nu = 3.3018e-3,
             T  = 951*2,
@@ -41,13 +44,13 @@ def problem_parameters(commandline_kwargs, NS_parameters, NS_expressions, **NS_n
     caseName = NS_parameters["mesh_path"].split(".")[0]
     NS_parameters["folder"] = path.join(NS_parameters["folder"], caseName)
 
-# Create a mesh
+
 def mesh(mesh_path, **NS_namespace):
+    # Read mesh
     mesh_folder = path.join(path.dirname(path.abspath(__file__)), mesh_path)
     return Mesh(mesh_folder)
 
 
-# Boundary conditions
 def create_bcs(u_, t, NS_expressions, V, Q, area_ratio, mesh, folder, mesh_path, nu,
                id_in, id_out, velocity_degree, pressure_degree, no_of_cycles,
                T, **NS_namespace):
@@ -55,7 +58,6 @@ def create_bcs(u_, t, NS_expressions, V, Q, area_ratio, mesh, folder, mesh_path,
     fd = MeshFunction("size_t", mesh, mesh.geometry().dim() - 1, mesh.domains())
 
     # Extract flow split ratios
-    # TODO: Should be a json / cpickle type
     info = open(path.join(path.dirname(path.abspath(__file__)), mesh_path.split(".")[0] \
                            + ".txt"), "r").readlines()
     for line in info:
@@ -112,30 +114,32 @@ def create_bcs(u_, t, NS_expressions, V, Q, area_ratio, mesh, folder, mesh_path,
                 u2=[bc_inlet[2], bc_wall],
                 p=bc_p)
 
+
 def get_file_paths(folder):
     if MPI.rank(MPI.comm_world) == 0:
         counter = 1
-        to_check = path.join(folder, "data", "%s")
-        while path.isdir(to_check % str(counter)):
+        to_check = path.join(folder, "data", "%d")
+        while path.isdir(to_check % counter):
             counter += 1
 
         if counter > 1:
             counter -= 1
-        if not path.exists(path.join(to_check % str(counter), "VTK")):
-            makedirs(path.join(to_check % str(counter), "VTK"))
+        if not path.exists(path.join(to_check % counter, "VTK")):
+            makedirs(path.join(to_check % counter, "VTK"))
     else:
         counter = 0
 
-    counter = MPI.max(MPI.comm_world, counter)
+    counter = int(MPI.max(MPI.comm_world, counter))
 
     common_path = path.join(folder, "data", str(counter), "VTK")
     file_u = [path.join(common_path, "u%d.xdmf" % i) for i in range(3)]
     file_p = path.join(common_path, "p.xdmf")
     file_nu = path.join(common_path, "nut.xdmf")
+    file_mesh = path.join(common_path, "mesh.xdmf")
     file_u_mean = [path.join(common_path, "u%d_mean.xdmf" % i) for i in range(3)]
     file_u_mean_vec = path.join(common_path, "u_mean.xdmf")
     files = {"u": file_u, "p": file_p, "u_mean": file_u_mean, "nut": file_nu,
-             "u_mean_vec": file_u_mean_vec}
+             "u_mean_vec": file_u_mean_vec, "mesh": file_mesh}
 
     return files
 
@@ -147,8 +151,7 @@ def pre_solve_hook(mesh, V, Q, newfolder, folder, u_, mesh_path,
     fd = MeshFunction("size_t", mesh, 2, mesh.domains())
     n = FacetNormal(mesh)
     eval_dict = {}
-    rel_path = path.join(path.dirname(path.abspath(__file__)), mesh_path.split(".")[0] + \
-                        "_probe_point")
+    rel_path = path.join(path.dirname(path.abspath(__file__)), mesh_path.split(".")[0] + "_probe_point")
     probe_points = np.load(rel_path, allow_pickle=True)
 
     # Store points file in checkpoint
@@ -166,6 +169,9 @@ def pre_solve_hook(mesh, V, Q, newfolder, folder, u_, mesh_path,
         NS_parameters.update(dict(files=files))
     else:
         files = NS_namespace["files"]
+
+    with XDMFFile(MPI.comm_world, files["mesh"]) as mesh_file:
+        mesh_file.write(mesh)
 
     writer = {}
     for key, value in files.items():
@@ -203,8 +209,8 @@ def w(P):
 
 
 def temporal_hook(u_, p_, p, Q, mesh, tstep, compute_flux, dump_stats, eval_dict,
-                  newfolder, id_in, writer, id_out, fd, n, store_data, NS_expressions,
-                  area_ratio, t, **NS_namespace):
+                  newfolder, id_in, id_out, fd, n, store_data, NS_expressions,
+                  area_ratio, t, writer, **NS_namespace):
 
     # Update boundary condition
     for uc in NS_expressions["inlet"]:
@@ -301,16 +307,18 @@ def temporal_hook(u_, p_, p, Q, mesh, tstep, compute_flux, dump_stats, eval_dict
 
     # Save velocity and pressure
     if tstep % store_data == 0:
-        f = File("p.pvd")
-        f << p_
-
-        # Evaluate points
+        # Name functions
         u_[0].rename("u0", "velocity-x")
         u_[1].rename("u1", "velocity-y")
         u_[2].rename("u2", "velocity-z")
         p_.rename("p", "pressure")
 
-        # Store files
+        # Store files 
         components = {"u0": u_[0], "u1": u_[1], "u2": u_[2], "p": p_}
         for key in components.keys():
-            writer[key].write_checkpoint(components[key], components[key].name(), t)
+            if tstep == store_data:
+                writer[key].write_checkpoint(components[key], components[key].name(), tstep,
+                                             XDMFFile.Encoding.HDF5, append=False)
+            else:
+                writer[key].write_checkpoint(components[key], components[key].name(), tstep,
+                                             XDMFFile.Encoding.HDF5, append=True)

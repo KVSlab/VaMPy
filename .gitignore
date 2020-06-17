@@ -102,3 +102,8 @@ venv.bak/
 
 # mypy
 .mypy_cache/
+
+# Data
+test/*
+!test/Case_test_71.vtp
+results_aneurysm

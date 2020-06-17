@@ -8,7 +8,7 @@ def kjell(self,u):
 
 def epsilon(u):
     'Return strain-rate tensor'
-    return 0.5*(grad(u) + transpose(grad(u)))
+    return 0.5*(grad(u) + grad(u).T)
 
 class STRESS:
     'Computation of stress for given u, p'
