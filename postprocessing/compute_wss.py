@@ -26,8 +26,8 @@ def main(case_path):
     f_2 = XDMFFile(MPI.comm_world, file_path_z.__str__())
 
     # Start post-processing from 2nd cycle using every 10th time step, or 2000 time steps per cycle
-    start = 0   # save_data = 5 -> 10000 / 5 = 2000
-    step = 1    # save_data = 5 ->    10 / 5 = 2
+    start = 2000   # save_data = 5 -> 10000 / 5 = 2000
+    step = 2       # save_data = 5 ->    10 / 5 = 2
     dt = 0.951
 
     # Read mesh
