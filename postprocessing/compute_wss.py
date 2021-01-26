@@ -12,21 +12,20 @@ from stress import STRESS
 
 parameters["reorder_dofs_serial"] = False
 
-
 def main(case_path):
     # File paths
-    file_path_x = case_path / "u0.xdmf"
-    file_path_y = case_path / "u1.xdmf"
-    file_path_z = case_path / "u2.xdmf"
-    mesh_path = case_path / "mesh.xdmf"
+    file_path_x = case_path / "u0.h5"
+    file_path_y = case_path / "u1.h5"
+    file_path_z = case_path / "u2.h5"
+    mesh_path = case_path / "mesh.xdmf" #generated from serial
 
     # Read headers in HDF5 files
-    f_0 = XDMFFile(MPI.comm_world, file_path_x.__str__())
-    f_1 = XDMFFile(MPI.comm_world, file_path_y.__str__())
-    f_2 = XDMFFile(MPI.comm_world, file_path_z.__str__())
+    #f_0 = XDMFFile(MPI.comm_world, file_path_x.__str__())
+    #f_1 = XDMFFile(MPI.comm_world, file_path_y.__str__())
+    #f_2 = XDMFFile(MPI.comm_world, file_path_z.__str__())
 
     # Start post-processing from 2nd cycle using every 10th time step, or 2000 time steps per cycle
-    start = 2000   # save_data = 5 -> 10000 / 5 = 2000
+    start = 0   # save_data = 5 -> 10000 / 5 = 2000
     step = 2       # save_data = 5 ->    10 / 5 = 2
     dt = 0.951
 
@@ -99,15 +98,25 @@ def main(case_path):
         print("Start 'simulation'")
 
     file_counter = start
+    #for file_counter in range(0,11):
     while True:
-        if MPI.rank(MPI.comm_world) == 0:
-            print("Timestep", file_counter*5)
+        #if MPI.rank(MPI.comm_world) == 0:
+            #print("Timestep", file_counter*5)
 
         # Get u
         try:
-            f_0.read_checkpoint(u0, "u0", file_counter)
-            f_1.read_checkpoint(u1, "u1", file_counter)
-            f_2.read_checkpoint(u2, "u2", file_counter)
+            #f1 = HDF5File(mesh.mpi_comm(), file_path_x.__str__(), "r")
+            #f2 = HDF5File(mesh.mpi_comm(), file_path_y.__str__(), "r")
+            #f3 = HDF5File(mesh.mpi_comm(), file_path_z.__str__(), "r")
+            f1 = HDF5File(MPI.comm_world, file_path_x.__str__(), "r")
+            f2 = HDF5File(MPI.comm_world, file_path_y.__str__(), "r")
+            f3 = HDF5File(MPI.comm_world, file_path_z.__str__(), "r")
+            vec_name = "/velocity/vector_%d"%file_counter
+            timestamp = f1.attributes(vec_name)["timestamp"]
+            print("Timestep",timestamp)
+            f1.read(u0,vec_name)
+            f2.read(u1,vec_name)
+            f3.read(u2,vec_name)
         except:
             break
         assign(u.sub(0), u0)
@@ -149,39 +158,39 @@ def main(case_path):
     OSI.vector()[:] = OSI.vector()[:] / n
     WSS_new.vector()[:] = OSI.vector()[:]
 
-    try:
-        func(WSS.vector(), rrt_.vector())
-        rrt_arr = rrt_.vector().get_local()
-        rrt_arr[rrt_arr.nonzero()[0]] = 1e-6
-        rrt_arr[np.isnan(rrt_arr)] = 1e-6
-        RRT.vector().apply("insert")
+    #try:
+        #func(WSS.vector(), rrt_.vector())
+        #rrt_arr = rrt_.vector().get_local()
+        #rrt_arr[rrt_arr.nonzero()[0]] = 1e-6
+        #rrt_arr[np.isnan(rrt_arr)] = 1e-6
+        #RRT.vector().apply("insert")
 
-        OSI_arr = OSI.vector().get_local()
-        OSI_arr[OSI_arr.nonzero()[0]] = 1e-6
-        OSI_arr[np.isnan(OSI_arr)] = 1e-6
-        OSI.vector().set_local(0.5*(1 - rrt_arr / OSI_arr))
-        OSI.vector().apply("insert")
-        save = True
-    except:
-        print("Fail for OSI and RRT")
-        save = False
+        #OSI_arr = OSI.vector().get_local()
+        #OSI_arr[OSI_arr.nonzero()[0]] = 1e-6
+        #OSI_arr[np.isnan(OSI_arr)] = 1e-6
+        #OSI.vector().set_local(0.5*(1 - rrt_arr / OSI_arr))
+        #OSI.vector().apply("insert")
+        #save = True
+    #except:
+        #print("Fail for OSI and RRT")
+        #save = False
 
-    if save:
-        osi_file = File((case_path / "OSI.xml.gz").__str__())
-        osi_file << OSI
-        del osi_file
+    #if save:
+        #osi_file = File((case_path / "OSI.xml.gz").__str__())
+        #osi_file << OSI
+        #del osi_file
 
-        osi_file = File((case_path / "OSI.pvd").__str__())
-        osi_file << OSI
-        del osi_file
+        #osi_file = File((case_path / "OSI.pvd").__str__())
+        #osi_file << OSI
+        #del osi_file
 
-        rrt_file = File((case_path / "RRT.xml.gz").__str__())
-        rrt_file << RRT
-        del rrt_file
+        #rrt_file = File((case_path / "RRT.xml.gz").__str__())
+        #rrt_file << RRT
+        #del rrt_file
 
-        rrt_file = File((case_path / "RRT.pvd").__str__())
-        rrt_file << RRT
-        del rrt_file
+        #rrt_file = File((case_path / "RRT.pvd").__str__())
+        #rrt_file << RRT
+        #del rrt_file
 
     twssg_file = File((case_path / "TWSSG.xml.gz").__str__())
     twssg_file << TWSSG
@@ -191,6 +200,13 @@ def main(case_path):
     twssg_file << TWSSG
     del twssg_file
 
+    value2 = (case_path / "TWSSG1.xdmf").__str__()
+    twssg1 = XDMFFile(MPI.comm_world, value2)
+    twssg1.parameters["flush_output"] = True
+    twssg1.parameters["functions_share_mesh"] = True
+    twssg1.parameters["rewrite_function_mesh"] = False
+    twssg1.write(TWSSG)
+
     wss_file = File((case_path /  "WSS.xml.gz").__str__())
     wss_file << WSS_new
     del wss_file
@@ -198,6 +214,14 @@ def main(case_path):
     wss_file = File((case_path / "WSS.pvd").__str__())
     wss_file << WSS_new
     del wss_file
+
+    value1 = (case_path / "WSS1.xdmf").__str__()
+    wss1 = XDMFFile(MPI.comm_world, value1)
+    wss1.parameters["flush_output"] = True
+    wss1.parameters["functions_share_mesh"] = True
+    wss1.parameters["rewrite_function_mesh"] = False
+    wss1.write(WSS_new)
+
 
 if __name__ == '__main__':
     if len(sys.argv) == 1:
