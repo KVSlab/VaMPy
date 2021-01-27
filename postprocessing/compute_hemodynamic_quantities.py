@@ -25,6 +25,7 @@ def compute_hemodynamic_quantities(case_path, nu, dt):
         dt (float): Time step of simulation
     """
     # File paths
+    case_path = Path(case_path)
     file_path_x = case_path / "u0.xdmf"
     file_path_y = case_path / "u1.xdmf"
     file_path_z = case_path / "u2.xdmf"
