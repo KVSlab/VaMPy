@@ -1,6 +1,22 @@
+from argparse import ArgumentParser
+
 from dolfin import *
 
 parameters["allow_extrapolation"] = True
+
+
+def read_command_line():
+    """Read arguments from commandline"""
+    parser = ArgumentParser()
+
+    parser.add_argument('--case', type=str, default="/results_folder/1/VTK", help="Path to simulation results",
+                        metavar="PATH")
+    parser.add_argument('--nu', type=float, default=3.3018e-3, help="Viscosity used in simulation")
+    parser.add_argument('--dt', type=float, default=0.0951, help="Time step of simulation")
+
+    args = parser.parse_args()
+
+    return args.case, args.nu, args.dt
 
 
 def epsilon(u):
