@@ -111,7 +111,7 @@ def compute_hemodynamic_quantities(case_path):
         # Compute WSS
         if MPI.rank(MPI.comm_world) == 0:
             print("Compute WSS")
-        tau = stress(u)
+        tau = stress()
         tau.vector()[:] = tau.vector()[:] * 1000
         WSS.vector().axpy(1, tau.vector())
 
