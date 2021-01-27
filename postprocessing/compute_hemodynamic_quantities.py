@@ -1,17 +1,16 @@
 from __future__ import print_function
 
 from pathlib import Path
-from sys import argv
 
 import numpy as np
 from dolfin import *
 
-from postprocessing_common import STRESS
+from postprocessing_common import STRESS, read_command_line
 
 parameters["reorder_dofs_serial"] = False
 
 
-def compute_hemodynamic_quantities(case_path):
+def compute_hemodynamic_quantities(case_path, nu, dt):
     """
     Loads velocity fields from completed CFD simulation,
     and computes and saves the following hemodynamic quantities:
@@ -22,6 +21,8 @@ def compute_hemodynamic_quantities(case_path):
 
     Args:
         case_path (Path): Path to results from simulation
+        nu (float): Viscosity
+        dt (float): Time step of simulation
     """
     # File paths
     file_path_x = case_path / "u0.xdmf"
@@ -37,7 +38,6 @@ def compute_hemodynamic_quantities(case_path):
     # Start post-processing from 2nd cycle using every 10th time step, or 2000 time steps per cycle
     start = 2000  # save_data = 5 -> 10000 / 5 = 2000
     step = 2  # save_data = 5 ->    10 / 5 = 2
-    dt = 0.951
 
     # Read mesh
     mesh = Mesh()
@@ -83,9 +83,7 @@ def compute_hemodynamic_quantities(case_path):
     twssg = Function(V_b1)
     tau_prev = Function(V_b1)
 
-    # TODO: Is this viscosity consistent with Artery.py?
-    mu = 0.0035
-    stress = STRESS(u, 0.0, mu, mesh)
+    stress = STRESS(u, 0.0, nu, mesh)
     dabla = get_dabla_function()
 
     if MPI.rank(MPI.comm_world) == 0:
@@ -226,8 +224,5 @@ def get_dabla_function():
 
 
 if __name__ == '__main__':
-    if len(argv) == 1:
-        print("Run program as 'python path/to/compute_wss.py path/to/results/run_number/VTK'")
-        exit(0)
-
-    compute_hemodynamic_quantities(Path.cwd() / argv[1])
+    folder, nu, dt = read_command_line()
+    compute_hemodynamic_quantities(folder, nu, dt)
