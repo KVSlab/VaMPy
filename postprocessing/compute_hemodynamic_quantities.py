@@ -6,7 +6,7 @@ from sys import argv
 import numpy as np
 from dolfin import *
 
-from stress import STRESS
+from postprocessing_common import STRESS
 
 parameters["reorder_dofs_serial"] = False
 
