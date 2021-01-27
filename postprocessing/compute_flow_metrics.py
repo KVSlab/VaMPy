@@ -1,34 +1,35 @@
-from argparse import ArgumentParser
 from os import path
 from time import time
 
 import numpy as np
 from dolfin import *
 
+from postprocessing_common import read_command_line, epsilon
+
 set_log_active(False)
 
 
-def read_command_line():
-    """Read arguments from commandline"""
-    parser = ArgumentParser()
+def get_dataset_names(data_file, num_files=3000000, step=1, start=1, print_info=True, velocity_filename="velocity%s"):
+    """
+    Read velocity fields datasets and extract names of files
 
-    parser.add_argument('--case', type=str, default="/results_folder/1/VTK", help="Path to simulation results",
-                        metavar="PATH")
-    parser.add_argument('--nu', type=float, default=1e-6, help="Kinematic viscosity used in simulation")
-    parser.add_argument('--dt', type=float, default=0.0951, help="Time step of simulation")
+    Args:
+        data_file (HDF5File): File object of velocity
+        num_files (int): Number of files
+        step (int): Step between each data dump
+        start (int): Step to start on
+        print_info (bool): Prints info about data if true
+        velocity_filename (str): Name of velocity files
 
-    args = parser.parse_args()
-
-    return args.case, args.nu, args.dt
-
-
-def get_dataset_names(f, num_files=3000000, step=1, start=1, print_info=True, velocity_filename="velocity%s"):
+    Returns:
+        names (list): List of data file names
+    """
     check = True
 
     # Find start file
     t0 = time()
     while check:
-        if f.has_dataset(velocity_filename % start):
+        if data_file.has_dataset(velocity_filename % start):
             check = False
             start -= step
         start += step
@@ -38,27 +39,41 @@ def get_dataset_names(f, num_files=3000000, step=1, start=1, print_info=True, ve
     for i in range(num_files):
         step = 1
         index = start + i * step
-        if f.has_dataset(velocity_filename % index):
+        if data_file.has_dataset(velocity_filename % index):
             names.append(velocity_filename % index)
 
     t1 = time()
 
     # Print info
     if MPI.rank(MPI.comm_world) == 0 and print_info:
-        print("")
+        print()
         print("=" * 6 + " Timesteps to average over " + "=" * 6)
         print("Length on data set names:", len(names))
         print("Start index:", start)
         print("Wanted num files:", num_files)
         print("Step between files:", step)
         print("Time used:", t1 - t0, "s")
+        print()
 
     return names
 
 
-def rate_of_strain(ssv, u, v, mesh, h, nu):
-    epsilon = 0.5 * (grad(u) + grad(u).T)
-    f = sqrt(inner(epsilon, epsilon))
+def rate_of_strain(ssv, u, v, mesh, h):
+    """
+    Computes rate of strain
+
+    Args:
+        ssv (Function): Function to save rate of strain to
+        u (Function): Function for velocity field
+        v (Function): Test function for velocity
+        mesh: Mesh to compute strain rate on
+        h (float): Cell diameter of mesh
+
+    Returns:
+        ssv (Function): Rate of strain
+    """
+    eps = epsilon(u)
+    f = sqrt(inner(eps, eps))
     x = assemble(inner(f, v) / h * dx(mesh))
     ssv.vector().set_local(x.array())
     ssv.vector().apply("insert")
@@ -67,8 +82,22 @@ def rate_of_strain(ssv, u, v, mesh, h, nu):
 
 
 def rate_of_dissipation(ssv, u, v, mesh, h, nu):
-    epsilon = 0.5 * (grad(u) + grad(u).T)
-    f = 2 * nu * inner(epsilon, epsilon)
+    """
+    Computes rate of dissipation
+
+    Args:
+        ssv (Function): Function to save rate of dissipation to
+        u (Function): Function for velocity field
+        v (Function): Test function for velocity
+        mesh: Mesh to compute dissipation rate on
+        h (float): Cell diameter of mesh
+        nu (float): Viscosity
+
+    Returns:
+        ssv (Function): Rate of dissipation
+    """
+    eps = epsilon(u)
+    f = 2 * nu * inner(eps, eps)
     x = assemble(inner(f, v) / h * dx(mesh))
     ssv.vector().set_local(x.array())
     ssv.vector().apply("insert")
@@ -76,17 +105,18 @@ def rate_of_dissipation(ssv, u, v, mesh, h, nu):
     return ssv
 
 
-def save_h5(filename, field, timestep):
-    f_xml = File(filename + timestep + ".xml.gz")
-    f_xml << field
-    del f_xml
+def compute_flow_metrics(folder, nu, dt):
+    """
+    Computes several flow field characteristics
+    for velocity field stored at 'folder' location
+    for flow_metrics given viscosity and time step
 
-    f_pvd = File(filename + ".pvd")
-    f_pvd << field
-    del f_pvd
+    Args:
+        folder (str): Path to simulation results
+        nu (float): Viscosity
+        dt (float): Time step
+    """
 
-
-def compute_info(folder, nu, dt):
     file_path_x = path.join(folder, "u0.h5")
     file_path_y = path.join(folder, "u1.h5")
     file_path_z = path.join(folder, "u2.h5")
@@ -97,23 +127,19 @@ def compute_info(folder, nu, dt):
 
     # Get names of data to extract
     start = 0
-    if MPI.rank(MPI.comm_world()) == 0:
-        print
-        "The post processing starts from", start
+    if MPI.rank(MPI.comm_world) == 0:
+        print("The post processing starts from", start)
     dataset_names = get_dataset_names(f_0, start=start)
-    # dataset_names = get_dataset_names(f_,  start=start) #beforeV
 
     # Get mesh information
-    case = folder.split("_")[0]
     mesh = Mesh()
     f_0.read(mesh, "Mesh", False)
 
     # Function space
-    u_order = 1
-    # u_order = int(folder.split("_")[1].split("P")[1])
+    velocity_degree = 1
     DG = FunctionSpace(mesh, 'DG', 0)
-    V = VectorFunctionSpace(mesh, "CG", u_order)
-    Vv = FunctionSpace(mesh, "CG", u_order)
+    V = VectorFunctionSpace(mesh, "CG", velocity_degree)
+    Vv = FunctionSpace(mesh, "CG", velocity_degree)
 
     # Mesh info
     h = CellDiameter(mesh)
@@ -124,10 +150,6 @@ def compute_info(folder, nu, dt):
     u = Function(V)
     u_mean = Function(V)
     u_prime = Function(V)
-    ssv = Function(DG)
-    ssv_avg = Function(DG)
-    dissipation = Function(DG)
-    dissipation_avg = Function(DG)
 
     # pluss-values
     l_pluss_avg = Function(DG)
@@ -173,13 +195,12 @@ def compute_info(folder, nu, dt):
     var_name = ["u_mean", "l_pluss", "t_pluss", "CFL", "ssv", "length_scale", "time_scale", "velocity_scale", "u_mag",
                 "dl", "dissipation", "kinetic_energy", "turbulent_kinetic_engergy", "turbulent_dissipation", "u_prime",
                 "u_viz"]
-    # TODO: add WSS, RRT, OSI, TWSSG, WSSG
+    # TODO: Add WSS, RRT, OSI, TWSSG, WSSG
     f = {}
     for vn in var_name:
-        if MPI.rank(mpi_comm_world()) == 0:
-            print
-            fullname % vn
-        f[vn] = XDMFFile(mpi_comm_world(), fullname % vn)
+        if MPI.rank(MPI.comm_world) == 0:
+            print(fullname % vn)
+        f[vn] = XDMFFile(MPI.comm_world, fullname % vn)
         f[vn].parameters["rewrite_function_mesh"] = False
         f[vn].parameters["flush_output"] = True
 
@@ -189,80 +210,66 @@ def compute_info(folder, nu, dt):
     # Get u mean
     u_mean_file_path = file_path_x.replace("u0.h5", "u%d_mean.h5")
     for i in range(3):
-        tmp_file = HDF5File(mpi_comm_world(), u_mean_file_path % i, "r")
+        tmp_file = HDF5File(MPI.comm_world, u_mean_file_path % i, "r")
         tmp_file.read(u0, "u_mean/avg")
         tmp_file.close()
         assign(u_mean.sub(i), u0)
 
     for data in dataset_names:
-        if MPI.rank(mpi_comm_world()) == 0:
-            print
-            data
+        if MPI.rank(MPI.comm_world) == 0:
+            print(data)
 
-        # Timestep and velocity
-        timestep = data.split("velocity")[-1]
+        # Time step and velocity
         f_0.read(u0, data)
         f_1.read(u1, data)
         f_2.read(u2, data)
         assign(u.sub(0), u0)
         assign(u.sub(1), u1)
         assign(u.sub(2), u2)
-        # f["u_viz"].write(u)
 
         # Compute CFL
         u_mag = project(sqrt(inner(u, u)), DG)
-        # f["u_mag"] << u_mag
 
         CFL.vector().set_local(u_mag.vector().array() / dl.vector().array() * dt)
         CFL.vector().apply("insert")
         CFL_avg.vector().axpy(1, CFL.vector())
-        # f["CFL"] << CFL
 
         # Compute rate-of-strain
         rate_of_strain(ssv, u, v, mesh, h, nu)
         ssv_avg.vector().axpy(1, ssv.vector())
-        # f["ssv"] << ssv
 
         # Compute l+ and t+
         u_star = np.sqrt(ssv.vector().array() * nu)
         l_pluss.vector().set_local(u_star * dl.vector().array() / nu)
         l_pluss.vector().apply("insert")
         l_pluss_avg.vector().axpy(1, l_pluss.vector())
-        # f["l_pluss"] << l_pluss
 
         t_pluss.vector().set_local(nu / u_star ** 2)
         t_pluss.vector().apply("insert")
         t_pluss_avg.vector().axpy(1, t_pluss.vector())
-        # f["t_pluss"] << t_pluss
 
         # Compute Kolmogorov
         rate_of_dissipation(dissipation, u, v, mesh, h, nu)
         ssv_ = dissipation.vector().array()
-        # f["dissipation"] << dissipation
         dissipation_avg.vector().axpy(1, dissipation.vector())
 
         u_prime.vector().set_local(u.vector().array() - u_mean.vector().array())
         u_prime.vector().apply("insert")
-        # f["u_prime"] << u_prime
 
         rate_of_dissipation(turbulent_dissipation, u_prime, v, mesh, h, nu)
-        # f["turbulent_dissipation"] << turbulent_dissipation
         turbulent_dissipation_avg.vector().axpy(1, turbulent_dissipation.vector())
 
         length_scale.vector().set_local((nu ** 3 / ssv_) ** (1. / 4))
         length_scale.vector().apply("insert")
         length_scale_avg.vector().axpy(1, length_scale.vector())
-        # f["length_scale"] << length_scale
 
         time_scale.vector().set_local((nu / ssv_) ** 0.5)
         time_scale.vector().apply("insert")
         time_scale_avg.vector().axpy(1, time_scale.vector())
-        # f["time_scale"] << time_scale
 
         velocity_scale.vector().set_local((ssv_ * nu) ** (1. / 4))
         velocity_scale.vector().apply("insert")
         velocity_scale_avg.vector().axpy(1, velocity_scale.vector())
-        # f["velocity_scale"] << velocity_scale
 
         # Energy
         assign(u0_prime, u_prime.sub(0))
@@ -273,13 +280,11 @@ def compute_info(folder, nu, dt):
             0.5 * (u0.vector().array() ** 2 + u1.vector().array() ** 2 + u2.vector().array() ** 2))
         kinetic_energy.vector().apply("insert")
         kinetic_energy_avg.vector().axpy(1, kinetic_energy.vector())
-        # f["kinetic_energy"] << kinetic_energy
 
         turbulent_kinetic_engergy.vector().set_local(
             0.5 * (u0_prime.vector().array() ** 2 + u1_prime.vector().array() ** 2 + u2_prime.vector().array() ** 2))
         turbulent_kinetic_engergy.vector().apply("insert")
         turbulent_kinetic_engergy_avg.vector().axpy(1, turbulent_kinetic_engergy.vector())
-        # f["turbulent_kinetic_engergy"] << turbulent_kinetic_engergy
 
     # Get avg
     N = len(dataset_names)
@@ -307,30 +312,25 @@ def compute_info(folder, nu, dt):
     f["turbulent_dissipation"] << turbulent_dissipation_avg
     f["u_mean"] << u_mean
 
-    # print info
-    a = [("dx", dl), ("l+", l_pluss_avg), ("t+", t_pluss_avg), ("Length scale", length_scale_avg),
-         ("Time scale", time_scale_avg), ("Velocity scale", velocity_scale), ("CFL", CFL_avg),
-         ("SSV", ssv_avg), ("dissipation", dissipation),
-         ("turbulent dissipation", turbulent_dissipation),
-         ("turbulent_kinetic_engergy", turbulent_kinetic_engergy),
-         ("kinetic_energy", kinetic_energy)]
+    # Print into
+    flow_metrics = [("dx", dl), ("l+", l_pluss_avg), ("t+", t_pluss_avg), ("Length scale", length_scale_avg),
+         ("Time scale", time_scale_avg), ("Velocity scale", velocity_scale), ("CFL", CFL_avg), ("SSV", ssv_avg),
+         ("dissipation", dissipation), ("turbulent dissipation", turbulent_dissipation),
+         ("turbulent_kinetic_engergy", turbulent_kinetic_engergy), ("kinetic_energy", kinetic_energy)]
 
-    for item in a:
-        sum_ = MPI.sum(mpi_comm_world(), np.sum(item[1].vector().array()))
-        num = MPI.sum(mpi_comm_world(), item[1].vector().array().shape[0])
+    for metric in flow_metrics:
+        sum_ = MPI.sum(MPI.comm_world, np.sum(metric[1].vector().array()))
+        num = MPI.sum(MPI.comm_world, metric[1].vector().array().shape[0])
         mean = sum_ / num
-        max_ = MPI.max(mpi_comm_world(), item[1].vector().array().max())
-        min_ = MPI.min(mpi_comm_world(), item[1].vector().array().min())
+        max_ = MPI.max(MPI.comm_world, metric[1].vector().array().max())
+        min_ = MPI.min(MPI.comm_world, metric[1].vector().array().min())
 
-        if MPI.rank(mpi_comm_world()) == 0:
-            print
-            item[0], "mean:", mean
-            print
-            item[0], "max:", max_
-            print
-            item[0], "min:", min_
+        if MPI.rank(MPI.comm_world) == 0:
+            print(metric[0], "mean:", mean)
+            print(metric[0], "max:", max_)
+            print(metric[0], "min:", min_)
 
 
 if __name__ == '__main__':
     folder, nu, dt = read_command_line()
-    compute_info(folder, nu, dt)
+    compute_flow_metrics(folder, nu, dt)
