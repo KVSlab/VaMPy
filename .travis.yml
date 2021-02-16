@@ -27,7 +27,7 @@ install:
   - conda config --add channels vmtk
 
   # Set up environment
-  - conda create -n vmtk_env vmtk pytest python=3.6 itk vtk paramiko llvm=3.3
+  - conda create -n vmtk_env vmtk pytest itk vtk paramiko llvm=3.3
 
   # Activate environment
   - source activate vmtk_env
