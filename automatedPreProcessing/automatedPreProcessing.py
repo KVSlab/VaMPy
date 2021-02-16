@@ -1,43 +1,31 @@
-from __future__ import print_function # Python 2 / 3 support
+# Python 2 / 3 support
+from __future__ import print_function
 
+import argparse
+import json
+from os import path
+
+import ImportData
+import ToolRepairSTL
+import numpy as np
+import vtk
+from NetworkBoundaryConditions import FlowSplitting
 # Local imports
 from common import *
 from set_aneurysm import *
-from visualize import visualize
-from DisplayData import DisplayModel, VtkPointCloud
-from NetworkBoundaryConditions import FlowSplitting
 from simulate import run_simulation
-import ImportData
-import ToolRepairSTL
-
-from os import path
+from visualize import visualize
 from vmtk import vmtkscripts
 
-import vtk
-import json
-import numpy as np
-import argparse
 
-
-def str2bool(arg):
-    if arg.lower() in ('yes', 'true', 't', 'y', '1'):
-        return True
-    elif arg.lower() in ('no', 'false', 'f', 'n', '0'):
-        return False
-    else:
-        raise argparse.ArgumentTypeError('Boolean value expected.')
-
-
-def Program(fileNameModel, verboseprint, smoothing, smoothing_factor,
-            smooth_aneurysm, meshingMethod, aneurysm,
-            createFlowext, viz, configPath, numberOfSacPoints, coarsening_factor):
+def run_pre_processing(fileNameModel, verboseprint, smoothing, smoothing_factor, smooth_aneurysm, meshingMethod,
+                       aneurysm, createFlowext, viz, configPath, numberOfSacPoints, coarsening_factor):
     # Get paths
     abs_path = path.abspath(path.dirname(__file__))
     caseName = fileNameModel.rsplit(path.sep, 1)[-1].rsplit('.')[0]
     dir_path = fileNameModel.rsplit(path.sep, 1)[0]
 
     # Naming conventions
-    fileNameInitialCenterlines = path.join(dir_path, caseName + "_initial_centerlines.vtp")
     fileNameCenterlines = path.join(dir_path, caseName + "_centerlines.vtp")
     filenameAneurysmCenterlines = path.join(dir_path, caseName + "_aneurysm_centerline.vtp")
     filenameSacCenterlines = path.join(dir_path, caseName + "_sac_centerline_{}.vtp")
@@ -50,9 +38,7 @@ def Program(fileNameModel, verboseprint, smoothing, smoothing_factor,
     fileNameModelFlowExt = path.join(dir_path, caseName + "_flowext.vtp")
     fileNameClippedModel = path.join(dir_path, caseName + "_clippedmodel.vtp")
     fileNameFlowCenterlines = path.join(dir_path, caseName + "_flow_cl.vtp")
-    fileNameCappedFlowExt = path.join(dir_path, caseName + "_capped_flowext.vtp")
     fileNameSurfaceName = path.join(dir_path, caseName + "_remeshed_surface.vtp")
-    fileNameOutput = path.join(dir_path, caseName + "_output.txt")
     fileNameXMLMesh = path.join(dir_path, caseName + ".xml")
     fileNameVTUMesh = path.join(dir_path, caseName + ".vtu")
     fileNameRunScript = path.join(dir_path, caseName + ".sh")
@@ -66,10 +52,10 @@ def Program(fileNameModel, verboseprint, smoothing, smoothing_factor,
     if not is_surface_capped and smoothing != "voronoi":
         print("--- Clipping the models inlet and outlets.\n")
         if not path.isfile(fileNameClippedModel):
-                # TODO: Check if this is a valid call to this method
-                centerline = compute_centerlines([], [], None, surface,
-                                                 method="pickpoint")
-                surface = uncapp_surface(surface, centerline, filename=None, clipspheres=0)
+            # TODO: Check if this is a valid call to this method
+            centerline = compute_centerlines([], [], None, surface,
+                                             method="pickpoint")
+            surface = uncapp_surface(surface, centerline, filename=None, clipspheres=0)
         else:
             surface = ReadPolyData(fileNameClippedModel)
 
@@ -101,13 +87,13 @@ def Program(fileNameModel, verboseprint, smoothing, smoothing_factor,
     print("--- Get centerlines\n")
     inlet, outlets = get_centers(surface, path.join(dir_path, caseName))
     centerlines = compute_centerlines(inlet, outlets, fileNameCenterlines,
-                                          capped_surface, resampling=0.1, endPoint=0)
+                                      capped_surface, resampling=0.1, endPoint=0)
     tol = get_tolerance(centerlines)
 
     if aneurysm:
         aneurysms = get_aneurysm_dome(capped_surface, path.join(dir_path, caseName))
         centerlineAnu = compute_centerlines(inlet, aneurysms, filenameAneurysmCenterlines,
-                                  capped_surface, resampling=0.1)
+                                            capped_surface, resampling=0.1)
 
         # Extract the aneurysm centerline
         sac_centerline = []
@@ -119,11 +105,11 @@ def Program(fileNameModel, verboseprint, smoothing, smoothing_factor,
             if not path.isfile(filenameSacCenterlines.format(i)):
                 line = ExtractSingleLine(centerlineAnu, i)
                 locator = get_locator(centerlines)
-                for j in range(line.GetNumberOfPoints() -1, 0, -1):
+                for j in range(line.GetNumberOfPoints() - 1, 0, -1):
                     point = line.GetPoints().GetPoint(j)
                     ID = locator.FindClosestPoint(point)
                     tmp_point = centerlines.GetPoints().GetPoint(ID)
-                    dist = np.sqrt(np.sum((np.asarray(point) - np.asarray(tmp_point))**2))
+                    dist = np.sqrt(np.sum((np.asarray(point) - np.asarray(tmp_point)) ** 2))
                     if dist <= tol:
                         break
 
@@ -142,7 +128,6 @@ def Program(fileNameModel, verboseprint, smoothing, smoothing_factor,
     # Get 'center' and 'radius' of the aneurysm(s)
     sac_center = []
     misr_max = []
-    #misr_max_center = []
 
     if aneurysm:
         # Merge the sac centerliens
@@ -152,7 +137,6 @@ def Program(fileNameModel, verboseprint, smoothing, smoothing_factor,
             sac_center.append(sac.GetPoints().GetPoint(sac.GetNumberOfPoints() // 2))
             tmp_misr = get_array(radiusArrayName, sac)
             misr_max.append(tmp_misr.max())
-            #misr_max_center.append(sac.GetPoint(np.argsort(tmp_misr)[0][-1]))
 
     # Smooth surface
     if smoothing == "voronoi":
@@ -193,29 +177,10 @@ def Program(fileNameModel, verboseprint, smoothing, smoothing_factor,
                 surface = vmtkSmoother(surface, "laplace", iterations=200)
                 WritePolyData(surface, fileNameSurfaceSmooth)
                 print(("ERROR: Automatic clipping failed. You have to open {} and " + \
-                        "manually clipp the branch which still is capped. " + \
-                        "Overwrite the current {} and restart the script.").format(
-                        fileNameSurfaceSmooth, fileNameSurfaceSmooth))
+                       "manually clipp the branch which still is capped. " + \
+                       "Overwrite the current {} and restart the script.").format(
+                    fileNameSurfaceSmooth, fileNameSurfaceSmooth))
                 sys.exit(0)
-
-                #for i in range(num_outlets):
-                #    lines = [ExtractSingleLine(centerlines, j) for j in range(num_outlets) if j != i]
-                #    tmp_centerlines = merge_data(lines)
-                #    tmp_uncapped = uncapp_surface(surface, tmp_centerlines, filename=None)
-
-                #    WritePolyData(tmp_uncapped, "tmp_uncapped{}.vtp".format(i))
-                #    WritePolyData(tmp_centerlines, "tmp_centerline{}.vtp".format(i))
-                #    if num_outlets == compute_centers(tmp_uncapped, test_capped=True)[1]:
-                #        surface = vmtkSmoother(tmp_uncapped, "laplace", iterations=200)
-                #        WritePolyData(surface, fileNameSurfaceSmooth)
-                #        print(("ERROR: Automatic clipping failed. You have to open {} and " + \
-                #              "manually clipp the branch which still is capped. " + \
-                #              "Overwrite the current {} and restart the script.").format(
-                #                  fileNameSurfaceSmooth, fileNameSurfaceSmooth))
-                #        break
-                #else:
-                #    print("ERROR: Something went wrong with the capping. Please overwrite" + \
-                #          " the file {} with a manually capped version.".format(fileNameSurfaceSmooth))
 
             surface = surface_uncapped
 
@@ -286,9 +251,7 @@ def Program(fileNameModel, verboseprint, smoothing, smoothing_factor,
         print("--- Compute the model centerlines with flow extension.")
         # Compute the centerlines.
         inlet, outlets = get_centers(surface, path.join(dir_path, caseName), flowext=True)
-        centerlines = compute_centerlines(inlet, outlets,
-                                             fileNameFlowCenterlines,
-                                             capped_surface, resampling = 0.5)
+        centerlines = compute_centerlines(inlet, outlets, fileNameFlowCenterlines, capped_surface, resampling=0.5)
 
     else:
         centerlines = ReadPolyData(fileNameFlowCenterlines)
@@ -318,7 +281,7 @@ def Program(fileNameModel, verboseprint, smoothing, smoothing_factor,
             print("--- Computing mesh\n")
             mesh, remeshSurface = generate_mesh(distance_to_sphere)
             assert remeshSurface.GetNumberOfPoints() > 0, \
-                    "No points in surface mesh, try to remesh"
+                "No points in surface mesh, try to remesh"
             assert mesh.GetNumberOfPoints() > 0, "No points in mesh, try to remesh"
 
         except:
@@ -326,7 +289,7 @@ def Program(fileNameModel, verboseprint, smoothing, smoothing_factor,
             mesh, remeshSurface = generate_mesh(distance_to_sphere)
             assert mesh.GetNumberOfPoints() > 0, "No points in mesh, after remeshing"
             assert remeshSurface.GetNumberOfPoints() > 0, \
-                    "No points in surface mesh, try to remesh"
+                "No points in surface mesh, try to remesh"
 
         # Write mesh in VTU format
         WritePolyData(remeshSurface, fileNameSurfaceName)
@@ -360,8 +323,8 @@ def Program(fileNameModel, verboseprint, smoothing, smoothing_factor,
         # voronoi diagram which is closest to that part compared to any ther
         # centerlines. Then randomly chose among those points. For now, simply
         # add just one point (sac_center).
-        #numberOfPoints = numberOfSacPoints
-        #for k in range(num_anu):
+        # numberOfPoints = numberOfSacPoints
+        # for k in range(num_anu):
         #    u = np.random.uniform(0.0, 1.0, (numberOfPoints, 1))
         #    theta = np.random.uniform(0., 1., (numberOfPoints, 1)) * np.pi
         #    phi = np.arccos(1 - 2 * np.random.uniform(0.0, 1., (numberOfPoints, 1)))
@@ -415,10 +378,10 @@ def Program(fileNameModel, verboseprint, smoothing, smoothing_factor,
     for i in range(refSystem.GetNumberOfPoints()):
         distancePoints = 10000000
         pointId = boundarySurface.FindPoint(refSystem.GetPoint(i))
-        boundarySurface.GetPointCells(pointId,pointCells)
+        boundarySurface.GetPointCells(pointId, pointCells)
         cellId = pointCells.GetId(0)
         cellEntityId = surfaceCellEntityIdsArray.GetValue(cellId)
-        cellEntityIdsArray.SetValue(i,cellEntityId)
+        cellEntityIdsArray.SetValue(i, cellEntityId)
 
         meshPoint = refSystem.GetPoint(i)
         for element in network.elements:
@@ -426,8 +389,8 @@ def Program(fileNameModel, verboseprint, smoothing, smoothing_factor,
                 networkPoint = element.GetOutPointsx1()[0]
             if element.IsAnInlet():
                 networkPoint = element.GetInPointsx0()[0]
-            if vtk.vtkMath.Distance2BetweenPoints(meshPoint,networkPoint) < distancePoints:
-                distancePoints = vtk.vtkMath.Distance2BetweenPoints(meshPoint,networkPoint)
+            if vtk.vtkMath.Distance2BetweenPoints(meshPoint, networkPoint) < distancePoints:
+                distancePoints = vtk.vtkMath.Distance2BetweenPoints(meshPoint, networkPoint)
                 closest = element.GetId()
         if network.elements[closest].IsAnInlet():
             verboseprint('I am the inlet, Sup?')
@@ -439,7 +402,7 @@ def Program(fileNameModel, verboseprint, smoothing, smoothing_factor,
             verboseprint(beta)
             verboseprint(network.elements[closest].GetOutPointsx1()[0])
         verboseprint('CellEntityId: %d\n' % cellEntityId)
-        verboseprint('meshPoint: %f, %f, %f\n' % (meshPoint[0],meshPoint[1],meshPoint[2]))
+        verboseprint('meshPoint: %f, %f, %f\n' % (meshPoint[0], meshPoint[1], meshPoint[2]))
         verboseprint(ids)
 
     # Store information for the solver.
@@ -483,99 +446,112 @@ def Program(fileNameModel, verboseprint, smoothing, smoothing_factor,
         run_simulation(configPath, dir_path, caseName)
 
 
-if __name__ == "__main__":
+def str2bool(arg):
+    if arg.lower() in ('yes', 'true', 't', 'y', '1'):
+        return True
+    elif arg.lower() in ('no', 'false', 'f', 'n', '0'):
+        return False
+    else:
+        raise argparse.ArgumentTypeError('Boolean value expected.')
+
+
+def read_command_line():
+    """
+    Read arguments from commandline and return all values in a dictionary.
+    """
     '''Command-line arguments.'''
     parser = argparse.ArgumentParser(
-                description="Autom. Pre-processing for FEniCS.")
+        description="Autom. Pre-processing for FEniCS.")
 
     parser.add_argument('-v', '--verbosity',
-        dest = 'verbosity',
-        type = str2bool,
-        default = False,
-        help = "Activates the verbose mode.")
+                        dest='verbosity',
+                        type=str2bool,
+                        default=False,
+                        help="Activates the verbose mode.")
 
     parser.add_argument('-i', '--inputModel',
-        type = str,
-        required = False,
-        dest = 'fileNameModel',
-        default = 'example/surface.vtp',
-        help = "Input file containing the 3D model.")
+                        type=str,
+                        required=False,
+                        dest='fileNameModel',
+                        default='example/surface.vtp',
+                        help="Input file containing the 3D model.")
 
     parser.add_argument('-sM', '--smoothingMethod',
-        type = str,
-        required = False,
-        dest = 'smoothingMethod',
-        default = "no_smooth",
-        choices = ["voronoi", "no_smooth", "laplace", "taubin"],
-        help = "Smoothing method, for now only Voronoi smoothing is avaleble." +\
-               " For Voronoi smoothing you can also controll smoothingFactor" + \
-               " (default = 0.25)  and smoothingAneurysm (default = False).")
+                        type=str,
+                        required=False,
+                        dest='smoothingMethod',
+                        default="no_smooth",
+                        choices=["voronoi", "no_smooth", "laplace", "taubin"],
+                        help="Smoothing method, for now only Voronoi smoothing is avaleble." + \
+                             " For Voronoi smoothing you can also controll smoothingFactor" + \
+                             " (default = 0.25)  and smoothingAneurysm (default = False).")
 
     parser.add_argument('-c', '--coarseningFactor',
-        type = float,
-        required = False,
-        dest = 'coarseningFactor',
-        default = 1.0,
-        help = "Refine or coarsen the standard mesh size")
+                        type=float,
+                        required=False,
+                        dest='coarseningFactor',
+                        default=1.0,
+                        help="Refine or coarsen the standard mesh size")
 
     parser.add_argument('-sF', '--smoothingFactor',
-        type = float,
-        required = False,
-        dest = 'smoothingFactor',
-        default = 0.25,
-        help = "smoothingFactor for VoronoiSmoothing, removes all spheres which" + \
-               " has a radious < MISR*(1-0.25), where MISR varying along the centerline.")
+                        type=float,
+                        required=False,
+                        dest='smoothingFactor',
+                        default=0.25,
+                        help="smoothingFactor for VoronoiSmoothing, removes all spheres which" + \
+                             " has a radious < MISR*(1-0.25), where MISR varying along the centerline.")
 
     parser.add_argument('-sA', '--smoothAneurysm',
-        type = str2bool,
-        required = False,
-        dest = "smoothingAneurysm",
-        help = "When using Voronoi smoothing one can choose not to smooth the" + \
-               " aneurysm as this method often removes to much of the aneurysm")
+                        type=str2bool,
+                        required=False,
+                        dest="smoothingAneurysm",
+                        help="When using Voronoi smoothing one can choose not to smooth the" + \
+                             " aneurysm as this method often removes to much of the aneurysm")
 
     parser.add_argument('-m', '--meshingMethod',
-        dest = "meshingMethod",
-        type = str,
-        required = True,
-        choices = ["diameter", "curvature"],
-        default = False)
+                        dest="meshingMethod",
+                        type=str,
+                        required=True,
+                        choices=["diameter", "curvature"],
+                        default=False)
 
     parser.add_argument('-a', '--aneurysm',
-        dest = "aneu",
-        type = str2bool,
-        default = True,
-        help = "Determine wether or not the model has a aneurysm. Default is False.")
+                        dest="aneu",
+                        type=str2bool,
+                        default=True,
+                        help="Determine wether or not the model has a aneurysm. Default is False.")
 
     parser.add_argument('-f', '--flowext',
-        dest = "fext",
-        default = True,
-        type = str2bool,
-        help = "Add flow extensions to to the model.")
+                        dest="fext",
+                        default=True,
+                        type=str2bool,
+                        help="Add flow extensions to to the model.")
 
     parser.add_argument('-vz', '--visualize',
-        dest = "viz",
-        default = True,
-        type = str2bool,
-        help = "Visualize surface, inlet, outlet and propes after meshing.")
+                        dest="viz",
+                        default=True,
+                        type=str2bool,
+                        help="Visualize surface, inlet, outlet and propes after meshing.")
 
     parser.add_argument('-sp', '--sacpoints',
-        type = int,
-        help = 'Number of sac points to add',
-        default = 20,
-        dest = "sacpts")
+                        type=int,
+                        help='Number of sac points to add',
+                        default=20,
+                        dest="sacpts")
 
     parser.add_argument('--simulationConfig',
-        type = str,
-        dest = "config",
-        default = None,
-        help = 'Path to configuration file for remote simulation. ' + \
-               'See example/ssh_config.json for details')
+                        type=str,
+                        dest="config",
+                        default=None,
+                        help='Path to configuration file for remote simulation. ' + \
+                             'See example/ssh_config.json for details')
 
     args = parser.parse_args()
 
     if args.verbosity:
         print()
         print("--- VERBOSE MODE ACTIVATED ---")
+
         def verboseprint(*args):
             for arg in args:
                 print(arg, end=' ')
@@ -586,8 +562,11 @@ if __name__ == "__main__":
     verboseprint(args)
 
     # Start the script.
-    print(args.config)
-    Program(args.fileNameModel, verboseprint, args.smoothingMethod,
-            args.smoothingFactor, args.smoothingAneurysm, args.meshingMethod,
-            args.aneu, args.fext, args.viz, args.config, args.sacpts,
-            args.coarseningFactor)
+    return dict(fileNameModel=args.fileNameModel, verboseprint=verboseprint, smoothing=args.smoothingMethod,
+                smoothing_factor=args.smoothingFactor, smooth_aneurysm=args.smoothingAneurysm,
+                meshingMethod=args.meshingMethod, aneurysm=args.aneu, createFlowext=args.fext, viz=args.viz,
+                configPath=args.config, numberOfSacPoints=args.sacpts, coarsening_factor=args.coarseningFactor)
+
+
+if __name__ == "__main__":
+    run_pre_processing(**read_command_line())
