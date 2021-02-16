@@ -9,7 +9,7 @@ These scripts was written by
 - Henrik A. Kjeldsberg
 
 ## Installation
-You can choose how to install the dependencies, but the fastest way to get started is to first install anaconda or minicoda on your computer. Then create two environments, one for `vmtk/vtk` and one for `fenics` by executing the following in a terminal:
+You can choose how to install the dependencies, but the fastest way to get started is to first install anaconda or miniconda on your computer. Then create two environments, one for `vmtk/vtk` and one for `fenics` by executing the following in a terminal:
 ```
 conda create -n vtk -c vmtk python=3.6 itk vtk vmtk paramiko
 conda create -n fenics -c conda-forge fenics
@@ -61,7 +61,7 @@ oasis NSfracStep problem=Artery mesh_path=test/Case_test_71.xml.gz
 
 Finally, you can create the WSS from the CFD simulation:
 ```
-python postprocessing/compute_hemodynamic_quantities.py --case path_to_results/data/[run_number]/VTK
+python postprocessing/compute_wss.py --case path_to_results/data/[run_number]/VTK
 ```
 
-You can also compute flow related metrics using `compute_flow_metrics.py`, but you would need to adapt how the files are read in to match with `compute_hemodynamic_quantities.py`.
+You can also compute flow related metrics using `compute_flow_metrics.py`, but you would need to adapt how the files are read in to match with `compute_wss.py`.
