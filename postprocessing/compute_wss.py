@@ -47,9 +47,6 @@ def compute_wss(case_path, nu, dt):
 
     # Load mesh
     bm = BoundaryMesh(mesh, 'exterior')
-    f = File((case_path / "Boundary_mesh.pvd").__str__())
-    f << bm
-    del f
 
     if MPI.rank(MPI.comm_world) == 0:
         print("Define function spaces")
