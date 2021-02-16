@@ -1,20 +1,21 @@
-import pytest 
 import sys
+
 sys.path.append("..")
 sys.path.append("../automatedPreProcessing")
 
 from automatedPreProcessing.common import *
 from automatedPreProcessing.automatedPreProcessing import read_command_line, run_pre_processing
 
+
 def test_pre_processing():
     model_path = "Case_test_71/Case_test_71.vtp"
     # Get default inputsc
     common_input = read_command_line()
     common_input.update(dict(meshingMethod="diameter",
-        fileNameModel=model_path,
-        aneurysm=False,
-        coarsening_factor=1.3,
-        viz=False))
+                             fileNameModel=model_path,
+                             aneurysm=False,
+                             coarsening_factor=1.3,
+                             viz=False))
 
     # Run pre processesing 
     run_pre_processing(**common_input)
@@ -23,12 +24,12 @@ def test_pre_processing():
     mesh_path = model_path.replace("vtp", "vtu")
 
     assert path.isfile(mesh_path)
-    
+
     # Check that mesh is not empty
     mesh = ReadPolyData(mesh_path)
 
     assert mesh.GetNumberOfPoints() > 0
-    
+
 
 if __name__ == "__main__":
     test_pre_processing()
