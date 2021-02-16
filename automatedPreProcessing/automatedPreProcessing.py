@@ -3,65 +3,77 @@ from __future__ import print_function
 
 import argparse
 import json
-from os import path
 
 import ImportData
 import ToolRepairSTL
-import numpy as np
-import vtk
 from NetworkBoundaryConditions import FlowSplitting
 # Local imports
-from common import *
 from set_aneurysm import *
 from simulate import run_simulation
 from visualize import visualize
-from vmtk import vmtkscripts
 
 
-def run_pre_processing(fileNameModel, verboseprint, smoothing, smoothing_factor, smooth_aneurysm, meshingMethod,
-                       aneurysm, createFlowext, viz, configPath, numberOfSacPoints, coarsening_factor):
+def run_pre_processing(filename_model, verbose_print, smoothing_method, smoothing_factor, smooth_aneurysm,
+                       meshing_method,
+                       aneurysm, create_flow_extensions, viz, config_path, number_of_sac_points, coarsening_factor):
+    """
+
+    Args:
+        filename_model:
+        verbose_print:
+        smoothing_method:
+        smoothing_factor:
+        smooth_aneurysm:
+        meshing_method:
+        aneurysm:
+        create_flow_extensions:
+        viz:
+        config_path:
+        number_of_sac_points:
+        coarsening_factor:
+    """
     # Get paths
     abs_path = path.abspath(path.dirname(__file__))
-    caseName = fileNameModel.rsplit(path.sep, 1)[-1].rsplit('.')[0]
-    dir_path = fileNameModel.rsplit(path.sep, 1)[0]
+    case_name = filename_model.rsplit(path.sep, 1)[-1].rsplit('.')[0]
+    dir_path = filename_model.rsplit(path.sep, 1)[0]
 
     # Naming conventions
-    fileNameCenterlines = path.join(dir_path, caseName + "_centerlines.vtp")
-    filenameAneurysmCenterlines = path.join(dir_path, caseName + "_aneurysm_centerline.vtp")
-    filenameSacCenterlines = path.join(dir_path, caseName + "_sac_centerline_{}.vtp")
-    fileNameDistanceToSphereDiam = path.join(dir_path, caseName + "_distance_to_sphere_diam.vtp")
-    fileNameDistanceToSphereCurv = path.join(dir_path, caseName + "_distance_to_sphere_curv.vtp")
-    fileNameProbePoints = path.join(dir_path, caseName + "_probe_point")
-    fileNameVoronoi = path.join(dir_path, caseName + "_voronoi.vtp")
-    fileNameVoronoiSmooth = path.join(dir_path, caseName + "_voronoi_smooth.vtp")
-    fileNameSurfaceSmooth = path.join(dir_path, caseName + "_smooth.vtp")
-    fileNameModelFlowExt = path.join(dir_path, caseName + "_flowext.vtp")
-    fileNameClippedModel = path.join(dir_path, caseName + "_clippedmodel.vtp")
-    fileNameFlowCenterlines = path.join(dir_path, caseName + "_flow_cl.vtp")
-    fileNameSurfaceName = path.join(dir_path, caseName + "_remeshed_surface.vtp")
-    fileNameXMLMesh = path.join(dir_path, caseName + ".xml")
-    fileNameVTUMesh = path.join(dir_path, caseName + ".vtu")
-    fileNameRunScript = path.join(dir_path, caseName + ".sh")
+    file_name_centerlines = path.join(dir_path, case_name + "_centerlines.vtp")
+    file_name_aneurysm_centerlines = path.join(dir_path, case_name + "_aneurysm_centerline.vtp")
+    file_name_sac_centerlines = path.join(dir_path, case_name + "_sac_centerline_{}.vtp")
+    file_name_distance_to_sphere_diam = path.join(dir_path, case_name + "_distance_to_sphere_diam.vtp")
+    file_name_distance_to_sphere_curv = path.join(dir_path, case_name + "_distance_to_sphere_curv.vtp")
+    file_name_probe_points = path.join(dir_path, case_name + "_probe_point")
+    file_name_voronoi = path.join(dir_path, case_name + "_voronoi.vtp")
+    file_name_voronoi_smooth = path.join(dir_path, case_name + "_voronoi_smooth.vtp")
+    file_name_surface_smooth = path.join(dir_path, case_name + "_smooth.vtp")
+    file_name_model_flow_ext = path.join(dir_path, case_name + "_flowext.vtp")
+    file_name_clipped_model = path.join(dir_path, case_name + "_clippedmodel.vtp")
+    file_name_flow_centerlines = path.join(dir_path, case_name + "_flow_cl.vtp")
+    file_name_surface_name = path.join(dir_path, case_name + "_remeshed_surface.vtp")
+    file_name_xml_mesh = path.join(dir_path, case_name + ".xml")
+    file_name_vtu_mesh = path.join(dir_path, case_name + ".vtu")
+    file_name_run_script = path.join(dir_path, case_name + ".sh")
 
-    print("\n--- Working on case:", caseName, "\n")
+    print("\n--- Working on case:", case_name, "\n")
 
     # Open the surface file.
     print("--- Load model file\n")
-    surface = ReadPolyData(fileNameModel)
+    surface = ReadPolyData(filename_model)
 
-    if not is_surface_capped and smoothing != "voronoi":
+    if not is_surface_capped and smoothing_method != "voronoi":
         print("--- Clipping the models inlet and outlets.\n")
-        if not path.isfile(fileNameClippedModel):
+        if not path.isfile(file_name_clipped_model):
             # TODO: Check if this is a valid call to this method
             centerline = compute_centerlines([], [], None, surface,
                                              method="pickpoint")
             surface = uncapp_surface(surface, centerline, filename=None, clipspheres=0)
         else:
-            surface = ReadPolyData(fileNameClippedModel)
+            surface = ReadPolyData(file_name_clipped_model)
 
-    parameters = get_parameters(path.join(dir_path, caseName))
+    parameters = get_parameters(path.join(dir_path, case_name))
 
-    if not "check_surface" in parameters.keys():
+    if "check_surface" not in parameters.keys():
         surface = surface_cleaner(surface)
         surface = triangulate_surface(surface)
 
@@ -70,12 +82,12 @@ def run_pre_processing(fileNameModel, verboseprint, smoothing, smoothing_factor,
         ToolRepairSTL.foundAndDeleteNaNTriangles(surface)
         surface = ToolRepairSTL.cleanTheSurface(surface)
         foundNaN = ToolRepairSTL.foundAndDeleteNaNTriangles(surface)
-        if foundNaN == True:
+        if foundNaN:
             raise RuntimeError(("There is an issue with the surface. "
                                 "Nan coordinates or some other shenanigans."))
         else:
             parameters["check_surface"] = True
-            write_parameters(parameters, path.join(dir_path, caseName))
+            write_parameters(parameters, path.join(dir_path, case_name))
 
     # Capp surface if open
     if not compute_centers(surface, test_capped=True):
@@ -85,24 +97,24 @@ def run_pre_processing(fileNameModel, verboseprint, smoothing, smoothing_factor,
 
     # Get centerlines
     print("--- Get centerlines\n")
-    inlet, outlets = get_centers(surface, path.join(dir_path, caseName))
-    centerlines = compute_centerlines(inlet, outlets, fileNameCenterlines,
+    inlet, outlets = get_centers(surface, path.join(dir_path, case_name))
+    centerlines = compute_centerlines(inlet, outlets, file_name_centerlines,
                                       capped_surface, resampling=0.1, endPoint=0)
     tol = get_tolerance(centerlines)
 
     if aneurysm:
-        aneurysms = get_aneurysm_dome(capped_surface, path.join(dir_path, caseName))
-        centerlineAnu = compute_centerlines(inlet, aneurysms, filenameAneurysmCenterlines,
+        aneurysms = get_aneurysm_dome(capped_surface, path.join(dir_path, case_name))
+        centerlineAnu = compute_centerlines(inlet, aneurysms, file_name_aneurysm_centerlines,
                                             capped_surface, resampling=0.1)
 
         # Extract the aneurysm centerline
         sac_centerline = []
-        info = get_parameters(path.join(dir_path, caseName))
+        info = get_parameters(path.join(dir_path, case_name))
         num_anu = info["number_of_aneurysms"]
 
         # Compute mean distance between points
         for i in range(num_anu):
-            if not path.isfile(filenameSacCenterlines.format(i)):
+            if not path.isfile(file_name_sac_centerlines.format(i)):
                 line = ExtractSingleLine(centerlineAnu, i)
                 locator = get_locator(centerlines)
                 for j in range(line.GetNumberOfPoints() - 1, 0, -1):
@@ -114,13 +126,13 @@ def run_pre_processing(fileNameModel, verboseprint, smoothing, smoothing_factor,
                         break
 
                 tmp = ExtractSingleLine(line, 0, startID=j)
-                WritePolyData(tmp, filenameSacCenterlines.format(i))
+                WritePolyData(tmp, file_name_sac_centerlines.format(i))
 
                 # List of VtkPolyData sac(s) centerline
                 sac_centerline.append(tmp)
 
             else:
-                sac_centerline.append(ReadPolyData(filenameSacCenterlines.format(i)))
+                sac_centerline.append(ReadPolyData(file_name_sac_centerlines.format(i)))
 
     else:
         num_anu = 0
@@ -139,18 +151,18 @@ def run_pre_processing(fileNameModel, verboseprint, smoothing, smoothing_factor,
             misr_max.append(tmp_misr.max())
 
     # Smooth surface
-    if smoothing == "voronoi":
+    if smoothing_method == "voronoi":
         print("--- Smooth surface: Voronoi smoothing\n")
-        if not path.isfile(fileNameSurfaceSmooth):
+        if not path.isfile(file_name_surface_smooth):
             # Get Voronoi diagram
-            if not path.isfile(fileNameVoronoi):
-                voronoi = makeVoronoiDiagram(surface, fileNameVoronoi)
-                WritePolyData(voronoi, fileNameVoronoi)
+            if not path.isfile(file_name_voronoi):
+                voronoi = makeVoronoiDiagram(surface, file_name_voronoi)
+                WritePolyData(voronoi, file_name_voronoi)
             else:
-                voronoi = ReadPolyData(fileNameVoronoi)
+                voronoi = ReadPolyData(file_name_voronoi)
 
             # Get smooth Voronoi diagram
-            if not path.isfile(fileNameVoronoiSmooth):
+            if not path.isfile(file_name_voronoi_smooth):
                 if aneurysm:
                     smooth_voronoi = SmoothVoronoiDiagram(voronoi, centerlines,
                                                           smoothing_factor,
@@ -159,9 +171,9 @@ def run_pre_processing(fileNameModel, verboseprint, smoothing, smoothing_factor,
                     smooth_voronoi = SmoothVoronoiDiagram(voronoi, centerlines,
                                                           smoothing_factor)
 
-                WritePolyData(smooth_voronoi, fileNameVoronoiSmooth)
+                WritePolyData(smooth_voronoi, file_name_voronoi_smooth)
             else:
-                smooth_voronoi = ReadPolyData(fileNameVoronoiSmooth)
+                smooth_voronoi = ReadPolyData(file_name_voronoi_smooth)
 
             # Envelope the smooth surface
             surface = create_new_surface(smooth_voronoi)
@@ -175,11 +187,11 @@ def run_pre_processing(fileNameModel, verboseprint, smoothing, smoothing_factor,
 
             if num_outlets != num_outlets_after:
                 surface = vmtkSmoother(surface, "laplace", iterations=200)
-                WritePolyData(surface, fileNameSurfaceSmooth)
+                WritePolyData(surface, file_name_surface_smooth)
                 print(("ERROR: Automatic clipping failed. You have to open {} and " + \
                        "manually clipp the branch which still is capped. " + \
                        "Overwrite the current {} and restart the script.").format(
-                    fileNameSurfaceSmooth, fileNameSurfaceSmooth))
+                    file_name_surface_smooth, file_name_surface_smooth))
                 sys.exit(0)
 
             surface = surface_uncapped
@@ -189,40 +201,40 @@ def run_pre_processing(fileNameModel, verboseprint, smoothing, smoothing_factor,
             surface = vmtkSmoother(surface, "laplace", iterations=200)
 
             # Write surface
-            WritePolyData(surface, fileNameSurfaceSmooth)
+            WritePolyData(surface, file_name_surface_smooth)
 
         else:
-            surface = ReadPolyData(fileNameSurfaceSmooth)
+            surface = ReadPolyData(file_name_surface_smooth)
 
 
-    elif smoothing == "laplace":
+    elif smoothing_method == "laplace":
         print("--- Smooth surface: Laplacian smoothing\n")
-        if not path.isfile(fileNameSurfaceSmooth):
-            surface = vmtkSmoother(surface, smoothing)
+        if not path.isfile(file_name_surface_smooth):
+            surface = vmtkSmoother(surface, smoothing_method)
 
             # Save the smoothed surface
-            WritePolyData(surface, fileNameSurfaceSmooth)
+            WritePolyData(surface, file_name_surface_smooth)
 
         else:
-            surface = ReadPolyData(fileNameSurfaceSmooth)
+            surface = ReadPolyData(file_name_surface_smooth)
 
-    elif smoothing == "taubin":
+    elif smoothing_method == "taubin":
         print("--- Smooth surface: Taubin smoothing\n")
-        if not path.isfile(fileNameSurfaceSmooth):
-            surface = vmtkSmoother(surface, smoothing)
+        if not path.isfile(file_name_surface_smooth):
+            surface = vmtkSmoother(surface, smoothing_method)
 
             # Save the smoothed surface
-            WritePolyData(surface, fileNameSurfaceSmooth)
+            WritePolyData(surface, file_name_surface_smooth)
 
         else:
-            surface = ReadPolyData(fileNameSurfaceSmooth)
+            surface = ReadPolyData(file_name_surface_smooth)
 
-    elif smoothing == "no_smooth" or None:
+    elif smoothing_method == "no_smooth" or None:
         print("--- No smoothing of surface\n")
 
     # Add flow extensions
-    if createFlowext:
-        if not path.isfile(fileNameModelFlowExt):
+    if create_flow_extensions:
+        if not path.isfile(file_name_model_flow_ext):
             print("--- Adding flow extensions")
             extension = 5
 
@@ -238,45 +250,45 @@ def run_pre_processing(fileNameModel, verboseprint, smoothing, smoothing_factor,
 
             surface = extender.Surface
             surface = vmtkSmoother(surface, "laplace", iterations=200)
-            WritePolyData(surface, fileNameModelFlowExt)
+            WritePolyData(surface, file_name_model_flow_ext)
 
         else:
-            surface = ReadPolyData(fileNameModelFlowExt)
+            surface = ReadPolyData(file_name_model_flow_ext)
 
     # Capp surface with flow extensions
     capped_surface = capp_surface(surface)
 
     # Get new centerlines with the flow extensions
-    if not path.isfile(fileNameFlowCenterlines):
+    if not path.isfile(file_name_flow_centerlines):
         print("--- Compute the model centerlines with flow extension.")
         # Compute the centerlines.
-        inlet, outlets = get_centers(surface, path.join(dir_path, caseName), flowext=True)
-        centerlines = compute_centerlines(inlet, outlets, fileNameFlowCenterlines, capped_surface, resampling=0.5)
+        inlet, outlets = get_centers(surface, path.join(dir_path, case_name), flowext=True)
+        centerlines = compute_centerlines(inlet, outlets, file_name_flow_centerlines, capped_surface, resampling=0.5)
 
     else:
-        centerlines = ReadPolyData(fileNameFlowCenterlines)
+        centerlines = ReadPolyData(file_name_flow_centerlines)
 
     # Choose input for the mesh
     print("--- Computing distance to sphere")
-    if meshingMethod == "curvature":
-        if not path.isfile(fileNameDistanceToSphereCurv):
+    if meshing_method == "curvature":
+        if not path.isfile(file_name_distance_to_sphere_curv):
             distance_to_sphere = dist_sphere_curv(surface, centerlines,
                                                   sac_center, misr_max,
-                                                  fileNameDistanceToSphereCurv,
+                                                  file_name_distance_to_sphere_curv,
                                                   coarsening_factor)
         else:
-            distance_to_sphere = ReadPolyData(fileNameDistanceToSphereCurv)
+            distance_to_sphere = ReadPolyData(file_name_distance_to_sphere_curv)
     else:
-        if not path.isfile(fileNameDistanceToSphereDiam):
+        if not path.isfile(file_name_distance_to_sphere_diam):
             distance_to_sphere = dist_sphere_diam(surface, centerlines,
                                                   sac_center, misr_max,
-                                                  fileNameDistanceToSphereDiam,
+                                                  file_name_distance_to_sphere_diam,
                                                   coarsening_factor)
         else:
-            distance_to_sphere = ReadPolyData(fileNameDistanceToSphereDiam)
+            distance_to_sphere = ReadPolyData(file_name_distance_to_sphere_diam)
 
     # Compute mesh
-    if not path.isfile(fileNameVTUMesh):
+    if not path.isfile(file_name_vtu_mesh):
         try:
             print("--- Computing mesh\n")
             mesh, remeshSurface = generate_mesh(distance_to_sphere)
@@ -292,29 +304,30 @@ def run_pre_processing(fileNameModel, verboseprint, smoothing, smoothing_factor,
                 "No points in surface mesh, try to remesh"
 
         # Write mesh in VTU format
-        WritePolyData(remeshSurface, fileNameSurfaceName)
-        WritePolyData(mesh, fileNameVTUMesh)
+        WritePolyData(remeshSurface, file_name_surface_name)
+        WritePolyData(mesh, file_name_vtu_mesh)
 
         # Write mesh to FEniCS to format
         meshWriter = vmtkscripts.vmtkMeshWriter()
         meshWriter.CellEntityIdsArrayName = "CellEntityIds"
         meshWriter.Mesh = mesh
-        meshWriter.OutputFileName = fileNameXMLMesh
+        meshWriter.Mode = "ascii"
+        meshWriter.OutputFileName = file_name_xml_mesh
         meshWriter.Execute()
         polyDataVolMesh = mesh
 
     else:
-        polyDataVolMesh = ReadPolyData(fileNameVTUMesh)
+        polyDataVolMesh = ReadPolyData(file_name_vtu_mesh)
 
     # Set the network object used in the scripts for 
     # boundary conditions and probes.
     network = ImportData.Network()
-    centerlinesBranches = ImportData.SetNetworkStructure(centerlines, network, verboseprint,
+    centerlinesBranches = ImportData.SetNetworkStructure(centerlines, network, verbose_print,
                                                          isConnectivityNeeded=True)
 
-    if not path.isfile(fileNameProbePoints):
+    if not path.isfile(file_name_probe_points):
         # Get the list of coordinates for the probe points along the network centerline.
-        listProbePoints = ImportData.GetListProbePoints(centerlinesBranches, network, verboseprint)
+        listProbePoints = ImportData.GetListProbePoints(centerlinesBranches, network, verbose_print)
         listProbePoints += sac_center
 
         # Add points randomly in the sac.
@@ -337,21 +350,21 @@ def run_pre_processing(fileNameModel, verboseprint, smoothing, smoothing_factor,
         #                                np.array(misr_max_center[k][1] + y[i]).tolist()[0],
         #                                np.array(misr_max_center[k][2] + z[i]).tolist()[0]])
 
-        print("--- Saving probes points in: ", fileNameProbePoints)
+        print("--- Saving probes points in: ", file_name_probe_points)
         dataNumpy = np.array(listProbePoints)
-        dataNumpy.dump(fileNameProbePoints)
+        dataNumpy.dump(file_name_probe_points)
     else:
-        dataNumpy = np.load(fileNameProbePoints, allow_pickle=True)
+        dataNumpy = np.load(file_name_probe_points, allow_pickle=True)
 
     # Set the flow split and inlet boundary condition
     # Compute the outlet boundary condition percentages.
     flowSplitting = FlowSplitting()
-    flowSplitting.ComputeAlphas(network, verboseprint)
-    flowSplitting.ComputeBetas(network, verboseprint)
-    flowSplitting.CheckTotalFlowRate(network, verboseprint)
+    flowSplitting.ComputeAlphas(network, verbose_print)
+    flowSplitting.ComputeBetas(network, verbose_print)
+    flowSplitting.CheckTotalFlowRate(network, verbose_print)
 
     # BSL method for mean inlet flow rate.
-    parameters = get_parameters(path.join(dir_path, caseName))
+    parameters = get_parameters(path.join(dir_path, case_name))
     meanInflow = 0.27 * parameters["inlet_area"]
 
     # Extract the surface mesh of the wall
@@ -393,28 +406,28 @@ def run_pre_processing(fileNameModel, verboseprint, smoothing, smoothing_factor,
                 distancePoints = vtk.vtkMath.Distance2BetweenPoints(meshPoint, networkPoint)
                 closest = element.GetId()
         if network.elements[closest].IsAnInlet():
-            verboseprint('I am the inlet, Sup?')
-            verboseprint(network.elements[closest].GetInPointsx0()[0])
+            verbose_print('I am the inlet, Sup?')
+            verbose_print(network.elements[closest].GetInPointsx0()[0])
             ids.insert(0, [cellEntityId, meanInflow])
         else:
             beta = network.elements[closest].GetBeta()
             ids.append([cellEntityId, beta])
-            verboseprint(beta)
-            verboseprint(network.elements[closest].GetOutPointsx1()[0])
-        verboseprint('CellEntityId: %d\n' % cellEntityId)
-        verboseprint('meshPoint: %f, %f, %f\n' % (meshPoint[0], meshPoint[1], meshPoint[2]))
-        verboseprint(ids)
+            verbose_print(beta)
+            verbose_print(network.elements[closest].GetOutPointsx1()[0])
+        verbose_print('CellEntityId: %d\n' % cellEntityId)
+        verbose_print('meshPoint: %f, %f, %f\n' % (meshPoint[0], meshPoint[1], meshPoint[2]))
+        verbose_print(ids)
 
     # Store information for the solver.
-    idFileLine = caseName + ' ' + repr(ids[0][0] - 1) + ' '
-    areaRatioLine = caseName + ' '
+    idFileLine = case_name + ' ' + repr(ids[0][0] - 1) + ' '
+    areaRatioLine = case_name + ' '
     for k in range(1, refSystem.GetNumberOfPoints() - 1):
         idFileLine += repr(ids[k][0] - 1) + ','
         areaRatioLine += repr(ids[k][1]) + ','
     idFileLine += repr(ids[-1][0] - 1) + ' ' + repr(ids[0][1])
     areaRatioLine += repr(ids[-1][1])
 
-    with open(path.join(dir_path, caseName + '.txt'), 'w') as outfile:
+    with open(path.join(dir_path, case_name + '.txt'), 'w') as outfile:
         outfile.write("\ninlet_area: " + str(parameters["inlet_area"]))
         outfile.write('\nidFileLine: ' + str(idFileLine))
         outfile.write('\nareaRatioLine: ' + str(areaRatioLine))
@@ -424,13 +437,13 @@ def run_pre_processing(fileNameModel, verboseprint, smoothing, smoothing_factor,
         visualize(network.elements, dataNumpy, surface, meanInflow)
 
     # Start simulation though ssh, without password
-    if configPath is not None:
+    if config_path is not None:
 
         # Set up simulation script
-        if not path.exists(fileNameRunScript):
+        if not path.exists(file_name_run_script):
             run_script_sample = open(path.join(abs_path, "run_script.sh"), "r").read()
-            config = json.load(open(configPath))
-            run_dict = dict(mesh_name=caseName,
+            config = json.load(open(config_path))
+            run_dict = dict(mesh_name=case_name,
                             num_nodes=1,
                             hours=120,
                             account="nn9249k",
@@ -439,11 +452,11 @@ def run_pre_processing(fileNameModel, verboseprint, smoothing, smoothing_factor,
             run_script = run_script_sample.format(**run_dict)
 
             # Write script
-            script_file = open(fileNameRunScript, "w")
+            script_file = open(file_name_run_script, "w")
             script_file.write(run_script)
             script_file.close()
 
-        run_simulation(configPath, dir_path, caseName)
+        run_simulation(config_path, dir_path, case_name)
 
 
 def str2bool(arg):
@@ -560,11 +573,10 @@ def read_command_line():
 
     verboseprint(args)
 
-    # Start the script.
-    return dict(fileNameModel=args.fileNameModel, verboseprint=verboseprint, smoothing=args.smoothingMethod,
+    return dict(filename_model=args.fileNameModel, verbose_print=verboseprint, smoothing_method=args.smoothingMethod,
                 smoothing_factor=args.smoothingFactor, smooth_aneurysm=args.smoothingAneurysm,
-                meshingMethod=args.meshingMethod, aneurysm=args.aneu, createFlowext=args.fext, viz=args.viz,
-                configPath=args.config, numberOfSacPoints=args.sacpts, coarsening_factor=args.coarseningFactor)
+                meshing_method=args.meshingMethod, aneurysm=args.aneu, create_flow_extensions=args.fext, viz=args.viz,
+                config_path=args.config, number_of_sac_points=args.sacpts, coarsening_factor=args.coarseningFactor)
 
 
 if __name__ == "__main__":

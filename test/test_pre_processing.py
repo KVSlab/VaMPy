@@ -11,8 +11,8 @@ def test_pre_processing():
     model_path = "Case_test_71/Case_test_71.vtp"
     # Get default inputsc
     common_input = read_command_line()
-    common_input.update(dict(meshingMethod="diameter",
-                             fileNameModel=model_path,
+    common_input.update(dict(meshing_method="diameter",
+                             filename_model=model_path,
                              aneurysm=False,
                              coarsening_factor=1.3,
                              viz=False))
