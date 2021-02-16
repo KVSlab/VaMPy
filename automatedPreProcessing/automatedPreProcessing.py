@@ -14,8 +14,8 @@ from visualize import visualize
 
 
 def run_pre_processing(filename_model, verbose_print, smoothing_method, smoothing_factor, smooth_aneurysm,
-                       meshing_method,
-                       aneurysm, create_flow_extensions, viz, config_path, number_of_sac_points, coarsening_factor):
+                       meshing_method, aneurysm, create_flow_extensions, viz, config_path, number_of_sac_points,
+                       coarsening_factor, compress_mesh=True):
     """
 
     Args:
@@ -31,6 +31,7 @@ def run_pre_processing(filename_model, verbose_print, smoothing_method, smoothin
         config_path:
         number_of_sac_points:
         coarsening_factor:
+        compress_mesh:
     """
     # Get paths
     abs_path = path.abspath(path.dirname(__file__))
@@ -312,6 +313,7 @@ def run_pre_processing(filename_model, verbose_print, smoothing_method, smoothin
         meshWriter.CellEntityIdsArrayName = "CellEntityIds"
         meshWriter.Mesh = mesh
         meshWriter.Mode = "ascii"
+        meshWriter.Compressed = compress_mesh
         meshWriter.OutputFileName = file_name_xml_mesh
         meshWriter.Execute()
         polyDataVolMesh = mesh

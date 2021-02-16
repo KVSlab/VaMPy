@@ -15,7 +15,8 @@ def test_pre_processing():
                              filename_model=model_path,
                              aneurysm=False,
                              coarsening_factor=1.3,
-                             viz=False))
+                             viz=False,
+                             compress_mesh=False))
 
     # Run pre processesing 
     run_pre_processing(**common_input)
