@@ -5,10 +5,10 @@ import argparse
 import json
 from os import path
 
-import ImportData
-import ToolRepairSTL
 import numpy as np
 import vtk
+import ImportData
+import ToolRepairSTL
 from NetworkBoundaryConditions import FlowSplitting
 # Local imports
 from common import *
@@ -511,9 +511,8 @@ def read_command_line():
     parser.add_argument('-m', '--meshingMethod',
                         dest="meshingMethod",
                         type=str,
-                        required=True,
                         choices=["diameter", "curvature"],
-                        default=False)
+                        default="diameter")
 
     parser.add_argument('-a', '--aneurysm',
                         dest="aneu",
