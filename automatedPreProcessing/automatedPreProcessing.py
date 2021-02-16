@@ -5,10 +5,10 @@ import argparse
 import json
 from os import path
 
-import numpy as np
-import vtk
 import ImportData
 import ToolRepairSTL
+import numpy as np
+import vtk
 from NetworkBoundaryConditions import FlowSplitting
 # Local imports
 from common import *
@@ -341,7 +341,7 @@ def run_pre_processing(fileNameModel, verboseprint, smoothing, smoothing_factor,
         dataNumpy = np.array(listProbePoints)
         dataNumpy.dump(fileNameProbePoints)
     else:
-        dataNumpy = np.load(fileNameProbePoints)
+        dataNumpy = np.load(fileNameProbePoints, allow_pickle=True)
 
     # Set the flow split and inlet boundary condition
     # Compute the outlet boundary condition percentages.
@@ -545,7 +545,7 @@ def read_command_line():
                         help='Path to configuration file for remote simulation. ' + \
                              'See example/ssh_config.json for details')
 
-    args = parser.parse_args()
+    args, _ = parser.parse_known_args()
 
     if args.verbosity:
         print()
