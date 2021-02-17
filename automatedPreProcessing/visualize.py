@@ -54,9 +54,11 @@ def visualize(network_elements, probe_points, output_surface, mean_inflow_rate):
 
     labelProperties = labelMapperInlet.GetLabelTextProperty()
     labelProperties.SetFontFamilyToArial()
+    labelProperties.SetFontSize(30)
 
     labelProperties = labelMapper.GetLabelTextProperty()
     labelProperties.SetFontFamilyToArial()
+    labelProperties.SetFontSize(30)
 
     labelsInlet = vtk.vtkActor2D()
     labelsInlet.SetMapper(labelMapperInlet)
@@ -78,7 +80,7 @@ def visualize(network_elements, probe_points, output_surface, mean_inflow_rate):
 
     opacity = 0.3
     renderer.AddActor(DisplayModel().polyDataToActor(output_surface, opacity))
-    renderer.SetBackground(.2, .3, .4)
+    renderer.SetBackground(0.1, 0.1, 0.2)
 
     # Set the lights of the renderer
     DisplayModel().setLight(renderer)

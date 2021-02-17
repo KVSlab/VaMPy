@@ -22,7 +22,7 @@ class VtkPointCloud:
         mapper.SetInputData(self.vtkPolyData)
         self.vtkActor = vtk.vtkActor()
         self.vtkActor.SetMapper(mapper)
-        self.vtkActor.GetProperty().SetPointSize(3.)
+        self.vtkActor.GetProperty().SetPointSize(9.)
         self.vtkActor.GetProperty().SetColor(1., .0, .0)
 
     def addPoint(self, point):
