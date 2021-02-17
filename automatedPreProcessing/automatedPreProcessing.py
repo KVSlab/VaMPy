@@ -14,24 +14,28 @@ from visualize import visualize
 
 
 def run_pre_processing(filename_model, verbose_print, smoothing_method, smoothing_factor, smooth_aneurysm,
-                       meshing_method, aneurysm, create_flow_extensions, viz, config_path, number_of_sac_points,
+                       meshing_method, aneurysm_present, create_flow_extensions, viz, config_path, number_of_sac_points,
                        coarsening_factor, compress_mesh=True):
     """
+    Automatically generate mesh of surface model in .vtu and .xml format, including prescribed
+    flow rates at inlet and outlet based on flow network model.
+
+    Runs simulation of meshed case on a remote ssh server if server configuration is provided.
 
     Args:
-        filename_model:
-        verbose_print:
-        smoothing_method:
-        smoothing_factor:
-        smooth_aneurysm:
-        meshing_method:
-        aneurysm:
-        create_flow_extensions:
-        viz:
-        config_path:
-        number_of_sac_points:
-        coarsening_factor:
-        compress_mesh:
+        filename_model (str): Name of case
+        verbose_print (bool): Toggles verbose mode
+        smoothing_method (str): Method for surface smoothing
+        smoothing_factor (float): Smoothing parameter
+        smooth_aneurysm (bool): Toggles smoothing of aneurysm (if present)
+        meshing_method (str): Method for meshing
+        aneurysm_present (bool): Determines if aneurysm is present
+        create_flow_extensions (bool): Adds flow extensions to mesh if True
+        viz (bool): Visualize resulting surface model with flow rates
+        config_path (str): Path to configuration file for remote simulation
+        number_of_sac_points (int): Number of sac points to evaluate (inside aneurysm)
+        coarsening_factor (float): Refine or coarsen the standard mesh size with given factor
+        compress_mesh (bool): Compresses finalized mesh if True
     """
     # Get paths
     abs_path = path.abspath(path.dirname(__file__))
@@ -66,9 +70,8 @@ def run_pre_processing(filename_model, verbose_print, smoothing_method, smoothin
         print("--- Clipping the models inlet and outlets.\n")
         if not path.isfile(file_name_clipped_model):
             # TODO: Check if this is a valid call to this method
-            centerline = compute_centerlines([], [], None, surface,
-                                             method="pickpoint")
-            surface = uncapp_surface(surface, centerline, filename=None, clipspheres=0)
+            centerline = compute_centerlines([], [], None, surface, method="pickpoint")
+            surface = uncapp_surface(surface, centerline, filename=None)
         else:
             surface = ReadPolyData(file_name_clipped_model)
 
@@ -103,7 +106,7 @@ def run_pre_processing(filename_model, verbose_print, smoothing_method, smoothin
                                       capped_surface, resampling=0.1, endPoint=0)
     tol = get_tolerance(centerlines)
 
-    if aneurysm:
+    if aneurysm_present:
         aneurysms = get_aneurysm_dome(capped_surface, path.join(dir_path, case_name))
         centerlineAnu = compute_centerlines(inlet, aneurysms, file_name_aneurysm_centerlines,
                                             capped_surface, resampling=0.1)
@@ -142,8 +145,8 @@ def run_pre_processing(filename_model, verbose_print, smoothing_method, smoothin
     sac_center = []
     misr_max = []
 
-    if aneurysm:
-        # Merge the sac centerliens
+    if aneurysm_present:
+        # Merge the sac centerline
         sac_centerlines = merge_data(sac_centerline)
 
         for sac in sac_centerline:
@@ -164,13 +167,10 @@ def run_pre_processing(filename_model, verbose_print, smoothing_method, smoothin
 
             # Get smooth Voronoi diagram
             if not path.isfile(file_name_voronoi_smooth):
-                if aneurysm:
-                    smooth_voronoi = SmoothVoronoiDiagram(voronoi, centerlines,
-                                                          smoothing_factor,
-                                                          sac_centerlines)
+                if aneurysm_present:
+                    smooth_voronoi = SmoothVoronoiDiagram(voronoi, centerlines, smoothing_factor, sac_centerlines)
                 else:
-                    smooth_voronoi = SmoothVoronoiDiagram(voronoi, centerlines,
-                                                          smoothing_factor)
+                    smooth_voronoi = SmoothVoronoiDiagram(voronoi, centerlines, smoothing_factor)
 
                 WritePolyData(smooth_voronoi, file_name_voronoi_smooth)
             else:
@@ -189,8 +189,8 @@ def run_pre_processing(filename_model, verbose_print, smoothing_method, smoothin
             if num_outlets != num_outlets_after:
                 surface = vmtkSmoother(surface, "laplace", iterations=200)
                 WritePolyData(surface, file_name_surface_smooth)
-                print(("ERROR: Automatic clipping failed. You have to open {} and " + \
-                       "manually clipp the branch which still is capped. " + \
+                print(("ERROR: Automatic clipping failed. You have to open {} and " +
+                       "manually clipp the branch which still is capped. " +
                        "Overwrite the current {} and restart the script.").format(
                     file_name_surface_smooth, file_name_surface_smooth))
                 sys.exit(0)
@@ -198,7 +198,7 @@ def run_pre_processing(filename_model, verbose_print, smoothing_method, smoothin
             surface = surface_uncapped
 
             # Smoothing to improve the quality of the elements
-            # Consider to add a subdivition here as well.
+            # Consider to add a subdivision here as well.
             surface = vmtkSmoother(surface, "laplace", iterations=200)
 
             # Write surface
@@ -292,20 +292,20 @@ def run_pre_processing(filename_model, verbose_print, smoothing_method, smoothin
     if not path.isfile(file_name_vtu_mesh):
         try:
             print("--- Computing mesh\n")
-            mesh, remeshSurface = generate_mesh(distance_to_sphere)
-            assert remeshSurface.GetNumberOfPoints() > 0, \
+            mesh, remeshed_surface = generate_mesh(distance_to_sphere)
+            assert remeshed_surface.GetNumberOfPoints() > 0, \
                 "No points in surface mesh, try to remesh"
             assert mesh.GetNumberOfPoints() > 0, "No points in mesh, try to remesh"
 
         except:
             distance_to_sphere = mesh_alternative(distance_to_sphere)
-            mesh, remeshSurface = generate_mesh(distance_to_sphere)
+            mesh, remeshed_surface = generate_mesh(distance_to_sphere)
             assert mesh.GetNumberOfPoints() > 0, "No points in mesh, after remeshing"
-            assert remeshSurface.GetNumberOfPoints() > 0, \
+            assert remeshed_surface.GetNumberOfPoints() > 0, \
                 "No points in surface mesh, try to remesh"
 
         # Write mesh in VTU format
-        WritePolyData(remeshSurface, file_name_surface_name)
+        WritePolyData(remeshed_surface, file_name_surface_name)
         WritePolyData(mesh, file_name_vtu_mesh)
 
         # Write mesh to FEniCS to format
@@ -324,8 +324,7 @@ def run_pre_processing(filename_model, verbose_print, smoothing_method, smoothin
     # Set the network object used in the scripts for 
     # boundary conditions and probes.
     network = ImportData.Network()
-    centerlinesBranches = ImportData.SetNetworkStructure(centerlines, network, verbose_print,
-                                                         isConnectivityNeeded=True)
+    centerlinesBranches = ImportData.SetNetworkStructure(centerlines, network, verbose_print)
 
     if not path.isfile(file_name_probe_points):
         # Get the list of coordinates for the probe points along the network centerline.
@@ -353,10 +352,10 @@ def run_pre_processing(filename_model, verbose_print, smoothing_method, smoothin
         #                                np.array(misr_max_center[k][2] + z[i]).tolist()[0]])
 
         print("--- Saving probes points in: ", file_name_probe_points)
-        dataNumpy = np.array(listProbePoints)
-        dataNumpy.dump(file_name_probe_points)
+        probe_points = np.array(listProbePoints)
+        probe_points.dump(file_name_probe_points)
     else:
-        dataNumpy = np.load(file_name_probe_points, allow_pickle=True)
+        probe_points = np.load(file_name_probe_points, allow_pickle=True)
 
     # Set the flow split and inlet boundary condition
     # Compute the outlet boundary condition percentages.
@@ -370,8 +369,7 @@ def run_pre_processing(filename_model, verbose_print, smoothing_method, smoothin
     mean_inflow_rate = 0.27 * parameters["inlet_area"]
 
     # Extract the surface mesh of the wall
-    wallMesh = threshold(polyDataVolMesh, "CellEntityIds", lower=0.5, upper=1.5,
-                         type="between", source=1)
+    wallMesh = threshold(polyDataVolMesh, "CellEntityIds", lower=0.5, upper=1.5)
 
     boundaryReferenceSystems = vmtkscripts.vmtkBoundaryReferenceSystems()
     boundaryReferenceSystems.Surface = wallMesh
@@ -381,8 +379,7 @@ def run_pre_processing(filename_model, verbose_print, smoothing_method, smoothin
     refSystem.GetPointData().AddArray(cellEntityIdsArray)
 
     # Extract the surface mesh of the end caps
-    boundarySurface = threshold(polyDataVolMesh, "CellEntityIds", upper=1.5,
-                                type="upper", source=1)
+    boundarySurface = threshold(polyDataVolMesh, "CellEntityIds", upper=1.5, type="upper")
 
     pointCells = vtk.vtkIdList()
     surfaceCellEntityIdsArray = vtk.vtkIntArray()
@@ -434,9 +431,9 @@ def run_pre_processing(filename_model, verbose_print, smoothing_method, smoothin
         outfile.write('\nidFileLine: ' + str(idFileLine))
         outfile.write('\nareaRatioLine: ' + str(areaRatioLine))
 
-    # Display the flow split at the outlets, inlet flowrate, and probes.
+    # Display the flow split at the outlets, inlet flow rate, and probes.
     if viz:
-        visualize(network.elements, dataNumpy, surface, mean_inflow_rate)
+        visualize(network.elements, probe_points, surface, mean_inflow_rate)
 
     # Start simulation though ssh, without password
     if config_path is not None:
@@ -462,6 +459,15 @@ def run_pre_processing(filename_model, verbose_print, smoothing_method, smoothin
 
 
 def str2bool(arg):
+    """
+    Convert a string to boolean.
+
+    Args:
+        arg (str): Input string.
+
+    Returns:
+        return (bool): Converted string.
+    """
     if arg.lower() in ('yes', 'true', 't', 'y', '1'):
         return True
     elif arg.lower() in ('no', 'false', 'f', 'n', '0'):
@@ -476,7 +482,7 @@ def read_command_line():
     """
     '''Command-line arguments.'''
     parser = argparse.ArgumentParser(
-        description="Autom. Pre-processing for FEniCS.")
+        description="Automatic pre-processing for FEniCS.")
 
     parser.add_argument('-v', '--verbosity',
                         dest='verbosity',
@@ -497,8 +503,8 @@ def read_command_line():
                         dest='smoothingMethod',
                         default="no_smooth",
                         choices=["voronoi", "no_smooth", "laplace", "taubin"],
-                        help="Smoothing method, for now only Voronoi smoothing is avaleble." + \
-                             " For Voronoi smoothing you can also controll smoothingFactor" + \
+                        help="Smoothing method, for now only Voronoi smoothing is available." +
+                             " For Voronoi smoothing you can also control smoothingFactor" +
                              " (default = 0.25)  and smoothingAneurysm (default = False).")
 
     parser.add_argument('-c', '--coarseningFactor',
@@ -513,14 +519,14 @@ def read_command_line():
                         required=False,
                         dest='smoothingFactor',
                         default=0.25,
-                        help="smoothingFactor for VoronoiSmoothing, removes all spheres which" + \
-                             " has a radious < MISR*(1-0.25), where MISR varying along the centerline.")
+                        help="smoothingFactor for VoronoiSmoothing, removes all spheres which" +
+                             " has a radius < MISR*(1-0.25), where MISR varying along the centerline.")
 
     parser.add_argument('-sA', '--smoothAneurysm',
                         type=str2bool,
                         required=False,
                         dest="smoothingAneurysm",
-                        help="When using Voronoi smoothing one can choose not to smooth the" + \
+                        help="When using Voronoi smoothing one can choose not to smooth the" +
                              " aneurysm as this method often removes to much of the aneurysm")
 
     parser.add_argument('-m', '--meshingMethod',
@@ -533,7 +539,7 @@ def read_command_line():
                         dest="aneu",
                         type=str2bool,
                         default=True,
-                        help="Determine wether or not the model has a aneurysm. Default is False.")
+                        help="Determine weather or not the model has a aneurysm. Default is False.")
 
     parser.add_argument('-f', '--flowext',
                         dest="fext",
@@ -545,7 +551,7 @@ def read_command_line():
                         dest="viz",
                         default=True,
                         type=str2bool,
-                        help="Visualize surface, inlet, outlet and propes after meshing.")
+                        help="Visualize surface, inlet, outlet and probes after meshing.")
 
     parser.add_argument('-sp', '--sacpoints',
                         type=int,
@@ -557,7 +563,7 @@ def read_command_line():
                         type=str,
                         dest="config",
                         default=None,
-                        help='Path to configuration file for remote simulation. ' + \
+                        help='Path to configuration file for remote simulation. ' +
                              'See example/ssh_config.json for details')
 
     args, _ = parser.parse_known_args()
@@ -566,19 +572,20 @@ def read_command_line():
         print()
         print("--- VERBOSE MODE ACTIVATED ---")
 
-        def verboseprint(*args):
+        def verbose_print(*args):
             for arg in args:
                 print(arg, end=' ')
                 print()
     else:
-        verboseprint = lambda *a: None
+        verbose_print = lambda *a: None
 
-    verboseprint(args)
+    verbose_print(args)
 
-    return dict(filename_model=args.fileNameModel, verbose_print=verboseprint, smoothing_method=args.smoothingMethod,
+    return dict(filename_model=args.fileNameModel, verbose_print=verbose_print, smoothing_method=args.smoothingMethod,
                 smoothing_factor=args.smoothingFactor, smooth_aneurysm=args.smoothingAneurysm,
-                meshing_method=args.meshingMethod, aneurysm=args.aneu, create_flow_extensions=args.fext, viz=args.viz,
-                config_path=args.config, number_of_sac_points=args.sacpts, coarsening_factor=args.coarseningFactor)
+                meshing_method=args.meshingMethod, aneurysm_present=args.aneu, create_flow_extensions=args.fext,
+                viz=args.viz, config_path=args.config, number_of_sac_points=args.sacpts,
+                coarsening_factor=args.coarseningFactor)
 
 
 if __name__ == "__main__":

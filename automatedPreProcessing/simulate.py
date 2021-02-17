@@ -8,7 +8,8 @@ import paramiko
 
 
 def exists(sftp, path):
-    """os.path.exists for paramiko's SCP object
+    """
+    os.path.exists for paramiko's SCP object
     """
     try:
         sftp.stat(path)
@@ -19,7 +20,16 @@ def exists(sftp, path):
         return True
 
 
-def run_simulation(config_path, localDir, caseName):
+def run_simulation(config_path, local_dir, case_name):
+    """
+    Run simulation of case on a remote ssh server with
+    given input configuration.
+
+    Args:
+        config_path (str): Path to configuration file
+        local_dir (str): Path to case folder
+        case_name (str): Case name
+    """
     client = paramiko.SSHClient()
     client.load_system_host_keys()
 
@@ -43,28 +53,28 @@ def run_simulation(config_path, localDir, caseName):
 
     # Uplad run script
     sftp.chdir(os.path.join(remote_folder))
-    if not exists(sftp, caseName + ".sh"):
-        sftp.put(os.path.join(localDir, caseName + ".sh"), caseName + ".sh")
+    if not exists(sftp, case_name + ".sh"):
+        sftp.put(os.path.join(local_dir, case_name + ".sh"), case_name + ".sh")
 
     # Upload mesh 
     sftp.chdir(os.path.join(remote_folder, "mesh"))
-    if not exists(sftp, caseName + ".xml.gz"):
-        sftp.put(os.path.join(localDir, caseName + ".xml.gz"), caseName + ".xml.gz")
+    if not exists(sftp, case_name + ".xml.gz"):
+        sftp.put(os.path.join(local_dir, case_name + ".xml.gz"), case_name + ".xml.gz")
 
     # Upload probe points and info
     sftp.chdir(os.path.join(remote_folder, "input"))
-    if not exists(sftp, caseName + "_probe_point"):
-        sftp.put(os.path.join(localDir, caseName + "_probe_point"), caseName + "_probe_point")
-    if not exists(sftp, caseName + ".txt"):
-        sftp.put(os.path.join(localDir, caseName + ".txt"), caseName + ".txt")
+    if not exists(sftp, case_name + "_probe_point"):
+        sftp.put(os.path.join(local_dir, case_name + "_probe_point"), case_name + "_probe_point")
+    if not exists(sftp, case_name + ".txt"):
+        sftp.put(os.path.join(local_dir, case_name + ".txt"), case_name + ".txt")
 
-    if not exists(sftp, os.path.join(remote_folder, "results", caseName)):
-        sftp.mkdir(os.path.join(remote_folder, "results", caseName))
+    if not exists(sftp, os.path.join(remote_folder, "results", case_name)):
+        sftp.mkdir(os.path.join(remote_folder, "results", case_name))
 
     sftp.close()
 
     # Run script
-    script_path = os.path.join(remote_folder, caseName + ".sh")
+    script_path = os.path.join(remote_folder, case_name + ".sh")
     stdin, stdout, stderr = client.exec_command(os.path.join(remote_folder, 'run.sh {}'.format(script_path)))
 
     for msg in stdout:

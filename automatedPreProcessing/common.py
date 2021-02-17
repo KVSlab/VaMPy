@@ -40,7 +40,17 @@ version = vtk.vtkVersion().GetVTKMajorVersion()
 
 
 def ReadPolyData(filename):
-    """Load the given file, and return a vtkPolyData object for it. """
+    """
+    Load the given file, and return a vtkPolyData object for it.
+
+    Args:
+        filename (str): Path to input file.
+
+    Returns:
+        polyData (vtkSTL/vtkPolyData/vtkXMLStructured/
+                    vtkXMLRectilinear/vtkXMLPolydata/vtkXMLUnstructured/
+                    vtkXMLImage/Tecplot): Output data.
+    """
 
     # Check if file exists
     if not path.exists(filename):
@@ -82,7 +92,16 @@ def ReadPolyData(filename):
 
 
 def WritePolyData(input_data, filename):
-    """Write the given input data based on the file name extension"""
+    """
+    Write the given input data based on the file name extension.
+
+    Args:
+        input_data (vtkSTL/vtkPolyData/vtkXMLStructured/
+                    vtkXMLRectilinear/vtkXMLPolydata/vtkXMLUnstructured/
+                    vtkXMLImage/Tecplot): Input data.
+        filename (str): Save path location.
+    """
+
     # Check filename format
     fileType = filename.split(".")[-1]
     if fileType == '':
@@ -213,14 +232,14 @@ def WriteTecplotSurfaceFile(surface, filename):
         array = surface.GetPointData().GetArray(i)
         arrayName = array.GetName()
 
-        if arrayName == None:
+        if arrayName is None:
             continue
-        if (arrayName[-1] == '_'):
+        if arrayName[-1] == '_':
             continue
 
         arrayNames.append(arrayName)
 
-        if (array.GetNumberOfComponents() == 1):
+        if array.GetNumberOfComponents() == 1:
             line = line + ',' + arrayName
         else:
             for j in range(array.GetNumberOfComponents()):
@@ -235,7 +254,7 @@ def WriteTecplotSurfaceFile(surface, filename):
             str(surface.GetNumberOfCells()))
     f.write(line)
 
-    # Write coordintes and array
+    # Write coordinates and array
     for i in range(surface.GetNumberOfPoints()):
         point = surface.GetPoint(i)
         line = " ".join(point)
@@ -246,12 +265,12 @@ def WriteTecplotSurfaceFile(surface, filename):
         line = line + '\n'
         f.write(line)
 
-    # Write conectivity(?) and ids
+    # Write connectivity and ids
     for i in range(surface.GetNumberOfCells()):
         cellPointIds = surface.GetCell(i).GetPointIds()
         line = ''
         for j in range(cellPointIds.GetNumberOfIds()):
-            if (j > 0):
+            if j > 0:
                 line = line + ' '
             line = line + str(cellPointIds.GetId(j) + 1)
         line = line + '\n'
@@ -259,6 +278,19 @@ def WriteTecplotSurfaceFile(surface, filename):
 
 
 def uncapp_surface(surface, centerlines, filename, clipspheres=0):
+    """
+    A method for removing endcapps on a surface. The method considers the centerline
+    of the surface model and clips the endcaps a distance of clipspheres * MISR away from the edge.
+
+    Args:
+        surface (vtkPolyData): Surface to be uncapped.
+        centerlines (vtkPolyData): Centerlines in surface model
+        filename (str): Filename to write uncapped model to
+        clipspheres (int): Number of MISR to clip model
+
+    Returns:
+        surface (vtkPolyData): The uncapped surface.
+    """
     extractor = vmtkscripts.vmtkEndpointExtractor()
     extractor.Centerlines = centerlines
     extractor.RadiusArrayName = radiusArrayName
@@ -294,7 +326,6 @@ def get_teams(dirpath):
     teams = []
     for folder in files:
         try:
-            a = int(folder)
             teams.append(path.join(dirpath, folder))
         except:
             pass
@@ -304,6 +335,16 @@ def get_teams(dirpath):
 
 
 def makeVoronoiDiagram(surface, file_path):
+    """
+    Compute the voronoi diagram of surface model.
+
+    Args:
+        surface (polydata): Capped surface model to create a Voronoi diagram of.
+        file_path (str): Absolute path to surface model path.
+
+    Returns:
+        voronoi (vtkPolyData): Voronoi diagram of surface.
+    """
     if path.isfile(file_path):
         return ReadPolyData(file_path)
 
@@ -331,18 +372,41 @@ def write_spheres(points, dirpath, radius=None, name="sphere%s.vtp", base=0.2):
 
 
 def get_tolerance(centerline):
+    """
+    Finds tolerance based on average length between first N points along the input centerline.
+
+    Args:
+        centerline (vtkPolyData): Centerline data.
+
+    Returns:
+        tolerance (float): Tolerance value.
+    """
     line = ExtractSingleLine(centerline, 0)
     length = get_curvilinear_coordinate(line)
 
     return np.mean(length[1:] - length[:-1]) / divergingRatioToSpacingTolerance
 
 
-def getRelevantOutlets(aneurysm_type, centerline, centerline_aneurysm, dirpath):
-    parameters = get_parameters(dirpath)
+def getRelevantOutlets(aneurysm_type, centerline, centerline_aneurysm, dir_path):
+    """
+    Extract relevant outlets of the
+    input surface model.
+
+    Args:
+        aneurysm_type (bool): Type of aneurysm, saccular of terminal
+        centerline_aneurysm (vtkPolyData): Centerline into aneurysm
+        centerline (vtkPolyData): Surface model centerline.
+        dir_path (str): Location of info-file.
+
+    Returns:
+        relevant_outlets (list): List of relevant outlet IDs.
+    """
+
+    parameters = get_parameters(dir_path)
     if "relevant_outlet_0" in parameters.keys():
         return parameters["relevant_outlet_0"], parameters["relevant_outlet_1"]
 
-    N_aneurysm = centerline_aneurysm.GetNumberOfPoints()
+    n_aneurysm = centerline_aneurysm.GetNumberOfPoints()
     tol = get_tolerance(centerline)
     div_anu = []
     aneurysm = centerline_aneurysm.GetCell(0)
@@ -351,7 +415,7 @@ def getRelevantOutlets(aneurysm_type, centerline, centerline_aneurysm, dirpath):
     for j in range(centerline.GetNumberOfCells()):
         line = centerline.GetCell(j)
         get_point_line = line.GetPoints().GetPoint
-        for i in range(min(N_aneurysm, line.GetNumberOfPoints())):
+        for i in range(min(n_aneurysm, line.GetNumberOfPoints())):
             point0 = get_point(i)
             point1 = get_point_line(i)
 
@@ -384,16 +448,29 @@ def getRelevantOutlets(aneurysm_type, centerline, centerline_aneurysm, dirpath):
     for i, e in enumerate([endpoint1, endpoint2]):
         data["relevant_outlet_%d" % i] = e
 
-    write_parameters(data, dirpath)
+    write_parameters(data, dir_path)
 
     return endpoint1, endpoint2
 
 
-def SmoothVoronoiDiagram(voronoi, centerlines, smoothingFactor,
-                         no_smooth_cl=None):
+def SmoothVoronoiDiagram(voronoi, centerlines, smoothing_factor, no_smooth_cl=None):
+    """
+    Smooth voronoi diagram based on a given smoothing factor. Each voronoi point
+    that has a radius less then MISR*(1-smoothingFactor) at the closest centerline point is removed.
+
+    Args:
+        voronoi (vtkPolyData): Voronoi diagram to be smoothed.
+        centerlines (vtkPolyData): Centerline data.
+        smoothing_factor (float): Smoothing factor: remove points with radius below (1-smoothing_factor)*MISR
+        no_smooth_cl (vktPolyData): Section of centerline not to smooth along.
+
+    Returns:
+        smoothedDiagram (vtkPolyData): Smoothed voronoi diagram.
+    """
+
     numberOfPoints = voronoi.GetNumberOfPoints()
 
-    threshold = get_array(radiusArrayName, centerlines) * (1 - smoothingFactor)
+    threshold = get_array(radiusArrayName, centerlines) * (1 - smoothing_factor)
     locator = get_locator(centerlines)
     if no_smooth_cl is not None:
         no_locator = get_locator(no_smooth_cl)
@@ -456,6 +533,17 @@ def SmoothVoronoiDiagram(voronoi, centerlines, smoothingFactor,
 
 
 def get_curvilinear_coordinate(line):
+    """
+    Get curvilinear coordinates along
+    an input centerline.
+
+    Args:
+        line (vtkPolyData): Input centerline
+
+    Returns:
+        curv_coor (ndarray): Array of abscissa points.
+    """
+
     curv_coor = np.zeros(line.GetNumberOfPoints())
     for i in range(line.GetNumberOfPoints() - 1):
         pnt1 = np.asarray(line.GetPoints().GetPoint(i))
@@ -466,6 +554,16 @@ def get_curvilinear_coordinate(line):
 
 
 def merge_data(inputs):
+    """
+    Appends one or more polygonal dataset together into a single
+    polygonal dataset.
+
+    Args:
+        inputs (list): List of vtkPolyData objects.
+
+    Returns:
+        merged_data (vtkPolyData): Single polygonal dataset.
+    """
     appendFilter = vtk.vtkAppendPolyData()
     for input_ in inputs:
         appendFilter.AddInputData(input_)
@@ -474,14 +572,26 @@ def merge_data(inputs):
     return appendFilter.GetOutput()
 
 
-def get_array(arrayName, line, k=1):
+def get_array(array_name, line, k=1):
+    """
+    Get data array from polydata object (PointData).
+
+    Args:
+        array_name (str): Name of array.
+        line (vtkPolyData): Centerline object.
+        k (int): Dimension.
+
+    Returns:
+        array (ndarray): Array containing data points.
+    """
+
     array = np.zeros((line.GetNumberOfPoints(), k))
     if k == 1:
-        getData = line.GetPointData().GetArray(arrayName).GetTuple1
+        getData = line.GetPointData().GetArray(array_name).GetTuple1
     elif k == 2:
-        getData = line.GetPointData().GetArray(arrayName).GetTuple2
+        getData = line.GetPointData().GetArray(array_name).GetTuple2
     elif k == 3:
-        getData = line.GetPointData().GetArray(arrayName).GetTuple3
+        getData = line.GetPointData().GetArray(array_name).GetTuple3
 
     for i in range(line.GetNumberOfPoints()):
         array[i, :] = getData(i)
@@ -489,16 +599,27 @@ def get_array(arrayName, line, k=1):
     return array
 
 
-def get_array_cell(arrayName, line, k=1):
+def get_array_cell(array_name, line, k=1):
+    """
+    Get cell data array from polydata object (CellData).
+
+    Args:
+        array_name (str): Name of array.
+        line (vtkPolyData): Centerline object.
+        k (int): Dimension.
+
+    Returns:
+        array (ndarray): Array containing data points.
+    """
     array = np.zeros((line.GetNumberOfCells(), k))
     if k == 1:
-        getData = line.GetCellData().GetArray(arrayName).GetTuple1
+        getData = line.GetCellData().GetArray(array_name).GetTuple1
     elif k == 2:
-        getData = line.GetCellData().GetArray(arrayName).GetTuple2
+        getData = line.GetCellData().GetArray(array_name).GetTuple2
     elif k == 3:
-        getData = line.GetCellData().GetArray(arrayName).GetTuple3
+        getData = line.GetCellData().GetArray(array_name).GetTuple3
     elif k == 9:
-        getData = line.GetCellData().GetArray(arrayName).GetTuple9
+        getData = line.GetCellData().GetArray(array_name).GetTuple9
 
     for i in range(line.GetNumberOfCells()):
         array[i, :] = getData(i)
@@ -508,16 +629,28 @@ def get_array_cell(arrayName, line, k=1):
 
 # TODO: Get bounds and compute polyballs based on that
 #       bounds = surface.GetBounds()
-def create_new_surface(completeVoronoiDiagram, polyBallImageSize=[280, 280, 280]):
+def create_new_surface(complete_voronoi_diagram, poly_ball_image_size=[280, 280, 280]):
+    """
+    Envelops an input voronoi diagram into a new surface model at a
+    given resolution determined by the poly_ball_size.
+
+    Args:
+        complete_voronoi_diagram (vtkPolyData): Voronoi diagram
+        poly_ball_image_size (list): List of dimensional resolution of output model
+
+    Returns:
+        envelope (vtkPolyData): Enveloped surface model.
+    """
+
     # Get the x,y, and z range of the completeVoronoiDiagram
     modeller = vtkvmtk.vtkvmtkPolyBallModeller()
     if version < 6:
-        modeller.SetInput(completeVoronoiDiagram)
+        modeller.SetInput(complete_voronoi_diagram)
     else:
-        modeller.SetInputData(completeVoronoiDiagram)
+        modeller.SetInputData(complete_voronoi_diagram)
     modeller.SetRadiusArrayName(radiusArrayName)
     modeller.UsePolyBallLineOff()
-    modeller.SetSampleDimensions(polyBallImageSize)
+    modeller.SetSampleDimensions(poly_ball_image_size)
     modeller.Update()
 
     # Write the new surface
@@ -567,6 +700,16 @@ def centerline_div(centerline1, centerline2, tol):
 
 
 def provide_aneurysm_points(surface, dir_path=None):
+    """
+    Get relevant aneurysm points from user selected points on a input surface.
+
+    Args:
+        surface (vtkPolyData): Surface model.
+        dir_path (str): Location of info.json file
+
+    Returns:
+        points (list): List of relevant outlet IDs
+    """
     # Fix surface
     cleaned_surface = surface_cleaner(surface)
     triangulated_surface = triangulate_surface(cleaned_surface)
@@ -591,7 +734,21 @@ def provide_aneurysm_points(surface, dir_path=None):
 
 
 def getData(centerline_par, centerline_dau1, centerline_dau2, tol, aneurysm_type):
-    # Declear variables before loop if values are not found
+    """
+    Get info about bifurcating points and diverging points within a bifurcation.
+    End points are set based on the MISR at the selected points.
+
+    Args:
+        aneurysm_type (str): Type of aneurysm, saccular or terminal
+        centerline_dau1 (vtkPolyData): Centerline from inlet to relevant outlet 1.
+        centerline_dau2 (vtkPolyData): Centerline from inlet to relevant outlet 2.
+        centerline_par(vtkPolyData): Centerline through bifurcation.
+        tol (float): Tolerance parameter.
+
+    Returns:
+        data (dict): Contains info about diverging point locations.
+    """
+    # Declare variables before loop if values are not found
     data = {"dau1": {}, "dau2": {}}
 
     # List of points conected to ID
@@ -640,6 +797,13 @@ def getData(centerline_par, centerline_dau1, centerline_dau2, tol, aneurysm_type
 
 
 def write_points(points, filename):
+    """
+    Writes input points to file.
+
+    Args:
+        points (vtkPolyData): Point data.
+        filename (str): Save location.
+    """
     pointSet = vtk.vtkPolyData()
     cellArray = vtk.vtkCellArray()
 
@@ -654,7 +818,17 @@ def write_points(points, filename):
 
 
 def surface_cleaner(surface):
-    "Clean surface"
+    """
+    Clean surface by merging duplicate points, and/or
+    removing unused points and/or removing degenerate cells.
+
+    Args:
+        surface (vtkPolyData): Surface model.
+
+    Returns:
+        cleanedSurface (vtkPolyData): Cleaned surface model.
+    """
+
     surfaceCleaner = vtk.vtkCleanPolyData()
     if version < 6:
         surfaceCleaner.SetInput(surface)
@@ -666,6 +840,19 @@ def surface_cleaner(surface):
 
 
 def get_centers(surface, dir_path, flowext=False):
+    """
+    Get the centers of the inlet and outlets.
+
+    Args:
+        surface (vtkPolyData): An open surface.
+        dir_path (str): Path to the case file.
+        flowext (bool): Turn on/off flow extension.
+
+    Returns:
+        inlet (list): A flatt list with the point of the inlet
+        outlet (list): A flatt list with the points of all the outlets.
+    """
+
     # Check if info exists
     if flowext or not path.isfile(path.join(dir_path, dir_path + ".txt")):
         compute_centers(surface, dir_path)
@@ -693,7 +880,15 @@ def get_centers(surface, dir_path, flowext=False):
 
 
 def triangulate_surface(surface):
-    """Triangulate surface or polygon(?)"""
+    """
+    Wrapper for vtkTriangleFilter.
+
+    Args:
+        surface (vtkPolyData): Surface to triangulate.
+    Returns:
+        surface (vtkPolyData): Triangulated surface.
+    """
+
     surfaceTriangulator = vtk.vtkTriangleFilter()
     if version < 6:
         surfaceTriangulator.SetInput(surface)
@@ -720,6 +915,21 @@ def geometryFilter(unstructured_grid):
 
 
 def threshold(surface, name, lower=0, upper=1, type="between", source=1):
+    """
+    Wrapper for vtkThreshold. Extract a section of a surface given a criteria.
+
+    Args:
+        surface (vtkPolyData): The input data to be extracted.
+        name (str): Name of scalar array.
+        lower (float): Lower bound.
+        upper (float): Upper bound.
+        type (str): Type of threshold (lower, upper, between)
+        source (int): PointData or CellData.
+
+    Returns:
+        surface (vtkPolyData): The extracted surface based on the lower and upper limit.
+    """
+
     # source = 1 uses cell data as input
     # source = 0 uses point data as input
 
@@ -751,7 +961,15 @@ def threshold(surface, name, lower=0, upper=1, type="between", source=1):
 
 
 def compute_area(surface):
-    "Compute area of polydata"
+    """
+    Calculate the area from the given polydata
+
+    Args:
+        surface (vtkPolyData): Surface to compute are off
+
+    Returns:
+        area (float): Area of the input surface
+    """
     mass = vtk.vtkMassProperties()
     if version < 6:
         mass.SetInput(surface)
@@ -761,118 +979,6 @@ def compute_area(surface):
     return mass.GetSurfaceArea()
 
 
-def uncapp_surface_old(surface):
-    # Add-hoc method for removing capps on surfaces
-    # This could proboly be highly improved, but is sufficient for now.
-
-    # Get cell normals
-    normal_generator = vtk.vtkPolyDataNormals()
-    if version < 6:
-        normal_generator.SetInput(surface)
-    else:
-        normal_generator.SetInputData(surface)
-    normal_generator.ComputePointNormalsOff()
-    normal_generator.ComputeCellNormalsOn()
-    normal_generator.Update()
-    cell_normals = normal_generator.GetOutput()
-
-    # Compute gradients of the normals
-    gradients_generator = vtk.vtkGradientFilter()
-    if version < 6:
-        gradients_generator.SetInput(cell_normals)
-    else:
-        gradients_generator.SetInputData(cell_normals)
-    gradients_generator.SetInputArrayToProcess(0, 0, 0, 1, "Normals")
-    gradients_generator.Update()
-    gradients = gradients_generator.GetOutput()
-
-    # Compute the magnitude of the gradient
-    gradients_array = get_array_cell("Gradients", gradients, k=9)
-    gradients_magnitude = np.sqrt(np.sum(gradients_array ** 2, axis=1))
-
-    # Mark all cells with a gradient magnitude less then 0.1
-    end_capp_array = gradients_magnitude < 0.08
-    end_capp_vtk = get_vtk_array("Gradients_mag", 1, end_capp_array.shape[0])
-    for i, p in enumerate(end_capp_array):
-        end_capp_vtk.SetTuple(i, [p])
-    gradients.GetCellData().AddArray(end_capp_vtk)
-
-    # Extract capps
-    end_capps = threshold(gradients, "Gradients_mag", lower=0.5, upper=1.5,
-                          type="between", source=1)
-
-    # Get connectivity
-    end_capps_connectivity = getConnectivity(end_capps)
-    region_array = get_array("RegionId", end_capps_connectivity)
-
-    # Compute area for each region
-    area = []
-    circleness = []
-    regions = []
-    centers_edge = []
-    limit = 0.1
-    for i in range(int(region_array.max()) + 1):
-        regions.append(threshold(end_capps_connectivity, "RegionId", lower=(i - limit),
-                                 upper=(i + limit), type="between", source=0))
-        circ, center = computeCircleness(regions[-1])
-        circleness.append(circ)
-        centers_edge.append(center)
-        area.append(compute_area(regions[-1]))
-
-    # Only keep outlets with circleness < 3 and area > 0.3 mm^2
-    circleness_IDs = np.where(np.array(circleness) < 3)
-    region_IDs = np.where(np.array(area) > 0.3)
-    regions = [regions[i] for i in region_IDs[0] if i in circleness_IDs[0]]
-    centers_edge = [centers_edge[i] for i in region_IDs[0] if i in circleness_IDs[0]]
-
-    # Mark the outlets on the original surface
-    mark_outlets = create_vtk_array(np.zeros(surface.GetNumberOfCells()), "outlets", k=1)
-    locator = get_locator_cell(surface)
-    tmp_center = [0, 0, 0]
-    for region in regions:
-        centers_filter = vtk.vtkCellCenters()
-        if version < 6:
-            centers_filter.SetInput(region)
-        else:
-            centers_filter.SetInputData(region)
-        centers_filter.VertexCellsOn()
-        centers_filter.Update()
-        centers = centers_filter.GetOutput()
-
-        for i in range(centers.GetNumberOfPoints()):
-            centers.GetPoint(i, tmp_center)
-            p = [0, 0, 0]
-            cellId = vtk.mutable(0)
-            subId = vtk.mutable(0)
-            dist = vtk.mutable(0)
-            locator.FindClosestPoint(tmp_center, p, cellId, subId, dist)
-            mark_outlets.SetTuple(cellId, [1])
-
-    surface.GetCellData().AddArray(mark_outlets)
-
-    # Remove the outlets from the original surface
-    uncapped_surface = threshold(surface, "outlets", lower=0, upper=0.5,
-                                 type="between", source=1)
-
-    # Check if some cells where not marked
-    remove = True
-    while remove:
-        locator = get_locator_cell(uncapped_surface)
-        mark_outlets = create_vtk_array(np.zeros(uncapped_surface.GetNumberOfCells()), "outlets", k=1)
-        remove = False
-        for center in centers_edge:
-            locator.FindClosestPoint(center, p, cellId, subId, dist)
-            if dist < 0.01:
-                remove = True
-                mark_outlets.SetTuple(cellId, [1])
-
-        uncapped_surface.GetCellData().AddArray(mark_outlets)
-
-        if remove:
-            uncapped_surface = threshold(uncapped_surface, "outlets", lower=0,
-                                         upper=0.5, type="between", source=1)
-
-    return uncapped_surface
 
 
 def capp_surface(surface):
