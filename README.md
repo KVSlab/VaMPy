@@ -3,7 +3,7 @@
 [![codecov](https://codecov.io/gh/KVSlab/Aneurysm_workflow/branch/master/graph/badge.svg?token=M2NMX6HOSZ)](https://codecov.io/gh/KVSlab/Aneurysm_workflow)
 
 <p align="center">
-    <img src="https://raw.githubusercontent.com/KVSlab/Aneurysm_worklow/master/test/processed_model.png" width="640 height="280" alt="Output pre processing"/>
+    <img src=test/processed_model.png width="640 height="280" alt="Output pre processing"/>
 </p>
 <p align="center">
     Meshed aneurysm model showing inlet flow rate, outlet flow split, and probes.
