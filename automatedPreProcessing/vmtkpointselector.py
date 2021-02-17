@@ -93,8 +93,6 @@ class vmtkPickPointSeedSelector(vmtkSeedSelector):
             self.vmtkRenderer.Initialize()
             self.OwnRenderer = 1
 
-        # self.vmtkRenderer.RegisterScript(self.Script)
-
         glyphs = vtk.vtkGlyph3D()
         glyphSource = vtk.vtkSphereSource()
         if version < 6:
@@ -102,7 +100,6 @@ class vmtkPickPointSeedSelector(vmtkSeedSelector):
             glyphs.SetSource(glyphSource.GetOutput())
         else:
             glyphs.SetInputData(self.PickedSeeds)
-            # glyphs.SetSourceData(glyphSource.GetOutput())
             glyphs.SetSourceConnection(glyphSource.GetOutputPort())
 
         glyphs.SetScaleModeToDataScalingOff()

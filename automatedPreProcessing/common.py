@@ -36,12 +36,11 @@ phiValues = [float(i) for i in range(2, 43, 2)]
 thetaStep = 2.0
 
 # Shortcuts
-# distance = vtk.vtkMath.Distance2BetweenPoints
 version = vtk.vtkVersion().GetVTKMajorVersion()
 
 
 def ReadPolyData(filename):
-    '''Load the given file, and return a vtkPolyData object for it. '''
+    """Load the given file, and return a vtkPolyData object for it. """
 
     # Check if file exists
     if not path.exists(filename):
@@ -664,7 +663,6 @@ def surface_cleaner(surface):
     surfaceCleaner.Update()
 
     return surfaceCleaner.GetOutput()
-
 
 
 def get_centers(surface, dir_path, flowext=False):

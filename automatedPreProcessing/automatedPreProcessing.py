@@ -8,7 +8,7 @@ import ImportData
 import ToolRepairSTL
 from NetworkBoundaryConditions import FlowSplitting
 # Local imports
-from set_aneurysm import *
+from common import *
 from simulate import run_simulation
 from visualize import visualize
 

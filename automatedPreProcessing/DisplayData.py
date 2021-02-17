@@ -48,7 +48,6 @@ class VtkText:
         self.text = vtk.vtkTextActor()
         self.text.SetInputData(guiText)
         textProperties = self.text.GetTextProperty()
-        # textProperties.SetFontFamilyToArial()
         textProperties.SetFontSize(15)
         textProperties.SetColor(1, 1, 1)
         self.text.SetDisplayPosition(20, 30)
@@ -57,8 +56,8 @@ class VtkText:
 class DisplayModel(object):
 
     def polyDataToActor(self, polyData, opacity=1.0):
-        '''Wrap the provided vtkPolyData object in a mapper and an actor, 
-        returning the actor. '''
+        """Wrap the provided vtkPolyData object in a mapper and an actor,
+        returning the actor. """
         mapper = vtk.vtkPolyDataMapper()
         if vtk.VTK_MAJOR_VERSION > 5:
             mapper.SetInputData(polyData)
@@ -108,8 +107,8 @@ class DisplayModel(object):
 
     def DisplayProbesAndModel(self, centerline, fileNameCenterline,
                               listProbePoints, model=None):
-        '''Displays a model and the corresponding probe points along 
-        the centerline. '''
+        """Displays a model and the corresponding probe points along
+        the centerline. """
 
         if model is None:
             isDisplayingModel = False

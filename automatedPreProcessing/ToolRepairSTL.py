@@ -82,7 +82,7 @@ def foundAndDeleteNaNTriangles(mesh):
     if ctrNaN > 0:
         foundNaN = True
 
-    return (foundNaN)
+    return foundNaN
 
 
 def cleanTheSurface(mesh):
@@ -92,13 +92,11 @@ def cleanTheSurface(mesh):
         cleanPolyData.SetInput(mesh)
     else:
         cleanPolyData.SetInputData(mesh)
-    # cleanPolyData.PointMergingOn()
     cleanPolyData.PointMergingOff()  # point locator will not be used, and points
     # that are not used by any cells will be eliminated,
     # but never merged.
-    # cleanPolyData.PieceInvariantOn()
-    # cleanPolyData.ConvertStripsToPolysOff()
-    # In VTK the tolerance is defined as a fraction 
+
+    # In VTK the tolerance is defined as a fraction
     # of the bounding box length.
     tol = 0.0  # 0.0005
     cleanPolyData.SetTolerance(tol)
@@ -124,7 +122,6 @@ def closeAllTheHolesOnTheSurface(mesh):
     fillHolesFilter.Update()
 
     outputPolyData = fillHolesFilter.GetOutput()
-    # outputPolyData.Update()
     print("> Done.")
     print("> ")
 
@@ -180,7 +177,6 @@ def checkIfThereIsNonTriangleCells(outputBisPolyData):
     ctr = 0
     for i in range(0, outputBisPolyData.GetNumberOfCells()):
         if outputBisPolyData.GetCellType(i) != 5:
-            # print outputBisPolyData.GetCellType(i)
             ctr += 1
     if ctr > 0:
         print("> ERROR: There are elements that are not triangles")

@@ -22,7 +22,7 @@ SECTIONARRAYNAME = 'CenterlineSectionArea'
 
 
 def loadFile(fileName):
-    '''Load the given file, and return a vtkPolyData object for it. '''
+    """Load the given file, and return a vtkPolyData object for it. """
     fileType = fileName[-3:]
     if fileType == '':
         raise RuntimeError('The file does not have an extension')
@@ -41,7 +41,7 @@ def loadFile(fileName):
     reader.Update()
     polyData = reader.GetOutput()
 
-    return (polyData)
+    return polyData
 
 
 def GetMaxGroupId(centerline):
@@ -52,7 +52,7 @@ def GetMaxGroupId(centerline):
         if groupId > maxGroupId:
             maxGroupId = groupId
 
-    return (maxGroupId)
+    return maxGroupId
 
 
 def GetBlankedGroupsIdList(centerline):
@@ -67,24 +67,23 @@ def GetBlankedGroupsIdList(centerline):
             blankedGroupdsArray.append((idx, groupId))
         idx += 1
 
-    return (blankedGroupdsArray)
+    return blankedGroupdsArray
 
 
 def GetRedundantBlankedIdList(centerline, blankedGroupsIdList):
-    ''' Get the redundant blanked segments.
+    """ Get the redundant blanked segments.
 
-    Nominaly, the x0 and x1 coordinates should be the same. Thus, the
+    Nominally, the x0 and x1 coordinates should be the same. Thus, the
     computed distance should be exactly 0.0.
     Sometimes branches are just different by a few and SHOULD be merged.
-    Visual inspection of the centerline with Paraview when the Warning 
+    Visual inspection of the centerline with Paraview when the Warning
     message pop up is advised.
-    Sometimes, the problem is more concerning. It is problematic that 
-    VMTK split, sometimes, the branches with a segment with a blanked 
-    segment, a lil' something and another blanked segment. In case of 
-    wierd branch splittings, try to lower the tol. It is cheating since 
+    Sometimes, the problem is more concerning. It is problematic that
+    VMTK split, sometimes, the branches with a segment with a blanked
+    segment, a lil' something and another blanked segment. In case of
+    wierd branch splittings, try to lower the tol. It is cheating since
     branches that should not be merge will be merged anyway.
-
-    '''
+    """
     currentX0 = [0.0, 0.0, 0.0]
     currentX1 = [0.0, 0.0, 0.0]
     otherX0 = [0.0, 0.0, 0.0]
@@ -120,7 +119,7 @@ def GetRedundantBlankedIdList(centerline, blankedGroupsIdList):
                     print('         Please check if this action was expected.')
                     print()
 
-    return (redundantBranchesIndex)
+    return redundantBranchesIndex
 
 
 def IsArrayDefined(centerline, arrayName):
@@ -136,24 +135,22 @@ def IsArrayDefined(centerline, arrayName):
             found = True
             break
 
-    return (found)
+    return found
 
 
 def ComputeGeometricTolerance(centerline):
-    '''Return the min and max length for branches.
+    """Return the min and max length for branches.
 
-    This routine compute the delta x minimum and maximum in the network. 
+    This routine compute the delta x minimum and maximum in the network.
     The minimum length is used for the connectivity. The maximum length
     is used for merging the blanked segments.
 
-    '''
+    """
     groupIdsArray = centerline.GetCellData().GetArray(GROUPIDSARRAYNAME)
-    numberOfCells = centerline.GetNumberOfCells()
     minLength = 10000.0
     maxLength = 0.0
     numberOfCells = centerline.GetNumberOfCells()
     for i in range(0, numberOfCells):
-        groupId = groupIdsArray.GetValue(i)
         npts = centerline.GetCell(i).GetPoints().GetNumberOfPoints()
         for k in range(0, npts - 1):
             point0 = [0.0, 0.0, 0.0]
@@ -171,7 +168,7 @@ def ComputeGeometricTolerance(centerline):
 
 
 def ComputeGroupLength(centerline, branchGroupId):
-    '''Return the mean length for branches of branchGroupId.'''
+    """Return the mean length for branches of branchGroupId."""
 
     groupLength = 0.0
     lengthWeightSum = 0.0
@@ -190,7 +187,7 @@ def ComputeGroupLength(centerline, branchGroupId):
 
 
 def ComputeBranchLength(centerline, branchId):
-    '''Return the length for the branch of index branchId.'''
+    """Return the length for the branch of index branchId."""
 
     length = 0.0
     npts = centerline.GetCell(branchId).GetPoints().GetNumberOfPoints()
@@ -205,13 +202,13 @@ def ComputeBranchLength(centerline, branchId):
 
 
 def ComputeGroupRadius(centerline, branchGroupId):
-    '''Return the mean radius of a group.
+    """Return the mean radius of a group.
 
-    The mean radius is computed using the hydraulic resistance for 
-    the branches of branchGroupId. See Chnafa et al. International 
+    The mean radius is computed using the hydraulic resistance for
+    the branches of branchGroupId. See Chnafa et al. International
     Journal for Numerical Methods in Biomedical Engineering, 2016.
 
-    '''
+    """
     groupRadius = 0.0
     radiusWeightSum = 0.0
     groupIdsArray = centerline.GetCellData().GetArray(GROUPIDSARRAYNAME)
@@ -227,7 +224,7 @@ def ComputeGroupRadius(centerline, branchGroupId):
 
 
 def ComputeBranchRadius(centerline, branchId):
-    '''Return the radius for a branch with index branchId. '''
+    """Return the radius for a branch with index branchId. """
     length = 0.0
     resistance = 0.0
     radiusArray = centerline.GetPointData().GetArray(RADIUSARRAYNAME)
@@ -240,8 +237,8 @@ def ComputeBranchRadius(centerline, branchId):
         dx = math.sqrt(vtk.vtkMath.Distance2BetweenPoints(point0, point1))
         length += dx
         r = radiusArray.GetComponent(centerline.GetCell(branchId).GetPointId(k), 0)
-        resistance += dx / r ** (4.0)
-    branchRadius = (length / resistance) ** (0.25)
+        resistance += dx / r ** 4.0
+    branchRadius = (length / resistance) ** 0.25
 
     return branchRadius
 
@@ -260,17 +257,17 @@ def GetListsUniqueBlankedBranches(blankedGroupsIdList, redundantBlankedBranchesI
 
 def SetNetworkStructure(centerline, network, verboseprint,
                         isConnectivityNeeded=True, isRadiusInletNeeded=True):
-    '''Fills a network structure with a vtkPolyData object.
+    """Fills a network structure with a vtkPolyData object.
 
     Each element has an unique index. The groups length and radius are
-    averaged out. When the element is not not part of the bifurcation 
+    averaged out. When the element is not not part of the bifurcation
     reference system, it is possible that multiple end points exist. They are
-    all saved. For the complet formalism of the bifurcation reference system 
-    see Antiga, L., & Steinman, D. A. (2004). Robust and objective 
-    decomposition and mapping of bifurcating vessels. Medical Imaging, 
+    all saved. For the complet formalism of the bifurcation reference system
+    see Antiga, L., & Steinman, D. A. (2004). Robust and objective
+    decomposition and mapping of bifurcating vessels. Medical Imaging,
     IEEE Transactions on, 23(6), 704-713.
 
-    '''
+    """
     verboseprint("> Filling the network structure with the raw data.")
     if not (IsArrayDefined(centerline, GROUPIDSARRAYNAME)):
         from vmtk import vmtkscripts
@@ -369,18 +366,18 @@ def SetNetworkStructure(centerline, network, verboseprint,
 
 
 def ComputeConnectivity(network, tolerance, verboseprint):
-    '''Compute the branches connectivity in the network.
+    """Compute the branches connectivity in the network.
 
     It is assumed that the first element is the inlet. In case of several
     inlets, modification to this routine should be coded. This routine search
-    for each branch, its connected branches by comparing the coordinates of 
+    for each branch, its connected branches by comparing the coordinates of
     the distal extremity of the treated branch with the proximal extremity
     of the other branches in the network. As sometimes the coordinates do not
     perfectly match, a tolerance is applied.
 
     TODO: use simply vtkPolyDataConnectivityFilter to do the job...?
 
-    '''
+    """
     # A few cases were bordeline, hence the factor.
     tol = 5.0 * tolerance
     # Initialization of the first branch.
@@ -427,14 +424,14 @@ def SetRadiusX0(centerline, network, verboseprint):
 
 
 def ComputeInletAverageRadius(centerline, desiredLength, verboseprint):
-    '''Compute the inlet radius as an averaged radius.
+    """Compute the inlet radius as an averaged radius.
 
     Computes an average radius over a certain length of the ICA. The mean
     radius is computed with the maximum inscribed sphere radius in the vessel.
     Thus, the actual radius might be underestimated if the vessel has
     an elliptical shape.
 
-    '''
+    """
     branchId = 0
     length = 0.0
     resistance = 0.0
@@ -460,7 +457,7 @@ def ComputeInletAverageRadius(centerline, desiredLength, verboseprint):
 
 
 def ComputeInletAverageCrossSectionArea(centerline, desiredLength, verboseprint):
-    '''Compute the inlet radius as an averaged radius.
+    """Compute the inlet radius as an averaged radius.
 
     Computes an average radius over a certain length of the ICA. The mean
     radius is computed with the cross section area. If the number of points
@@ -468,7 +465,7 @@ def ComputeInletAverageCrossSectionArea(centerline, desiredLength, verboseprint)
     to the inlet point. Note that due to a bug in VTK the very first point
     seems wrong, that is why I am taking the second point of the centerline.
 
-    '''
+    """
     branchId = 0
     length = 0.0
     resistance = 0.0
@@ -498,8 +495,8 @@ def ComputeInletAverageCrossSectionArea(centerline, desiredLength, verboseprint)
 
 def GetIndexCenterlineForADefinedLength(centerline, branchId, desiredLength,
                                         verboseprint):
-    '''Get the index of the point such as the desired distance between the index and 
-    the beginning of the branch is reached. '''
+    """Get the index of the point such as the desired distance between the index and
+    the beginning of the branch is reached. """
 
     length = 0.0
     done = False
@@ -524,7 +521,7 @@ def GetIndexCenterlineForADefinedLength(centerline, branchId, desiredLength,
 
 
 def GetListProbePoints(centerline, network, verboseprint):
-    '''Get points on a centerline spaced by the inlet diameter. '''
+    """Get points on a centerline spaced by the inlet diameter. """
 
     diameterInlet = 2.0 * network.GetNetworkInletRadius()
     pointsList = []
@@ -672,7 +669,7 @@ class Element(object):
         return self.x1Id
 
     def IsBlanked(self):
-        '''Returns True if the element is part of a branch division.'''
+        """Returns True if the element is part of a branch division."""
         return self.blanking
 
     def IsAnInlet(self):
