@@ -13,7 +13,7 @@ def test_pre_processing():
     common_input = read_command_line()
     common_input.update(dict(meshing_method="diameter",
                              filename_model=model_path,
-                             aneurysm=False,
+                             aneurysm_present=False,
                              coarsening_factor=1.3,
                              viz=False,
                              compress_mesh=False))
