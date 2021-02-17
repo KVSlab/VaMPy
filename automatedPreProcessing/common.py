@@ -1,3 +1,5 @@
+from subprocess import check_output, STDOUT
+
 import vtk
 from vmtk import vtkvmtk, vmtkscripts
 
@@ -1193,12 +1195,12 @@ def compute_centerlines(inlet, outlet, filepath, surface, resampling=1,
 
     if smooth:
         centerlineSmoothing = vmtkscripts.vmtkCenterlineSmoothing()
-        centerlineSmoothing.SetInputData(self.Centerlines)
+        centerlineSmoothing.SetInputData(centerlines)
         centerlineSmoothing.SetNumberOfSmoothingIterations(num_iter)
         centerlineSmoothing.SetSmoothingFactor(smooth_factor)
         centerlineSmoothing.Update()
 
-        centerlines = centerlinesSmooth.GetOutput()
+        centerlines = centerlineSmoothing.GetOutput()
 
     # Save the computed centerline.
     if filepath is not None:
@@ -1291,8 +1293,8 @@ def GramSchmidt(V):
     def proj(u, v):
         return u * np.dot(v, u) / np.dot(u, u)
 
-    for i in xrange(1, V.shape[1]):
-        for j in xrange(i):
+    for i in range(1, V.shape[1]):
+        for j in range(i):
             U[:, i] -= proj(U[:, j], V[:, i])
 
     # normalize column
