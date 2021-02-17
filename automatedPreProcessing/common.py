@@ -1,5 +1,3 @@
-from subprocess import check_output, STDOUT
-
 import vtk
 from vmtk import vtkvmtk, vmtkscripts
 
@@ -979,9 +977,18 @@ def compute_area(surface):
     return mass.GetSurfaceArea()
 
 
-
-
 def capp_surface(surface):
+    """
+    Wrapper for vmtkCapPolyData.
+    Close holes in a surface model.
+
+    Args:
+        surface (vtkPolyData): Surface to be capped.
+
+    Returns:
+        surface (vtkPolyData): Capped surface.
+    """
+
     surfaceCapper = vtkvmtk.vtkvmtkCapPolyData()
     if version < 6:
         surfaceCapper.SetInput(surface)
@@ -1038,11 +1045,28 @@ def compute_distance_to_sphere(surface, centerSphere, radiusSphere=0.0,
 
 
 def is_surface_capped(surface):
+    """
+    Checks if the surface is closed, and how many openings there are.
+
+    Args:
+        surface (vtkPolyData): Surface to be checked
+
+    Returns:
+        open (boolean): Open or closed surface
+        number (int): Number of integer
+    """
+
     return compute_centers(surface, test_capped=True)[0]
 
 
 def getConnectivity(surface):
-    """Compute connectivity of the cells"""
+    """
+    Wrapper of vtkPolyDataConnectivityFilter. Compute connectivity.
+
+    Args:
+        surface (vtkPolyData): Input surface data.
+    """
+
     connectivity = vtk.vtkPolyDataConnectivityFilter()
     # Backwards compatibility
     if version < 6:
@@ -1060,6 +1084,17 @@ def getConnectivity(surface):
 
 
 def computeCircleness(surface):
+    """
+    Compute the area ratio between minimum circle and the maximum circle.
+
+    Args:
+        surface (vtkPolyData): Boundary edges of an opening
+
+    Returns:
+        circleness (float): Area ratio
+        center (list): Center of the opening.
+    """
+
     edges = getFeatureEdges(surface)
 
     # Get points
@@ -1086,7 +1121,16 @@ def computeCircleness(surface):
 
 
 def getFeatureEdges(polyData):
-    """Extracts the edges of the cells that are open"""
+    """
+    Wrapper for vtkFeatureedges. Extracts the edges of the cells that are open.
+
+    Args:
+        polydata (vtkPolyData): surface to extract the openings from.
+
+    Returns:
+        feature_edges (vtkPolyData): The boundary edges of the surface.
+    """
+
     featureEdges = vtk.vtkFeatureEdges()
     featureEdges.FeatureEdgesOff()
     featureEdges.BoundaryEdgesOn()
@@ -1101,6 +1145,20 @@ def getFeatureEdges(polyData):
 
 
 def compute_centers(polyData, case_path=None, test_capped=False):
+    """
+    Compute the center of all the openings in the surface. The inlet is chosen based on
+    the largest area.
+
+    Args:
+        test_capped (bool): Check if surface is capped
+        polyData (vtkPolyData): centers of the openings
+        case_path (str): path to case directory.
+
+    Returns:
+        inlet_center (list): Inlet center.
+        outlet_centers (list): A flattened list with all the outlet centers.
+    """
+
     # Get cells which are open
     cells = getFeatureEdges(polyData)
 
@@ -1182,6 +1240,16 @@ def compute_bary_center(points):
 
 
 def get_vtk_array(name, comp, num):
+    """An empty vtkDoubleArray.
+
+    Args:
+        name (str): Name of array.
+        comp (int): Number of components
+        num (int): Number of tuples.
+
+    Returns:
+        array (vtkDoubleArray): An empty vtk array.
+    """
     array = vtk.vtkDoubleArray()
     array.SetNumberOfComponents(comp)
     array.SetNumberOfTuples(num)
@@ -1193,6 +1261,14 @@ def get_vtk_array(name, comp, num):
 
 
 def get_locator_cell(surface):
+    """Wrapper for vtkCellLocator
+
+    Args:
+        surface (vtkPolyData): input surface
+
+    Returns:
+        return (vtkCellLocator): Cell locator of the input surface.
+    """
     locator = vtk.vtkCellLocator()
     locator.SetDataSet(surface)
     locator.BuildLocator()
@@ -1201,6 +1277,14 @@ def get_locator_cell(surface):
 
 
 def get_locator(centerline):
+    """Wrapper for vtkStaticPointLocator.
+
+    Args:
+        centerline (vtkPolyData): Input vtkPolyData.
+
+    Returns:
+        locator (vtkStaticPointLocator): Point locator of the input surface.
+    """
     locator = vtk.vtkStaticPointLocator()
     locator.SetDataSet(centerline)
     locator.BuildLocator()
@@ -1209,10 +1293,30 @@ def get_locator(centerline):
 
 
 def distance(point1, point2):
+    """Distance between two points.
+
+    Args:
+        point1 (ndarray): A point
+        point2 (ndarray): A point
+
+    Returns:
+        distance (float): Distance between point1 and point2
+    """
+
     return np.sqrt(np.sum((np.asarray(point1) - np.asarray(point2)) ** 2))
 
 
 def remove_distant_points(voronoi, centerline):
+    """Take a voronoi diagram and a centerline remove points that are far away.
+
+    Args:
+        voronoi (vtkPolyData): Voronoi data.
+        centerline (vtkPolyData): centerline.
+
+    Returns:
+        voronoi (vtkPolyData): Voronoi diagram without the extreme points
+    """
+
     N = voronoi.GetNumberOfPoints()
     newVoronoi = vtk.vtkPolyData()
     cellArray = vtk.vtkCellArray()
@@ -1230,9 +1334,7 @@ def remove_distant_points(voronoi, centerline):
         ID = locator.FindClosestPoint(point)
         cl_point = centerline.GetPoint(ID)
         dist = distance(point, cl_point)
-        # comp = (47.424041748046875, 43.039527893066406, 41.241416931152344)
         if dist / 3 > get_data(i) or get_data(i) > limit:
-            # print(point)
             count += 1
             continue
 
@@ -1264,6 +1366,17 @@ def success(text):
 
 
 def compute_centerline_sections(surface, centerline):
+    """
+    Wrapper for vmtk centerline sections.
+
+    Args:
+        surface (vtkPolyData): Surface to measure area.
+        centerline (vtkPolyData): centerline to measure along.
+
+    Returns:
+        line (vtkPolyData): centerline with the attributes
+        centerline_sections_area (vtkPolyData): sections along the centerline
+    """
     centerlineSections = vtkvmtk.vtkvmtkPolyDataCenterlineSections()
     centerlineSections.SetInputData(surface)
     centerlineSections.SetCenterlines(centerline)
@@ -1280,16 +1393,33 @@ def compute_centerline_sections(surface, centerline):
     return line, CenterlineSections
 
 
-def compute_centerlines(inlet, outlet, filepath, surface, resampling=1,
-                        smooth=False, num_iter=100, smooth_factor=0.1,
-                        endPoint=1, method="pointlist"):
+def compute_centerlines(inlet, outlet, filepath, surface, resampling=1, smooth=False, num_iter=100, smooth_factor=0.1,
+                        end_point=1, method="pointlist"):
+    """Wrapper for vmtkcenterlines and vmtkcenterlinesmoothing.
+
+    Args:
+        inlet (list): point of the inlet
+        outlet (list): flatt list of the outlet points
+        filepath (str): path to where to store the centerline
+        surface (vtkPolyData): surface to get the centerline from.
+        resampling (float): resampling step length.
+        smooth (bool): smooth centerline or not.
+        num_iter (int): number of iterations in smooth.
+        smooth_factor (float): smoothing factor.
+        end_point (int): 0 or 1, include end point in centerline.
+        method (str): method for setting the inlet and outlet location
+
+    Returns:
+        centerline (vtkPolyData): centerline of the surface.
+    """
+
     if path.isfile(filepath):
         return ReadPolyData(filepath)
 
     centerlines = vmtkscripts.vmtkCenterlines()
     centerlines.Surface = surface
     centerlines.SeedSelectorName = 'pointlist'
-    centerlines.AppendEndPoints = endPoint
+    centerlines.AppendEndPoints = end_point
     centerlines.Resampling = 1
     centerlines.ResamplingStepLength = resampling
     centerlines.SourcePoints = inlet
@@ -1313,33 +1443,43 @@ def compute_centerlines(inlet, outlet, filepath, surface, resampling=1,
     return centerlines
 
 
-# TODO: Replace with vmtkscript
-def CenterlineAttribiutes(line, remove=True, filename=None, smooth=False,
-                          it=300, factor=0.1):
-    if filename is None:
-        filename = "tmp_cl.vtp"
-        WritePolyData(line, filename)
+def CenterlineAttribiutes(line, smooth=False, iterations=300, factor=0.1):
+    """
+    Wrapper for centerline attributes.
 
-    command = ('vmtkcenterlineattributes -ifile %s --pipe vmtkcenterlinegeometry ' + \
-               '-ofile %s') % (filename, filename)
+    Args:
+        line (vtkPolyData): Line to investigate.
+        smooth (bool): Turn on and off smoothing before computing the attributes features.
+        iterations (int): Number of iterations.
+        factor (float): Smoothing factor.
+
+    Returns:
+        line (vtkPolyData): Line with centerline attributes.
+    """
+    attributes = vmtkscripts.vmtkCenterlineAttributes()
+    attributes.Centerlines = line
+    attributes.NormalsArrayName = parallelTransportNormalsArrayName
+    attributes.AbscissaArrayName = abscissasArrayName
+    attributes.Execute()
+    centerline = attributes.Centerlines
+
+    geometry = vmtkscripts.vmtkCenterlineGeometry()
+    geometry.Centerlines = centerline
+
     if smooth:
-        command += ' -smoothing 1 iterations %s -factor %s -outputsmoothd 1' % \
-                   (it, factor)
-    else:
-        command += ' -smoothing 0'
-    a = check_output(command, stderr=STDOUT, shell=True)
-    status, text = success(a)
+        geometry.LineSmoothing = 1
+        geometry.OutputSmoothedLines = smooth
+        geometry.SmoothingFactor = factor
+        geometry.NumberOfSmoothingIterations = iterations
+    geometry.FernetTangentArrayName = "FernetTangent"
+    geometry.FernetNormalArrayName = "FernetNormal"
+    geometry.FrenetBinormalArrayName = "FernetBiNormal"
+    geometry.CurvatureArrayName = "Curvature"
+    geometry.TorsionArrayName = "Torsion"
+    geometry.TortuosityArrayName = "Tortuosity"
+    geometry.Execute()
 
-    if not status:
-        print("smoething went wront when finding the attributes for the centerline")
-        print(text)
-        sys.exit(0)
-
-    line = ReadPolyData(filename)
-    if remove:
-        check_output('rm ' + filename, stderr=STDOUT, shell=True)
-
-    return line
+    return geometry.Centerlines
 
 
 def generate_mesh(surface):

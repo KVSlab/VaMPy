@@ -103,7 +103,7 @@ def run_pre_processing(filename_model, verbose_print, smoothing_method, smoothin
     print("--- Get centerlines\n")
     inlet, outlets = get_centers(surface, path.join(dir_path, case_name))
     centerlines = compute_centerlines(inlet, outlets, file_name_centerlines,
-                                      capped_surface, resampling=0.1, endPoint=0)
+                                      capped_surface, resampling=0.1, end_point=0)
     tol = get_tolerance(centerlines)
 
     if aneurysm_present:
