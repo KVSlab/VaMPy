@@ -1,5 +1,6 @@
 import vtk
 from vmtk import vtkvmtk, vmtkscripts
+
 try:
     from vmtkpointselector import *
 except:
@@ -33,8 +34,9 @@ phiValues = [float(i) for i in range(2, 43, 2)]
 thetaStep = 2.0
 
 # Shortcuts
-#distance = vtk.vtkMath.Distance2BetweenPoints
+# distance = vtk.vtkMath.Distance2BetweenPoints
 version = vtk.vtkVersion().GetVTKMajorVersion()
+
 
 def ReadPolyData(filename):
     '''Load the given file, and return a vtkPolyData object for it. '''
@@ -135,10 +137,10 @@ def ReadTecplotSurfaceFile(filename):
     # Read ZONE variables
     if line.split()[0] == 'ZONE':
         lineNid = line.find('N=')
-        lineN = line[lineNid:lineNid + line[lineNid:].find(',') ].split('=')[1]
+        lineN = line[lineNid:lineNid + line[lineNid:].find(',')].split('=')[1]
         numberOfNodes = int(lineN)
         lineEid = line.find('E=')
-        lineE = line[lineEid:lineEid + line[lineEid:].find(',') ].split('=')[1]
+        lineE = line[lineEid:lineEid + line[lineEid:].find(',')].split('=')[1]
         numberOfElements = int(lineE)
         elementType = 'TRIANGLE'
         if line.find('ET=') != -1:
@@ -168,9 +170,9 @@ def ReadTecplotSurfaceFile(filename):
     # Insert points
     dataCounter = 0
     for i in range(numberOfNodes):
-        point = [float(data[dataCounter]), float(data[dataCounter+1]), float(data[dataCounter+2])]
+        point = [float(data[dataCounter]), float(data[dataCounter + 1]), float(data[dataCounter + 2])]
         dataCounter += 3
-        points.SetPoint(i,point)
+        points.SetPoint(i, point)
         for j in range(len(arrayNames)):
             surface.GetPointData().GetArray(arrayNames[j]).SetComponent(i, 0, float(data[dataCounter]))
             dataCounter += 1
@@ -180,15 +182,15 @@ def ReadTecplotSurfaceFile(filename):
     cellIds = vtk.vtkIdList()
     for i in range(numberOfElements):
         cellIds.Initialize()
-        cellIds.InsertNextId(int(data[dataCounter])-1)
+        cellIds.InsertNextId(int(data[dataCounter]) - 1)
         dataCounter += 1
-        cellIds.InsertNextId(int(data[dataCounter])-1)
+        cellIds.InsertNextId(int(data[dataCounter]) - 1)
         dataCounter += 1
-        cellIds.InsertNextId(int(data[dataCounter])-1)
+        cellIds.InsertNextId(int(data[dataCounter]) - 1)
         dataCounter += 1
 
         if elementType == "QUADRILATERAL":
-            cellIds.InsertNextId(int(data[dataCounter])-1)
+            cellIds.InsertNextId(int(data[dataCounter]) - 1)
             dataCounter += 1
 
         cells.InsertNextCell(cellIds)
@@ -201,13 +203,13 @@ def WriteTecplotSurfaceFile(surface, filename):
     surface = triangulate_surface(surface)
 
     # Open file
-    f = open(fileName, 'w')
+    f = open(filename, 'w')
     line = "VARIABLES = X,Y,Z"
 
     # Get array
     arrayNames = []
-    for i in range(self.Surface.GetPointData().GetNumberOfArrays()):
-        array = self.Surface.GetPointData().GetArray(i)
+    for i in range(surface.GetPointData().GetNumberOfArrays()):
+        array = surface.GetPointData().GetArray(i)
         arrayName = array.GetName()
 
         if arrayName == None:
@@ -228,24 +230,24 @@ def WriteTecplotSurfaceFile(surface, filename):
 
     # Write header
     line = "ZONE N=%s,E=%s,F=FEPOINT,ET=TRIANGLE\n" % \
-            (str(self.Surface.GetNumberOfPoints()),
-             str(self.Surface.GetNumberOfCells()))
+           (str(surface.GetNumberOfPoints()),
+            str(surface.GetNumberOfCells()))
     f.write(line)
 
     # Write coordintes and array
-    for i in range(self.Surface.GetNumberOfPoints()):
-        point = self.Surface.GetPoint(i)
+    for i in range(surface.GetNumberOfPoints()):
+        point = surface.GetPoint(i)
         line = " ".join(point)
         for arrayName in arrayNames:
-            array = self.Surface.GetPointData().GetArray(arrayName)
+            array = surface.GetPointData().GetArray(arrayName)
             for j in range(array.GetNumberOfComponents()):
-                line = line + ' ' + str(array.GetComponent(i,j))
+                line = line + ' ' + str(array.GetComponent(i, j))
         line = line + '\n'
         f.write(line)
 
     # Write conectivity(?) and ids
-    for i in range(self.Surface.GetNumberOfCells()):
-        cellPointIds = self.Surface.GetCell(i).GetPointIds()
+    for i in range(surface.GetNumberOfCells()):
+        cellPointIds = surface.GetCell(i).GetPointIds()
         line = ''
         for j in range(cellPointIds.GetNumberOfIds()):
             if (j > 0):
@@ -315,7 +317,7 @@ def makeVoronoiDiagram(surface, file_path):
 
 
 def write_spheres(points, dirpath, radius=None, name="sphere%s.vtp", base=0.2):
-    radius = [base]*len(points) if radius is None else radius
+    radius = [base] * len(points) if radius is None else radius
     for counter, point in enumerate(points):
         sphere = vtk.vtkSphereSource()
         sphere.SetCenter(point)
@@ -369,7 +371,7 @@ def getRelevantOutlets(aneurysm_type, centerline, centerline_aneurysm, dirpath):
         while diff:
             line2 = ExtractSingleLine(centerline, index[line_id])
             line2_div_point = line2.GetPoints().GetPoint(div_anu[index[line_id]])
-            if distance(line2_div_point, line_div_point) > 3*tol:
+            if distance(line2_div_point, line_div_point) > 3 * tol:
                 diff = False
             endpoint2 = list(line2.GetPoints().GetPoint(line2.GetNumberOfPoints() - 1))
             line_id -= 1
@@ -407,7 +409,7 @@ def SmoothVoronoiDiagram(voronoi, centerlines, smoothingFactor,
         id_ = locator.FindClosestPoint(point)
         cl_point = centerlines.GetPoint(id_)
 
-        if distance(point, cl_point) > 3*threshold[id_]:
+        if distance(point, cl_point) > 3 * threshold[id_]:
             points.InsertNextPoint(point)
             cellArray.InsertNextCell(1)
             cellArray.InsertCellPoint(count)
@@ -456,8 +458,8 @@ def get_curvilinear_coordinate(line):
     curv_coor = np.zeros(line.GetNumberOfPoints())
     for i in range(line.GetNumberOfPoints() - 1):
         pnt1 = np.asarray(line.GetPoints().GetPoint(i))
-        pnt2 = np.asarray(line.GetPoints().GetPoint(i+1))
-        curv_coor[i+1] = np.sqrt(np.sum((pnt1 - pnt2)**2)) + curv_coor[i]
+        pnt2 = np.asarray(line.GetPoints().GetPoint(i + 1))
+        curv_coor[i + 1] = np.sqrt(np.sum((pnt1 - pnt2) ** 2)) + curv_coor[i]
 
     return curv_coor
 
@@ -477,11 +479,11 @@ def get_array(arrayName, line, k=1):
         getData = line.GetPointData().GetArray(arrayName).GetTuple1
     elif k == 2:
         getData = line.GetPointData().GetArray(arrayName).GetTuple2
-    elif k ==3:
+    elif k == 3:
         getData = line.GetPointData().GetArray(arrayName).GetTuple3
 
     for i in range(line.GetNumberOfPoints()):
-        array[i,:] = getData(i)
+        array[i, :] = getData(i)
 
     return array
 
@@ -492,13 +494,13 @@ def get_array_cell(arrayName, line, k=1):
         getData = line.GetCellData().GetArray(arrayName).GetTuple1
     elif k == 2:
         getData = line.GetCellData().GetArray(arrayName).GetTuple2
-    elif k ==3:
+    elif k == 3:
         getData = line.GetCellData().GetArray(arrayName).GetTuple3
     elif k == 9:
         getData = line.GetCellData().GetArray(arrayName).GetTuple9
 
     for i in range(line.GetNumberOfCells()):
-        array[i,:] = getData(i)
+        array[i, :] = getData(i)
 
     return array
 
@@ -589,7 +591,7 @@ def provide_aneurysm_points(surface, dir_path=None):
 
 def getData(centerline_par, centerline_dau1, centerline_dau2, tol, aneurysm_type):
     # Declear variables before loop if values are not found
-    data = {"dau1":{}, "dau2":{}}
+    data = {"dau1": {}, "dau2": {}}
 
     # List of points conected to ID
     points_ids_0 = vtk.vtkIdList()
@@ -624,7 +626,7 @@ def getData(centerline_par, centerline_dau1, centerline_dau2, tol, aneurysm_type
                 break
 
         end, r_end = move_past_sphere(centerline, center, r, point_ID_0,
-                                        stop=point_ID_0*100, step=1, X=1)
+                                      stop=point_ID_0 * 100, step=1, X=1)
 
         data[key]["end_point"] = end
         data[key]["r_end"] = r_end
@@ -726,7 +728,7 @@ def triangulate_surface(surface):
 
 
 def geometryFilter(unstructured_grid):
-     # Convert unstructured grid to polydata
+    # Convert unstructured grid to polydata
     filter = vtk.vtkGeometryFilter()
     if version < 6:
         filter.SetInput(unstructured_grid)
@@ -748,7 +750,7 @@ def threshold(surface, name, lower=0, upper=1, type="between", source=1):
         threshold.SetInput(surface)
     else:
         threshold.SetInputData(surface)
-    if type=="between":
+    if type == "between":
         threshold.ThresholdBetween(lower, upper)
     elif type == "lower":
         threshold.ThresholdByLower(lower)
@@ -756,7 +758,7 @@ def threshold(surface, name, lower=0, upper=1, type="between", source=1):
         threshold.ThresholdByUpper(upper)
     else:
         print(("%s is not a threshold type. Pleace chose from: upper, lower" + \
-              ", or between") % type)
+               ", or between") % type)
         sys.exit(0)
 
     threshold.SetInputArrayToProcess(0, 0, 0, source, name)
@@ -807,7 +809,7 @@ def uncapp_surface_old(surface):
 
     # Compute the magnitude of the gradient
     gradients_array = get_array_cell("Gradients", gradients, k=9)
-    gradients_magnitude = np.sqrt(np.sum(gradients_array**2, axis=1))
+    gradients_magnitude = np.sqrt(np.sum(gradients_array ** 2, axis=1))
 
     # Mark all cells with a gradient magnitude less then 0.1
     end_capp_array = gradients_magnitude < 0.08
@@ -818,7 +820,7 @@ def uncapp_surface_old(surface):
 
     # Extract capps
     end_capps = threshold(gradients, "Gradients_mag", lower=0.5, upper=1.5,
-                            type="between", source=1)
+                          type="between", source=1)
 
     # Get connectivity
     end_capps_connectivity = getConnectivity(end_capps)
@@ -830,9 +832,9 @@ def uncapp_surface_old(surface):
     regions = []
     centers_edge = []
     limit = 0.1
-    for i in range(int(region_array.max())+1):
-        regions.append(threshold(end_capps_connectivity, "RegionId",  lower=(i-limit),
-                            upper=(i+limit), type="between", source=0))
+    for i in range(int(region_array.max()) + 1):
+        regions.append(threshold(end_capps_connectivity, "RegionId", lower=(i - limit),
+                                 upper=(i + limit), type="between", source=0))
         circ, center = computeCircleness(regions[-1])
         circleness.append(circ)
         centers_edge.append(center)
@@ -871,7 +873,7 @@ def uncapp_surface_old(surface):
 
     # Remove the outlets from the original surface
     uncapped_surface = threshold(surface, "outlets", lower=0, upper=0.5,
-                                type="between", source=1)
+                                 type="between", source=1)
 
     # Check if some cells where not marked
     remove = True
@@ -889,7 +891,7 @@ def uncapp_surface_old(surface):
 
         if remove:
             uncapped_surface = threshold(uncapped_surface, "outlets", lower=0,
-                                            upper=0.5, type="between", source=1)
+                                         upper=0.5, type="between", source=1)
 
     return uncapped_surface
 
@@ -911,7 +913,6 @@ def compute_distance_to_sphere(surface, centerSphere, radiusSphere=0.0,
                                distanceOffset=0.0, distanceScale=0.01,
                                minDistance=0.2, maxDistance=0.3,
                                distanceToSpheresArrayName="DistanceToSpheres"):
-
     # Check if there allready exists a distance to spheres
     N = surface.GetNumberOfPoints()
     number, names = get_number_of_arrays(surface)
@@ -986,15 +987,15 @@ def computeCircleness(surface):
     center = np.mean(np.array(points), axis=0)
 
     # Compute ratio between max inscribed sphere, and min inscribed "area"
-    point_radius = np.sqrt(np.sum((points-center)**2, axis=1))
+    point_radius = np.sqrt(np.sum((points - center) ** 2, axis=1))
     argsort = np.argsort(point_radius)
     if point_radius[argsort[1]] / point_radius[argsort[0]] > 15:
         radius_min = point_radius[argsort[1]]
     else:
         radius_min = point_radius.min()
 
-    min_area = math.pi * radius_min**2
-    max_area = math.pi * point_radius.max()**2
+    min_area = math.pi * radius_min ** 2
+    max_area = math.pi * point_radius.max() ** 2
 
     return max_area / min_area, center
 
@@ -1046,8 +1047,8 @@ def compute_centers(polyData, case_path=None, test_capped=False):
     center = []
     for i in range(int(region_array.max()) + 1):
         # Compute area
-        boundary = threshold(outputs, "RegionId", lower=i-0.1, upper=i+0.1,
-                            type="between", source=0)
+        boundary = threshold(outputs, "RegionId", lower=i - 0.1, upper=i + 0.1,
+                             type="between", source=0)
 
         delaunay_filter = vtk.vtkDelaunay2D()
         delaunay_filter.SetInputData(boundary)
@@ -1080,17 +1081,17 @@ def compute_centers(polyData, case_path=None, test_capped=False):
 def compute_bary_center(points):
     # Get i+1
     shifted = np.zeros(points.shape)
-    shifted[1:,:] = points[:-1,:]
-    shifted[0,:] = points[-1,:]
+    shifted[1:, :] = points[:-1, :]
+    shifted[0, :] = points[-1, :]
 
     # Compute weights
-    weight = np.sqrt(np.sum((points - shifted)**2, axis=1))
+    weight = np.sqrt(np.sum((points - shifted) ** 2, axis=1))
     weight_sum = np.sum(weight)
 
     # Compute center
-    center_x = np.sum((points[:,0] + shifted[:,0])/2 * weight) / weight_sum
-    center_y = np.sum((points[:,1] + shifted[:,1])/2 * weight) / weight_sum
-    center_z = np.sum((points[:,2] + shifted[:,2])/2 * weight) / weight_sum
+    center_x = np.sum((points[:, 0] + shifted[:, 0]) / 2 * weight) / weight_sum
+    center_y = np.sum((points[:, 1] + shifted[:, 1]) / 2 * weight) / weight_sum
+    center_z = np.sum((points[:, 2] + shifted[:, 2]) / 2 * weight) / weight_sum
 
     return [center_x, center_y, center_z]
 
@@ -1123,7 +1124,7 @@ def get_locator(centerline):
 
 
 def distance(point1, point2):
-    return np.sqrt(np.sum((np.asarray(point1) - np.asarray(point2))**2))
+    return np.sqrt(np.sum((np.asarray(point1) - np.asarray(point2)) ** 2))
 
 
 def remove_distant_points(voronoi, centerline):
@@ -1144,24 +1145,23 @@ def remove_distant_points(voronoi, centerline):
         ID = locator.FindClosestPoint(point)
         cl_point = centerline.GetPoint(ID)
         dist = distance(point, cl_point)
-        #comp = (47.424041748046875, 43.039527893066406, 41.241416931152344)
-        if dist/3 > get_data(i) or get_data(i) > limit:
-            #print(point)
+        # comp = (47.424041748046875, 43.039527893066406, 41.241416931152344)
+        if dist / 3 > get_data(i) or get_data(i) > limit:
+            # print(point)
             count += 1
             continue
 
         points.InsertNextPoint(point)
         cellArray.InsertNextCell(1)
-        cellArray.InsertCellPoint(i-count)
+        cellArray.InsertCellPoint(i - count)
         value = get_data(i)
-        radius[i-count] = value
+        radius[i - count] = value
 
     print("Removed %s points from the voronoi diagram" % count)
 
-    radiusArray = get_vtk_array(radiusArrayName, 1, N-count)
-    for i in range(N-count):
+    radiusArray = get_vtk_array(radiusArrayName, 1, N - count)
+    for i in range(N - count):
         radiusArray.SetTuple(i, [float(radius[i])])
-
 
     newVoronoi.SetPoints(points)
     newVoronoi.SetVerts(cellArray)
@@ -1230,7 +1230,7 @@ def compute_centerlines(inlet, outlet, filepath, surface, resampling=1,
 
 # TODO: Replace with vmtkscript
 def CenterlineAttribiutes(line, remove=True, filename=None, smooth=False,
-                         it=300, factor=0.1):
+                          it=300, factor=0.1):
     if filename is None:
         filename = "tmp_cl.vtp"
         WritePolyData(line, filename)
@@ -1258,30 +1258,31 @@ def CenterlineAttribiutes(line, remove=True, filename=None, smooth=False,
 
 
 def generate_mesh(surface):
-        # Compute the mesh.
-        meshGenerator = vmtkscripts.vmtkMeshGenerator()
-        meshGenerator.Surface = surface
-        meshGenerator.ElementSizeMode = "edgelengtharray"
-        meshGenerator.TargetEdgeLengthArrayName = "Size"
-        meshGenerator.BoundaryLayer = 1
-        meshGenerator.NumberOfSubLayers = 4
-        meshGenerator.BoundaryLayerOnCaps = 0
-        meshGenerator.BoundaryLayerThicknessFactor = 0.85
-        meshGenerator.SubLayerRatio = 0.75
-        meshGenerator.Tetrahedralize = 1
-        meshGenerator.VolumeElementScaleFactor = 0.8
-        meshGenerator.EndcapsEdgeLengthFactor = 1.0
+    # Compute the mesh.
+    meshGenerator = vmtkscripts.vmtkMeshGenerator()
+    meshGenerator.Surface = surface
+    meshGenerator.ElementSizeMode = "edgelengtharray"
+    meshGenerator.TargetEdgeLengthArrayName = "Size"
+    meshGenerator.BoundaryLayer = 1
+    meshGenerator.NumberOfSubLayers = 4
+    meshGenerator.BoundaryLayerOnCaps = 0
+    meshGenerator.BoundaryLayerThicknessFactor = 0.85
+    meshGenerator.SubLayerRatio = 0.75
+    meshGenerator.Tetrahedralize = 1
+    meshGenerator.VolumeElementScaleFactor = 0.8
+    meshGenerator.EndcapsEdgeLengthFactor = 1.0
 
-        # Mesh
-        meshGenerator.Execute()
+    # Mesh
+    meshGenerator.Execute()
 
-        # Remeshed surface, store for later
-        remeshSurface = meshGenerator.RemeshedSurface
+    # Remeshed surface, store for later
+    remeshSurface = meshGenerator.RemeshedSurface
 
-        # Full mesh
-        mesh = meshGenerator.Mesh
+    # Full mesh
+    mesh = meshGenerator.Mesh
 
-        return mesh, remeshSurface
+    return mesh, remeshSurface
+
 
 def create_vtk_array(values, name, k=1):
     vtkArray = get_vtk_array(name, k, values.shape[0])
@@ -1291,15 +1292,15 @@ def create_vtk_array(values, name, k=1):
             vtkArray.SetTuple1(i, values[i])
     elif k == 2:
         for i in range(values.shape[0]):
-            vtkArray.SetTuple2(i, values[i,0], values[i,1])
+            vtkArray.SetTuple2(i, values[i, 0], values[i, 1])
     elif k == 3:
         for i in range(values.shape[0]):
-            vtkArray.SetTuple3(i, values[i,0], values[i,1], values[i,2])
+            vtkArray.SetTuple3(i, values[i, 0], values[i, 1], values[i, 2])
     elif k == 9:
         for i in range(values.shape[0]):
-            vtkArray.SetTuple9(i, values[i,0], values[i,1], values[i,2],
-                                  values[i,3], values[i,4], values[i,5],
-                                  values[i,6], values[i,7], values[i,8])
+            vtkArray.SetTuple9(i, values[i, 0], values[i, 1], values[i, 2],
+                               values[i, 3], values[i, 4], values[i, 5],
+                               values[i, 6], values[i, 7], values[i, 8])
 
     return vtkArray
 
@@ -1309,15 +1310,15 @@ def GramSchmidt(V):
     U = np.copy(V)
 
     def proj(u, v):
-        return u * np.dot(v,u) / np.dot(u,u)
+        return u * np.dot(v, u) / np.dot(u, u)
 
     for i in xrange(1, V.shape[1]):
         for j in xrange(i):
-            U[:,i] -= proj(U[:,j], V[:,i])
+            U[:, i] -= proj(U[:, j], V[:, i])
 
     # normalize column
-    den=(U**2).sum(axis=0)**0.5
-    E = U/den
+    den = (U ** 2).sum(axis=0) ** 0.5
+    E = U / den
     return E
 
 
@@ -1380,29 +1381,29 @@ def data_to_vtkPolyData(data, header, TNB=None, PT=None):
 
     if TNB is not None:
         for i in range(3):
-            radiusArray = get_vtk_array(header[i+data.shape[1]], 3, data.shape[0])
+            radiusArray = get_vtk_array(header[i + data.shape[1]], 3, data.shape[0])
             info_array.append(radiusArray)
 
     if PT is not None:
         start = data.shape[1] if TNB is None else data.shape[1] + 3
         for i in range(2):
-            radiusArray = get_vtk_array(header[i+start], 3, PT[0].shape[0])
+            radiusArray = get_vtk_array(header[i + start], 3, PT[0].shape[0])
             info_array.append(radiusArray)
 
     for i in range(data.shape[0]):
         cellArray.InsertCellPoint(i)
-        linePoints.InsertNextPoint(data[i,:3])
+        linePoints.InsertNextPoint(data[i, :3])
         for j in range(3, data.shape[1]):
-            info_array[j-3].SetTuple1(i, data[i, j])
+            info_array[j - 3].SetTuple1(i, data[i, j])
 
     if TNB is not None:
         for i in range(data.shape[0]):
-            for j in range(data.shape[1]-3, data.shape[1], 1):
-                tnb_ = TNB[j - data.shape[1]][i,:]
+            for j in range(data.shape[1] - 3, data.shape[1], 1):
+                tnb_ = TNB[j - data.shape[1]][i, :]
                 info_array[j].SetTuple3(i, tnb_[0], tnb_[1], tnb_[2])
 
     if PT is not None:
-        start = data.shape[1]-3 if TNB is None else data.shape[1]
+        start = data.shape[1] - 3 if TNB is None else data.shape[1]
         for i in range(PT[-1].shape[0]):
             for j in range(start, start + 2, 1):
                 pt_ = PT[j - start][i, :]
@@ -1470,7 +1471,7 @@ def ExtractSingleLine(centerlines, id, startID=0, endID=None):
             elif num == 9:
                 tmp = getArray[j].GetTuple9(i)
                 arrays[j].SetTuple9(count, tmp[0], tmp[1], tmp[2], tmp[3], tmp[4],
-                                       tmp[5], tmp[6], tmp[7], tmp[8])
+                                    tmp[5], tmp[6], tmp[7], tmp[8])
         count += 1
 
     line.SetPoints(linePoints)
@@ -1491,7 +1492,7 @@ def move_past_sphere(centerline, center, r, start, step=-1, stop=0, X=0.8):
     # Go the length of one MISR backwards
     for i in range(start, stop, step):
         value = MISphere.EvaluateFunction(centerline.GetPoint(i))
-        if (value>=0.0):
+        if (value >= 0.0):
             tempPoint = centerline.GetPoint(i)
             break
 
@@ -1562,7 +1563,7 @@ def dist_sphere_curv(surface, centerlines, sac_center, misr_max, fileName, facto
     curvatureSurface = curvatureFilter.Surface
     curvatureArray = get_array("Curvature", curvatureSurface)
     distance_to_sphere_array = get_array("DistanceToSpheres", distance_to_sphere)
-    size_array = curvatureArray * distance_to_sphere_array*factor
+    size_array = curvatureArray * distance_to_sphere_array * factor
 
     size_vtk_array = create_vtk_array(size_array, "Size")
     curvatureSurface.GetPointData().AddArray(size_vtk_array)
@@ -1585,13 +1586,13 @@ def dist_sphere_diam(surface, centerlines, sac_center, misr_max, fileName, facto
     upper = 20
     lower = 6
     diameter_array = 2 * get_array("DistanceToCenterlines", distance_to_sphere)
-    element_size = 13. / 35 * diameter_array**2 + lower
+    element_size = 13. / 35 * diameter_array ** 2 + lower
     element_size[element_size > upper] = upper
     element_size[element_size < lower] = lower
     elements_vtk = create_vtk_array(element_size, "Num elements")
     distance_to_sphere.GetPointData().AddArray(elements_vtk)
     element_size = diameter_array / element_size
-    #element_size[element_size < 0.12] = 0.12
+    # element_size[element_size < 0.12] = 0.12
 
     # Reduce element size in aneurysm
     for i in range(len(sac_center)):
@@ -1603,14 +1604,13 @@ def dist_sphere_diam(surface, centerlines, sac_center, misr_max, fileName, facto
         element_size *= factor
     else:
         distance_to_spheres_array = get_array("DistanceToSpheres", distance_to_sphere)
-        element_size = np.minimum(element_size, distance_to_spheres_array)*factor
+        element_size = np.minimum(element_size, distance_to_spheres_array) * factor
 
     vtk_array = create_vtk_array(element_size, "Size")
     distance_to_sphere.GetPointData().AddArray(vtk_array)
     WritePolyData(distance_to_sphere, fileName)
 
     return distance_to_sphere
-
 
 
 def mesh_alternative(surface):
@@ -1628,7 +1628,7 @@ def mesh_alternative(surface):
 
 
 def vmtkSmoother(surface, method, iterations=600):
-    smoother= vmtkscripts.vmtkSurfaceSmoothing()
+    smoother = vmtkscripts.vmtkSurfaceSmoothing()
     smoother.Surface = surface
     smoother.NumberOfIterations = iterations
     smoother.Method = method
@@ -1636,6 +1636,3 @@ def vmtkSmoother(surface, method, iterations=600):
     surface = smoother.Surface
 
     return surface
-
-
-
