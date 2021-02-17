@@ -433,6 +433,8 @@ def run_pre_processing(filename_model, verbose_print, smoothing_method, smoothin
 
     # Display the flow split at the outlets, inlet flow rate, and probes.
     if viz:
+        print("--- Visualizing flow split at outlets, inlet flow rate, and probes in VTK render window. ")
+        print("--- Press 'q' inside the render window to exit.")
         visualize(network.elements, probe_points, surface, mean_inflow_rate)
 
     # Start simulation though ssh, without password
