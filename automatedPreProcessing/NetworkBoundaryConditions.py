@@ -36,7 +36,7 @@ class FlowSplitting(object):
             raise RuntimeError('The network has only one outlet.')
         # For each element of the network,
         for element in network.elements:
-            if not(element.IsBlanked()):
+            if not (element.IsBlanked()):
                 continue
             # find the adjacent blanked branches.
             adjacentBranchFound = False
@@ -45,16 +45,16 @@ class FlowSplitting(object):
             for otherElement in network.elements:
                 if otherElement.GetId() == element.GetId():
                     continue
-                if not(otherElement.IsBlanked()):
+                if not (otherElement.IsBlanked()):
                     continue
                 if otherElement.GetInPointsx0Id() == element.GetInPointsx0Id():
                     adjacentBranchFound = True
                     sumSurfaces += network.elements[
-                                    otherElement.GetFrontSegment()].GetMeanArea()
+                        otherElement.GetFrontSegment()].GetMeanArea()
             # At least one adjacent blanked branch should be found. 
-            if not(adjacentBranchFound):
-                raise RuntimeError('Unexpected error, '  
-                    'adjacent branch not found. Check the connectivity.')
+            if not (adjacentBranchFound):
+                raise RuntimeError('Unexpected error, '
+                                   'adjacent branch not found. Check the connectivity.')
             alpha = S / sumSurfaces
             element.SetAlpha(alpha)
         self.hasComputedAlphas = True
@@ -72,21 +72,21 @@ class FlowSplitting(object):
         applied.
 
         '''
-        if not(self.hasComputedAlphas):
+        if not (self.hasComputedAlphas):
             raise RuntimeError('Alpha coefficients need to be computed first.')
         # For each element of the network, ...
         for element in network.elements:
-            if not(element.IsAnOutlet()):
+            if not (element.IsAnOutlet()):
                 continue
             foundNetworkRoot = False
             beta = 1.0
             currentElement = element
             # ... gather alpha coefficients at each division by scanning
             # the network in direction of the flow inlet.
-            while not(foundNetworkRoot):
+            while not (foundNetworkRoot):
                 if currentElement.GetBehindSegment() == None:
                     raise RuntimeError('The network is constitued of one segment '
-                        'or the input centerlines have a hanging segment.')
+                                       'or the input centerlines have a hanging segment.')
                 behindElement = network.elements[currentElement.GetBehindSegment()]
                 if behindElement.IsBlanked():
                     beta *= behindElement.GetAlpha()
@@ -109,11 +109,11 @@ class FlowSplitting(object):
         '''
         sumAreas = 0.0
         for element in network.elements:
-            if not(element.IsAnOutlet()):
+            if not (element.IsAnOutlet()):
                 continue
             sumAreas += element.GetMeanArea()
         for element in network.elements:
-            if not(element.IsAnOutlet()):
+            if not (element.IsAnOutlet()):
                 continue
             gamma = element.GetMeanArea() / sumAreas
             element.SetGamma(gamma)
@@ -121,7 +121,7 @@ class FlowSplitting(object):
 
     def CheckTotalFlowRate(self, network, verboseprint):
         '''Check if the sum of the outflows is 100%. '''
-        tol = 0.000001 # Flow balance error tolerance.
+        tol = 0.000001  # Flow balance error tolerance.
         if self.hasComputedBetas:
             sumBeta = 0.0
             for element in network.elements:
@@ -136,4 +136,3 @@ class FlowSplitting(object):
                     sumGamma += element.GetGamma()
             if abs(sumGamma - 1.0) > tol:
                 raise RuntimeError('Unexpected error, sum(Gamma) coefficients != 1.0')
-    

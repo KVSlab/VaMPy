@@ -1,5 +1,7 @@
 import vtk
+
 from DisplayData import DisplayModel, VtkPointCloud
+
 version = vtk.vtkVersion().GetVTKMajorVersion()
 
 
@@ -8,10 +10,10 @@ def visualize(networkElements, dataNumpy, outputPolyData, meanInflow):
     scalar = vtk.vtkDoubleArray()
     scalar.SetNumberOfComponents(1)
     for element in networkElements:
-        if not(element.IsAnOutlet()):
+        if not (element.IsAnOutlet()):
             continue
         points.InsertNextPoint(element.GetOutPointsx1()[0])
-        scalar.InsertNextValue(100.0*element.GetBeta())
+        scalar.InsertNextValue(100.0 * element.GetBeta())
     polydata = vtk.vtkPolyData()
     polydata.SetPoints(points)
     polydata.GetPointData().SetScalars(scalar)

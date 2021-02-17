@@ -1,7 +1,6 @@
-from os import path
 from common import *
-from vmtk import vmtkscripts
 from vmtkpointselector import *
+
 
 def provide_aneurysm_points(surface, dir_path=None):
     # Fix surface

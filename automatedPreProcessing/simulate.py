@@ -1,8 +1,10 @@
 from __future__ import print_function
-import os
-import json
-import paramiko
+
 import errno
+import json
+import os
+
+import paramiko
 
 
 def exists(sftp, path):
@@ -67,7 +69,7 @@ def run_simulation(config_path, localDir, caseName):
     # Run script
     script_path = os.path.join(remoteFolder, caseName + ".sh")
 
-    #_, stdout, stderr = client.exec_command('chmod +x {}'.format(script_path))
+    # _, stdout, stderr = client.exec_command('chmod +x {}'.format(script_path))
     stdin, stdout, stderr = client.exec_command(os.path.join(remoteFolder, 'run.sh {}'.format(script_path)))
 
     for msg in stdout:

@@ -664,27 +664,6 @@ def surface_cleaner(surface):
     return surfaceCleaner.GetOutput()
 
 
-def get_area(dir_path):
-    # Check if info exists
-    if not path.isfile(path.join(dir_path, dir_path + ".txt")):
-        compute_centers(surface, dir_path)
-
-    # Open info
-    parameters = get_parameters(dir_path)
-    outlets_area = []
-    for key, value in parameters.items():
-        if key == "inlet_area":
-            inlet_area = value
-        elif "outlet" in key and "area" in key and "relevant" not in key:
-            outlets_area.append(value)
-
-    if len(outlets_area) != 0:
-        outlet_area = []
-        for i in range(len(outlets_area)):
-            outlet_area.append(parameters["outlet%d_area" % i])
-
-    return inlet_area, outlet_area
-
 
 def get_centers(surface, dir_path, flowext=False):
     # Check if info exists
