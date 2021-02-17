@@ -1,0 +1,53 @@
+language: python
+
+notifications:
+  email:
+    recipients:
+      - henrik.kjeldsberg@live.no
+    on_success: never   # default: change
+    on_failure: always  # default: always
+
+matrix:
+  include:
+    - os: linux
+      python: 3.8
+
+install:
+  # Install conda
+  - wget https://repo.anaconda.com/miniconda/Miniconda3-latest-Linux-x86_64.sh -O ~/miniconda.sh
+  - bash ~/miniconda.sh -b -p $HOME/miniconda
+
+  # Export path
+  - export PATH="$HOME/miniconda/bin:$PATH"
+  - hash -r
+
+  # Set conda parameters
+  - conda config --set restore_free_channel true
+  - conda config --set always_yes yes --set changeps1 no
+  - conda config --add channels vmtk
+
+  # Set up environment
+  - conda create -n vmtk_env vmtk pytest itk vtk llvm=3.3 paramiko
+
+  # Activate environment
+  - source activate vmtk_env
+
+  # Useful for debugging any issues with conda
+  - conda info -a
+
+  # / -> // in vmtkcenterlines.py and vmtksurfacecurvature.py
+  - sed -i -e 's/len(self.SourcePoints)\/3/len\(self.SourcePoints\)\/\/3/g' ../../../miniconda/envs/vmtk_env/lib/python3.6/site-packages/vmtk/vmtkcenterlines.py
+  - sed -i -e 's/len(self.TargetPoints)\/3/len\(self.TargetPoints\)\/\/3/g' ../../../miniconda/envs/vmtk_env/lib/python3.6/site-packages/vmtk/vmtkcenterlines.py
+  - sed -i -e 's/(len(values) - 1)\/2/\(len\(values\) - 1\)\/\/2/g' ../../../miniconda/envs/vmtk_env/lib/python3.6/site-packages/vmtk/vmtksurfacecurvature.py
+
+  # Dependencies for code coverage
+  - pip install pytest-cov codecov
+
+
+script:
+  - cd test
+  - pytest --cov=./
+
+# Push the results back to codecov
+after_success:
+  - bash <(curl -s https://codecov.io/bash)

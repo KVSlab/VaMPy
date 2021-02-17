@@ -1,4 +1,6 @@
 # Aneurysm_workflow
+[![Build Status](https://travis-ci.com/KVSlab/Aneurysm_workflow.svg?token=qbve9tcy6am6sUJksBcu&branch=master)](https://travis-ci.com/KVSlab/Aneurysm_workflow)
+[![codecov](https://codecov.io/gh/KVSlab/Aneurysm_workflow/branch/master/graph/badge.svg?token=M2NMX6HOSZ)](https://codecov.io/gh/KVSlab/Aneurysm_workflow)
 
 This is a collection of scripts to run an aneurysm problem with Oasis. There are also scripts for a variety of post-processing; WSS-based matrics, more advanced turbulence metrics, and a variety of morphological parameters. The latter is implemented through automated neck plane detection, but are not adapted to the `Aneurysm_workflow` pipeline and are here merely for convenience.
 
@@ -50,13 +52,13 @@ First, use the automatedPreProcessing to create a mesh, boundary conditions, and
 
 ```
 conda deactivate && conda activate vtk
-python automatedPreProcessing/automatedPreProcessing.py -m diameter -i test/Case_test_71.vtp --aneurysm False -c 1.3
+python automatedPreProcessing/automatedPreProcessing.py -m diameter -i test/Case_test_71/Case_test_71.vtp --aneurysm False -c 1.3
 ```
 
 Then run a CFD simulation for two cycles with 10 000 time steps per cycle and default parameters with Oasis:
 ```
 conda deactivate && conda activate fenics
-oasis NSfracStep problem=Artery mesh_path=test/Case_test_71.xml.gz
+oasis NSfracStep problem=Artery mesh_path=test/Case_test_71/Case_test_71.xml.gz
 ```
 
 Finally, you can create the WSS from the CFD simulation:
