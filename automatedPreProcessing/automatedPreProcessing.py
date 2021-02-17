@@ -7,8 +7,8 @@ import json
 import ImportData
 import ToolRepairSTL
 from NetworkBoundaryConditions import FlowSplitting
+from common import *
 # Local imports
-from set_aneurysm import *
 from simulate import run_simulation
 from visualize import visualize
 
@@ -462,6 +462,15 @@ def run_pre_processing(filename_model, verbose_print, smoothing_method, smoothin
 
 
 def str2bool(arg):
+    """
+    Convert a string to boolean.
+
+    Args:
+        arg (str): Input string.
+
+    Returns:
+        return (bool): Converted string.
+    """
     if arg.lower() in ('yes', 'true', 't', 'y', '1'):
         return True
     elif arg.lower() in ('no', 'false', 'f', 'n', '0'):
