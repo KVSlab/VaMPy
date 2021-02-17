@@ -1,4 +1,4 @@
-# Aneurysm_workflow
+# Aneurysm workflow
 [![Build Status](https://travis-ci.com/KVSlab/Aneurysm_workflow.svg?token=qbve9tcy6am6sUJksBcu&branch=master)](https://travis-ci.com/KVSlab/Aneurysm_workflow)
 [![codecov](https://codecov.io/gh/KVSlab/Aneurysm_workflow/branch/master/graph/badge.svg?token=M2NMX6HOSZ)](https://codecov.io/gh/KVSlab/Aneurysm_workflow)
 
@@ -10,7 +10,7 @@
 </p>
 
 ## Description
-This is a collection of scripts to run an aneurysm problem with Oasis. There are also scripts for a variety of post-processing; WSS-based metrics, more advanced turbulence metrics, and a variety of morphological parameters. The latter is implemented through automated neck plane detection, but are not adapted to the `Aneurysm_workflow` pipeline and are here merely for convenience.
+Aneurysm workflow is a collection of scripts to run an aneurysm problem with [Oasis](https://github.com/mikaem/Oasis). There are also scripts for a variety of post-processing; WSS-based metrics, more advanced turbulence metrics, and a variety of morphological parameters. The latter is implemented through automated neck plane detection, but are not adapted to the `Aneurysm_workflow` pipeline and are here merely for convenience.
 
 ## Authors
 These scripts was written by
@@ -35,7 +35,7 @@ gzfile = gzip.open(self.OutputFileName, 'wb')
 ```
 Please note that these changes are fixed in the development version of vmtk, but a new version has not been released in a long time.
 
-Now, you need to install `Oasis`and `fenicstools`. You can do so with the following commands:
+Now, you need to install [`Oasis`](https://github.com/mikaem/Oasis) and [`fenicstools`](https://github.com/mikaem/fenicstools/). You can do so with the following commands:
 ```
 conda activate fenics
 cd [path_to_your_installation_folder]
