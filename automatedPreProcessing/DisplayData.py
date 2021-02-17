@@ -48,7 +48,6 @@ class VtkText:
         self.text = vtk.vtkTextActor()
         self.text.SetInputData(guiText)
         textProperties = self.text.GetTextProperty()
-        # textProperties.SetFontFamilyToArial()
         textProperties.SetFontSize(15)
         textProperties.SetColor(1, 1, 1)
         self.text.SetDisplayPosition(20, 30)
