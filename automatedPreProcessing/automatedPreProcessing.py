@@ -129,7 +129,7 @@ def run_pre_processing(filename_model, verbose_print, smoothing_method, smoothin
                     if dist <= tol:
                         break
 
-                tmp = ExtractSingleLine(line, 0, startID=j)
+                tmp = ExtractSingleLine(line, 0, start_id=j)
                 WritePolyData(tmp, file_name_sac_centerlines.format(i))
 
                 # List of VtkPolyData sac(s) centerline

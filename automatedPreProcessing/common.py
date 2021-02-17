@@ -782,7 +782,7 @@ def getData(centerline_par, centerline_dau1, centerline_dau2, tol, aneurysm_type
                 break
 
         end, r_end = move_past_sphere(centerline, center, r, point_ID_0,
-                                      stop=point_ID_0 * 100, step=1, X=1)
+                                      stop=point_ID_0 * 100, step=1, scale_factor=1)
 
         data[key]["end_point"] = end
         data[key]["r_end"] = r_end
@@ -1510,6 +1510,17 @@ def generate_mesh(surface):
 
 
 def create_vtk_array(values, name, k=1):
+    """
+    Given a set of numpy values, and a name of the array create vtk array
+
+    Args:
+        values (list, ndarray): List of the values.
+        name (str): Name of the array.
+        k (int): Length of tuple.
+
+    Returns:
+        vtk_array (vtkPointArray): vtk point array
+    """
     vtkArray = get_vtk_array(name, k, values.shape[0])
 
     if k == 1:
@@ -1531,6 +1542,15 @@ def create_vtk_array(values, name, k=1):
 
 
 def GramSchmidt(V):
+    """
+    Gram schmidt process of each column
+
+    Args:
+        V (numpy.array): A (n x n) matrix
+
+    Returns:
+        E (numpy.array): A (n x n) matrix where all the columns are orthogonal
+    """
     V = 1.0 * V
     U = np.copy(V)
 
@@ -1548,6 +1568,15 @@ def GramSchmidt(V):
 
 
 def get_parameters(dir_path):
+    """
+    Read the parameters in the info file.
+
+    Args:
+        dir_path (str): Path to folder.
+
+    Returns:
+        data (dict): The data in the info file.
+    """
     # If info.txt file, return an empty dict
     if not path.isfile(dir_path + ".txt"): return {}
 
@@ -1576,6 +1605,13 @@ def get_parameters(dir_path):
 
 
 def write_parameters(data, dir_path):
+    """
+    Get the old parameters, then write the new parameters in data.
+
+    Args:
+        data (dict): New data to write to parameters
+        dir_path (str): Path to data location.
+    """
     # Get old parameters
     parameters = get_parameters(dir_path)
 
@@ -1594,6 +1630,17 @@ def write_parameters(data, dir_path):
 
 
 def data_to_vtkPolyData(data, header, TNB=None, PT=None):
+    """Converting a range of data to a vtk array.
+
+    Args:
+        data (numpy.ndarray): Data array.
+        header (list): A list of names for each array.
+        TNB (numpy.ndarray): Data array.
+        PT (numpy.ndarray): Data array.
+
+    Returns:
+        line (vtkPolyData): Line couple with all the new data.
+    """
     line = vtk.vtkPolyData()
     cellArray = vtk.vtkCellArray()
     cellArray.InsertNextCell(data.shape[0])
@@ -1643,6 +1690,15 @@ def data_to_vtkPolyData(data, header, TNB=None, PT=None):
 
 
 def get_number_of_arrays(line):
+    """Returns the names and number of arrays for a centerline
+
+    Args:
+        line (vtkPolyData): Line to investigate
+
+    Returns:
+        count (int): Number of arrays in the line.
+        names (list): A list of names of the arrays.
+    """
     count = 0
     names = []
     name = 0
@@ -1655,14 +1711,26 @@ def get_number_of_arrays(line):
     return count, names
 
 
-def ExtractSingleLine(centerlines, id, startID=0, endID=None):
+def ExtractSingleLine(centerlines, line_id, start_id=0, end_id=None):
+    """Extract one line from multiple centerlines.
+    If start_id and end_id is set then only a segment of the centerline is extracted.
+
+    Args:
+        centerlines (vtkPolyData): Centerline to extract.
+        line_id (int): The line ID to extract.
+        start_id (int): Point ID to start at
+        end_id (int): Point ID to stop at
+
+    Returns:
+        centerline (vtkPolyData): The single line extracted
+    """
     cell = vtk.vtkGenericCell()
-    centerlines.GetCell(id, cell)
-    N = cell.GetNumberOfPoints() if endID is None else endID + 1
+    centerlines.GetCell(line_id, cell)
+    N = cell.GetNumberOfPoints() if end_id is None else end_id + 1
 
     line = vtk.vtkPolyData()
     cellArray = vtk.vtkCellArray()
-    cellArray.InsertNextCell(N - startID)
+    cellArray.InsertNextCell(N - start_id)
     linePoints = vtk.vtkPoints()
 
     arrays = []
@@ -1670,7 +1738,7 @@ def ExtractSingleLine(centerlines, id, startID=0, endID=None):
     for i in range(N_):
         tmp = centerlines.GetPointData().GetArray(names[i])
         tmp_comp = tmp.GetNumberOfComponents()
-        radiusArray = get_vtk_array(names[i], tmp_comp, N - startID)
+        radiusArray = get_vtk_array(names[i], tmp_comp, N - start_id)
         arrays.append(radiusArray)
 
     getArray = []
@@ -1678,7 +1746,7 @@ def ExtractSingleLine(centerlines, id, startID=0, endID=None):
         getArray.append(centerlines.GetPointData().GetArray(names[i]))
 
     count = 0
-    for i in range(startID, N):
+    for i in range(start_id, N):
         cellArray.InsertCellPoint(count)
         linePoints.InsertNextPoint(cell.GetPoints().GetPoint(i))
 
@@ -1706,12 +1774,28 @@ def ExtractSingleLine(centerlines, id, startID=0, endID=None):
     return line
 
 
-def move_past_sphere(centerline, center, r, start, step=-1, stop=0, X=0.8):
-    """Moves a point along the centerline until it as outside MIS"""
+def move_past_sphere(centerline, center, r, start, step=-1, stop=0, scale_factor=0.8):
+    """Moves a point along the centerline until it as outside the a sphere with radius (r)
+    and a center (center).
+
+    Args:
+        centerline (vtkPolyData): Centerline to move along.
+        center (list): point list of the center of the sphere
+        r (float): the radius of a sphere
+        start (int): id of the point along the centerline where to start.
+        step (int): direction along the centerline.
+        stop (int): ID along centerline, for when to stop searching.
+        scale_factor (float): Scale the radius with this factor.
+
+    Returns:
+        tempPoint (list): The first point on the centerline outside the sphere
+        r (float): minimal inscribed sphere radius at the new point.
+    """
+
     # Create the minimal inscribed sphere
     MISphere = vtk.vtkSphere()
     MISphere.SetCenter(center)
-    MISphere.SetRadius(r * X)
+    MISphere.SetRadius(r * scale_factor)
     tempPoint = [0.0, 0.0, 0.0]
 
     # Go the length of one MISR backwards
@@ -1853,6 +1937,18 @@ def mesh_alternative(surface):
 
 
 def vmtkSmoother(surface, method, iterations=600):
+    """
+    Wrapper for a vmtksurfacesmoothing.
+
+    Args:
+        surface (vtkPolyData): Input surface to be smoothed.
+        method (str): Smoothing method.
+        iterations (int): Number of iterations.
+
+    Returns:
+        surface (vtkPolyData): The smoothed surface.
+    """
+
     smoother = vmtkscripts.vmtkSurfaceSmoothing()
     smoother.Surface = surface
     smoother.NumberOfIterations = iterations
