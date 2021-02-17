@@ -73,7 +73,7 @@ def CreateCenterlines(points, centerlines, aneurysmType):
         id_end = locator.FindClosestPoint(points.GetPoint(1))
 
         # Extract relevant section
-        section = ExtractSingleLine(line1, 0, startID=id1_start, endID=id1_end)
+        section = ExtractSingleLine(line1, 0, start_id=id1_start, end_id=id1_end)
 
     # For Terminal Aneurysms
     else:
@@ -105,8 +105,8 @@ def CreateCenterlines(points, centerlines, aneurysmType):
             id2_end = id2_end1
 
         # Extract relevant section
-        section1 = ExtractSingleLine(line1, 0, startID=id1_start, endID=id1_end)
-        section2 = ExtractSingleLine(line2, 0, startID=id2_start, endID=id2_end)
+        section1 = ExtractSingleLine(line1, 0, start_id=id1_start, end_id=id1_end)
+        section2 = ExtractSingleLine(line2, 0, start_id=id2_start, end_id=id2_end)
 
         # Merge the two centerlines
         section = merge_data([section1, section2])

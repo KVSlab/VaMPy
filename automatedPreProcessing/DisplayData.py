@@ -41,13 +41,13 @@ class VtkPointCloud:
         self.vtkPolyData.SetPoints(self.vtkPoints)
         self.vtkPolyData.SetVerts(self.vtkCells)
 
+
 class VtkText:
 
     def __init__(self, guiText=""):
         self.text = vtk.vtkTextActor()
         self.text.SetInputData(guiText)
         textProperties = self.text.GetTextProperty()
-        #textProperties.SetFontFamilyToArial()
         textProperties.SetFontSize(15)
         textProperties.SetColor(1, 1, 1)
         self.text.SetDisplayPosition(20, 30)
@@ -56,8 +56,8 @@ class VtkText:
 class DisplayModel(object):
 
     def polyDataToActor(self, polyData, opacity=1.0):
-        '''Wrap the provided vtkPolyData object in a mapper and an actor, 
-        returning the actor. '''
+        """Wrap the provided vtkPolyData object in a mapper and an actor,
+        returning the actor. """
         mapper = vtk.vtkPolyDataMapper()
         if vtk.VTK_MAJOR_VERSION > 5:
             mapper.SetInputData(polyData)
@@ -67,22 +67,22 @@ class DisplayModel(object):
         actor.SetMapper(mapper)
         actor.GetProperty().SetOpacity(opacity)
 
-        return(actor)
+        return (actor)
 
     def setLight(self, renderer):
         lightKit = vtk.vtkLightKit()
         lightKit.MaintainLuminanceOn()
         lightKit.SetKeyLightIntensity(0.8)
         # 0 cold blue, 0.5 neutral white, 1 is reddish
-        lightKit.SetKeyLightWarmth(0.5) 
+        lightKit.SetKeyLightWarmth(0.5)
         lightKit.SetFillLightWarmth(0.5)
-      
+
         # The function is called SetHeadLightWarmth starting from VTK 5.0
-        try :
-          lightKit.SetHeadLightWarmth(0.5)
-        except :
-          lightKit.SetHeadlightWarmth(0.5)
-      
+        try:
+            lightKit.SetHeadLightWarmth(0.5)
+        except:
+            lightKit.SetHeadlightWarmth(0.5)
+
         # intensity ratios
         lightKit.SetKeyToFillRatio(2.)
         lightKit.SetKeyToHeadRatio(7.)
@@ -100,15 +100,15 @@ class DisplayModel(object):
         interactor.SetRenderWindow(renderWindow)
         interactorStyle = vtk.vtkInteractorStyleTrackballCamera()
         interactor.SetInteractorStyle(interactorStyle)
-        
+
         # Initialize and start the interactor.
         interactor.Initialize()
         interactor.Start()
 
-    def DisplayProbesAndModel(self, centerline, fileNameCenterline, 
-        listProbePoints, model=None):
-        '''Displays a model and the corresponding probe points along 
-        the centerline. '''
+    def DisplayProbesAndModel(self, centerline, fileNameCenterline,
+                              listProbePoints, model=None):
+        """Displays a model and the corresponding probe points along
+        the centerline. """
 
         if model is None:
             isDisplayingModel = False
@@ -125,7 +125,7 @@ class DisplayModel(object):
         ren = vtk.vtkRenderer()
         renWindows = vtk.vtkRenderWindow()
         renWindows.AddRenderer(ren)
-         
+
         # Create a renderwindowinteractor
         iren = vtk.vtkRenderWindowInteractor()
         iren.SetRenderWindow(renWindows)
@@ -133,7 +133,7 @@ class DisplayModel(object):
         # Assign a control style.
         style = vtk.vtkInteractorStyleTrackballCamera()
         iren.SetInteractorStyle(style)
-         
+
         # Assign actor to the renderer.
         ren.AddActor(pointCloud.vtkActor)
         if isDisplayingModel:
@@ -145,17 +145,17 @@ class DisplayModel(object):
 
         # Create a text actor.
         txt = vtk.vtkTextActor()
-        guiText = ("Centerline file name: " 
-            + repr(fileNameCenterline.rsplit('/', 1)[-1]) + "\n" 
-            + "Number of probes: " + repr(len(listProbePoints)) + "\n" 
-            + "Q to exit.")
+        guiText = ("Centerline file name: "
+                   + repr(fileNameCenterline.rsplit('/', 1)[-1]) + "\n"
+                   + "Number of probes: " + repr(len(listProbePoints)) + "\n"
+                   + "Q to exit.")
         txt.SetInputData(guiText)
         txtprop = txt.GetTextProperty()
         txtprop.SetFontFamilyToArial()
         txtprop.SetFontSize(15)
         txtprop.SetColor(1, 1, 1)
         txt.SetDisplayPosition(20, 30)
- 
+
         # Assign actor to the renderer.
         ren.AddActor(txt)
 
@@ -164,4 +164,3 @@ class DisplayModel(object):
         renWindows.Render()
         renWindows.SetWindowName("Probe Points.")
         iren.Start()
-
