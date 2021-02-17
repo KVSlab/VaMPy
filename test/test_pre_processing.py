@@ -9,7 +9,7 @@ from automatedPreProcessing.automatedPreProcessing import read_command_line, run
 
 def test_pre_processing():
     model_path = "Case_test_71/Case_test_71.vtp"
-    # Get default inputsc
+    # Get default input parameters
     common_input = read_command_line()
     common_input.update(dict(meshing_method="diameter",
                              filename_model=model_path,
@@ -18,7 +18,7 @@ def test_pre_processing():
                              viz=False,
                              compress_mesh=False))
 
-    # Run pre processesing 
+    # Run pre processing
     run_pre_processing(**common_input)
 
     # Check that mesh is created
