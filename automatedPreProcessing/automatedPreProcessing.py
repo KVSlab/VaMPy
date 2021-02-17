@@ -367,7 +367,7 @@ def run_pre_processing(filename_model, verbose_print, smoothing_method, smoothin
 
     # BSL method for mean inlet flow rate.
     parameters = get_parameters(path.join(dir_path, case_name))
-    meanInflow = 0.27 * parameters["inlet_area"]
+    mean_inflow_rate = 0.27 * parameters["inlet_area"]
 
     # Extract the surface mesh of the wall
     wallMesh = threshold(polyDataVolMesh, "CellEntityIds", lower=0.5, upper=1.5,
@@ -410,7 +410,7 @@ def run_pre_processing(filename_model, verbose_print, smoothing_method, smoothin
         if network.elements[closest].IsAnInlet():
             verbose_print('I am the inlet, Sup?')
             verbose_print(network.elements[closest].GetInPointsx0()[0])
-            ids.insert(0, [cellEntityId, meanInflow])
+            ids.insert(0, [cellEntityId, mean_inflow_rate])
         else:
             beta = network.elements[closest].GetBeta()
             ids.append([cellEntityId, beta])
@@ -436,7 +436,7 @@ def run_pre_processing(filename_model, verbose_print, smoothing_method, smoothin
 
     # Display the flow split at the outlets, inlet flowrate, and probes.
     if viz:
-        visualize(network.elements, dataNumpy, surface, meanInflow)
+        visualize(network.elements, dataNumpy, surface, mean_inflow_rate)
 
     # Start simulation though ssh, without password
     if config_path is not None:

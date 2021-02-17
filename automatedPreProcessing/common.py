@@ -5,7 +5,7 @@ from vmtk import vtkvmtk, vmtkscripts
 
 try:
     from vmtkpointselector import *
-except:
+except ImportError:
     pass
 import numpy as np
 import sys
@@ -27,7 +27,7 @@ edgeArrayName = 'EdgeArray'
 edgePCoordArrayName = 'EdgePCoordArray'
 costFunctionArrayName = 'CostFunctionArray'
 
-# Options not availeble from commandline
+# Options not available from commandline
 divergingRatioToSpacingTolerance = 2.0
 interpolationHalfSize = 3
 voronoiCoreCutOffThreshold = 0.75

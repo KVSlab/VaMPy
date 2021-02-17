@@ -29,7 +29,7 @@ def run_simulation(config_path, localDir, caseName):
         hostname = config['hostname']
         username = config['username']
         password = config['password']
-        remoteFolder = config['remoteFolder']
+        remote_folder = config['remoteFolder']
     except KeyError:
         raise ValueError('Invalid configuration file')
 
@@ -39,33 +39,33 @@ def run_simulation(config_path, localDir, caseName):
     home = str(stdout.read().strip())
 
     sftp = client.open_sftp()
-    remoteFolder = os.path.join(home, remoteFolder)
+    remote_folder = os.path.join(home, remote_folder)
 
     # Uplad run script
-    sftp.chdir(os.path.join(remoteFolder))
+    sftp.chdir(os.path.join(remote_folder))
     if not exists(sftp, caseName + ".sh"):
         sftp.put(os.path.join(localDir, caseName + ".sh"), caseName + ".sh")
 
     # Upload mesh 
-    sftp.chdir(os.path.join(remoteFolder, "mesh"))
+    sftp.chdir(os.path.join(remote_folder, "mesh"))
     if not exists(sftp, caseName + ".xml.gz"):
         sftp.put(os.path.join(localDir, caseName + ".xml.gz"), caseName + ".xml.gz")
 
     # Upload probe points and info
-    sftp.chdir(os.path.join(remoteFolder, "input"))
+    sftp.chdir(os.path.join(remote_folder, "input"))
     if not exists(sftp, caseName + "_probe_point"):
         sftp.put(os.path.join(localDir, caseName + "_probe_point"), caseName + "_probe_point")
     if not exists(sftp, caseName + ".txt"):
         sftp.put(os.path.join(localDir, caseName + ".txt"), caseName + ".txt")
 
-    if not exists(sftp, os.path.join(remoteFolder, "results", caseName)):
-        sftp.mkdir(os.path.join(remoteFolder, "results", caseName))
+    if not exists(sftp, os.path.join(remote_folder, "results", caseName)):
+        sftp.mkdir(os.path.join(remote_folder, "results", caseName))
 
     sftp.close()
 
     # Run script
-    script_path = os.path.join(remoteFolder, caseName + ".sh")
-    stdin, stdout, stderr = client.exec_command(os.path.join(remoteFolder, 'run.sh {}'.format(script_path)))
+    script_path = os.path.join(remote_folder, caseName + ".sh")
+    stdin, stdout, stderr = client.exec_command(os.path.join(remote_folder, 'run.sh {}'.format(script_path)))
 
     for msg in stdout:
         print(msg)
