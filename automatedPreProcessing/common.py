@@ -1,7 +1,6 @@
 import json
 
 import vtk
-from IPython import embed
 from vmtk import vtkvmtk, vmtkscripts
 
 try:
