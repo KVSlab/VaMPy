@@ -1,11 +1,12 @@
+import json
 import pickle
-from os import path, makedirs, getcwd
+from os import path, makedirs
 
 import numpy as np
 from fenicstools import Probes
 from oasis.problems.NSfracStep import *
 
-from Womersley import make_womersley_bcs, compute_boundary_geometry_acrn
+from .Womersley import make_womersley_bcs, compute_boundary_geometry_acrn
 
 set_log_level(50)
 
@@ -47,32 +48,26 @@ def problem_parameters(commandline_kwargs, NS_parameters, NS_expressions, **NS_n
 
 def mesh(mesh_path, **NS_namespace):
     # Read mesh
-    mesh_folder = path.join(path.dirname(path.abspath(__file__)), mesh_path)
-    return Mesh(mesh_folder)
+    return Mesh(mesh_path)
 
 
-def create_bcs(u_, t, NS_expressions, V, Q, area_ratio, mesh, folder, mesh_path, nu,
-               id_in, id_out, velocity_degree, pressure_degree, no_of_cycles,
-               T, **NS_namespace):
+def create_bcs(t, NS_expressions, V, Q, area_ratio, mesh, mesh_path, nu, id_in, id_out, pressure_degree, **NS_namespace):
     # Mesh function
     fd = MeshFunction("size_t", mesh, mesh.geometry().dim() - 1, mesh.domains())
 
-    # Extract flow split ratios
-    info = open(path.join(path.dirname(path.abspath(__file__)), mesh_path.split(".")[0] \
-                           + ".txt"), "r").readlines()
-    for line in info:
-        if "inlet_area" in line:
-            inlet_area = float(line.split(":")[-1])
-        elif "idFileLine" in line:
-            _, _, id_in_, id_out_, Q_mean = line.split()
-            id_in.append(int(id_in_))
-            id_out[:] = [int(p) for p in id_out_.split(",")]
-            Q_mean = float(Q_mean)
-        elif "areaRatioLine" in line:
-            area_ratio[:] = [float(p) for p in line.split()[-1].split(",")]
+    # Read case parameters
+    info_path = mesh_path.split(".")[0] + ".json"
+    with open(info_path) as f:
+        info = json.load(f)
 
-    # Womersley boundary condition at inlet 
-    t_values = np.linspace(0, T)
+    # Extract flow split ratios and inlet/outlet IDs
+    id_info = info['idFileLine'].split()
+    id_in.append(int(id_info[1]))
+    id_out[:] = [int(p) for p in id_info[2].split(",")]
+    Q_mean = float(id_info[3])
+    area_ratio[:] = [float(p) for p in info['areaRatioLine'].split()[-1].split(",")]
+
+    # Womersley boundary condition at inlet
     t_values, Q_ = np.load(path.join(path.dirname(path.abspath(__file__)), "ICA_values"))
     Q_values = Q_mean * Q_
     t_values *= 1000
@@ -151,7 +146,7 @@ def pre_solve_hook(mesh, V, Q, newfolder, folder, u_, mesh_path,
     fd = MeshFunction("size_t", mesh, 2, mesh.domains())
     n = FacetNormal(mesh)
     eval_dict = {}
-    rel_path = path.join(path.dirname(path.abspath(__file__)), mesh_path.split(".")[0] + "_probe_point")
+    rel_path = mesh_path.split(".")[0] + "_probe_point"
     probe_points = np.load(rel_path, allow_pickle=True)
 
     # Store points file in checkpoint
