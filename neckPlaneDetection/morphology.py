@@ -190,10 +190,10 @@ def compute_morphology(team, case, data, i):
                   parameters["dau2"]["end_point"]]
 
         # Merge the two centerlines
-        section1 = ExtractSingleLine(relevant_centerline, 0, startID=5)
-        section2 = ExtractSingleLine(relevant_centerline, 1, startID=5)
-        section1 = ExtractSingleLine(section1, 0, endID=section1.GetNumberOfPoints() - 10)
-        section2 = ExtractSingleLine(section2, 0, endID=section2.GetNumberOfPoints() - 10)
+        section1 = ExtractSingleLine(relevant_centerline, 0, start_id=5)
+        section2 = ExtractSingleLine(relevant_centerline, 1, start_id=5)
+        section1 = ExtractSingleLine(section1, 0, end_id=section1.GetNumberOfPoints() - 10)
+        section2 = ExtractSingleLine(section2, 0, end_id=section2.GetNumberOfPoints() - 10)
         centerline_no_end = merge_data([section1, section2])
 
         # Compute area along the centerline

@@ -1,17 +1,29 @@
 import vtk
+
 from DisplayData import DisplayModel, VtkPointCloud
+
 version = vtk.vtkVersion().GetVTKMajorVersion()
 
 
-def visualize(networkElements, dataNumpy, outputPolyData, meanInflow):
+def visualize(network_elements, probe_points, output_surface, mean_inflow_rate):
+    """
+    Visualize surface model / mesh with distributed flow rates at each inlet/outlet
+    in an interactive VTK window.
+
+    Args:
+        network_elements (list): List of inlet/outlet elements within a surface model network
+        probe_points (ndarray): Array of probe points
+        output_surface (vtkPolyData): Surface model to visualize
+        mean_inflow_rate (float): Mean inflow rate of input model
+    """
     points = vtk.vtkPoints()
     scalar = vtk.vtkDoubleArray()
     scalar.SetNumberOfComponents(1)
-    for element in networkElements:
-        if not(element.IsAnOutlet()):
+    for element in network_elements:
+        if not (element.IsAnOutlet()):
             continue
         points.InsertNextPoint(element.GetOutPointsx1()[0])
-        scalar.InsertNextValue(100.0*element.GetBeta())
+        scalar.InsertNextValue(100.0 * element.GetBeta())
     polydata = vtk.vtkPolyData()
     polydata.SetPoints(points)
     polydata.GetPointData().SetScalars(scalar)
@@ -19,10 +31,10 @@ def visualize(networkElements, dataNumpy, outputPolyData, meanInflow):
     pointInlet = vtk.vtkPoints()
     scalarInlet = vtk.vtkDoubleArray()
     scalarInlet.SetNumberOfComponents(1)
-    for element in networkElements:
+    for element in network_elements:
         if element.IsAnInlet():
             pointInlet.InsertNextPoint(element.GetInPointsx0()[0])
-            scalarInlet.InsertNextValue(meanInflow)
+            scalarInlet.InsertNextValue(mean_inflow_rate)
             break
 
     polydataInlet = vtk.vtkPolyData()
@@ -42,9 +54,11 @@ def visualize(networkElements, dataNumpy, outputPolyData, meanInflow):
 
     labelProperties = labelMapperInlet.GetLabelTextProperty()
     labelProperties.SetFontFamilyToArial()
+    labelProperties.SetFontSize(30)
 
     labelProperties = labelMapper.GetLabelTextProperty()
     labelProperties.SetFontFamilyToArial()
+    labelProperties.SetFontSize(30)
 
     labelsInlet = vtk.vtkActor2D()
     labelsInlet.SetMapper(labelMapperInlet)
@@ -55,8 +69,8 @@ def visualize(networkElements, dataNumpy, outputPolyData, meanInflow):
 
     # Create a cloud of points from the list of probe points.
     pointCloud = VtkPointCloud()
-    for i in range(dataNumpy.shape[0]):
-        pointCloud.addPoint(dataNumpy[i])
+    for i in range(probe_points.shape[0]):
+        pointCloud.addPoint(probe_points[i])
 
     # Create the renderer
     renderer = vtk.vtkRenderer()
@@ -65,8 +79,8 @@ def visualize(networkElements, dataNumpy, outputPolyData, meanInflow):
     renderer.AddActor(pointCloud.vtkActor)
 
     opacity = 0.3
-    renderer.AddActor(DisplayModel().polyDataToActor(outputPolyData, opacity))
-    renderer.SetBackground(.2, .3, .4)
+    renderer.AddActor(DisplayModel().polyDataToActor(output_surface, opacity))
+    renderer.SetBackground(0.1, 0.1, 0.2)
 
     # Set the lights of the renderer
     DisplayModel().setLight(renderer)
