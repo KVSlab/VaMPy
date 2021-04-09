@@ -1,7 +1,6 @@
 from __future__ import print_function
 
 from pathlib import Path
-
 import numpy as np
 from dolfin import *
 
@@ -26,24 +25,19 @@ def compute_wss(case_path, nu, dt):
     """
     # File paths
     case_path = Path(case_path)
-    file_path_x = case_path / "u0.xdmf"
-    file_path_y = case_path / "u1.xdmf"
-    file_path_z = case_path / "u2.xdmf"
-    mesh_path = case_path / "mesh.xdmf"
-
-    # Read headers in HDF5 files
-    f_0 = XDMFFile(MPI.comm_world, file_path_x.__str__())
-    f_1 = XDMFFile(MPI.comm_world, file_path_y.__str__())
-    f_2 = XDMFFile(MPI.comm_world, file_path_z.__str__())
+    file_path_x = case_path / "u0.h5"
+    file_path_y = case_path / "u1.h5"
+    file_path_z = case_path / "u2.h5"
+    mesh_path = case_path / "mesh.h5"
 
     # Start post-processing from 2nd cycle using every 10th time step, or 2000 time steps per cycle
-    start = 2000  # save_data = 5 -> 10000 / 5 = 2000
+    start = 0  # save_data = 5 -> 10000 / 5 = 2000
     step = 2  # save_data = 5 ->    10 / 5 = 2
 
-    # Read mesh
+    # Read mesh saved as HDF5 format
     mesh = Mesh()
-    with XDMFFile(MPI.comm_world, mesh_path.__str__()) as mesh_file:
-        mesh_file.read(mesh)
+    with HDF5File(MPI.comm_world, mesh_path.__str__(), "r") as mesh_file:
+        mesh_file.read(mesh, "mesh", False)
 
     # Load mesh
     bm = BoundaryMesh(mesh, 'exterior')
@@ -89,14 +83,17 @@ def compute_wss(case_path, nu, dt):
 
     file_counter = start
     while True:
-        if MPI.rank(MPI.comm_world) == 0:
-            print("Timestep", file_counter * 5)
-
         # Read velocity components to respective functions and assign them to vector function u
         try:
-            f_0.read_checkpoint(u0, "u0", file_counter)
-            f_1.read_checkpoint(u1, "u1", file_counter)
-            f_2.read_checkpoint(u2, "u2", file_counter)
+            f1 = HDF5File(MPI.comm_world, file_path_x.__str__(), "r")
+            f2 = HDF5File(MPI.comm_world, file_path_y.__str__(), "r")
+            f3 = HDF5File(MPI.comm_world, file_path_z.__str__(), "r")
+            vec_name = "/velocity/vector_%d" % file_counter
+            timestamp = f1.attributes(vec_name)["timestamp"]
+            print("Timestep: {}".format(timestamp))
+            f1.read(u0, vec_name)
+            f2.read(u1, vec_name)
+            f3.read(u2, vec_name)
         except:
             print("Failed to read in velocity at file_counter={}".format(file_counter))
             break
@@ -149,51 +146,49 @@ def compute_wss(case_path, nu, dt):
         OSI_arr = OSI.vector().get_local()
         OSI_arr[OSI_arr.nonzero()[0]] = 1e-6
         OSI_arr[np.isnan(OSI_arr)] = 1e-6
-        OSI.vector().set_local(0.5 * (1 - rrt_arr / OSI_arr))
+        OSI.vector().set_local(0.5*(1 - rrt_arr / OSI_arr))
         OSI.vector().apply("insert")
         save = True
     except:
-        print("Fail for OSI and RRT")
+        print("Failed to compute OSI and RRT")
         save = False
 
     if save:
-        osi_file = File((case_path / "OSI.xml.gz").__str__())
-        osi_file << OSI
-        del osi_file
+        # Save OSI and RRT
+        rrt_path = (case_path / "RRT.xdmf").__str__()
+        osi_path = (case_path / "OSI.xdmf").__str__()
 
-        osi_file = File((case_path / "OSI.pvd").__str__())
-        osi_file << OSI
-        del osi_file
+        rrt = XDMFFile(MPI.comm_world, rrt_path)
+        osi = XDMFFile(MPI.comm_world, osi_path)
 
-        rrt_file = File((case_path / "RRT.xml.gz").__str__())
-        rrt_file << RRT
-        del rrt_file
+        for f in [rrt, osi]:
+            f.parameters["flush_output"] = True
+            f.parameters["functions_share_mesh"] = True
+            f.parameters["rewrite_function_mesh"] = False
 
-        rrt_file = File((case_path / "RRT.pvd").__str__())
-        rrt_file << RRT
-        del rrt_file
+        rrt.write(RRT)
+        osi.write(OSI)
 
-    twssg_file = File((case_path / "TWSSG.xml.gz").__str__())
-    twssg_file << TWSSG
-    del twssg_file
+    # Save WSS and TWSSG
+    wss_path = (case_path / "WSS.xdmf").__str__()
+    twssg_path = (case_path / "TWSSG.xdmf").__str__()
 
-    twssg_file = File((case_path / "TWSSG.pvd").__str__())
-    twssg_file << TWSSG
-    del twssg_file
+    wss = XDMFFile(MPI.comm_world, wss_path)
+    twssg = XDMFFile(MPI.comm_world, twssg_path)
 
-    wss_file = File((case_path / "WSS.xml.gz").__str__())
-    wss_file << WSS_new
-    del wss_file
+    for f in [wss, twssg]:
+        f.parameters["flush_output"] = True
+        f.parameters["functions_share_mesh"] = True
+        f.parameters["rewrite_function_mesh"] = False
 
-    wss_file = File((case_path / "WSS.pvd").__str__())
-    wss_file << WSS_new
-    del wss_file
+    wss.write(WSS_new)
+    twssg.write(TWSSG)
 
 
 def get_dabla_function():
     """
     Compiles a string in C++ and expose as a Python object (dabla),
-    used the compute several hemodynamic quantities.
+    used to compute several hemodynamic quantities.
 
     Returns:
         dabla: C++ compiled function
