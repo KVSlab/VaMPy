@@ -6,7 +6,7 @@ import numpy as np
 from fenicstools import Probes
 from oasis.problems.NSfracStep import *
 
-from .Womersley import make_womersley_bcs, compute_boundary_geometry_acrn
+from Womersley import make_womersley_bcs, compute_boundary_geometry_acrn
 
 set_log_level(50)
 
