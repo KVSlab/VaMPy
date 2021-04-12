@@ -9,7 +9,7 @@ from postprocessing_common import STRESS, read_command_line
 parameters["reorder_dofs_serial"] = False
 
 
-def compute_wss(case_path, nu, dt):
+def compute_wss(case_path, nu, dt, velocity_degree):
     """
     Loads velocity fields from completed CFD simulation,
     and computes and saves the following hemodynamic quantities:
@@ -44,7 +44,6 @@ def compute_wss(case_path, nu, dt):
 
     if MPI.rank(MPI.comm_world) == 0:
         print("Define function spaces")
-    velocity_degree = 1
     V_b1 = VectorFunctionSpace(bm, "CG", 1)
     U_b1 = FunctionSpace(bm, "CG", 1)
     V = VectorFunctionSpace(mesh, "CG", velocity_degree)
@@ -217,5 +216,5 @@ def get_dabla_function():
 
 
 if __name__ == '__main__':
-    folder, nu, dt = read_command_line()
-    compute_wss(folder, nu, dt)
+    folder, nu, dt, velocity_degree = read_command_line()
+    compute_wss(folder, nu, dt, velocity_degree)

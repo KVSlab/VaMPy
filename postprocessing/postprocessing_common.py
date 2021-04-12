@@ -13,10 +13,11 @@ def read_command_line():
                         metavar="PATH")
     parser.add_argument('--nu', type=float, default=3.3018e-3, help="Viscosity used in simulation")
     parser.add_argument('--dt', type=float, default=0.0951, help="Time step of simulation")
+    parser.add_argument('--velocity-degree', type=int, default=1, help="Degree of velocity element")
 
     args = parser.parse_args()
 
-    return args.case, args.nu, args.dt
+    return args.case, args.nu, args.dt, args.velocity_degree
 
 
 def epsilon(u):
