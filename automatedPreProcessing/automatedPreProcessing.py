@@ -2,7 +2,6 @@
 from __future__ import print_function
 
 import argparse
-import json
 
 import ImportData
 import ToolRepairSTL
@@ -425,11 +424,11 @@ def run_pre_processing(filename_model, verbose_print, smoothing_method, smoothin
         areaRatioLine += repr(ids[k][1]) + ','
     idFileLine += repr(ids[-1][0] - 1) + ' ' + repr(ids[0][1])
     areaRatioLine += repr(ids[-1][1])
-
-    with open(path.join(dir_path, case_name + '.txt'), 'w') as outfile:
-        outfile.write("\ninlet_area: " + str(parameters["inlet_area"]))
-        outfile.write('\nidFileLine: ' + str(idFileLine))
-        outfile.write('\nareaRatioLine: ' + str(areaRatioLine))
+    info = {"inlet_area": parameters["inlet_area"],
+            "idFileLine": str(idFileLine),
+            "areaRatioLine": str(areaRatioLine)
+            }
+    write_parameters(info, path.join(dir_path, case_name))
 
     # Display the flow split at the outlets, inlet flow rate, and probes.
     if viz:

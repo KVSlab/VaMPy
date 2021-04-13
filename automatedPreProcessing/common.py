@@ -1,3 +1,5 @@
+import json
+
 import vtk
 from vmtk import vtkvmtk, vmtkscripts
 
@@ -1577,29 +1579,14 @@ def get_parameters(dir_path):
     Returns:
         data (dict): The data in the info file.
     """
-    # If info.txt file, return an empty dict
-    if not path.isfile(dir_path + ".txt"): return {}
+    # If info.json file, return an empty dict
+    if not path.isfile(dir_path + ".json"):
+        return {}
 
     # Get text
-    f = open(dir_path + ".txt", "r")
-    text = f.read()
-    f.close()
-    text = text.split("\n")
-
-    # Get values
-    data = {}
-    for par in text:
-        if par != "":
-            split = par.split(": ")
-            if len(split) == 2:
-                key, value = split
-            else:
-                key = split[0]
-                value = ": ".join(split[1:])
-            try:
-                data[key] = eval(value)
-            except:
-                data[key] = value
+    info_path = dir_path + ".json"
+    with open(info_path) as info:
+        data = json.load(info)
 
     return data
 
@@ -1615,18 +1602,12 @@ def write_parameters(data, dir_path):
     # Get old parameters
     parameters = get_parameters(dir_path)
 
-    # Add new parameters (can overwrite old as well)
-    for key, value in data.items():
-        parameters[key] = value
+    # Update with new parameters
+    parameters.update(data)
 
-    # Get new text
-    text = ["%s: %s" % (k, v) for k, v in parameters.items()]
-    text = "\n".join(text)
-
-    # Write text
-    f = open(dir_path + ".txt", "w")
-    f.write(text)
-    f.close()
+    # Save to json file
+    with open(dir_path + ".json", "w") as f:
+        json.dump(parameters, f)
 
 
 def data_to_vtkPolyData(data, header, TNB=None, PT=None):
