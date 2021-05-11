@@ -26,6 +26,7 @@ def compute_wss(case_path, nu, dt, velocity_degree):
     """
     # File paths
     case_path = Path(case_path)
+    file_path_u = case_path / "u.h5"
     file_path_u = case_path / "u0.h5"
     mesh_path = case_path / "mesh.h5"
 
@@ -85,7 +86,7 @@ def compute_wss(case_path, nu, dt, velocity_degree):
             print("=" * 10, "Timestep: {}".format(timestamp), "=" * 10)
             f.read(u, vec_name)
         except:
-            print("=" * 10, "Finished reading in solution", "=" * 10)
+            print("=" * 10, "Finished reading solutions", "=" * 10)
             break
 
         # Compute WSS
@@ -123,6 +124,8 @@ def compute_wss(case_path, nu, dt, velocity_degree):
     WSS.vector()[:] = WSS.vector()[:] / n
     OSI.vector()[:] = OSI.vector()[:] / n
     WSS_new.vector()[:] = OSI.vector()[:]
+    WSS_new.name("WSS", "WSS")
+    TWSSG.name("TWSSG", "TWSSG")
 
     try:
         dabla(WSS.vector(), rrt_.vector())
@@ -130,12 +133,14 @@ def compute_wss(case_path, nu, dt, velocity_degree):
         rrt_arr[rrt_arr.nonzero()[0]] = 1e-6
         rrt_arr[np.isnan(rrt_arr)] = 1e-6
         RRT.vector().apply("insert")
+        RRT.name("RRT", "RRT")
 
         OSI_arr = OSI.vector().get_local()
         OSI_arr[OSI_arr.nonzero()[0]] = 1e-6
         OSI_arr[np.isnan(OSI_arr)] = 1e-6
         OSI.vector().set_local(0.5 * (1 - rrt_arr / OSI_arr))
         OSI.vector().apply("insert")
+        OSI.name("OSI", "OSI")
         save = True
     except:
         print("Failed to compute OSI and RRT")
