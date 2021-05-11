@@ -251,6 +251,7 @@ def temporal_hook(u_, p_, mesh, tstep, save_probe_frequency, eval_dict, newfolde
         viz_p.write(p_, "/pressure", tstep)
         viz_p.close()
 
+        # Save velocity
         viz_u = HDF5File(MPI.comm_world, u_path, file_mode=file_mode)
         viz_u.write(U, "/velocity", tstep)
         viz_u.close()
