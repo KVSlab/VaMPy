@@ -20,6 +20,7 @@ def compute_wss(case_path, nu, dt, velocity_degree):
     (4) RRT - Relative residence time
 
     Args:
+        velocity_degree (int): Finite element degree of velocity
         case_path (Path): Path to results from simulation
         nu (float): Viscosity
         dt (float): Time step of simulation
@@ -27,7 +28,6 @@ def compute_wss(case_path, nu, dt, velocity_degree):
     # File paths
     case_path = Path(case_path)
     file_path_u = case_path / "u.h5"
-    file_path_u = case_path / "u0.h5"
     mesh_path = case_path / "mesh.h5"
 
     # Start post-processing from 2nd cycle using every 10th time step, or 2000 time steps per cycle
@@ -124,8 +124,8 @@ def compute_wss(case_path, nu, dt, velocity_degree):
     WSS.vector()[:] = WSS.vector()[:] / n
     OSI.vector()[:] = OSI.vector()[:] / n
     WSS_new.vector()[:] = OSI.vector()[:]
-    WSS_new.name("WSS", "WSS")
-    TWSSG.name("TWSSG", "TWSSG")
+    WSS_new.rename("WSS", "WSS")
+    TWSSG.rename("TWSSG", "TWSSG")
 
     try:
         dabla(WSS.vector(), rrt_.vector())
@@ -133,14 +133,14 @@ def compute_wss(case_path, nu, dt, velocity_degree):
         rrt_arr[rrt_arr.nonzero()[0]] = 1e-6
         rrt_arr[np.isnan(rrt_arr)] = 1e-6
         RRT.vector().apply("insert")
-        RRT.name("RRT", "RRT")
+        RRT.rename("RRT", "RRT")
 
         OSI_arr = OSI.vector().get_local()
         OSI_arr[OSI_arr.nonzero()[0]] = 1e-6
         OSI_arr[np.isnan(OSI_arr)] = 1e-6
         OSI.vector().set_local(0.5 * (1 - rrt_arr / OSI_arr))
         OSI.vector().apply("insert")
-        OSI.name("OSI", "OSI")
+        OSI.rename("OSI", "OSI")
         save = True
     except:
         print("Failed to compute OSI and RRT")
