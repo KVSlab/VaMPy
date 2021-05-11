@@ -1,6 +1,7 @@
 from __future__ import print_function
 
 from pathlib import Path
+
 import numpy as np
 from dolfin import *
 
@@ -25,9 +26,7 @@ def compute_wss(case_path, nu, dt, velocity_degree):
     """
     # File paths
     case_path = Path(case_path)
-    file_path_x = case_path / "u0.h5"
-    file_path_y = case_path / "u1.h5"
-    file_path_z = case_path / "u2.h5"
+    file_path_u = case_path / "u0.h5"
     mesh_path = case_path / "mesh.h5"
 
     # Start post-processing from 2nd cycle using every 10th time step, or 2000 time steps per cycle
@@ -47,14 +46,10 @@ def compute_wss(case_path, nu, dt, velocity_degree):
     V_b1 = VectorFunctionSpace(bm, "CG", 1)
     U_b1 = FunctionSpace(bm, "CG", 1)
     V = VectorFunctionSpace(mesh, "CG", velocity_degree)
-    U = FunctionSpace(mesh, "CG", velocity_degree)
 
     if MPI.rank(MPI.comm_world) == 0:
         print("Define functions")
     u = Function(V)
-    u0 = Function(U)
-    u1 = Function(U)
-    u2 = Function(U)
 
     # RRT
     rrt_ = Function(U_b1)
@@ -78,27 +73,20 @@ def compute_wss(case_path, nu, dt, velocity_degree):
     dabla = get_dabla_function()
 
     if MPI.rank(MPI.comm_world) == 0:
-        print("Start 'simulation'")
+        print("=" * 10, "Start post processing", "=" * 10)
 
     file_counter = start
     while True:
-        # Read velocity components to respective functions and assign them to vector function u
+        # Read in velocity solution to vector function u
         try:
-            f1 = HDF5File(MPI.comm_world, file_path_x.__str__(), "r")
-            f2 = HDF5File(MPI.comm_world, file_path_y.__str__(), "r")
-            f3 = HDF5File(MPI.comm_world, file_path_z.__str__(), "r")
+            f = HDF5File(MPI.comm_world, file_path_u.__str__(), "r")
             vec_name = "/velocity/vector_%d" % file_counter
-            timestamp = f1.attributes(vec_name)["timestamp"]
-            print("Timestep: {}".format(timestamp))
-            f1.read(u0, vec_name)
-            f2.read(u1, vec_name)
-            f3.read(u2, vec_name)
+            timestamp = f.attributes(vec_name)["timestamp"]
+            print("=" * 10, "Timestep: {}".format(timestamp), "=" * 10)
+            f.read(u, vec_name)
         except:
-            print("Failed to read in velocity at file_counter={}".format(file_counter))
+            print("=" * 10, "Finished reading in solution", "=" * 10)
             break
-        assign(u.sub(0), u0)
-        assign(u.sub(1), u1)
-        assign(u.sub(2), u2)
 
         # Compute WSS
         if MPI.rank(MPI.comm_world) == 0:
@@ -122,13 +110,14 @@ def compute_wss(case_path, nu, dt, velocity_degree):
 
         # Update tau
         if MPI.rank(MPI.comm_world) == 0:
-            print("Update WSS")
+            print("Update WSS\n")
         tau_prev.vector().zero()
         tau_prev.vector().axpy(1, tau.vector())
 
         # Update file_counter
         file_counter += step
 
+    print("=" * 10, "Saving hemodynamic indices", "=" * 10)
     n = (file_counter - start) // step
     TWSSG.vector()[:] = TWSSG.vector()[:] / n
     WSS.vector()[:] = WSS.vector()[:] / n
@@ -145,7 +134,7 @@ def compute_wss(case_path, nu, dt, velocity_degree):
         OSI_arr = OSI.vector().get_local()
         OSI_arr[OSI_arr.nonzero()[0]] = 1e-6
         OSI_arr[np.isnan(OSI_arr)] = 1e-6
-        OSI.vector().set_local(0.5*(1 - rrt_arr / OSI_arr))
+        OSI.vector().set_local(0.5 * (1 - rrt_arr / OSI_arr))
         OSI.vector().apply("insert")
         save = True
     except:

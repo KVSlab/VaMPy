@@ -127,7 +127,7 @@ def get_file_paths(folder):
             makedirs(common_path)
 
     file_p = path.join(common_path, "p.h5")
-    file_u = [path.join(common_path, "u{}.h5".format(i)) for i in range(3)]
+    file_u = path.join(common_path, "u.h5")
     file_mesh = path.join(common_path, "mesh.h5")
     files = {"u": file_u, "p": file_p, "mesh": file_mesh}
 
@@ -244,19 +244,13 @@ def temporal_hook(u_, p_, mesh, tstep, save_probe_frequency, eval_dict, newfolde
         files = NS_parameters['files']
         file_mode = "w" if tstep == save_solution_at_tstep else "a"
         p_path = files['p']
+        u_path = files['u']
 
         # Save pressure
         viz_p = HDF5File(MPI.comm_world, p_path, file_mode=file_mode)
         viz_p.write(p_, "/pressure", tstep)
         viz_p.close()
 
-        #Save velocity as components
-        # for i in range(3):
-        #     u_path = files['u'][i]
-        #     viz_u = HDF5File(MPI.comm_world, u_path, file_mode=file_mode)
-        #     viz_u.write(u_[i], "/velocity", tstep)
-        #     viz_u.close()
-        u_path = files['u'][0]
         viz_u = HDF5File(MPI.comm_world, u_path, file_mode=file_mode)
         viz_u.write(U, "/velocity", tstep)
         viz_u.close()
