@@ -4,9 +4,20 @@ from os import path, makedirs
 
 import numpy as np
 from fenicstools import Probes
-
 from oasis.problems.NSfracStep import *
+
 from Womersley import make_womersley_bcs, compute_boundary_geometry_acrn
+
+"""
+Problem file for running CFD simulation in arterial models consisting of one inlet, and two or more outlets.
+A Womersley velocity profile is applied at the inlet, and a flow split pressure condition is applied at the outlets,
+following [1]. Flow rate for the inlet condition, and flow split values for the outlets are computed from the 
+pre-processing script automatedPreProcessing.py. The simulation is run for two cycles (adjustable), but only the 
+results/solutions from the second cycle are stored to avoid non-physiological effects from the first cycle. 
+
+[1] Gin, Ron, Anthony G. Straatman, and David A. Steinman. "A dual-pressure boundary condition for use in simulations 
+    of bifurcating conduits." J. Biomech. Eng. 124.5 (2002): 617-619. 
+"""
 
 set_log_level(50)
 
@@ -14,7 +25,7 @@ set_log_level(50)
 def problem_parameters(commandline_kwargs, NS_parameters, NS_expressions, **NS_namespace):
     if "restart_folder" in commandline_kwargs.keys():
         restart_folder = commandline_kwargs["restart_folder"]
-        f = open(path.join(restart_folder, 'params.dat'), 'r')
+        f = open(path.join(restart_folder, 'params.dat'), 'rb')
         NS_parameters.update(pickle.load(f))
         NS_parameters['restart_folder'] = restart_folder
     else:
