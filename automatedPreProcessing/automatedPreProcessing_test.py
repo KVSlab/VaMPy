@@ -566,6 +566,12 @@ def read_command_line():
                         default=None,
                         help='Path to configuration file for remote simulation. ' +
                              'See example/ssh_config.json for details')
+    parser.add_argument('-atr', '--atrium',
+                        dest="atri",
+                        type=str2bool,
+                        default=False,
+                        help="Determine weather or not the model is Atrium not Artery. Default is False.")
+
 
     args, _ = parser.parse_known_args()
 

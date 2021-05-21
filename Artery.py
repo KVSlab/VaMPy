@@ -34,7 +34,7 @@ def problem_parameters(commandline_kwargs, NS_parameters, NS_expressions, **NS_n
             dump_stats=100,
             store_data=5,
             store_data_tstep=10000,  # Start storing data at 2nd cycle
-            save_step=10000,
+            save_step=200,
             checkpoint=500,
             print_intermediate_info=100,
             folder="results_artery",
@@ -240,13 +240,11 @@ def temporal_hook(u_, p_, mesh, tstep, dump_stats, eval_dict, newfolder, id_in, 
 def beta(err, p):
     """
     Adjusted choice of beta from
-    Gin and Steinman et al., A Dual-Pressure Boundary Condition doi:10.1115/1.1504446 
+    Gin and Steinman et al., A Dual-Pressure Boundary Condition doi:10.1115/1.1504446 
     Ramped up to desired value if flow rate error (err) increases
-
     Args:
         err (float): Flow split error
         p (float): Pressure value
-
     Returns:
         beta (float): Variable factor in flow split method
     """
