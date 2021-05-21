@@ -1,6 +1,7 @@
 import json
 import pickle
 from os import path, makedirs
+from pprint import pprint
 
 import numpy as np
 from fenicstools import Probes
@@ -13,10 +14,13 @@ Problem file for running CFD simulation in arterial models consisting of one inl
 A Womersley velocity profile is applied at the inlet, and a flow split pressure condition is applied at the outlets,
 following [1]. Flow rate for the inlet condition, and flow split values for the outlets are computed from the 
 pre-processing script automatedPreProcessing.py. The simulation is run for two cycles (adjustable), but only the 
-results/solutions from the second cycle are stored to avoid non-physiological effects from the first cycle. 
+results/solutions from the second cycle are stored to avoid non-physiological effects from the first cycle.
+One cardiac cycle is set to 0.951 s from [2], and scaled by a factor of 1000, hence all parameters are in [mm] or [ms].  
 
 [1] Gin, Ron, Anthony G. Straatman, and David A. Steinman. "A dual-pressure boundary condition for use in simulations 
     of bifurcating conduits." J. Biomech. Eng. 124.5 (2002): 617-619. 
+[2] Hoi, Yiemeng, et al. "Characterization of volumetric flow rate waveforms at the carotid bifurcations of older 
+    adults." Physiological measurement 31.3 (2010): 291.
 """
 
 set_log_level(50)
@@ -40,6 +44,7 @@ def problem_parameters(commandline_kwargs, NS_parameters, NS_expressions, **NS_n
             id_in=[],  # Inlet boundary ID
             id_out=[],  # Outlet boundary IDs
             area_ratio=[],
+            area_inlet=[],
             # Simulation parameters
             cardiac_cycle=cardiac_cycle,  # Cardiac cycle [ms]
             T=cardiac_cycle * number_of_cycles,  # Simulation end time [ms]
@@ -62,13 +67,44 @@ def problem_parameters(commandline_kwargs, NS_parameters, NS_expressions, **NS_n
     case_name = mesh_file.split(".")[0]
     NS_parameters["folder"] = path.join(NS_parameters["folder"], case_name)
 
+    print("Starting simulation for case: {}".format(case_name))
+    print("Running with the following parameters:")
+    pprint(NS_parameters)
+
 
 def mesh(mesh_path, **NS_namespace):
     # Read mesh
-    return Mesh(mesh_path)
+    mesh = Mesh(mesh_path)
+    return mesh
 
 
-def create_bcs(t, NS_expressions, V, Q, area_ratio, mesh, mesh_path, nu, id_in, id_out, pressure_degree,
+def mpi_print(*args, rank=0, **kwargs):
+    if MPI.rank(MPI.comm_world) == rank:
+        print(*args, **kwargs)
+
+
+def print_mesh_info(mesh):
+    xmin = mesh.coordinates()[:, 0].min()
+    xmax = mesh.coordinates()[:, 0].max()
+    ymin = mesh.coordinates()[:, 1].min()
+    ymax = mesh.coordinates()[:, 1].max()
+    zmin = mesh.coordinates()[:, 2].min()
+    zmax = mesh.coordinates()[:, 2].max()
+    volume = assemble(Constant(1) * dx(mesh))
+    mpi_print("Mesh dimensions:")
+    mpi_print("xmin, xmax: {}, {}".format(xmin, xmax))
+    mpi_print("ymin, ymax: {}, {}".format(ymin, ymax))
+    mpi_print("zmin, zmax: {}, {}".format(zmin, zmax))
+    mpi_print("Number of cells: {}".format(mesh.num_cells()))
+    mpi_print("Number of edges: {}".format(mesh.num_edges()))
+    mpi_print("Number of faces: {}".format(mesh.num_faces()))
+    mpi_print("Number of facets: {}".format(mesh.num_facets()))
+    mpi_print("Number of vertices: {}".format(mesh.num_vertices()))
+    mpi_print("Volume: {}".format(volume))
+    mpi_print("Number of cells per volume: {}".format(mesh.num_cells() / volume))
+
+
+def create_bcs(t, NS_expressions, V, Q, area_ratio, area_inlet, mesh, mesh_path, nu, id_in, id_out, pressure_degree,
                **NS_namespace):
     # Mesh function
     boundary = MeshFunction("size_t", mesh, mesh.geometry().dim() - 1, mesh.domains())
@@ -84,6 +120,7 @@ def create_bcs(t, NS_expressions, V, Q, area_ratio, mesh, mesh_path, nu, id_in, 
     id_out[:] = [int(p) for p in id_info[2].split(",")]
     Q_mean = float(id_info[3])
     area_ratio[:] = [float(p) for p in parameters['areaRatioLine'].split()[-1].split(",")]
+    area_inlet.append(float(parameters['inlet_area']))
 
     # Load normalized time and flow rate values
     t_values, Q_ = np.loadtxt(path.join(path.dirname(path.abspath(__file__)), "ICA_values")).T
@@ -107,14 +144,14 @@ def create_bcs(t, NS_expressions, V, Q, area_ratio, mesh, mesh_path, nu, id_in, 
         area_out.append(assemble(Constant(1.0, name="one") * dsi))
 
     bc_p = []
-    print("=== Initial pressure and area fraction ===")
+    mpi_print("=== Initial pressure and area fraction ===")
     for i, ID in enumerate(id_out):
         p_initial = area_out[i] / sum(area_out)
         outflow = Expression("p", p=p_initial, degree=pressure_degree)
         bc = DirichletBC(Q, outflow, boundary, ID)
         bc_p.append(bc)
         NS_expressions[ID] = outflow
-        print(("Boundary ID={:d}, area fraction: {:0.4f}, pressure: {:0.6f}".format(ID, area_ratio[i], p_initial)))
+        mpi_print(("Boundary ID={:d}, area fraction: {:0.4f}, pressure: {:0.6f}".format(ID, area_ratio[i], p_initial)))
 
     # No slip condition at wall
     wall = Constant(0.0)
@@ -132,7 +169,7 @@ def create_bcs(t, NS_expressions, V, Q, area_ratio, mesh, mesh_path, nu, id_in, 
 
 def get_file_paths(folder):
     # Create folder where data and solutions (velocity, mesh, pressure) is stored
-    common_path = path.join(folder, "VTK")
+    common_path = path.join(folder, "Solutions")
     if MPI.rank(MPI.comm_world) == 0:
         if not path.exists(common_path):
             makedirs(common_path)
@@ -186,7 +223,7 @@ def pre_solve_hook(mesh, V, Q, newfolder, mesh_path, restart_folder, velocity_de
 
 def temporal_hook(u_, p_, mesh, tstep, save_probe_frequency, eval_dict, newfolder, id_in, id_out, boundary, n,
                   save_solution_frequency, NS_parameters, NS_expressions, area_ratio, t, save_solution_at_tstep,
-                  U, **NS_namespace):
+                  U, area_inlet, nu, **NS_namespace):
     # Update boundary condition to current time
     for uc in NS_expressions["inlet"]:
         uc.set_t(t)
@@ -196,13 +233,18 @@ def temporal_hook(u_, p_, mesh, tstep, save_probe_frequency, eval_dict, newfolde
         Q_ideals, Q_in, Q_outs = update_pressure_condition(NS_expressions, area_ratio, boundary, id_in, id_out, mesh, n,
                                                            tstep, u_)
 
+    # Compute flow rates and updated pressure at outlets, and mean velocity and Reynolds number at inlet
     if MPI.rank(MPI.comm_world) == 0 and tstep % 10 == 0:
+        U_mean = Q_in / area_inlet[0]
+        diam_inlet = np.sqrt(4 * area_inlet[0] / np.pi)
+        Re = U_mean * diam_inlet / nu
         print("=" * 10, "Time step " + str(tstep), "=" * 10)
         print("Sum of Q_out = {:0.4f} Q_in = {:0.4f}".format(sum(Q_outs), Q_in))
         for i, out_id in enumerate(id_out):
             print(("For outlet with boundary ID={:d}, target flow rate: {:0.4f} mL/s, computed flow rate: {:0.4f} mL/s")
                   .format(out_id, Q_ideals[i], Q_outs[i]))
-            print(("Updating pressure to: {:0.4f}").format(NS_expressions[out_id].p))
+            print(("Pressure updated to: {:0.4f}, mean velocity (inlet): {:0.4f}, Reynolds number (inlet): {:0.4f}")
+                  .format(NS_expressions[out_id].p, U_mean, Re))
         print()
 
     # Sample velocity and pressure in points/probes
@@ -215,7 +257,7 @@ def temporal_hook(u_, p_, mesh, tstep, save_probe_frequency, eval_dict, newfolde
     if tstep % save_probe_frequency == 0:
         # Save variables along the centerline for CFD simulation
         # diagnostics and light-weight post processing
-        filepath = path.join(newfolder, "Stats")
+        filepath = path.join(newfolder, "Probes")
         if MPI.rank(MPI.comm_world) == 0:
             if not path.exists(filepath):
                 makedirs(filepath)
@@ -241,12 +283,7 @@ def temporal_hook(u_, p_, mesh, tstep, save_probe_frequency, eval_dict, newfolde
 
     # Save velocity and pressure for post processing
     if tstep % save_solution_frequency == 0 and tstep >= save_solution_at_tstep:
-        # Name functions
-        u_[0].rename("u0", "velocity-x")
-        u_[1].rename("u1", "velocity-y")
-        u_[2].rename("u2", "velocity-z")
-        p_.rename("p", "pressure")
-
+        # Assign velocity components to vector solution
         assign(U.sub(0), u_[0])
         assign(U.sub(1), u_[1])
         assign(U.sub(2), u_[2])
