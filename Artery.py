@@ -5,8 +5,8 @@ from pprint import pprint
 
 import numpy as np
 from fenicstools import Probes
-from oasis.problems.NSfracStep import *
 
+from oasis.problems.NSfracStep import *
 from Womersley import make_womersley_bcs, compute_boundary_geometry_acrn
 
 """
@@ -67,23 +67,21 @@ def problem_parameters(commandline_kwargs, NS_parameters, NS_expressions, **NS_n
     case_name = mesh_file.split(".")[0]
     NS_parameters["folder"] = path.join(NS_parameters["folder"], case_name)
 
-    print("Starting simulation for case: {}".format(case_name))
-    print("Running with the following parameters:")
-    pprint(NS_parameters)
+    if MPI.rank(MPI.comm_world) == 0:
+        print("=== Starting simulation for case: {} ===".format(case_name))
+        print("Running with the following parameters:")
+        pprint(NS_parameters)
 
 
 def mesh(mesh_path, **NS_namespace):
     # Read mesh
     mesh = Mesh(mesh_path)
+    if MPI.rank(MPI.comm_world) == 0:
+        print_mesh_information(mesh)
     return mesh
 
 
-def mpi_print(*args, rank=0, **kwargs):
-    if MPI.rank(MPI.comm_world) == rank:
-        print(*args, **kwargs)
-
-
-def print_mesh_info(mesh):
+def print_mesh_information(mesh):
     xmin = mesh.coordinates()[:, 0].min()
     xmax = mesh.coordinates()[:, 0].max()
     ymin = mesh.coordinates()[:, 1].min()
@@ -91,17 +89,17 @@ def print_mesh_info(mesh):
     zmin = mesh.coordinates()[:, 2].min()
     zmax = mesh.coordinates()[:, 2].max()
     volume = assemble(Constant(1) * dx(mesh))
-    mpi_print("Mesh dimensions:")
-    mpi_print("xmin, xmax: {}, {}".format(xmin, xmax))
-    mpi_print("ymin, ymax: {}, {}".format(ymin, ymax))
-    mpi_print("zmin, zmax: {}, {}".format(zmin, zmax))
-    mpi_print("Number of cells: {}".format(mesh.num_cells()))
-    mpi_print("Number of edges: {}".format(mesh.num_edges()))
-    mpi_print("Number of faces: {}".format(mesh.num_faces()))
-    mpi_print("Number of facets: {}".format(mesh.num_facets()))
-    mpi_print("Number of vertices: {}".format(mesh.num_vertices()))
-    mpi_print("Volume: {}".format(volume))
-    mpi_print("Number of cells per volume: {}".format(mesh.num_cells() / volume))
+    print("=== Mesh information ===")
+    print("xmin, xmax: {}, {}".format(xmin, xmax))
+    print("ymin, ymax: {}, {}".format(ymin, ymax))
+    print("zmin, zmax: {}, {}".format(zmin, zmax))
+    print("Number of cells: {}".format(mesh.num_cells()))
+    print("Number of edges: {}".format(mesh.num_edges()))
+    print("Number of faces: {}".format(mesh.num_faces()))
+    print("Number of facets: {}".format(mesh.num_facets()))
+    print("Number of vertices: {}".format(mesh.num_vertices()))
+    print("Volume: {:0.4f}".format(volume))
+    print("Number of cells per volume: {:0.4f}".format(mesh.num_cells() / volume))
 
 
 def create_bcs(t, NS_expressions, V, Q, area_ratio, area_inlet, mesh, mesh_path, nu, id_in, id_out, pressure_degree,
@@ -144,14 +142,16 @@ def create_bcs(t, NS_expressions, V, Q, area_ratio, area_inlet, mesh, mesh_path,
         area_out.append(assemble(Constant(1.0, name="one") * dsi))
 
     bc_p = []
-    mpi_print("=== Initial pressure and area fraction ===")
+    if MPI.rank(MPI.comm_world) == 0:
+        print("=== Initial pressure and area fraction ===")
     for i, ID in enumerate(id_out):
         p_initial = area_out[i] / sum(area_out)
         outflow = Expression("p", p=p_initial, degree=pressure_degree)
         bc = DirichletBC(Q, outflow, boundary, ID)
         bc_p.append(bc)
         NS_expressions[ID] = outflow
-        mpi_print(("Boundary ID={:d}, area fraction: {:0.4f}, pressure: {:0.6f}".format(ID, area_ratio[i], p_initial)))
+        if MPI.rank(MPI.comm_world) == 0:
+            print(("Boundary ID={:d}, pressure: {:0.6f}, area fraction: {:0.4f}".format(ID, p_initial, area_ratio[i])))
 
     # No slip condition at wall
     wall = Constant(0.0)
@@ -239,12 +239,12 @@ def temporal_hook(u_, p_, mesh, tstep, save_probe_frequency, eval_dict, newfolde
         diam_inlet = np.sqrt(4 * area_inlet[0] / np.pi)
         Re = U_mean * diam_inlet / nu
         print("=" * 10, "Time step " + str(tstep), "=" * 10)
-        print("Sum of Q_out = {:0.4f} Q_in = {:0.4f}".format(sum(Q_outs), Q_in))
+        print("Sum of Q_out = {:0.4f}, Q_in = {:0.4f}, mean velocity (inlet): {:0.4f}, Reynolds number (inlet): {:0.4f}"
+                .format(sum(Q_outs), Q_in, U_mean, Re))
         for i, out_id in enumerate(id_out):
-            print(("For outlet with boundary ID={:d}, target flow rate: {:0.4f} mL/s, computed flow rate: {:0.4f} mL/s")
-                  .format(out_id, Q_ideals[i], Q_outs[i]))
-            print(("Pressure updated to: {:0.4f}, mean velocity (inlet): {:0.4f}, Reynolds number (inlet): {:0.4f}")
-                  .format(NS_expressions[out_id].p, U_mean, Re))
+            print(("For outlet with boundary ID={:d}: target flow rate: {:0.4f} mL/s, " +
+                   "computed flow rate: {:0.4f} mL/s, pressure updated to: {:0.4f}")
+                  .format(out_id, Q_ideals[i], Q_outs[i], NS_expressions[out_id].p))
         print()
 
     # Sample velocity and pressure in points/probes
