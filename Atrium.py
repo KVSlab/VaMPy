@@ -7,18 +7,20 @@ import csv
 import numpy as np
 from numpy.core.fromnumeric import mean
 from Womersley import make_womersley_bcs, compute_boundary_geometry_acrn
-#from Parabolic import make_parabolic_bcs, compute_boundary_geometry_acrn
 
 from fenicstools import Probes
 from oasis.problems.NSfracStep import *
+from scipy.interpolate import UnivariateSpline
+from scipy.integrate import simps, romberg
+
+
 
 set_log_level(50)
-
 
 def problem_parameters(commandline_kwargs, NS_parameters, NS_expressions, **NS_namespace):
     if "restart_folder" in commandline_kwargs.keys():
         restart_folder = commandline_kwargs["restart_folder"]
-        f = open(path.join(restart_folder, 'params.dat'), 'rb')
+        f = open(path.join(restart_folder, 'params.dat'), 'r')
         NS_parameters.update(pickle.load(f))
         NS_parameters['restart_folder'] = restart_folder
     else:
@@ -32,8 +34,8 @@ def problem_parameters(commandline_kwargs, NS_parameters, NS_expressions, **NS_n
             id_out=[],  # Outlet boundary IDs
             area_ratio=[],
             # Simulation parameters
-            T=1045,  # Run simulation for 1 cardiac cycles [ms]
-            dt=0.1, # 10 000 steps per cycle [ms]
+            T= 1045,#1.045,  # Run simulation for 1 cardiac cycles [ms]
+            dt=0.1,#0.0001, # 10 000 steps per cycle [ms]
             no_of_cycles=1,
             dump_stats=100,
             store_data=5,
@@ -60,15 +62,53 @@ def problem_parameters(commandline_kwargs, NS_parameters, NS_expressions, **NS_n
 def mesh(mesh_path, **NS_namespace):
     # Read mesh
     return Mesh(mesh_path)
-       
+
+class boundary_expression(UserExpression):
+
+    def __init__(self, coeffs, omega, period, normal, normal_component, area, centers, radius, **kwargs):
+        
+        self.Cn = coeffs
+        self.omega = omega
+        self.period = period
+        self.normal = normal
+        self.normal_component = normal_component
+        self.area = area
+        self.centers = centers
+        self.radius = radius
+        self.num_fourier_coefficients = len(coeffs)
+        self.t = None
+        self.ns = ns = np.arange(1,self.num_fourier_coefficients)
+
+        super().__init__(**kwargs)
+
+    
+    def update(self, t):
+        self.t = float(t) % self.period
+        self._expnt = np.exp((self.omega * self.t * 1j) * self.ns)
+
+    def parabolic(self, x):
+        r2 = self.radius**2
+        x0=self.centers[0]
+        x1=self.centers[1]
+        x2=self.centers[2]
+        return 1 - ( pow(x0 - x[0], 2) + pow(x1 - x[1], 2) + pow(x2 - x[2], 2) ) / r2
+
+    def eval(self,values,x):
+
+        # blunt profile
+        par = (self.Cn[0] + np.dot(self.Cn[1:], self._expnt)).real
+        # Scale by negative normal direction 
+        values[0] = -self.normal_component * par
+          
+      
 
 def create_bcs(t, NS_expressions, V, Q, area_ratio, mesh, mesh_path, nu, id_in, id_out, pressure_degree, **NS_namespace):
     # Mesh function
     boundary = MeshFunction("size_t", mesh, mesh.geometry().dim() - 1, mesh.domains())
     boundary.set_values(boundary.array() + 1)
 
-    id_in = [2,3,5,6] # Hardcoded. FIXIT: automated prepocessing
-    id_out = [4]
+    id_in = [3,4,5,6] # Hardcoded. FIXIT: automated prepocessing
+    id_out = [2]
 
     # Read case parameters
     info_path = mesh_path.split(".")[0] + ".json"
@@ -77,8 +117,9 @@ def create_bcs(t, NS_expressions, V, Q, area_ratio, mesh, mesh_path, nu, id_in, 
 
     # Extract flow split ratios and inlet/outlet IDs
     id_info = info['idFileLine'].split()
-    #id_out.append(int(id_info[1]))
-    #id_in[:] = [int(p) for p in id_info[2].split(",")]
+    # id_out.append(int(id_info[1]))
+    # id_in[:] = [int(p) for p in id_info[2].split(",")]
+    #Q_mean = float(id_info[3])
     area_ratio[:] = [float(p) for p in info['areaRatioLine'].split()[-1].split(",")]
 
     area_in = np.array([info['outlet0_area'],info['outlet1_area'],info['outlet2_area'],info['outlet3_area']])
@@ -88,32 +129,37 @@ def create_bcs(t, NS_expressions, V, Q, area_ratio, mesh, mesh_path, nu, id_in, 
     NS_parameters['dim_MV'] = dim_MV
     NS_parameters['dim_PV'] = dim_PV
  
-    Q_mean = 20     # [ml]
-    t_values, Q_ = np.load(path.join(path.dirname(path.abspath(__file__)), "ICA_values"))
-    Q_values = Q_mean * Q_
-    t_values *= 1000
+    # Q_mean = 10     # [ml]
+    # t_values, Q_ = np.load(path.join(path.dirname(path.abspath(__file__)), "ICA_values"))
+    # Q_values = Q_mean * Q_
+    # t_values *= 1000
 
-    # t_values , V_values = [], [] 
-    # try:
-    #     with open(path.join(path.dirname(path.abspath(__file__)), "Dataset.csv")) as csvfile:    
-    #         csvReader = csv.reader(csvfile)    
-    #         for row in csvReader:   
-    #             t_values.append(float(row[0])*1000) #convert to ms 
-    #             V_values.append(float(row[1])) 
-    # except ValueError:
-    #     raise
+    t_values , V_values = [], [] 
+    try:
+        t_values, V_values = np.loadtxt(path.join(path.dirname(path.abspath(__file__)), "pv_velocity.txt")).T
+        t_values *= 1000
+    except ValueError:
+        raise
 
     bc_inlets = {}
     for i, ID in enumerate(id_in):
-        tmp_area, tmp_center, tmp_radius, tmp_normal = compute_boundary_geometry_acrn(mesh, id_in[i], boundary)
-        inlet = make_womersley_bcs(t_values, Q_values, mesh, nu, tmp_area, tmp_center, tmp_radius, tmp_normal, V.ufl_element())
-        #inlet = make_parabolic_bcs(t_values, V_values, mesh, nu, tmp_area, tmp_center, tmp_radius, tmp_normal, V.ufl_element(),coeffstype="V")
+        tmp_area, tmp_center, tmp_radius, tmp_normal = compute_boundary_geometry_acrn(mesh, id_in[i], boundary)  
+        inlet, coeffs = [], []
+        coeffs, omega, period = get_coeffients(t_values, V_values)
+        for normal_component in tmp_normal:
+            _in = boundary_expression(coeffs, omega, period, tmp_normal, normal_component, tmp_area, tmp_center, tmp_radius, element = V.ufl_element())
+            inlet.append(_in)
+    
         NS_expressions[ID] = inlet
         bc_inlet = [DirichletBC(V, inlet[i], boundary, ID) for i in range(3)]
         bc_inlets[ID] = bc_inlet
         # Set start time equal to t_0
         for uc in inlet:
-            uc.set_t(t)
+            uc.update(t)
+
+        #inlet = make_womersley_bcs(t_values, Q_values, mesh, nu, tmp_area, tmp_center, tmp_radius, tmp_normal, V.ufl_element())
+        #inlet = make_parabolic_bcs(t_values, V_values, mesh, nu, tmp_area, tmp_center, tmp_radius, tmp_normal, V.ufl_element(),coeffstype="V")
+        
 
     bc_p = []
     for i, ID in enumerate(id_out):
@@ -187,13 +233,13 @@ def temporal_hook(h, u_, q_, p_, mesh, tstep, dump_stats, eval_dict, newfolder, 
     boundary = MeshFunction("size_t", mesh, mesh.geometry().dim() - 1, mesh.domains())
     boundary.set_values(boundary.array() + 1)
 
-    id_in = [2,3,5,6] # Hardcoded. FIXIT: automated prepocessing
-    id_out = [4]
-
+    id_in = [3,4,5,6] # Hardcoded. FIXIT: automated prepocessing
+    id_out = [2]
+   
     # Update boundary condition
     for i, in_id in enumerate(id_in):
         for uc in NS_expressions[in_id]:
-            uc.set_t(t)
+            uc.update(t)
                 
     # Compute flux and update pressure condition
     if tstep > 2:
@@ -208,21 +254,22 @@ def temporal_hook(h, u_, q_, p_, mesh, tstep, dump_stats, eval_dict, newfolder, 
     max_cfl = cfl.max()
     min_cfl = cfl.min() 
 
+    # print(cfl.max()*h / dt)
     dim_MV = NS_parameters['dim_MV']  
     dim_PV = NS_parameters['dim_PV'] 
     
-    # Re =  U.vector().get_local() * dim_MV / NS_parameters['nu']
-    # Re_MV = Re.max()*1000
-    # Re_ =  U.vector().get_local() * dim_PV / NS_parameters['nu']
-    # Re_PV = Re_.max()*1000
+    Re =  U.vector().get_local() * dim_MV / NS_parameters['nu']
+    Re_MV = Re.max()
+    Re_ =  U.vector().get_local() * dim_PV / NS_parameters['nu']
+    Re_PV = Re_.max()
 
     if MPI.rank(MPI.comm_world) == 0 and tstep % 10 == 0:
         print("=" * 10, tstep, "=" * 10)
         print()
-        # info_green('Time = {0:2.4e}, timestep = {1:6d}, max_CFL={2:2.3f}, min_CFL={3:2.3f}, Re_PV={0:2.4e}, Re_MV={0:2.4e}'
-        #        .format(t, tstep, max_cfl, min_cfl, Re_PV, Re_MV))
-        info_green('Time = {0:2.4e}, timestep = {1:6d}, max_CFL={2:2.3f}, min_CFL={3:2.3f}'
-               .format(t, tstep, max_cfl, min_cfl))
+        info_green('Time = {0:2.4e}, timestep = {1:6d}, max_CFL={2:2.3f}, min_CFL={3:2.3f}, Re_PV={0:2.4e}, Re_MV={0:2.4e}'
+               .format(t, tstep, max_cfl, min_cfl, Re_PV, Re_MV))
+        # info_green('Time = {0:2.4e}, timestep = {1:6d}, max_CFL={2:2.3f}, min_CFL={3:2.3f}'
+        #        .format(t, tstep, max_cfl, min_cfl))
         print("Sum of Q_in = {:0.4f} Q_out = {:0.4f}".format(sum(Q_ins), Q_out))
         #for i, in_id in enumerate(id_in):
         #    print(("({:d}) New pressure {:0.4f}").format(out_id, NS_expressions[out_id].p))
@@ -230,14 +277,15 @@ def temporal_hook(h, u_, q_, p_, mesh, tstep, dump_stats, eval_dict, newfolder, 
         #     print(("({:d}) area ratio {:0.4f}, ideal: {:0.4f} actual:" +
         #            " {:0.4f}").format(in_id, area_ratio[i], Q_ideals[i], Q_ins[i]))      
         print()
-    
+        
 
     if MPI.rank(MPI.comm_world) == 0 and tstep > 2:
         velocity_path = path.join(newfolder, "Timeseries", "velocity.txt")
         if not path.isdir(path.join(newfolder, "Timeseries")):
             os.mkdir(path.join(newfolder, "Timeseries"))
         with open(velocity_path, 'a') as filename:
-            filename.write("{:2.4e}, {:.4f}, {:.4f}, {:.4f}, {:.4f}, {:.4f} \n".format(t, V_out, V_ins[0], V_ins[1], V_ins[2], V_ins[3]))  
+            #filename.write("{:2.4e}, {:.4f}, {:.4f}, {:.4f}, {:.4f}, {:.4f} \n".format(t, Q_out, Q_ins[0], Q_ins[1], Q_ins[2], Q_ins[3]))  
+             filename.write("{:2.4e}, {:.4f}, {:.4f}, {:.4f}, {:.4f}, {:.4f} \n".format(t, V_out, V_ins[0], V_ins[1], V_ins[2], V_ins[3]))  
 
     # Sample velocity in points
     eval_dict["centerline_u_x_probes"](u_[0])
@@ -333,4 +381,46 @@ def EdgeLength(mesh):
         edge_length = circumradius_DG * sqrt(8 / 3)
 
     return edge_length
+
+
+def get_coeffients(x,y):
+
+    num_fourier_coefficients = 20
+    
+    N = len(x) + 1
+    # Compute transient profile as interpolation of given coefficients
+    period = max(x)
+    transient_profile = UnivariateSpline(x, y, s=0, k=1)
+
+    # Compute fourier coefficients of transient profile
+    timedisc = np.linspace(0, period, N)
+
+    Cn, omega = fourier_coefficients(timedisc, transient_profile, period, num_fourier_coefficients)
+
+    return Cn, omega, period
+
+def fourier_coefficients(x, y, T, N):
+
+    '''From x-array and y-spline and period T, calculate N complex Fourier coefficients.'''
+    omega = 2*np.pi/T
+    ck = []
+    ck.append(1/T*simps(y(x), x))
+    for n in range(1,N):
+        c = 1/T*simps(y(x)*np.exp(-1j*n*omega*x), x)
+
+        # Clamp almost zero real and imag components to zero
+        if 1:
+            cr = c.real
+            ci = c.imag
+            if abs(cr) < 1e-14: cr = 0.0
+            if abs(ci) < 1e-14: ci = 0.0
+            c = cr + ci*1j
+
+        ck.append(2*c)
+
+    return ck, omega
+
+
+
+
 
