@@ -5,8 +5,8 @@ from pprint import pprint
 
 import numpy as np
 from fenicstools import Probes
-
 from oasis.problems.NSfracStep import *
+
 from Womersley import make_womersley_bcs, compute_boundary_geometry_acrn
 
 """
@@ -88,7 +88,6 @@ def print_mesh_information(mesh):
     ymax = mesh.coordinates()[:, 1].max()
     zmin = mesh.coordinates()[:, 2].min()
     zmax = mesh.coordinates()[:, 2].max()
-    volume = assemble(Constant(1) * dx(mesh))
     print("=== Mesh information ===")
     print("xmin, xmax: {}, {}".format(xmin, xmax))
     print("ymin, ymax: {}, {}".format(ymin, ymax))
@@ -98,8 +97,6 @@ def print_mesh_information(mesh):
     print("Number of faces: {}".format(mesh.num_faces()))
     print("Number of facets: {}".format(mesh.num_facets()))
     print("Number of vertices: {}".format(mesh.num_vertices()))
-    print("Volume: {:0.4f}".format(volume))
-    print("Number of cells per volume: {:0.4f}".format(mesh.num_cells() / volume))
 
 
 def create_bcs(t, NS_expressions, V, Q, area_ratio, area_inlet, mesh, mesh_path, nu, id_in, id_out, pressure_degree,
@@ -240,7 +237,7 @@ def temporal_hook(u_, p_, mesh, tstep, save_probe_frequency, eval_dict, newfolde
         Re = U_mean * diam_inlet / nu
         print("=" * 10, "Time step " + str(tstep), "=" * 10)
         print("Sum of Q_out = {:0.4f}, Q_in = {:0.4f}, mean velocity (inlet): {:0.4f}, Reynolds number (inlet): {:0.4f}"
-                .format(sum(Q_outs), Q_in, U_mean, Re))
+              .format(sum(Q_outs), Q_in, U_mean, Re))
         for i, out_id in enumerate(id_out):
             print(("For outlet with boundary ID={:d}: target flow rate: {:0.4f} mL/s, " +
                    "computed flow rate: {:0.4f} mL/s, pressure updated to: {:0.4f}")
