@@ -113,6 +113,7 @@ def print_mesh_information(mesh):
         print("ymin, ymax: {}, {}".format(min(ymin), max(ymax)))
         print("zmin, zmax: {}, {}".format(min(zmin), max(zmax)))
         print("Number of cells: {}".format(sum(num_cells)))
+        print("Number of cells per processor: {}".format(int(np.mean(num_cells))))
         print("Number of edges: {}".format(sum(num_edges)))
         print("Number of faces: {}".format(sum(num_faces)))
         print("Number of facets: {}".format(sum(num_facets)))
