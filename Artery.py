@@ -106,6 +106,7 @@ def print_mesh_information(mesh):
     num_faces = comm.gather(local_num_faces, 0)
     num_facets = comm.gather(local_num_facets, 0)
     num_vertices = comm.gather(local_num_vertices, 0)
+    volume = assemble(Constant(1) * dx(mesh))
 
     if MPI.rank(MPI.comm_world) == 0:
         print("=== Mesh information ===")
@@ -118,6 +119,8 @@ def print_mesh_information(mesh):
         print("Number of faces: {}".format(sum(num_faces)))
         print("Number of facets: {}".format(sum(num_facets)))
         print("Number of vertices: {}".format(sum(num_vertices)))
+        print("Volume: {:.4f}".format(volume))
+        print("Number of cells per volume: {:.4f}".format(sum(num_cells) / volume))
 
 
 def create_bcs(t, NS_expressions, V, Q, area_ratio, area_inlet, mesh, mesh_path, nu, id_in, id_out, pressure_degree,
