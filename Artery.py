@@ -74,29 +74,49 @@ def problem_parameters(commandline_kwargs, NS_parameters, NS_expressions, **NS_n
 
 
 def mesh(mesh_path, **NS_namespace):
-    # Read mesh
+    # Read mesh and print mesh information
     mesh = Mesh(mesh_path)
-    if MPI.rank(MPI.comm_world) == 0:
-        print_mesh_information(mesh)
+    print_mesh_information(mesh)
+
     return mesh
 
 
 def print_mesh_information(mesh):
-    xmin = mesh.coordinates()[:, 0].min()
-    xmax = mesh.coordinates()[:, 0].max()
-    ymin = mesh.coordinates()[:, 1].min()
-    ymax = mesh.coordinates()[:, 1].max()
-    zmin = mesh.coordinates()[:, 2].min()
-    zmax = mesh.coordinates()[:, 2].max()
-    print("=== Mesh information ===")
-    print("xmin, xmax: {}, {}".format(xmin, xmax))
-    print("ymin, ymax: {}, {}".format(ymin, ymax))
-    print("zmin, zmax: {}, {}".format(zmin, zmax))
-    print("Number of cells: {}".format(mesh.num_cells()))
-    print("Number of edges: {}".format(mesh.num_edges()))
-    print("Number of faces: {}".format(mesh.num_faces()))
-    print("Number of facets: {}".format(mesh.num_facets()))
-    print("Number of vertices: {}".format(mesh.num_vertices()))
+    comm = MPI.comm_world
+    local_xmin = mesh.coordinates()[:, 0].min()
+    local_xmax = mesh.coordinates()[:, 0].max()
+    local_ymin = mesh.coordinates()[:, 1].min()
+    local_ymax = mesh.coordinates()[:, 1].max()
+    local_zmin = mesh.coordinates()[:, 2].min()
+    local_zmax = mesh.coordinates()[:, 2].max()
+    xmin = comm.gather(local_xmin, 0)
+    xmax = comm.gather(local_xmax, 0)
+    ymin = comm.gather(local_ymin, 0)
+    ymax = comm.gather(local_ymax, 0)
+    zmin = comm.gather(local_zmin, 0)
+    zmax = comm.gather(local_zmax, 0)
+
+    local_num_cells = mesh.num_cells()
+    local_num_edges = mesh.num_edges()
+    local_num_faces = mesh.num_faces()
+    local_num_facets = mesh.num_facets()
+    local_num_vertices = mesh.num_vertices()
+    num_cells = comm.gather(local_num_cells, 0)
+    num_edges = comm.gather(local_num_edges, 0)
+    num_faces = comm.gather(local_num_faces, 0)
+    num_facets = comm.gather(local_num_facets, 0)
+    num_vertices = comm.gather(local_num_vertices, 0)
+
+    if MPI.rank(MPI.comm_world) == 0:
+        print("=== Mesh information ===")
+        print("xmin, xmax: {}, {}".format(min(xmin), max(xmax)))
+        print("ymin, ymax: {}, {}".format(min(ymin), max(ymax)))
+        print("zmin, zmax: {}, {}".format(min(zmin), max(zmax)))
+        print("Number of cells: {}".format(sum(num_cells)))
+        print("Number of edges: {}".format(sum(num_edges)))
+        print("Number of faces: {}".format(sum(num_faces)))
+        print("Number of facets: {}".format(sum(num_facets)))
+        print("Number of vertices: {}".format(sum(num_vertices)))
 
 
 def create_bcs(t, NS_expressions, V, Q, area_ratio, area_inlet, mesh, mesh_path, nu, id_in, id_out, pressure_degree,
