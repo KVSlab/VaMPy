@@ -159,7 +159,7 @@ def compute_wss(case_path, nu, dt, velocity_degree):
         save = False
 
     if save:
-        # Save WSS_abs and RRT
+        # Save OSI and RRT
         rrt_path = (case_path / "RRT.xdmf").__str__()
         osi_path = (case_path / "OSI.xdmf").__str__()
 
