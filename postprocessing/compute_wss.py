@@ -64,7 +64,7 @@ def compute_wss(case_path, nu, dt, velocity_degree):
 
     # WSS_mean
     WSS_mean = Function(V_b1)
-    wss_mean_ = Function(U_b1)
+    wss_mean = Function(U_b1)
 
     # WSS_abs
     WSS_abs = Function(U_b1)
@@ -141,8 +141,8 @@ def compute_wss(case_path, nu, dt, velocity_degree):
     TWSSG.rename("TWSSG", "TWSSG")
 
     try:
-        dabla(WSS_mean.vector(), wss_mean_.vector())
-        wss_mean_vec = wss_mean_.vector().get_local()
+        dabla(WSS_mean.vector(), wss_mean.vector())
+        wss_mean_vec = wss_mean.vector().get_local()
         wss_abs_vec = WSS_abs.vector().get_local()
 
         # Compute RRT and OSI based on mean and absolute WSS
