@@ -57,16 +57,18 @@ def compute_wss(case_path, nu, dt, velocity_degree):
     u2 = Function(U)
 
     # RRT
-    rrt_ = Function(U_b1)
     RRT = Function(U_b1)
-
-    # WSS
-    WSS = Function(V_b1)
 
     # OSI
     OSI = Function(U_b1)
-    WSS_new = Function(U_b1)
-    osi_ = Function(U_b1)
+
+    # WSS_mean
+    WSS_mean = Function(V_b1)
+    wss_mean_ = Function(U_b1)
+
+    # WSS_abs
+    WSS_abs = Function(U_b1)
+    wss_abs = Function(U_b1)
 
     # TWSSG
     TWSSG = Function(U_b1)
@@ -102,15 +104,15 @@ def compute_wss(case_path, nu, dt, velocity_degree):
 
         # Compute WSS
         if MPI.rank(MPI.comm_world) == 0:
-            print("Compute WSS")
+            print("Compute WSS (mean)")
         tau = stress()
         tau.vector()[:] = tau.vector()[:] * 1000
-        WSS.vector().axpy(1, tau.vector())
+        WSS_mean.vector().axpy(1, tau.vector())
 
         if MPI.rank(MPI.comm_world) == 0:
-            print("Compute OSI")
-        dabla(tau.vector(), osi_.vector())
-        OSI.vector().axpy(1, osi_.vector())
+            print("Compute WSS (absolute value)")
+        dabla(tau.vector(), wss_abs.vector())
+        WSS_abs.vector().axpy(1, wss_abs.vector())
 
         # Compute TWSSG
         if MPI.rank(MPI.comm_world) == 0:
@@ -122,38 +124,42 @@ def compute_wss(case_path, nu, dt, velocity_degree):
 
         # Update tau
         if MPI.rank(MPI.comm_world) == 0:
-            print("Update WSS")
+            print("Update WSS \n")
         tau_prev.vector().zero()
         tau_prev.vector().axpy(1, tau.vector())
 
         # Update file_counter
         file_counter += step
 
+    print("=" * 10, "Saving hemodynamic indices", "=" * 10)
     n = (file_counter - start) // step
     TWSSG.vector()[:] = TWSSG.vector()[:] / n
-    WSS.vector()[:] = WSS.vector()[:] / n
-    OSI.vector()[:] = OSI.vector()[:] / n
-    WSS_new.vector()[:] = OSI.vector()[:]
+    WSS_abs.vector()[:] = WSS_abs.vector()[:] / n
+    WSS_mean.vector()[:] = WSS_mean.vector()[:] / n
+
+    WSS_abs.rename("WSS", "WSS")
+    TWSSG.rename("TWSSG", "TWSSG")
 
     try:
-        dabla(WSS.vector(), rrt_.vector())
-        rrt_arr = rrt_.vector().get_local()
-        rrt_arr[rrt_arr.nonzero()[0]] = 1e-6
-        rrt_arr[np.isnan(rrt_arr)] = 1e-6
-        RRT.vector().apply("insert")
+        dabla(WSS_mean.vector(), wss_mean_.vector())
+        wss_mean_vec = wss_mean_.vector().get_local()
+        wss_abs_vec = WSS_abs.vector().get_local()
 
-        OSI_arr = OSI.vector().get_local()
-        OSI_arr[OSI_arr.nonzero()[0]] = 1e-6
-        OSI_arr[np.isnan(OSI_arr)] = 1e-6
-        OSI.vector().set_local(0.5*(1 - rrt_arr / OSI_arr))
+        # Compute RRT and OSI based on mean and absolute WSS
+        RRT.vector().set_local(1 / wss_mean_vec)
+        RRT.vector().apply("insert")
+        RRT.rename("RRT", "RRT")
+
+        OSI.vector().set_local(0.5 * (1 - wss_mean_vec / wss_abs_vec))
         OSI.vector().apply("insert")
+        OSI.rename("OSI", "OSI")
         save = True
     except:
         print("Failed to compute OSI and RRT")
         save = False
 
     if save:
-        # Save OSI and RRT
+        # Save WSS_abs and RRT
         rrt_path = (case_path / "RRT.xdmf").__str__()
         osi_path = (case_path / "OSI.xdmf").__str__()
 
@@ -180,7 +186,7 @@ def compute_wss(case_path, nu, dt, velocity_degree):
         f.parameters["functions_share_mesh"] = True
         f.parameters["rewrite_function_mesh"] = False
 
-    wss.write(WSS_new)
+    wss.write(WSS_abs)
     twssg.write(TWSSG)
 
 
