@@ -110,9 +110,9 @@ def print_mesh_information(mesh):
 
     if MPI.rank(MPI.comm_world) == 0:
         print("=== Mesh information ===")
-        print("xmin, xmax: {}, {}".format(min(xmin), max(xmax)))
-        print("ymin, ymax: {}, {}".format(min(ymin), max(ymax)))
-        print("zmin, zmax: {}, {}".format(min(zmin), max(zmax)))
+        print("X range: {} to {} (delta: {:.4f})".format(min(xmin), max(xmax), max(xmax) - min(xmin)))
+        print("Y range: {} to {} (delta: {:.4f})".format(min(ymin), max(ymax), max(ymax) - min(ymin)))
+        print("Z range: {} to {} (delta: {:.4f})".format(min(zmin), max(zmax), max(zmax) - min(zmin)))
         print("Number of cells: {}".format(sum(num_cells)))
         print("Number of cells per processor: {}".format(int(np.mean(num_cells))))
         print("Number of edges: {}".format(sum(num_edges)))
