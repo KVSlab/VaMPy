@@ -2,6 +2,7 @@ import json
 
 import vtk
 from vmtk import vtkvmtk, vmtkscripts
+from vtk_wrapper import *
 
 try:
     from vmtkpointselector import *
@@ -277,48 +278,108 @@ def WriteTecplotSurfaceFile(surface, filename):
         f.write(line)
 
 
-def uncapp_surface(surface, centerlines, filename, clipspheres=0):
+def uncapp_surface(surface, gradients_limit=0.15, area_limit=0.3, circleness_limit=3):
     """
-    A method for removing endcapps on a surface. The method considers the centerline
-    of the surface model and clips the endcaps a distance of clipspheres * MISR away from the edge.
+    A rule-based method for removing endcapps on a surface. The method considers the
+    gradient of the normals, the size of the region, and how similar it is to a circle.
 
     Args:
         surface (vtkPolyData): Surface to be uncapped.
-        centerlines (vtkPolyData): Centerlines in surface model
-        filename (str): Filename to write uncapped model to
-        clipspheres (int): Number of MISR to clip model
+        gradients_limit (float): Upper limit for gradients of normals.
+        area_limit (float): Lower limit of the area.
+        circleness_limit (float): Upper limit of the circleness.
 
     Returns:
         surface (vtkPolyData): The uncapped surface.
     """
-    extractor = vmtkscripts.vmtkEndpointExtractor()
-    extractor.Centerlines = centerlines
-    extractor.RadiusArrayName = radiusArrayName
-    extractor.GroupIdsArrayName = groupIDsArrayName
-    extractor.BlankingArrayName = branchClippingArrayName
-    extractor.NumberOfEndPointSpheres = clipspheres
-    extractor.Execute()
-    clipped_centerlines = extractor.Centerlines
 
-    clipper = vmtkscripts.vmtkBranchClipper()
-    clipper.Surface = surface
-    clipper.Centerlines = clipped_centerlines
-    clipper.RadiusArrayName = radiusArrayName
-    clipper.GroupIdsArrayName = groupIDsArrayName
-    clipper.BlankingArrayName = branchClippingArrayName
-    clipper.Execute()
-    surface = clipper.Surface
+    cell_normals = vtk_compute_polydata_normals(surface, compute_cell_normals=True)
 
-    connector = vmtkscripts.vmtkSurfaceConnectivity()
-    connector.Surface = surface
-    connector.CleanOutput = 1
-    connector.Execute()
-    surface = connector.Surface
+    gradients = vtk_compute_normal_gradients(cell_normals)
 
-    if filename is not None:
-        WritePolyData(surface, filename)
+    # Compute the magnitude of the gradient
+    gradients_array = get_cell_data_array("Gradients", gradients, 9)
+    gradients_magnitude = np.sqrt(np.sum(gradients_array ** 2, axis=1))
 
-    return surface
+    # Mark all cells with a gradient magnitude less then gradient_limit
+    end_capp_array = gradients_magnitude < gradients_limit
+    end_capp_vtk = get_vtk_array("Gradients_mag", 1, end_capp_array.shape[0])
+    for i, p in enumerate(end_capp_array):
+        end_capp_vtk.SetTuple(i, [p])
+    gradients.GetCellData().AddArray(end_capp_vtk)
+
+    # Extract capps
+    end_capps = vtk_compute_threshold(gradients, "Gradients_mag", lower=0.5, upper=1.5,
+                                      threshold_type="between", source=1)
+
+    # Get connectivity
+    end_capps_connectivity = vtk_compute_connectivity(end_capps)
+    region_array = get_point_data_array("RegionId", end_capps_connectivity)
+
+    # Compute area for each region
+    area = []
+    circleness = []
+    regions = []
+    centers_edge = []
+    limit = 0.1
+    for i in range(int(region_array.max()) + 1):
+        regions.append(vtk_compute_threshold(end_capps_connectivity, "RegionId", lower=(i - limit),
+                                             upper=(i + limit), threshold_type="between", source=0))
+        circ, center = compute_circleness(regions[-1])
+        circleness.append(circ)
+        centers_edge.append(center)
+        area.append(vtk_compute_mass_properties(regions[-1]))
+
+    # Only keep outlets with circleness < circleness_limit and area > area_limit
+    circleness_ids = np.where(np.array(circleness) < circleness_limit)
+    region_ids = np.where(np.array(area) > area_limit)
+    regions = [regions[i] for i in region_ids[0] if i in circleness_ids[0]]
+    centers_edge = [centers_edge[i] for i in region_ids[0] if i in circleness_ids[0]]
+
+    # Mark the outlets on the original surface
+    mark_outlets = create_vtk_array(np.zeros(surface.GetNumberOfCells()), "outlets", k=1)
+    locator = get_vtk_cell_locator(surface)
+    tmp_center = [0, 0, 0]
+    for region in regions:
+        centers_filter = vtk.vtkCellCenters()
+        centers_filter.SetInputData(region)
+        centers_filter.VertexCellsOn()
+        centers_filter.Update()
+        centers = centers_filter.GetOutput()
+
+        for i in range(centers.GetNumberOfPoints()):
+            centers.GetPoint(i, tmp_center)
+            p = [0, 0, 0]
+            cell_id = vtk.mutable(0)
+            sub_id = vtk.mutable(0)
+            dist = vtk.mutable(0)
+            locator.FindClosestPoint(tmp_center, p, cell_id, sub_id, dist)
+            mark_outlets.SetTuple(cell_id, [1])
+
+    surface.GetCellData().AddArray(mark_outlets)
+
+    # Remove the outlets from the original surface
+    uncapped_surface = vtk_compute_threshold(surface, "outlets", lower=0, upper=0.5, threshold_type="between", source=1)
+
+    # Check if some cells where not marked
+    remove = True
+    while remove:
+        locator = get_vtk_cell_locator(uncapped_surface)
+        mark_outlets = create_vtk_array(np.zeros(uncapped_surface.GetNumberOfCells()), "outlets", k=1)
+        remove = False
+        for center in centers_edge:
+            locator.FindClosestPoint(center, p, cell_id, sub_id, dist)
+            if dist < 0.01:
+                remove = True
+                mark_outlets.SetTuple(cell_id, [1])
+
+        uncapped_surface.GetCellData().AddArray(mark_outlets)
+
+        if remove:
+            uncapped_surface = vtk_compute_threshold(uncapped_surface, "outlets", lower=0,
+                                                     upper=0.5, threshold_type="between", source=1)
+
+    return uncapped_surface
 
 
 def get_teams(dirpath):
@@ -839,7 +900,7 @@ def surface_cleaner(surface):
     return surfaceCleaner.GetOutput()
 
 
-def get_centers(surface, dir_path, flowext=False):
+def get_centers(surface, atrium_present, dir_path, flowext=False):
     """
     Get the centers of the inlet and outlets.
 
@@ -854,27 +915,48 @@ def get_centers(surface, dir_path, flowext=False):
     """
 
     # Check if info exists
-    if flowext or not path.isfile(path.join(dir_path, dir_path + ".txt")):
-        compute_centers(surface, dir_path)
+    if flowext or not path.isfile(path.join(dir_path, dir_path + ".json")):
+        compute_centers(surface, atrium_present, dir_path)
 
     # Open info
     parameters = get_parameters(dir_path)
     outlets = []
     inlet = []
     for key, value in parameters.items():
-        if key == "inlet":
-            inlet = value
-        elif "outlet" in key and "area" not in key and "relevant" not in key:
-            outlets += value
+        
+        if(atrium_present==False):
+            if key == "inlet":
+                inlet = value
+            elif "outlet" in key and "area" not in key and "relevant" not in key:
+                outlets += value
+        else:
+            # FIXIT: 1 outlet and several inlets. Setting names should be corrected
+            if key == "outlet":
+                outlets = value
+            elif "inlet" in key and "area" not in key and "relevant" not in key:
+                inlet += value
 
     num_outlets = len(outlets) // 3
+    num_inlets  = len(inlet) // 3
+   
     if num_outlets != 0:
-        outlets = []
-        for i in range(num_outlets):
-            outlets += parameters["outlet%d" % i]
+        if(atrium_present==False):
+            outlets = []
+            for i in range(num_outlets):
+                outlets += parameters["outlet%d" % i]
+        else:
+            # FIXIT: several inlets
+            inlet = []
+            for i in range(num_inlets):
+                inlet += parameters["inlet%d" % i]
 
-    if inlet == [] and outlets == []:
-        inlet, outlets = compute_centers(surface, dir_path)
+    # FIXIT: atrium case has several inlets (instead of inlet) and only one outlet (instead of outlets).
+    if inlet == [] and outlets == []: 
+        inlet, outlets = compute_centers(surface, atrium_present, dir_path)
+
+        print("The number of outlets =", len(outlets) // 3)
+        print("The number of inlets =", len(inlet) // 3)
+        print()
 
     return inlet, outlets
 
@@ -1046,7 +1128,7 @@ def compute_distance_to_sphere(surface, centerSphere, radiusSphere=0.0,
     return surface
 
 
-def is_surface_capped(surface):
+def is_surface_capped(surface, atrium_present):
     """
     Checks if the surface is closed, and how many openings there are.
 
@@ -1058,7 +1140,7 @@ def is_surface_capped(surface):
         number (int): Number of integer
     """
 
-    return compute_centers(surface, test_capped=True)[0]
+    return compute_centers(surface, atrium_present, test_capped=True)[0]
 
 
 def getConnectivity(surface):
@@ -1146,28 +1228,29 @@ def getFeatureEdges(polyData):
     return featureEdges.GetOutput()
 
 
-def compute_centers(polyData, case_path=None, test_capped=False):
+def compute_centers(polyData, atrium_present, case_path=None, test_capped=False):
     """
     Compute the center of all the openings in the surface. The inlet is chosen based on
-    the largest area.
+    the largest area for arteries (or aneurysm). However, for atrium, the outlet is chosen based on
+    the largest area (new).
 
     Args:
-        test_capped (bool): Check if surface is capped
-        polyData (vtkPolyData): centers of the openings
+        test_capped (bool): Check if surface is capped.
+        polyData (vtkPolyData): centers of the openings.
         case_path (str): path to case directory.
+        atrium_present (bool): Check if it is an atrium model.
 
     Returns:
         inlet_center (list): Inlet center.
         outlet_centers (list): A flattened list with all the outlet centers.
     """
-
     # Get cells which are open
     cells = getFeatureEdges(polyData)
 
     if cells.GetNumberOfCells() == 0 and not test_capped:
         print("WARNING: The model is capped, so it is uncapped, but the method is experimental.")
         uncapped_surface = uncapp_surface(polyData)
-        compute_centers(uncapped_surface, case_path, test_capped)
+        compute_centers(uncapped_surface, atrium_present, case_path, test_capped)
     elif cells.GetNumberOfCells() == 0 and test_capped:
         return False, 0
 
@@ -1203,24 +1286,44 @@ def compute_centers(polyData, case_path=None, test_capped=False):
         # Get center
         center.append(np.mean(points[(region_array == i).nonzero()[0]], axis=0))
 
-    # Store the center and area
-    inlet_ind = area.index(max(area))
-    if case_path is not None:
-        info = {"inlet": center[inlet_ind].tolist(), "inlet_area": area[inlet_ind]}
-        p = 0
-        for i in range(len(area)):
-            if i == inlet_ind: p = -1; continue
-            info["outlet%d" % (i + p)] = center[i].tolist()
-            info["outlet%s_area" % (i + p)] = area[i]
+    if(atrium_present==True):
+        # Store the center and area
+        outlet_ind = area.index(max(area))
+        if case_path is not None:
+            info = {"outlet": center[outlet_ind].tolist(), "outlet_area": area[outlet_ind]}
+            p = 0
+            for i in range(len(area)):
+                if i == outlet_ind: p = -1; continue
+                info["inlet%d" % (i + p)] = center[i].tolist()
+                info["inlet%s_area" % (i + p)] = area[i]
 
-        write_parameters(info, case_path)
+            write_parameters(info, case_path)
 
-    inlet_center = center[inlet_ind].tolist()
-    center.pop(inlet_ind)
+        outlet_center = center[outlet_ind].tolist()                # center of the outlet 
+        center.pop(outlet_ind)
 
-    center_ = [item for sublist in center for item in sublist]
+        center_ = [item for sublist in center for item in sublist] # centers of the inlets
 
-    return inlet_center, center_
+        return center_, outlet_center
+    else:
+        # Store the center and area
+        inlet_ind = area.index(max(area))
+        if case_path is not None:
+            info = {"inlet": center[inlet_ind].tolist(), "inlet_area": area[inlet_ind]}
+            p = 0
+            for i in range(len(area)):
+                if i == inlet_ind: p = -1; continue
+                info["outlet%d" % (i + p)] = center[i].tolist()
+                info["outlet%s_area" % (i + p)] = area[i]
+
+            write_parameters(info, case_path)
+
+        inlet_center = center[inlet_ind].tolist()
+        center.pop(inlet_ind)
+
+        center_ = [item for sublist in center for item in sublist]
+
+        return inlet_center, center_
 
 
 def compute_bary_center(points):
@@ -1395,7 +1498,7 @@ def compute_centerline_sections(surface, centerline):
     return line, CenterlineSections
 
 
-def compute_centerlines(inlet, outlet, filepath, surface, resampling=1, smooth=False, num_iter=100, smooth_factor=0.1,
+def compute_centerlines(inlet, outlet, atrium_present, filepath, surface, resampling=1, smooth=False, num_iter=100, smooth_factor=0.1,
                         end_point=1, method="pointlist"):
     """Wrapper for vmtkcenterlines and vmtkcenterlinesmoothing.
 
@@ -1417,15 +1520,21 @@ def compute_centerlines(inlet, outlet, filepath, surface, resampling=1, smooth=F
 
     if path.isfile(filepath):
         return ReadPolyData(filepath)
-
+  
     centerlines = vmtkscripts.vmtkCenterlines()
     centerlines.Surface = surface
     centerlines.SeedSelectorName = 'pointlist'
     centerlines.AppendEndPoints = end_point
     centerlines.Resampling = 1
     centerlines.ResamplingStepLength = resampling
-    centerlines.SourcePoints = inlet
-    centerlines.TargetPoints = outlet
+
+    if(atrium_present==False):
+        centerlines.SourcePoints = inlet
+        centerlines.TargetPoints = outlet
+    else:
+        centerlines.SourcePoints = outlet
+        centerlines.TargetPoints = inlet
+
     centerlines.Execute()
     centerlines = centerlines.Centerlines
 
@@ -1488,13 +1597,15 @@ def generate_mesh(surface):
     # Compute the mesh.
     meshGenerator = vmtkscripts.vmtkMeshGenerator()
     meshGenerator.Surface = surface
-    meshGenerator.ElementSizeMode = "edgelengtharray"
-    meshGenerator.TargetEdgeLengthArrayName = "Size"
-    meshGenerator.BoundaryLayer = 1
-    meshGenerator.NumberOfSubLayers = 4
-    meshGenerator.BoundaryLayerOnCaps = 0
-    meshGenerator.BoundaryLayerThicknessFactor = 0.85
-    meshGenerator.SubLayerRatio = 0.75
+    meshGenerator.ElementSizeMode = "edgelengtharray" # Variable size mesh
+    meshGenerator.TargetEdgeLengthArrayName = "Size"  # Variable size mesh
+    #meshGenerator.ElementSizeMode = "edgelength"     # Constant size mesh
+    #meshGenerator.TargetEdgeLength = 1.0             # Constant size mesh
+    meshGenerator.BoundaryLayer = 1    
+    meshGenerator.NumberOfSubLayers = 4   
+    meshGenerator.BoundaryLayerOnCaps = 0 # it should 1
+    meshGenerator.BoundaryLayerThicknessFactor = 0.7 #0.85 
+    meshGenerator.SubLayerRatio = 0.55 #0.75 
     meshGenerator.Tetrahedralize = 1
     meshGenerator.VolumeElementScaleFactor = 0.8
     meshGenerator.EndcapsEdgeLengthFactor = 1.0
