@@ -13,7 +13,7 @@ from visualize import visualize
 
 
 def run_pre_processing(filename_model, verbose_print, smoothing_method, smoothing_factor, smooth_aneurysm,
-                       meshing_method, aneurysm_present, create_flow_extensions, viz, config_path, number_of_sac_points,
+                       meshing_method, aneurysm_present, atrium_present, create_flow_extensions, viz, config_path, number_of_sac_points,
                        coarsening_factor, compress_mesh=True):
     """
     Automatically generate mesh of surface model in .vtu and .xml format, including prescribed
@@ -29,6 +29,7 @@ def run_pre_processing(filename_model, verbose_print, smoothing_method, smoothin
         smooth_aneurysm (bool): Toggles smoothing of aneurysm (if present)
         meshing_method (str): Method for meshing
         aneurysm_present (bool): Determines if aneurysm is present
+        atrium_present (bool): Determines whether this ia an atrium case
         create_flow_extensions (bool): Adds flow extensions to mesh if True
         viz (bool): Visualize resulting surface model with flow rates
         config_path (str): Path to configuration file for remote simulation
@@ -65,15 +66,15 @@ def run_pre_processing(filename_model, verbose_print, smoothing_method, smoothin
     print("--- Load model file\n")
     surface = ReadPolyData(filename_model)
 
-    if not is_surface_capped and smoothing_method != "voronoi":
-        print("--- Clipping the models inlet and outlets.\n")
+    if not is_surface_capped(surface, atrium_present) and smoothing_method != "voronoi":
+        print("--- Clipping the models inlets and outlets.\n")
         if not path.isfile(file_name_clipped_model):
-            # TODO: Check if this is a valid call to this method
-            centerline = compute_centerlines([], [], None, surface, method="pickpoint")
-            surface = uncapp_surface(surface, centerline, filename=None)
+            # TODO: Add input parameters as input to automatedPreProcessing
+            #centerline = compute_centerlines([], [], atrium_present, None, surface, method="pickpoint")
+            surface = uncapp_surface(surface, area_limit=20, circleness_limit=5)
+            WritePolyData(surface, file_name_clipped_model)
         else:
             surface = ReadPolyData(file_name_clipped_model)
-
     parameters = get_parameters(path.join(dir_path, case_name))
 
     if "check_surface" not in parameters.keys():
@@ -93,21 +94,21 @@ def run_pre_processing(filename_model, verbose_print, smoothing_method, smoothin
             write_parameters(parameters, path.join(dir_path, case_name))
 
     # Capp surface if open
-    if not compute_centers(surface, test_capped=True):
+    if not compute_centers(surface, atrium_present, test_capped=True):
         capped_surface = capp_surface(surface)
     else:
         capped_surface = surface
 
     # Get centerlines
     print("--- Get centerlines\n")
-    inlet, outlets = get_centers(surface, path.join(dir_path, case_name))
-    centerlines = compute_centerlines(inlet, outlets, file_name_centerlines,
-                                      capped_surface, resampling=0.1, end_point=0)
+    # FIXIT: when atrium is present several inlets and 1 outlet
+    inlet, outlets = get_centers(surface, atrium_present, path.join(dir_path, case_name))
+    centerlines = compute_centerlines(inlet, outlets, atrium_present, file_name_centerlines, capped_surface, resampling=0.1, end_point=0)
     tol = get_tolerance(centerlines)
 
     if aneurysm_present:
         aneurysms = get_aneurysm_dome(capped_surface, path.join(dir_path, case_name))
-        centerlineAnu = compute_centerlines(inlet, aneurysms, file_name_aneurysm_centerlines,
+        centerlineAnu = compute_centerlines(inlet, aneurysms, atrium_present, file_name_aneurysm_centerlines,
                                             capped_surface, resampling=0.1)
 
         # Extract the aneurysm centerline
@@ -183,7 +184,7 @@ def run_pre_processing(filename_model, verbose_print, smoothing_method, smoothin
 
             # Check if there has been added new outlets
             num_outlets = centerlines.GetNumberOfLines()
-            num_outlets_after = compute_centers(surface_uncapped, test_capped=True)[1]
+            num_outlets_after = compute_centers(surface_uncapped, atrium_present, test_capped=True)[1]
 
             if num_outlets != num_outlets_after:
                 surface = vmtkSmoother(surface, "laplace", iterations=200)
@@ -236,7 +237,7 @@ def run_pre_processing(filename_model, verbose_print, smoothing_method, smoothin
     if create_flow_extensions:
         if not path.isfile(file_name_model_flow_ext):
             print("--- Adding flow extensions")
-            extension = 4 #5
+            extension = 1
 
             extender = vmtkscripts.vmtkFlowExtensions()
             extender.Surface = surface
@@ -246,6 +247,7 @@ def run_pre_processing(filename_model, verbose_print, smoothing_method, smoothin
             extender.ExtensionMode = "boundarynormal"
             extender.CenterlineNormalEstimationDistanceRatio = 1.0
             extender.Interactive = 0
+            extender.AdaptiveNumberOfBoundaryPoints = 1
             extender.Execute()
 
             surface = extender.Surface
@@ -261,9 +263,9 @@ def run_pre_processing(filename_model, verbose_print, smoothing_method, smoothin
     # Get new centerlines with the flow extensions
     if not path.isfile(file_name_flow_centerlines):
         print("--- Compute the model centerlines with flow extension.")
-        # Compute the centerlines.
-        inlet, outlets = get_centers(surface, path.join(dir_path, case_name), flowext=True)
-        centerlines = compute_centerlines(inlet, outlets, file_name_flow_centerlines, capped_surface, resampling=0.5)
+        # Compute the centerlines. FIXIT: There are several inlets and one outet for atrium case 
+        inlet, outlets = get_centers(surface, atrium_present, path.join(dir_path, case_name), flowext=True)
+        centerlines = compute_centerlines(inlet, outlets, atrium_present, file_name_flow_centerlines, capped_surface, resampling=0.5)
 
     else:
         centerlines = ReadPolyData(file_name_flow_centerlines)
@@ -365,7 +367,14 @@ def run_pre_processing(filename_model, verbose_print, smoothing_method, smoothin
 
     # BSL method for mean inlet flow rate.
     parameters = get_parameters(path.join(dir_path, case_name))
-    mean_inflow_rate = 0.27 * parameters["inlet_area"]
+    if(atrium_present==False):
+        mean_inflow_rate = 0.27 * parameters["inlet_area"]
+    else:
+        Total_inlet_area=0
+        num_inlets  = len(inlet) // 3
+        for i in range(num_inlets):
+            Total_inlet_area+=parameters["inlet%s_area" % (i)]
+        mean_inflow_rate = 0.27 * Total_inlet_area
 
     # Extract the surface mesh of the wall
     wallMesh = threshold(polyDataVolMesh, "CellEntityIds", lower=0.5, upper=1.5)
@@ -424,7 +433,13 @@ def run_pre_processing(filename_model, verbose_print, smoothing_method, smoothin
         areaRatioLine += repr(ids[k][1]) + ','
     idFileLine += repr(ids[-1][0] - 1) + ' ' + repr(ids[0][1])
     areaRatioLine += repr(ids[-1][1])
-    info = {"inlet_area": parameters["inlet_area"],
+    if(atrium_present==False):
+        info = {"inlet_area": parameters["inlet_area"],
+            "idFileLine": str(idFileLine),
+            "areaRatioLine": str(areaRatioLine)
+            }
+    else:
+        info = {"inlet_area": Total_inlet_area,
             "idFileLine": str(idFileLine),
             "areaRatioLine": str(areaRatioLine)
             }
@@ -542,6 +557,12 @@ def read_command_line():
                         default=True,
                         help="Determine weather or not the model has a aneurysm. Default is False.")
 
+    parser.add_argument('-at', '--atrium',
+                        dest="atriu",
+                        type=str2bool,
+                        default=False,
+                        help="Determine weather or not the model is an Atrium model. Default is False.") 
+
     parser.add_argument('-f', '--flowext',
                         dest="fext",
                         default=True,
@@ -584,7 +605,8 @@ def read_command_line():
 
     return dict(filename_model=args.fileNameModel, verbose_print=verbose_print, smoothing_method=args.smoothingMethod,
                 smoothing_factor=args.smoothingFactor, smooth_aneurysm=args.smoothingAneurysm,
-                meshing_method=args.meshingMethod, aneurysm_present=args.aneu, create_flow_extensions=args.fext,
+                meshing_method=args.meshingMethod, aneurysm_present=args.aneu, atrium_present=args.atriu, 
+                create_flow_extensions=args.fext,
                 viz=args.viz, config_path=args.config, number_of_sac_points=args.sacpts,
                 coarsening_factor=args.coarseningFactor)
 
