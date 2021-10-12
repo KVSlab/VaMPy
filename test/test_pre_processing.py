@@ -27,7 +27,7 @@ def test_pre_processing():
     assert path.isfile(mesh_path)
 
     # Check that mesh is not empty
-    mesh = ReadPolyData(mesh_path)
+    mesh = read_polydata(mesh_path)
 
     assert mesh.GetNumberOfPoints() > 0
 
