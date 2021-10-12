@@ -1,4 +1,8 @@
-from morphman.common import *
+from morphman import get_parameters, vtk_clean_polydata, vtk_triangulate_surface, write_parameters, read_polydata, \
+    vmtkscripts, write_polydata, vtk_extract_feature_edges, get_uncapped_surface, vtk_compute_connectivity, \
+    get_point_data_array, vtk_compute_threshold, vtk_compute_mass_properties, extract_single_line, \
+    get_curvilinear_coordinate, get_centerline_tolerance, get_distance, create_vtk_array, vmtk_smooth_surface, \
+    get_number_of_arrays, get_vtk_array
 
 try:
     from vmtkpointselector import *
@@ -499,7 +503,8 @@ def compute_centers_for_meshing(polyData, atrium_present, case_path=None, test_c
     center = []
     for i in range(int(region_array.max()) + 1):
         # Compute area
-        boundary = vtk_compute_threshold(outputs, "RegionId", lower=i - 0.1, upper=i + 0.1, threshold_type="between", source=0)
+        boundary = vtk_compute_threshold(outputs, "RegionId", lower=i - 0.1, upper=i + 0.1, threshold_type="between",
+                                         source=0)
 
         delaunay_filter = vtk.vtkDelaunay2D()
         delaunay_filter.SetInputData(boundary)
