@@ -36,9 +36,9 @@ install:
   - conda info -a
 
   # / -> // in vmtkcenterlines.py and vmtksurfacecurvature.py
-  - sed -i -e 's/len(self.SourcePoints)\/3/len\(self.SourcePoints\)\/\/3/g' ../../../miniconda/envs/vmtk_env/lib/python3.6/site-packages/vmtk/vmtkcenterlines.py
-  - sed -i -e 's/len(self.TargetPoints)\/3/len\(self.TargetPoints\)\/\/3/g' ../../../miniconda/envs/vmtk_env/lib/python3.6/site-packages/vmtk/vmtkcenterlines.py
-  - sed -i -e 's/(len(values) - 1)\/2/\(len\(values\) - 1\)\/\/2/g' ../../../miniconda/envs/vmtk_env/lib/python3.6/site-packages/vmtk/vmtksurfacecurvature.py
+  - sed -i -e 's/len(self.SourcePoints)\/3/len\(self.SourcePoints\)\/\/3/g' ../../../miniconda/envs/morphmanEnv/lib/python3.6/site-packages/vmtk/vmtkcenterlines.py
+  - sed -i -e 's/len(self.TargetPoints)\/3/len\(self.TargetPoints\)\/\/3/g' ../../../miniconda/envs/morphmanEnv/lib/python3.6/site-packages/vmtk/vmtkcenterlines.py
+  - sed -i -e 's/(len(values) - 1)\/2/\(len\(values\) - 1\)\/\/2/g' ../../../miniconda/envs/morphmanEnv/lib/python3.6/site-packages/vmtk/vmtksurfacecurvature.py
 
   # Dependencies for code coverage
   - pip install pytest-cov codecov
