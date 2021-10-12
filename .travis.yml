@@ -25,9 +25,10 @@ install:
   - conda config --set restore_free_channel true
   - conda config --set always_yes yes --set changeps1 no
   - conda config --add channels vmtk
+  - conda config --add channels morphman
 
   # Set up environment
-  - conda create -n morphmanEnv -c vmtk -c morphman morphman
+  - conda create -n morphmanEnv morphman
 
   # Activate environment
   - source activate morphmanEnv
