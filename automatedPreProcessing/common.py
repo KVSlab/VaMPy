@@ -499,7 +499,7 @@ def compute_centers_for_meshing(polyData, atrium_present, case_path=None, test_c
     center = []
     for i in range(int(region_array.max()) + 1):
         # Compute area
-        boundary = vtk_compute_threshold(outputs, "RegionId", lower=i - 0.1, upper=i + 0.1, type="between", source=0)
+        boundary = vtk_compute_threshold(outputs, "RegionId", lower=i - 0.1, upper=i + 0.1, threshold_type="between", source=0)
 
         delaunay_filter = vtk.vtkDelaunay2D()
         delaunay_filter.SetInputData(boundary)
