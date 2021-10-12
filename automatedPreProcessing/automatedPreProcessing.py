@@ -2,11 +2,6 @@
 from __future__ import print_function
 
 import argparse
-import json
-import sys
-
-from morphman import is_surface_capped, vmtk_cap_polydata, compute_centerlines, get_vtk_point_locator, \
-    vtk_merge_polydata, smooth_voronoi_diagram, create_new_surface, compute_centers
 
 import ImportData
 import ToolRepairSTL

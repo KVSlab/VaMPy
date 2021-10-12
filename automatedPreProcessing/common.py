@@ -1,9 +1,5 @@
-# from morphman import get_parameters, vtk_clean_polydata, vtk_triangulate_surface, write_parameters, read_polydata, \
-#     vmtkscripts, write_polydata, vtk_extract_feature_edges, get_uncapped_surface, vtk_compute_connectivity, \
-#     get_point_data_array, vtk_compute_threshold, vtk_compute_mass_properties, extract_single_line, \
-#     get_curvilinear_coordinate, get_centerline_tolerance, get_distance, create_vtk_array, vmtk_smooth_surface, \
-#     get_number_of_arrays, get_vtk_array
 from morphman.common import *
+
 try:
     from vmtkpointselector import *
 except ImportError:
