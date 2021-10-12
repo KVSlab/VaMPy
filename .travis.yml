@@ -27,10 +27,10 @@ install:
   - conda config --add channels vmtk
 
   # Set up environment
-  - conda create -n vmtk_env vmtk pytest itk vtk llvm=3.3 paramiko
+  - conda create -n morphmanEnv -c vmtk -c morphman morphman
 
   # Activate environment
-  - source activate vmtk_env
+  - source activate morphmanEnv
 
   # Useful for debugging any issues with conda
   - conda info -a
