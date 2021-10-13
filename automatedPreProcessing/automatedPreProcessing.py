@@ -274,7 +274,7 @@ def run_pre_processing(filename_model, verbose_print, smoothing_method, smoothin
             source = inlet
             target = outlets
         centerlines, _, _ = compute_centerlines(source, target, file_name_flow_centerlines, capped_surface,
-                                                resampling=0.5)
+                                                resampling=0.1)
 
     else:
         centerlines = read_polydata(file_name_flow_centerlines)
@@ -286,18 +286,14 @@ def run_pre_processing(filename_model, verbose_print, smoothing_method, smoothin
 
     elif meshing_method == "curvature":
         if not path.isfile(file_name_distance_to_sphere_curv):
-            distance_to_sphere = dist_sphere_curv(surface, centerlines,
-                                                  sac_center, misr_max,
-                                                  file_name_distance_to_sphere_curv,
-                                                  coarsening_factor)
+            distance_to_sphere = dist_sphere_curv(surface, centerlines, sac_center, misr_max,
+                                                  file_name_distance_to_sphere_curv, coarsening_factor)
         else:
             distance_to_sphere = read_polydata(file_name_distance_to_sphere_curv)
     elif meshing_method == "diameter":
         if not path.isfile(file_name_distance_to_sphere_diam):
-            distance_to_sphere = dist_sphere_diam(surface, centerlines,
-                                                  sac_center, misr_max,
-                                                  file_name_distance_to_sphere_diam,
-                                                  coarsening_factor)
+            distance_to_sphere = dist_sphere_diam(surface, centerlines, sac_center, misr_max,
+                                                  file_name_distance_to_sphere_diam, coarsening_factor)
         else:
             distance_to_sphere = read_polydata(file_name_distance_to_sphere_diam)
 
@@ -365,7 +361,7 @@ def run_pre_processing(filename_model, verbose_print, smoothing_method, smoothin
         Total_inlet_area = 0
         num_inlets = len(inlet) // 3
         for i in range(num_inlets):
-            Total_inlet_area += parameters["inlet%s_area" % (i)]
+            Total_inlet_area += parameters["inlet%s_area" % i]
         mean_inflow_rate = 0.27 * Total_inlet_area
     else:
         mean_inflow_rate = 0.27 * parameters["inlet_area"]
