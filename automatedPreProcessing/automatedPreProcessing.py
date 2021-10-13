@@ -299,14 +299,14 @@ def run_pre_processing(filename_model, verbose_print, smoothing_method, smoothin
     if not path.isfile(file_name_vtu_mesh):
         try:
             print("--- Computing mesh\n")
-            mesh, remeshed_surface = generate_mesh(distance_to_sphere, edge_length)
+            mesh, remeshed_surface = generate_mesh(distance_to_sphere)
             assert remeshed_surface.GetNumberOfPoints() > 0, \
                 "No points in surface mesh, try to remesh"
             assert mesh.GetNumberOfPoints() > 0, "No points in mesh, try to remesh"
 
         except:
             distance_to_sphere = mesh_alternative(distance_to_sphere)
-            mesh, remeshed_surface = generate_mesh(distance_to_sphere, edge_length)
+            mesh, remeshed_surface = generate_mesh(distance_to_sphere)
             assert mesh.GetNumberOfPoints() > 0, "No points in mesh, after remeshing"
             assert remeshed_surface.GetNumberOfPoints() > 0, \
                 "No points in surface mesh, try to remesh"

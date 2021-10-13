@@ -450,16 +450,12 @@ def compute_distance_to_sphere(surface, centerSphere, radiusSphere=0.0,
     return surface
 
 
-def generate_mesh(surface, edge_length=None):
+def generate_mesh(surface):
     # Compute the mesh.
     meshGenerator = vmtkscripts.vmtkMeshGenerator()
     meshGenerator.Surface = surface
-    if edge_length is None:
-        meshGenerator.ElementSizeMode = "edgelength"  # Constant size mesh
-        meshGenerator.TargetEdgeLength = edge_length
-    else:
-        meshGenerator.ElementSizeMode = "edgelengtharray"  # Variable size mesh
-        meshGenerator.TargetEdgeLengthArrayName = "Size"  # Variable size mesh
+    meshGenerator.ElementSizeMode = "edgelengtharray"  # Variable size mesh
+    meshGenerator.TargetEdgeLengthArrayName = "Size"  # Variable size mesh
     meshGenerator.BoundaryLayer = 1
     meshGenerator.NumberOfSubLayers = 4
     meshGenerator.BoundaryLayerOnCaps = 0  # it should 1
