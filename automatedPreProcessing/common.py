@@ -33,26 +33,26 @@ thetaStep = 2.0
 version = vtk.vtkVersion().GetVTKMajorVersion()
 
 
-def get_aneurysm_dome(surface, dir_path):
+def get_regions_to_refine(surface, dir_path):
     # Check if info exists
     if not path.isfile(path.join(dir_path, dir_path + ".txt")):
-        provide_aneurysm_points(surface, dir_path)
+        provide_region_points(surface, dir_path)
 
     # Open info
     parameters = get_parameters(dir_path)
     dome = []
     for key, value in parameters.items():
-        if key.startswith("aneurysm_"):
+        if key.startswith("region_"):
             dome.append(value)
 
     if dome == []:
-        dome = provide_aneurysm_points(surface, dir_path)
+        dome = provide_region_points(surface, dir_path)
 
     # Flatten list
     return [item for sublist in dome for item in sublist]
 
 
-def provide_aneurysm_points(surface, dir_path=None):
+def provide_region_points(surface, dir_path=None):
     """
     Get relevant aneurysm points from user selected points on a input surface.
 
@@ -72,15 +72,15 @@ def provide_aneurysm_points(surface, dir_path=None):
     SeedSelector.SetSurface(triangulated_surface)
     SeedSelector.Execute()
 
-    aneurysmSeedIds = SeedSelector.GetTargetSeedIds()
+    regionSeedIds = SeedSelector.GetTargetSeedIds()
     get_point = surface.GetPoints().GetPoint
-    points = [list(get_point(aneurysmSeedIds.GetId(i))) for i in range(aneurysmSeedIds.GetNumberOfIds())]
+    points = [list(get_point(regionSeedIds.GetId(i))) for i in range(regionSeedIds.GetNumberOfIds())]
 
     if dir_path is not None:
-        info = {"number_of_aneurysms": len(points)}
+        info = {"number_of_regions": len(points)}
 
         for i in range(len(points)):
-            info["aneurysm_%d" % i] = points[i]
+            info["region_%d" % i] = points[i]
             write_parameters(info, dir_path)
 
     return points
@@ -324,6 +324,34 @@ def dist_sphere_curv(surface, centerlines, sac_center, misr_max, fileName, facto
     return distance_to_sphere
 
 
+def dist_sphere_constant(surface, centerlines, sac_center, misr_max, fileName, edge_length):
+    # Constant meshing method with possible refined area.
+    # --- Compute the distanceToCenterlines
+    distTocenterlines = vmtkscripts.vmtkDistanceToCenterlines()
+    distTocenterlines.Surface = surface
+    distTocenterlines.Centerlines = centerlines
+    distTocenterlines.Execute()
+    distance_to_sphere = distTocenterlines.Surface
+
+    # Reduce element size in aneurysm
+    for i in range(len(sac_center)):
+        distance_to_sphere = compute_distance_to_sphere(distance_to_sphere,
+                                                        sac_center[i],
+                                                        maxDistance=100,
+                                                        distanceScale=0.2 / (misr_max[i] * 2.))
+
+    element_size = edge_length + np.zeros((surface.GetNumberOfPoints(), 1))
+    if len(sac_center) != 0:
+        distance_to_spheres_array = get_point_data_array("DistanceToSpheres", distance_to_sphere)
+        element_size = np.minimum(element_size, distance_to_spheres_array)
+
+    vtk_array = create_vtk_array(element_size, "Size")
+    distance_to_sphere.GetPointData().AddArray(vtk_array)
+    write_polydata(distance_to_sphere, fileName)
+
+    return distance_to_sphere
+
+
 def dist_sphere_diam(surface, centerlines, sac_center, misr_max, fileName, factor):
     # Meshing method following Owais way.
     # --- Compute the distanceToCenterlines
@@ -426,7 +454,7 @@ def generate_mesh(surface, edge_length=None):
     # Compute the mesh.
     meshGenerator = vmtkscripts.vmtkMeshGenerator()
     meshGenerator.Surface = surface
-    if edge_length is not None:
+    if edge_length is None:
         meshGenerator.ElementSizeMode = "edgelength"  # Constant size mesh
         meshGenerator.TargetEdgeLength = edge_length
     else:

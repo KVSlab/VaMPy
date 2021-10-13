@@ -19,9 +19,9 @@ These scripts was written by
 - Henrik A. Kjeldsberg
 
 ## Installation
-You can choose how to install the dependencies, but the fastest way to get started is to first install anaconda or miniconda on your computer. Then create two environments, one for `vmtk/vtk` and one for `fenics` by executing the following in a terminal:
+You can choose how to install the dependencies, but the fastest way to get started is to first install anaconda or miniconda on your computer. Then create two environments, one for `vmtk/vtk/morphMan` and one for `fenics` by executing the following in a terminal:
 ```
-conda create -n vtk -c vmtk python=3.6 itk vtk vmtk paramiko
+conda create -n vtk -c vmtk -c morphman morphman paramiko
 conda create -n fenics -c conda-forge fenics
 ```
 
@@ -60,7 +60,7 @@ First, use the automatedPreProcessing to create a mesh, boundary conditions, and
 
 ```
 conda deactivate && conda activate vtk
-python automatedPreProcessing/automatedPreProcessing.py -m diameter -i test/Case_test_71/Case_test_71.vtp --aneurysm False -c 1.3
+python automatedPreProcessing/automatedPreProcessing.py -m diameter -i test/Case_test_71/Case_test_71.vtp -c 1.3 
 ```
 
 Then run a CFD simulation for two cycles with 10 000 time steps per cycle and default parameters with Oasis:

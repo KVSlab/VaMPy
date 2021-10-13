@@ -13,7 +13,7 @@ from visualize import visualize
 
 
 def run_pre_processing(filename_model, verbose_print, smoothing_method, smoothing_factor, meshing_method,
-                       aneurysm_present, atrium_present, create_flow_extensions, viz, config_path, coarsening_factor,
+                       refine_region, atrium_present, create_flow_extensions, viz, config_path, coarsening_factor,
                        flow_extension_length, edge_length, compress_mesh=True):
     """
     Automatically generate mesh of surface model in .vtu and .xml format, including prescribed
@@ -27,7 +27,7 @@ def run_pre_processing(filename_model, verbose_print, smoothing_method, smoothin
         smoothing_method (str): Method for surface smoothing
         smoothing_factor (float): Smoothing parameter
         meshing_method (str): Method for meshing
-        aneurysm_present (bool): Determines if aneurysm is present
+        regine_region (bool): Refines selected region of input if True
         atrium_present (bool): Determines whether this is an atrium case
         create_flow_extensions (bool): Adds flow extensions to mesh if True
         viz (bool): Visualize resulting surface model with flow rates
@@ -42,9 +42,10 @@ def run_pre_processing(filename_model, verbose_print, smoothing_method, smoothin
 
     # Naming conventions
     file_name_centerlines = path.join(dir_path, case_name + "_centerlines.vtp")
-    file_name_aneurysm_centerlines = path.join(dir_path, case_name + "_aneurysm_centerline.vtp")
-    file_name_sac_centerlines = path.join(dir_path, case_name + "_sac_centerline_{}.vtp")
+    file_name_refine_region_centerlines = path.join(dir_path, case_name + "_refine_region_centerline.vtp")
+    file_name_region_centerlines = path.join(dir_path, case_name + "_sac_centerline_{}.vtp")
     file_name_distance_to_sphere_diam = path.join(dir_path, case_name + "_distance_to_sphere_diam.vtp")
+    file_name_distance_to_sphere_const = path.join(dir_path, case_name + "_distance_to_sphere_const.vtp")
     file_name_distance_to_sphere_curv = path.join(dir_path, case_name + "_distance_to_sphere_curv.vtp")
     file_name_probe_points = path.join(dir_path, case_name + "_probe_point")
     file_name_voronoi = path.join(dir_path, case_name + "_voronoi.vtp")
@@ -109,19 +110,23 @@ def run_pre_processing(filename_model, verbose_print, smoothing_method, smoothin
                                             end_point=0)
     tol = get_centerline_tolerance(centerlines)
 
-    if aneurysm_present:
-        aneurysms = get_aneurysm_dome(capped_surface, path.join(dir_path, case_name))
-        centerlineAnu, _, _ = compute_centerlines(source, aneurysms, file_name_aneurysm_centerlines, capped_surface,
+    # Get 'center' and 'radius' of the regions(s)
+    region_center = []
+    misr_max = []
+
+    if refine_region:
+        regions = get_regions_to_refine(capped_surface, path.join(dir_path, case_name))
+        centerlineAnu, _, _ = compute_centerlines(source, regions, file_name_refine_region_centerlines, capped_surface,
                                                   resampling=0.1)
 
-        # Extract the aneurysm centerline
-        sac_centerline = []
+        # Extract the region centerline
+        refine_region_centerline = []
         info = get_parameters(path.join(dir_path, case_name))
-        num_anu = info["number_of_aneurysms"]
+        num_anu = info["number_of_regions"]
 
         # Compute mean distance between points
         for i in range(num_anu):
-            if not path.isfile(file_name_sac_centerlines.format(i)):
+            if not path.isfile(file_name_region_centerlines.format(i)):
                 line = extract_single_line(centerlineAnu, i)
                 locator = get_vtk_point_locator(centerlines)
                 for j in range(line.GetNumberOfPoints() - 1, 0, -1):
@@ -133,25 +138,20 @@ def run_pre_processing(filename_model, verbose_print, smoothing_method, smoothin
                         break
 
                 tmp = extract_single_line(line, 0, start_id=j)
-                write_polydata(tmp, file_name_sac_centerlines.format(i))
+                write_polydata(tmp, file_name_region_centerlines.format(i))
 
                 # List of VtkPolyData sac(s) centerline
-                sac_centerline.append(tmp)
+                refine_region_centerline.append(tmp)
 
             else:
-                sac_centerline.append(read_polydata(file_name_sac_centerlines.format(i)))
+                refine_region_centerline.append(read_polydata(file_name_region_centerlines.format(i)))
 
-    # Get 'center' and 'radius' of the aneurysm(s)
-    sac_center = []
-    misr_max = []
-
-    if aneurysm_present:
         # Merge the sac centerline
-        sac_centerlines = vtk_merge_polydata(sac_centerline)
+        region_centerlines = vtk_merge_polydata(refine_region_centerline)
 
-        for sac in sac_centerline:
-            sac_center.append(sac.GetPoints().GetPoint(sac.GetNumberOfPoints() // 2))
-            tmp_misr = get_point_data_array(radiusArrayName, sac)
+        for region in refine_region_centerline:
+            region_center.append(region.GetPoints().GetPoint(region.GetNumberOfPoints() // 2))
+            tmp_misr = get_point_data_array(radiusArrayName, region)
             misr_max.append(tmp_misr.max())
 
     # Smooth surface
@@ -167,8 +167,8 @@ def run_pre_processing(filename_model, verbose_print, smoothing_method, smoothin
 
             # Get smooth Voronoi diagram
             if not path.isfile(file_name_voronoi_smooth):
-                if aneurysm_present:
-                    smooth_voronoi = smooth_voronoi_diagram(voronoi, centerlines, smoothing_factor, sac_centerlines)
+                if refine_region:
+                    smooth_voronoi = smooth_voronoi_diagram(voronoi, centerlines, smoothing_factor, region_centerlines)
                 else:
                     smooth_voronoi = smooth_voronoi_diagram(voronoi, centerlines, smoothing_factor)
 
@@ -279,17 +279,18 @@ def run_pre_processing(filename_model, verbose_print, smoothing_method, smoothin
     # Choose input for the mesh
     print("--- Computing distance to sphere\n")
     if meshing_method == "constant":
-        distance_to_sphere = surface
+        distance_to_sphere = dist_sphere_constant(surface, centerlines, region_center, misr_max,
+                                                  file_name_distance_to_sphere_const, edge_length)
 
     elif meshing_method == "curvature":
         if not path.isfile(file_name_distance_to_sphere_curv):
-            distance_to_sphere = dist_sphere_curv(surface, centerlines, sac_center, misr_max,
+            distance_to_sphere = dist_sphere_curv(surface, centerlines, region_center, misr_max,
                                                   file_name_distance_to_sphere_curv, coarsening_factor)
         else:
             distance_to_sphere = read_polydata(file_name_distance_to_sphere_curv)
     elif meshing_method == "diameter":
         if not path.isfile(file_name_distance_to_sphere_diam):
-            distance_to_sphere = dist_sphere_diam(surface, centerlines, sac_center, misr_max,
+            distance_to_sphere = dist_sphere_diam(surface, centerlines, region_center, misr_max,
                                                   file_name_distance_to_sphere_diam, coarsening_factor)
         else:
             distance_to_sphere = read_polydata(file_name_distance_to_sphere_diam)
@@ -335,7 +336,7 @@ def run_pre_processing(filename_model, verbose_print, smoothing_method, smoothin
     if not path.isfile(file_name_probe_points):
         # Get the list of coordinates for the probe points along the network centerline.
         listProbePoints = ImportData.GetListProbePoints(centerlinesBranches, network, verbose_print)
-        listProbePoints += sac_center
+        listProbePoints += region_center
 
         print("--- Saving probes points in: %s\n" % file_name_probe_points)
         probe_points = np.array(listProbePoints)
@@ -441,7 +442,7 @@ def read_command_line():
                         choices=["voronoi", "no_smooth", "laplace", "taubin"],
                         help="Smoothing method, for now only Voronoi smoothing is available." +
                              " For Voronoi smoothing you can also control smoothingFactor" +
-                             " (default = 0.25)  and smoothingAneurysm (default = False).")
+                             " (default = 0.25).")
 
     parser.add_argument('-c', '--coarseningFactor',
                         type=float,
@@ -470,11 +471,12 @@ def read_command_line():
                         type=float,
                         help="Characteristic edge length used for meshing.")
 
-    parser.add_argument('-a', '--aneurysm',
-                        dest="aneurysmPresent",
+    parser.add_argument('-r', '--refine-region',
+                        dest="refineRegion",
                         type=str2bool,
                         default=False,
-                        help="Determine weather or not the model has a aneurysm. Default is False.")
+                        help="Determine weather or not to refine a specific region of " +
+                             "the input model. Default is False.")
 
     parser.add_argument('-at', '--atrium',
                         dest="atriumPresent",
@@ -524,7 +526,7 @@ def read_command_line():
 
     return dict(filename_model=args.fileNameModel, verbose_print=verbose_print, smoothing_method=args.smoothingMethod,
                 smoothing_factor=args.smoothingFactor, meshing_method=args.meshingMethod,
-                aneurysm_present=args.aneurysmPresent, atrium_present=args.atriumPresent,
+                refine_region=args.refineRegion, atrium_present=args.atriumPresent,
                 create_flow_extensions=args.flowExtension, viz=args.viz, config_path=args.config,
                 coarsening_factor=args.coarseningFactor, flow_extension_length=args.flowExtLen,
                 edge_length=args.edgeLength)
