@@ -54,7 +54,7 @@ def get_regions_to_refine(surface, dir_path):
 
 def provide_region_points(surface, dir_path=None):
     """
-    Get relevant aneurysm points from user selected points on a input surface.
+    Get relevant region points from user selected points on a input surface.
 
     Args:
         surface (vtkPolyData): Surface model.
@@ -333,7 +333,7 @@ def dist_sphere_constant(surface, centerlines, sac_center, misr_max, fileName, e
     distTocenterlines.Execute()
     distance_to_sphere = distTocenterlines.Surface
 
-    # Reduce element size in aneurysm
+    # Reduce element size in region
     for i in range(len(sac_center)):
         distance_to_sphere = compute_distance_to_sphere(distance_to_sphere,
                                                         sac_center[i],

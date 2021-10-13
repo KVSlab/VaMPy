@@ -265,7 +265,7 @@ def remove(dirpath, smooth, smooth_factor, bif, addPoint, lower,
     capped_surface = ReadPolyData(model_path.replace(".vtp", "_closed.vtp"))
 
     # Get aneurysm "end point"
-    aneurysm = get_aneurysm_dome(capped_surface, dirpath, anu_num)
+    aneurysm = get_regions_to_refine(capped_surface, dirpath, anu_num)
     outlet1, outlet2 = get_relevant_outlets(capped_surface, dirpath)
 
     # Get inlet and outlets

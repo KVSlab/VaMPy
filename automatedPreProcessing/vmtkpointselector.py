@@ -130,7 +130,7 @@ class vmtkPickPointSeedSelector(vmtkSeedSelector):
 
         self.vmtkRenderer.Renderer.AddActor(surfaceActor)
 
-        text = 'Please position the mouse and press space to add the top of the aneurysm, \'u\' to undo\n'
+        text = 'Please position the mouse and press space to add the top of the region of interest, \'u\' to undo\n'
         guiText = VtkText(text)
         self.vmtkRenderer.Renderer.AddActor(guiText.text)
 

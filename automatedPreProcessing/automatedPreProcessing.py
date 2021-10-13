@@ -207,7 +207,6 @@ def run_pre_processing(filename_model, verbose_print, smoothing_method, smoothin
         else:
             surface = read_polydata(file_name_surface_smooth)
 
-
     elif smoothing_method == "laplace":
         print("--- Smooth surface: Laplacian smoothing\n")
         if not path.isfile(file_name_surface_smooth):
@@ -279,8 +278,11 @@ def run_pre_processing(filename_model, verbose_print, smoothing_method, smoothin
     # Choose input for the mesh
     print("--- Computing distance to sphere\n")
     if meshing_method == "constant":
-        distance_to_sphere = dist_sphere_constant(surface, centerlines, region_center, misr_max,
-                                                  file_name_distance_to_sphere_const, edge_length)
+        if not path.isfile(file_name_distance_to_sphere_const):
+            distance_to_sphere = dist_sphere_constant(surface, centerlines, region_center, misr_max,
+                                                      file_name_distance_to_sphere_const, edge_length)
+        else:
+            distance_to_sphere = read_polydata(file_name_distance_to_sphere_const)
 
     elif meshing_method == "curvature":
         if not path.isfile(file_name_distance_to_sphere_curv):
