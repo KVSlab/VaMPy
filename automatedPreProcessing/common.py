@@ -223,7 +223,7 @@ def get_centers_for_meshing(surface, atrium_present, dir_path, flowext=False):
     outlets = []
     inlets = []
     for key, value in parameters.items():
-        if "area" not in key and "relevant" not in key:
+        if "area" not in key and "id" not in key and "relevant" not in key:
             if "outlet" in key:
                 outlets += value
             elif "inlet" in key:

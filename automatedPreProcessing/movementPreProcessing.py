@@ -4,6 +4,8 @@ import os
 from morphman.common import *
 from vtk.numpy_interface import dataset_adapter as dsa
 
+from common import get_centers_for_meshing
+
 cell_id_name = "CellEntityIds"
 
 
@@ -45,7 +47,7 @@ def main(case_path, move_surface, add_extensions, edge_length, patient_specific,
 
     # Cap surface with flow extensions
     capped_surface = vmtk_cap_polydata(surface)
-    inlet, outlets = get_inlet_and_outlet_centers(surface, model_path)
+    outlets, inlet = get_centers_for_meshing(surface, True, model_path)
     centerlines, _, _ = compute_centerlines(inlet, outlets, cl_path, capped_surface, resampling=0.01)
     centerline = extract_single_line(centerlines, 0)
     origin = centerline.GetPoint(0)
@@ -61,10 +63,10 @@ def main(case_path, move_surface, add_extensions, edge_length, patient_specific,
 
     # Add flow extensions
     if add_extensions and path.exists(moved_path):
-        surface_to_mesh = add_flow_extensions(surface, model_path, moved_path, edge_length, recompute_mesh)
+        surface_to_mesh = add_flow_extensions(surface, model_path, moved_path, centerlines, edge_length)
 
     if not path.exists(mesh_path) or recompute_mesh and surface_to_mesh is not None:
-        generate_mesh(mesh_path, mesh_xml_path, surface_to_mesh, edge_length)
+        generate_mesh(surface_to_mesh, mesh_path, mesh_xml_path, edge_length)
 
 
 def IdealVolume(t):
@@ -151,12 +153,11 @@ def capp_surface(remeshed_extended, offset=1):
     return surface
 
 
-def add_flow_extensions(surface, model_path, moved_path, resolution=1.9, recompute_mesh=False):
+def add_flow_extensions(surface, model_path, moved_path, centerline, resolution=1.9):
     # Create result paths
     points_path = model_path + "_points.np"
     remeshed_path = model_path + "_remeshed.vtp"
     extended_path = model_path + "_extended"
-    centerline_path = model_path + "_cl.vtp"
     remeshed_extended_path = model_path + "_remeshed_extended.vtp"
     if not path.exists(extended_path):
         os.mkdir(extended_path)
@@ -170,20 +171,10 @@ def add_flow_extensions(surface, model_path, moved_path, resolution=1.9, recompu
         remeshed = vtk_clean_polydata(remeshed)
         write_polydata(remeshed, remeshed_path)
 
-    # Compute centerline
-    if not path.exists(centerline_path):
-        print("-- Computing centerlines --")
-        inlet, outlet = compute_centers(remeshed, model_path)
-        print(inlet, outlet)
-        centerline, _, _ = compute_centerlines(inlet, outlet, centerline_path, capp_surface(remeshed),
-                                               resampling=0.1, end_point=1)
-    else:
-        centerline = read_polydata(centerline_path)
-
     # Create surface extensions on the original surface
     print("-- Adding flow extensions --")
-    length_in = 1.5
-    length_out = 1.5
+    length_in = 1.0
+    length_out = 1.0
     remeshed_extended = add_flow_extension(remeshed, centerline, include_outlet=False, extension_length=length_in)
     remeshed_extended = add_flow_extension(remeshed_extended, centerline, include_outlet=True,
                                            extension_length=length_out)
@@ -206,22 +197,33 @@ def add_flow_extensions(surface, model_path, moved_path, resolution=1.9, recompu
 
         tmp_surface = read_polydata(model_path)
         new_path = path.join(extended_path, model_path.split("/")[-1])
-        move_surface_model(tmp_surface, surface, remeshed, remeshed_extended, distance, point_map, new_path, i, points)
+        if not path.exists(new_path):
+            move_surface_model(tmp_surface, surface, remeshed, remeshed_extended, distance, point_map, new_path, i,
+                               points)
 
-    # Write points to file
+    # Resample points and write to file
+    N = 200
     points[:, :, -1] = points[:, :, 0]
+    time = np.linspace(0, 1, points.shape[2])
+    N2 = N + N // (time.shape[0] - 1)
+    move = np.zeros((points.shape[0], points.shape[1], N + 1))
+    move[:, 0, :] = resample(points[:, 0, :], N2, time, axis=1)[0][:, :N - N2 + 1]
+    move[:, 1, :] = resample(points[:, 1, :], N2, time, axis=1)[0][:, :N - N2 + 1]
+    move[:, 2, :] = resample(points[:, 2, :], N2, time, axis=1)[0][:, :N - N2 + 1]
+
+    points = move
     points.dump(points_path)
 
     return remeshed_extended
 
 
-def generate_mesh(mesh_path, mesh_xml_path, remeshed_extended, resolution):
+def generate_mesh(surface, mesh_path, mesh_xml_path, resolution):
     # Cap mitral valve
     print("-- Meshing surface --")
-    remeshed_extended = dsa.WrapDataObject(remeshed_extended)
-    remeshed_extended.CellData.append(np.zeros(remeshed_extended.VTKObject.GetNumberOfCells()) + 1,
-                                      cell_id_name)
-    remeshed_all_capped = capp_surface(remeshed_extended.VTKObject)
+    surface = dsa.WrapDataObject(surface)
+    surface.CellData.append(np.zeros(surface.VTKObject.GetNumberOfCells()) + 1,
+                            cell_id_name)
+    remeshed_all_capped = capp_surface(surface.VTKObject)
     remeshed_all_capped = remesh_surface(remeshed_all_capped, resolution, exclude=[1])
 
     # Mesh volumetric
@@ -260,6 +262,8 @@ def generate_mesh(mesh_path, mesh_xml_path, remeshed_extended, resolution):
     meshWriter.Compressed = True
     meshWriter.OutputFileName = mesh_xml_path
     meshWriter.Execute()
+
+    return mesh
 
 
 def move_surface_model(surface, original, remeshed, remeshed_extended, distance, point_map, file_path, i, points):

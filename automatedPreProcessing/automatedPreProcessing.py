@@ -3,9 +3,7 @@ from __future__ import print_function
 
 import argparse
 
-import ImportData
 import ToolRepairSTL
-from NetworkBoundaryConditions import FlowSplitting
 # Local imports
 from common import *
 from simulate import run_simulation
@@ -357,14 +355,15 @@ def run_pre_processing(filename_model, verbose_print, smoothing_method, smoothin
     parameters = get_parameters(path.join(dir_path, case_name))
 
     # FIXME: Add plausible boundary conditions for atrial flow
+    flow_rate_factor = 0.27
     if atrium_present:
         Total_inlet_area = 0
         num_inlets = len(inlet) // 3
         for i in range(num_inlets):
             Total_inlet_area += parameters["inlet%s_area" % i]
-        mean_inflow_rate = 0.27 * Total_inlet_area
+        mean_inflow_rate = flow_rate_factor * Total_inlet_area
     else:
-        mean_inflow_rate = 0.27 * parameters["inlet_area"]
+        mean_inflow_rate = flow_rate_factor * parameters["inlet_area"]
 
     find_boundaries(case_name, dir_path, mean_inflow_rate, network, polyDataVolMesh, verbose_print)
 
@@ -393,26 +392,7 @@ def run_pre_processing(filename_model, verbose_print, smoothing_method, smoothin
             script_file = open(file_name_run_script, "w")
             script_file.write(run_script)
             script_file.close()
-
         run_simulation(config_path, dir_path, case_name)
-
-
-def str2bool(arg):
-    """
-    Convert a string to boolean.
-
-    Args:
-        arg (str): Input string.
-
-    Returns:
-        return (bool): Converted string.
-    """
-    if arg.lower() in ('yes', 'true', 't', 'y', '1'):
-        return True
-    elif arg.lower() in ('no', 'false', 'f', 'n', '0'):
-        return False
-    else:
-        raise argparse.ArgumentTypeError('Boolean value expected.')
 
 
 def read_command_line():
