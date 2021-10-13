@@ -25,12 +25,13 @@ install:
   - conda config --set restore_free_channel true
   - conda config --set always_yes yes --set changeps1 no
   - conda config --add channels vmtk
+  - conda config --add channels morphman
 
   # Set up environment
-  - conda create -n vmtk_env vmtk pytest itk vtk llvm=3.3 paramiko
+  - conda create -n morphmanEnv morphman pytest llvm=3.3 paramiko
 
   # Activate environment
-  - source activate vmtk_env
+  - source activate morphmanEnv
 
   # Useful for debugging any issues with conda
   - conda info -a
