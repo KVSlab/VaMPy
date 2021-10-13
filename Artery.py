@@ -1,12 +1,27 @@
 import json
 import pickle
-from os import path, makedirs
+from os import makedirs
+from pprint import pprint
 
 import numpy as np
-from Womersley import make_womersley_bcs, compute_boundary_geometry_acrn
 from fenicstools import Probes
 
 from oasis.problems.NSfracStep import *
+from Womersley import make_womersley_bcs, compute_boundary_geometry_acrn
+
+"""
+Problem file for running CFD simulation in arterial models consisting of one inlet, and two or more outlets.
+A Womersley velocity profile is applied at the inlet, and a flow split pressure condition is applied at the outlets,
+following [1]. Flow rate for the inlet condition, and flow split values for the outlets are computed from the 
+pre-processing script automatedPreProcessing.py. The simulation is run for two cycles (adjustable), but only the 
+results/solutions from the second cycle are stored to avoid non-physiological effects from the first cycle.
+One cardiac cycle is set to 0.951 s from [2], and scaled by a factor of 1000, hence all parameters are in [mm] or [ms].  
+
+[1] Gin, Ron, Anthony G. Straatman, and David A. Steinman. "A dual-pressure boundary condition for use in simulations 
+    of bifurcating conduits." J. Biomech. Eng. 124.5 (2002): 617-619. 
+[2] Hoi, Yiemeng, et al. "Characterization of volumetric flow rate waveforms at the carotid bifurcations of older 
+    adults." Physiological measurement 31.3 (2010): 291.
+"""
 
 set_log_level(50)
 
@@ -14,28 +29,31 @@ set_log_level(50)
 def problem_parameters(commandline_kwargs, NS_parameters, NS_expressions, **NS_namespace):
     if "restart_folder" in commandline_kwargs.keys():
         restart_folder = commandline_kwargs["restart_folder"]
-        f = open(path.join(restart_folder, 'params.dat'), 'r')
+        f = open(path.join(restart_folder, 'params.dat'), 'rb')
         NS_parameters.update(pickle.load(f))
         NS_parameters['restart_folder'] = restart_folder
     else:
-        # Override some problem specific parameters
-        # parameters are in mm and ms
+        # Parameters are in mm and ms
+        cardiac_cycle = 951
+        number_of_cycles = 2
+
         NS_parameters.update(
             # Fluid parameters
-            nu=3.3018e-3,  # Viscosity
+            nu=3.3018e-3,  # Kinematic viscosity
             # Geometry parameters
             id_in=[],  # Inlet boundary ID
             id_out=[],  # Outlet boundary IDs
             area_ratio=[],
+            area_inlet=[],
             # Simulation parameters
-            T=951 * 2,  # Run simulation for 2 cardiac cycles
-            dt=0.0951,  # 10 000 steps per cycle
-            no_of_cycles=2,
-            dump_stats=100,
-            store_data=5,
-            store_data_tstep=10000,  # Start storing data at 2nd cycle
-            save_step=200,
-            checkpoint=500,
+            cardiac_cycle=cardiac_cycle,  # Cardiac cycle [ms]
+            T=cardiac_cycle * number_of_cycles,  # Simulation end time [ms]
+            dt=0.0951,  # Time step size [ms]
+            save_probe_frequency=100,  # Save frequency for sampling velocity & pressure at probes along the centerline
+            save_solution_frequency=5,  # Save frequency for post processing
+            save_solution_after_cycle=1,  # Store solution after 1 cardiac cycle
+            # Oasis specific parameters
+            checkpoint=500,  # Checkpoint frequency
             print_intermediate_info=100,
             folder="results_artery",
             mesh_path=commandline_kwargs["mesh_path"],
@@ -49,37 +67,93 @@ def problem_parameters(commandline_kwargs, NS_parameters, NS_expressions, **NS_n
     case_name = mesh_file.split(".")[0]
     NS_parameters["folder"] = path.join(NS_parameters["folder"], case_name)
 
+    if MPI.rank(MPI.comm_world) == 0:
+        print("=== Starting simulation for case: {} ===".format(case_name))
+        print("Running with the following parameters:")
+        pprint(NS_parameters)
+
 
 def mesh(mesh_path, **NS_namespace):
-    # Read mesh
-    return Mesh(mesh_path)
+    # Read mesh and print mesh information
+    mesh = Mesh(mesh_path)
+    print_mesh_information(mesh)
+
+    return mesh
 
 
-def create_bcs(t, NS_expressions, V, Q, area_ratio, mesh, mesh_path, nu, id_in, id_out, pressure_degree, **NS_namespace):
+def print_mesh_information(mesh):
+    comm = MPI.comm_world
+    local_xmin = mesh.coordinates()[:, 0].min()
+    local_xmax = mesh.coordinates()[:, 0].max()
+    local_ymin = mesh.coordinates()[:, 1].min()
+    local_ymax = mesh.coordinates()[:, 1].max()
+    local_zmin = mesh.coordinates()[:, 2].min()
+    local_zmax = mesh.coordinates()[:, 2].max()
+    xmin = comm.gather(local_xmin, 0)
+    xmax = comm.gather(local_xmax, 0)
+    ymin = comm.gather(local_ymin, 0)
+    ymax = comm.gather(local_ymax, 0)
+    zmin = comm.gather(local_zmin, 0)
+    zmax = comm.gather(local_zmax, 0)
+
+    local_num_cells = mesh.num_cells()
+    local_num_edges = mesh.num_edges()
+    local_num_faces = mesh.num_faces()
+    local_num_facets = mesh.num_facets()
+    local_num_vertices = mesh.num_vertices()
+    num_cells = comm.gather(local_num_cells, 0)
+    num_edges = comm.gather(local_num_edges, 0)
+    num_faces = comm.gather(local_num_faces, 0)
+    num_facets = comm.gather(local_num_facets, 0)
+    num_vertices = comm.gather(local_num_vertices, 0)
+    volume = assemble(Constant(1) * dx(mesh))
+
+    if MPI.rank(MPI.comm_world) == 0:
+        print("=== Mesh information ===")
+        print("X range: {} to {} (delta: {:.4f})".format(min(xmin), max(xmax), max(xmax) - min(xmin)))
+        print("Y range: {} to {} (delta: {:.4f})".format(min(ymin), max(ymax), max(ymax) - min(ymin)))
+        print("Z range: {} to {} (delta: {:.4f})".format(min(zmin), max(zmax), max(zmax) - min(zmin)))
+        print("Number of cells: {}".format(sum(num_cells)))
+        print("Number of cells per processor: {}".format(int(np.mean(num_cells))))
+        print("Number of edges: {}".format(sum(num_edges)))
+        print("Number of faces: {}".format(sum(num_faces)))
+        print("Number of facets: {}".format(sum(num_facets)))
+        print("Number of vertices: {}".format(sum(num_vertices)))
+        print("Volume: {:.4f}".format(volume))
+        print("Number of cells per volume: {:.4f}".format(sum(num_cells) / volume))
+
+
+def create_bcs(t, NS_expressions, V, Q, area_ratio, area_inlet, mesh, mesh_path, nu, id_in, id_out, pressure_degree,
+               **NS_namespace):
     # Mesh function
     boundary = MeshFunction("size_t", mesh, mesh.geometry().dim() - 1, mesh.domains())
+    boundary.set_values(boundary.array() + 1)
 
     # Read case parameters
-    info_path = mesh_path.split(".")[0] + ".json"
-    with open(info_path) as f:
+    info = mesh_path.split(".")[0] + "_info.json"
+    with open(info) as f:
         info = json.load(f)
 
-    # Extract flow split ratios and inlet/outlet IDs
-    id_info = info['idFileLine'].split()
-    id_in.append(int(id_info[1]))
-    id_out[:] = [int(p) for p in id_info[2].split(",")]
-    Q_mean = float(id_info[3])
-    area_ratio[:] = [float(p) for p in info['areaRatioLine'].split()[-1].split(",")]
+    id_wall = 1
+    id_in[:] = info['inlet_id']
+    id_out[:] = info['outlet_ids']
+    Q_mean = info['mean_flow_rate']
 
-    # Womersley boundary condition at inlet
-    t_values, Q_ = np.load(path.join(path.dirname(path.abspath(__file__)), "ICA_values"))
-    Q_values = Q_mean * Q_
-    t_values *= 1000
-    tmp_a, tmp_c, tmp_r, tmp_n = compute_boundary_geometry_acrn(mesh, id_in[0], boundary)
-    inlet = make_womersley_bcs(t_values, Q_values, mesh, nu, tmp_a, tmp_c, tmp_r, tmp_n, V.ufl_element())
+    area_ratio[:] = info['area_ratio']
+    area_inlet.append(info['inlet_area'])
+
+    # Load normalized time and flow rate values
+    t_values, Q_ = np.loadtxt(path.join(path.dirname(path.abspath(__file__)), "ICA_values")).T
+    Q_values = Q_mean * Q_  # Specific flow rate * Flow wave form
+    t_values *= 1000  # Scale to [ms]
+    tmp_area, tmp_center, tmp_radius, tmp_normal = compute_boundary_geometry_acrn(mesh, id_in[0], boundary)
+
+    # Create Womersley boundary condition at inlet
+    inlet = make_womersley_bcs(t_values, Q_values, mesh, nu, tmp_area, tmp_center, tmp_radius, tmp_normal,
+                               V.ufl_element())
     NS_expressions["inlet"] = inlet
 
-    # Set start time equal to t_0
+    # Initialize inlet expressions with initial time
     for uc in inlet:
         uc.set_t(t)
 
@@ -90,20 +164,22 @@ def create_bcs(t, NS_expressions, V, Q, area_ratio, mesh, mesh_path, nu, id_in, 
         area_out.append(assemble(Constant(1.0, name="one") * dsi))
 
     bc_p = []
-    print("Initial pressure:")
+    if MPI.rank(MPI.comm_world) == 0:
+        print("=== Initial pressure and area fraction ===")
     for i, ID in enumerate(id_out):
         p_initial = area_out[i] / sum(area_out)
         outflow = Expression("p", p=p_initial, degree=pressure_degree)
         bc = DirichletBC(Q, outflow, boundary, ID)
         bc_p.append(bc)
         NS_expressions[ID] = outflow
-        print(ID, p_initial)
+        if MPI.rank(MPI.comm_world) == 0:
+            print(("Boundary ID={:d}, pressure: {:0.6f}, area fraction: {:0.4f}".format(ID, p_initial, area_ratio[i])))
 
     # No slip condition at wall
     wall = Constant(0.0)
 
     # Create Boundary conditions for the velocity
-    bc_wall = DirichletBC(V, wall, boundary, 0)
+    bc_wall = DirichletBC(V, wall, boundary, id_wall)
     bc_inlet = [DirichletBC(V, inlet[i], boundary, id_in[0]) for i in range(3)]
 
     # Return boundary conditions in dictionary
@@ -115,22 +191,26 @@ def create_bcs(t, NS_expressions, V, Q, area_ratio, mesh, mesh_path, nu, id_in, 
 
 def get_file_paths(folder):
     # Create folder where data and solutions (velocity, mesh, pressure) is stored
-    common_path = path.join(folder, "VTK")
+    common_path = path.join(folder, "Solutions")
     if MPI.rank(MPI.comm_world) == 0:
         if not path.exists(common_path):
             makedirs(common_path)
 
     file_p = path.join(common_path, "p.h5")
-    file_u = [path.join(common_path, "u{}.h5".format(i)) for i in range(3)]
+    file_u = path.join(common_path, "u.h5")
     file_mesh = path.join(common_path, "mesh.h5")
     files = {"u": file_u, "p": file_p, "mesh": file_mesh}
 
     return files
 
 
-def pre_solve_hook(mesh, V, Q, newfolder, mesh_path, restart_folder, **NS_namespace):
+def pre_solve_hook(mesh, V, Q, newfolder, mesh_path, restart_folder, velocity_degree, cardiac_cycle,
+                   save_solution_after_cycle, dt, **NS_namespace):
+    # Mesh function
+    boundary = MeshFunction("size_t", mesh, mesh.geometry().dim() - 1, mesh.domains())
+    boundary.set_values(boundary.array() + 1)
+
     # Create point for evaluation
-    boundary = MeshFunction("size_t", mesh, 2, mesh.domains())
     n = FacetNormal(mesh)
     eval_dict = {}
     rel_path = mesh_path.split(".")[0] + "_probe_point"
@@ -152,43 +232,57 @@ def pre_solve_hook(mesh, V, Q, newfolder, mesh_path, restart_folder, **NS_namesp
     else:
         files = NS_namespace["files"]
 
-    # Save mesh as HDF5 file
+    # Save mesh as HDF5 file for post processing
     with HDF5File(MPI.comm_world, files["mesh"], "w") as mesh_file:
         mesh_file.write(mesh, "mesh")
 
-    return dict(eval_dict=eval_dict, boundary=boundary, n=n)
+    # Create vector function for storing velocity
+    Vv = VectorFunctionSpace(mesh, "CG", velocity_degree)
+    U = Function(Vv)
+
+    # Tstep when solutions for post processing should start being saved
+    save_solution_at_tstep = int(cardiac_cycle * save_solution_after_cycle / dt)
+
+    return dict(eval_dict=eval_dict, n=n, U=U, save_solution_at_tstep=save_solution_at_tstep, boundary=boundary)
 
 
-def temporal_hook(u_, p_, mesh, tstep, dump_stats, eval_dict, newfolder, id_in, id_out, boundary, n, store_data,
-                  NS_parameters, NS_expressions, area_ratio, t, store_data_tstep, **NS_namespace):
-    # Update boundary condition
+def temporal_hook(u_, p_, mesh, tstep, save_probe_frequency, eval_dict, newfolder, id_in, id_out, boundary, n,
+                  save_solution_frequency, NS_parameters, NS_expressions, area_ratio, t, save_solution_at_tstep,
+                  U, area_inlet, nu, **NS_namespace):
+    # Update boundary condition to current time
     for uc in NS_expressions["inlet"]:
         uc.set_t(t)
 
     # Compute flux and update pressure condition
-    if tstep > 2 and tstep % 1 == 0:
+    if tstep > 2:
         Q_ideals, Q_in, Q_outs = update_pressure_condition(NS_expressions, area_ratio, boundary, id_in, id_out, mesh, n,
                                                            tstep, u_)
 
+    # Compute flow rates and updated pressure at outlets, and mean velocity and Reynolds number at inlet
     if MPI.rank(MPI.comm_world) == 0 and tstep % 10 == 0:
-        print("=" * 10, tstep, "=" * 10)
-        print("Sum of Q_out = {:0.4f} Q_in = {:0.4f}".format(sum(Q_outs), Q_in))
+        U_mean = Q_in / area_inlet[0]
+        diam_inlet = np.sqrt(4 * area_inlet[0] / np.pi)
+        Re = U_mean * diam_inlet / nu
+        print("=" * 10, "Time step " + str(tstep), "=" * 10)
+        print("Sum of Q_out = {:0.4f}, Q_in = {:0.4f}, mean velocity (inlet): {:0.4f}, Reynolds number (inlet): {:0.4f}"
+              .format(sum(Q_outs), Q_in, U_mean, Re))
         for i, out_id in enumerate(id_out):
-            print(("({:d}) New pressure {:0.4f}").format(out_id, NS_expressions[out_id].p))
-        for i, out_id in enumerate(id_out):
-            print(("({:d}) area ratio {:0.4f}, ideal: {:0.4f} actual:" +
-                   " {:0.4f}").format(out_id, area_ratio[i], Q_ideals[i], Q_outs[i]))
+            print(("For outlet with boundary ID={:d}: target flow rate: {:0.4f} mL/s, " +
+                   "computed flow rate: {:0.4f} mL/s, pressure updated to: {:0.4f}")
+                  .format(out_id, Q_ideals[i], Q_outs[i], NS_expressions[out_id].p))
         print()
 
-    # Sample velocity in points
+    # Sample velocity and pressure in points/probes
     eval_dict["centerline_u_x_probes"](u_[0])
     eval_dict["centerline_u_y_probes"](u_[1])
     eval_dict["centerline_u_z_probes"](u_[2])
     eval_dict["centerline_p_probes"](p_)
 
-    # Store sampled velocity
-    if tstep % dump_stats == 0:
-        filepath = path.join(newfolder, "Stats")
+    # Store sampled velocity and pressure
+    if tstep % save_probe_frequency == 0:
+        # Save variables along the centerline for CFD simulation
+        # diagnostics and light-weight post processing
+        filepath = path.join(newfolder, "Probes")
         if MPI.rank(MPI.comm_world) == 0:
             if not path.exists(filepath):
                 makedirs(filepath)
@@ -212,39 +306,40 @@ def temporal_hook(u_, p_, mesh, tstep, dump_stats, eval_dict, newfolder, id_in, 
         eval_dict["centerline_u_z_probes"].clear()
         eval_dict["centerline_p_probes"].clear()
 
-    # Save velocity and pressure
-    if tstep % store_data == 0 and tstep >= store_data_tstep:
-        # Name functions
-        u_[0].rename("u0", "velocity-x")
-        u_[1].rename("u1", "velocity-y")
-        u_[2].rename("u2", "velocity-z")
-        p_.rename("p", "pressure")
+    # Save velocity and pressure for post processing
+    if tstep % save_solution_frequency == 0 and tstep >= save_solution_at_tstep:
+        # Assign velocity components to vector solution
+        assign(U.sub(0), u_[0])
+        assign(U.sub(1), u_[1])
+        assign(U.sub(2), u_[2])
 
         # Get save paths
         files = NS_parameters['files']
-        file_mode = "w" if tstep == store_data_tstep else "a"
+        file_mode = "w" if tstep == save_solution_at_tstep else "a"
         p_path = files['p']
+        u_path = files['u']
 
-        # Save
+        # Save pressure
         viz_p = HDF5File(MPI.comm_world, p_path, file_mode=file_mode)
         viz_p.write(p_, "/pressure", tstep)
         viz_p.close()
 
-        for i in range(3):
-            u_path = files['u'][i]
-            viz_u = HDF5File(MPI.comm_world, u_path, file_mode=file_mode)
-            viz_u.write(u_[i], "/velocity", tstep)
-            viz_u.close()
+        # Save velocity
+        viz_u = HDF5File(MPI.comm_world, u_path, file_mode=file_mode)
+        viz_u.write(U, "/velocity", tstep)
+        viz_u.close()
 
 
 def beta(err, p):
     """
     Adjusted choice of beta from
-    Gin and Steinman et al., A Dual-Pressure Boundary Condition doi:10.1115/1.1504446 
+    Gin and Steinman et al., A Dual-Pressure Boundary Condition doi:10.1115/1.1504446
     Ramped up to desired value if flow rate error (err) increases
+
     Args:
         err (float): Flow split error
         p (float): Pressure value
+
     Returns:
         beta (float): Variable factor in flow split method
     """
