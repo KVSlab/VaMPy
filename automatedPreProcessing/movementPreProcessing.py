@@ -8,6 +8,21 @@ cell_id_name = "CellEntityIds"
 
 
 def main(case_path, move_surface, add_extensions, edge_length, patient_specific, recompute_mesh):
+    """
+    Automatically generate movement and  mesh of surface model in .vtu and .xml format.
+    Assumes the user either has a set of displaced models or models with mapped displacement fields,
+    located in moved_path or mapped_path, respectively.
+
+    Can add patient-specific or arbitrary movement to model.
+
+    Args:
+        case_path (str): Path to case
+        move_surface (bool): To move surface or not
+        add_extensions (bool): To add flow extensions or not
+        edge_length (float): Mesh resolution, characteristic edge length
+        patient_specific (bool): If case has patient-specific movement or not
+        recompute_mesh (bool): Computes mesh if true
+    """
     # Find model_path
     if "vtp" in case_path:
         model_path = case_path.replace(".vtp", "")
@@ -18,12 +33,15 @@ def main(case_path, move_surface, add_extensions, edge_length, patient_specific,
     case = model_path.split("/")[-1]
     mapped_path = model_path + "_mapped"
     moved_path = model_path + "_moved"
+    mesh_path = model_path + ".vtu"
+    mesh_xml_path = mesh_path.replace(".vtu", ".xml")
 
     if not path.exists(moved_path):
         os.mkdir(moved_path)
 
     # Compute centerlines and get center of mitral valve as new origin
     surface = read_polydata(case_path)
+    surface_to_mesh = None
 
     # Cap surface with flow extensions
     capped_surface = vmtk_cap_polydata(surface)
@@ -43,7 +61,10 @@ def main(case_path, move_surface, add_extensions, edge_length, patient_specific,
 
     # Add flow extensions
     if add_extensions and path.exists(moved_path):
-        add_flow_extensions(surface, model_path, moved_path, edge_length, recompute_mesh)
+        surface_to_mesh = add_flow_extensions(surface, model_path, moved_path, edge_length, recompute_mesh)
+
+    if not path.exists(mesh_path) or recompute_mesh and surface_to_mesh is not None:
+        generate_mesh(mesh_path, mesh_xml_path, surface_to_mesh, edge_length)
 
 
 def IdealVolume(t):
@@ -132,9 +153,7 @@ def capp_surface(remeshed_extended, offset=1):
 
 def add_flow_extensions(surface, model_path, moved_path, resolution=1.9, recompute_mesh=False):
     # Create result paths
-    mesh_path = model_path + ".vtu"
     points_path = model_path + "_points.np"
-    mesh_xml_path = mesh_path.replace(".vtu", ".xml")
     remeshed_path = model_path + "_remeshed.vtp"
     extended_path = model_path + "_extended"
     centerline_path = model_path + "_cl.vtp"
@@ -193,51 +212,54 @@ def add_flow_extensions(surface, model_path, moved_path, resolution=1.9, recompu
     points[:, :, -1] = points[:, :, 0]
     points.dump(points_path)
 
+    return remeshed_extended
+
+
+def generate_mesh(mesh_path, mesh_xml_path, remeshed_extended, resolution):
     # Cap mitral valve
-    if not path.exists(mesh_path) or recompute_mesh:
-        print("-- Meshing surface --")
-        remeshed_extended = dsa.WrapDataObject(remeshed_extended)
-        remeshed_extended.CellData.append(np.zeros(remeshed_extended.VTKObject.GetNumberOfCells()) + 1,
-                                          cell_id_name)
-        remeshed_all_capped = capp_surface(remeshed_extended.VTKObject)
-        remeshed_all_capped = remesh_surface(remeshed_all_capped, resolution, exclude=[1])
+    print("-- Meshing surface --")
+    remeshed_extended = dsa.WrapDataObject(remeshed_extended)
+    remeshed_extended.CellData.append(np.zeros(remeshed_extended.VTKObject.GetNumberOfCells()) + 1,
+                                      cell_id_name)
+    remeshed_all_capped = capp_surface(remeshed_extended.VTKObject)
+    remeshed_all_capped = remesh_surface(remeshed_all_capped, resolution, exclude=[1])
 
-        # Mesh volumetric
-        sizingFunction = vtkvmtk.vtkvmtkPolyDataSizingFunction()
-        sizingFunction.SetInputData(remeshed_all_capped)
-        sizingFunction.SetSizingFunctionArrayName("Volume")
-        sizingFunction.SetScaleFactor(0.8)
-        sizingFunction.Update()
+    # Mesh volumetric
+    sizingFunction = vtkvmtk.vtkvmtkPolyDataSizingFunction()
+    sizingFunction.SetInputData(remeshed_all_capped)
+    sizingFunction.SetSizingFunctionArrayName("Volume")
+    sizingFunction.SetScaleFactor(0.8)
+    sizingFunction.Update()
 
-        surfaceToMesh = vmtkscripts.vmtkSurfaceToMesh()
-        surfaceToMesh.Surface = sizingFunction.GetOutput()
-        surfaceToMesh.Execute()
+    surfaceToMesh = vmtkscripts.vmtkSurfaceToMesh()
+    surfaceToMesh.Surface = sizingFunction.GetOutput()
+    surfaceToMesh.Execute()
 
-        tetgen = vmtkscripts.vmtkTetGen()
-        tetgen.Mesh = surfaceToMesh.Mesh
-        tetgen.GenerateCaps = 0
-        tetgen.UseSizingFunction = 1
-        tetgen.SizingFunctionArrayName = "Volume"
-        tetgen.CellEntityIdsArrayName = cell_id_name
-        tetgen.Order = 1
-        tetgen.Quality = 1
-        tetgen.PLC = 1
-        tetgen.NoBoundarySplit = 1
-        tetgen.RemoveSliver = 1
-        tetgen.OutputSurfaceElements = 1
-        tetgen.OutputVolumeElements = 1
-        tetgen.Execute()
+    tetgen = vmtkscripts.vmtkTetGen()
+    tetgen.Mesh = surfaceToMesh.Mesh
+    tetgen.GenerateCaps = 0
+    tetgen.UseSizingFunction = 1
+    tetgen.SizingFunctionArrayName = "Volume"
+    tetgen.CellEntityIdsArrayName = cell_id_name
+    tetgen.Order = 1
+    tetgen.Quality = 1
+    tetgen.PLC = 1
+    tetgen.NoBoundarySplit = 1
+    tetgen.RemoveSliver = 1
+    tetgen.OutputSurfaceElements = 1
+    tetgen.OutputVolumeElements = 1
+    tetgen.Execute()
 
-        mesh = tetgen.Mesh
-        write_polydata(mesh, mesh_path)
+    mesh = tetgen.Mesh
+    write_polydata(mesh, mesh_path)
 
-        meshWriter = vmtkscripts.vmtkMeshWriter()
-        meshWriter.CellEntityIdsArrayName = "CellEntityIds"
-        meshWriter.Mesh = mesh
-        meshWriter.Mode = "ascii"
-        meshWriter.Compressed = True
-        meshWriter.OutputFileName = mesh_xml_path
-        meshWriter.Execute()
+    meshWriter = vmtkscripts.vmtkMeshWriter()
+    meshWriter.CellEntityIdsArrayName = "CellEntityIds"
+    meshWriter.Mesh = mesh
+    meshWriter.Mode = "ascii"
+    meshWriter.Compressed = True
+    meshWriter.OutputFileName = mesh_xml_path
+    meshWriter.Execute()
 
 
 def move_surface_model(surface, original, remeshed, remeshed_extended, distance, point_map, file_path, i, points):
