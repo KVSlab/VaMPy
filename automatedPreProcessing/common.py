@@ -540,3 +540,70 @@ def compute_centers_for_meshing(polyData, atrium_present, case_path=None, test_c
     center_ = [item for sublist in center for item in sublist]  # centers of the inlets
 
     return center_, boundary_center
+
+
+def find_boundaries(case_name, dir_path, mean_inflow_rate, network, polyDataVolMesh, verbose_print):
+    # Extract the surface mesh of the wall
+    wallMesh = vtk_compute_threshold(polyDataVolMesh, "CellEntityIds", lower=0.5, upper=1.5)
+    boundaryReferenceSystems = vmtkscripts.vmtkBoundaryReferenceSystems()
+    boundaryReferenceSystems.Surface = wallMesh
+    boundaryReferenceSystems.Execute()
+    refSystem = boundaryReferenceSystems.ReferenceSystems
+    cellEntityIdsArray = get_vtk_array('CellEntityIds', 0, refSystem.GetNumberOfPoints())
+    refSystem.GetPointData().AddArray(cellEntityIdsArray)
+
+    # Extract the surface mesh of the end caps
+    boundarySurface = vtk_compute_threshold(polyDataVolMesh, "CellEntityIds", upper=1.5, threshold_type="upper")
+    pointCells = vtk.vtkIdList()
+    surfaceCellEntityIdsArray = vtk.vtkIntArray()
+    surfaceCellEntityIdsArray.DeepCopy(boundarySurface.GetCellData().GetArray('CellEntityIds'))
+
+    # Find the corresponding couple (mesh outlet ID, network ID).
+    ids = []
+    for i in range(refSystem.GetNumberOfPoints()):
+        distancePoints = 10000000
+        pointId = boundarySurface.FindPoint(refSystem.GetPoint(i))
+        boundarySurface.GetPointCells(pointId, pointCells)
+        cellId = pointCells.GetId(0)
+        cellEntityId = surfaceCellEntityIdsArray.GetValue(cellId)
+        cellEntityIdsArray.SetValue(i, cellEntityId)
+
+        meshPoint = refSystem.GetPoint(i)
+        for element in network.elements:
+            if element.IsAnOutlet():
+                networkPoint = element.GetOutPointsx1()[0]
+            if element.IsAnInlet():
+                networkPoint = element.GetInPointsx0()[0]
+            if vtk.vtkMath.Distance2BetweenPoints(meshPoint, networkPoint) < distancePoints:
+                distancePoints = vtk.vtkMath.Distance2BetweenPoints(meshPoint, networkPoint)
+                closest = element.GetId()
+        if network.elements[closest].IsAnInlet():
+            verbose_print('I am the inlet, Sup?')
+            verbose_print(network.elements[closest].GetInPointsx0()[0])
+            ids.insert(0, [cellEntityId, mean_inflow_rate])
+        else:
+            beta = network.elements[closest].GetBeta()
+            ids.append([cellEntityId, beta])
+            verbose_print(beta)
+            verbose_print(network.elements[closest].GetOutPointsx1()[0])
+        verbose_print('CellEntityId: %d\n' % cellEntityId)
+        verbose_print('meshPoint: %f, %f, %f\n' % (meshPoint[0], meshPoint[1], meshPoint[2]))
+        verbose_print(ids)
+
+    # Store information for the solver.
+    inlet_id = [ids[0][0]]
+    outlet_ids = []
+    area_ratios = []
+    for k in range(1, refSystem.GetNumberOfPoints()):
+        outlet_ids.append(ids[k][0])
+        area_ratios.append(ids[k][1])
+
+    info = {
+        "inlet_id": inlet_id,
+        "outlet_ids": outlet_ids,
+        "mean_flow_rate": mean_inflow_rate,
+        "area_ratio": area_ratios
+    }
+    info_path = path.join(dir_path, case_name)
+
+    write_parameters(info, info_path)

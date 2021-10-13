@@ -344,26 +344,6 @@ def run_pre_processing(filename_model, verbose_print, smoothing_method, smoothin
         listProbePoints = ImportData.GetListProbePoints(centerlinesBranches, network, verbose_print)
         listProbePoints += sac_center
 
-        # Add points randomly in the sac.
-        # FIXME: This is not robust enough. Suggestion to fix: Extract the
-        # second half of the sac centerline, then get all points from the
-        # voronoi diagram which is closest to that part compared to any ther
-        # centerlines. Then randomly chose among those points. For now, simply
-        # add just one point (sac_center).
-        # numberOfPoints = numberOfSacPoints
-        # for k in range(num_anu):
-        #    u = np.random.uniform(0.0, 1.0, (numberOfPoints, 1))
-        #    theta = np.random.uniform(0., 1., (numberOfPoints, 1)) * np.pi
-        #    phi = np.arccos(1 - 2 * np.random.uniform(0.0, 1., (numberOfPoints, 1)))
-        #    radius = misr_max[k] * u**(0.3333)
-        #    x = radius * np.sin(theta) * np.cos(phi)
-        #    y = radius * np.sin(theta) * np.sin(phi)
-        #    z = radius * np.cos(theta)
-        #    for i in range(len(x)):
-        #        listProbePoints.append([np.array(misr_max_center[k][0] + x[i]).tolist()[0],
-        #                                np.array(misr_max_center[k][1] + y[i]).tolist()[0],
-        #                                np.array(misr_max_center[k][2] + z[i]).tolist()[0]])
-
         print("--- Saving probes points in: %s\n" % file_name_probe_points)
         probe_points = np.array(listProbePoints)
         probe_points.dump(file_name_probe_points)
@@ -379,83 +359,18 @@ def run_pre_processing(filename_model, verbose_print, smoothing_method, smoothin
 
     # BSL method for mean inlet flow rate.
     parameters = get_parameters(path.join(dir_path, case_name))
-    if (atrium_present == False):
-        mean_inflow_rate = 0.27 * parameters["inlet_area"]
-    else:
+
+    # FIXME: Add plausible boundary conditions for atrial flow
+    if atrium_present:
         Total_inlet_area = 0
         num_inlets = len(inlet) // 3
         for i in range(num_inlets):
             Total_inlet_area += parameters["inlet%s_area" % (i)]
         mean_inflow_rate = 0.27 * Total_inlet_area
-
-    # Extract the surface mesh of the wall
-    wallMesh = vtk_compute_threshold(polyDataVolMesh, "CellEntityIds", lower=0.5, upper=1.5)
-
-    boundaryReferenceSystems = vmtkscripts.vmtkBoundaryReferenceSystems()
-    boundaryReferenceSystems.Surface = wallMesh
-    boundaryReferenceSystems.Execute()
-    refSystem = boundaryReferenceSystems.ReferenceSystems
-    cellEntityIdsArray = get_vtk_array('CellEntityIds', 0, refSystem.GetNumberOfPoints())
-    refSystem.GetPointData().AddArray(cellEntityIdsArray)
-
-    # Extract the surface mesh of the end caps
-    boundarySurface = vtk_compute_threshold(polyDataVolMesh, "CellEntityIds", upper=1.5, threshold_type="upper")
-
-    pointCells = vtk.vtkIdList()
-    surfaceCellEntityIdsArray = vtk.vtkIntArray()
-    surfaceCellEntityIdsArray.DeepCopy(boundarySurface.GetCellData().GetArray('CellEntityIds'))
-
-    # Find the corresponding couple (mesh outlet ID, network ID).
-    ids = []
-    for i in range(refSystem.GetNumberOfPoints()):
-        distancePoints = 10000000
-        pointId = boundarySurface.FindPoint(refSystem.GetPoint(i))
-        boundarySurface.GetPointCells(pointId, pointCells)
-        cellId = pointCells.GetId(0)
-        cellEntityId = surfaceCellEntityIdsArray.GetValue(cellId)
-        cellEntityIdsArray.SetValue(i, cellEntityId)
-
-        meshPoint = refSystem.GetPoint(i)
-        for element in network.elements:
-            if element.IsAnOutlet():
-                networkPoint = element.GetOutPointsx1()[0]
-            if element.IsAnInlet():
-                networkPoint = element.GetInPointsx0()[0]
-            if vtk.vtkMath.Distance2BetweenPoints(meshPoint, networkPoint) < distancePoints:
-                distancePoints = vtk.vtkMath.Distance2BetweenPoints(meshPoint, networkPoint)
-                closest = element.GetId()
-        if network.elements[closest].IsAnInlet():
-            verbose_print('I am the inlet, Sup?')
-            verbose_print(network.elements[closest].GetInPointsx0()[0])
-            ids.insert(0, [cellEntityId, mean_inflow_rate])
-        else:
-            beta = network.elements[closest].GetBeta()
-            ids.append([cellEntityId, beta])
-            verbose_print(beta)
-            verbose_print(network.elements[closest].GetOutPointsx1()[0])
-        verbose_print('CellEntityId: %d\n' % cellEntityId)
-        verbose_print('meshPoint: %f, %f, %f\n' % (meshPoint[0], meshPoint[1], meshPoint[2]))
-        verbose_print(ids)
-
-    # Store information for the solver.
-    idFileLine = case_name + ' ' + repr(ids[0][0] - 1) + ' '
-    areaRatioLine = case_name + ' '
-    for k in range(1, refSystem.GetNumberOfPoints() - 1):
-        idFileLine += repr(ids[k][0] - 1) + ','
-        areaRatioLine += repr(ids[k][1]) + ','
-    idFileLine += repr(ids[-1][0] - 1) + ' ' + repr(ids[0][1])
-    areaRatioLine += repr(ids[-1][1])
-    if atrium_present:
-        info = {"inlet_area": Total_inlet_area,
-                "idFileLine": str(idFileLine),
-                "areaRatioLine": str(areaRatioLine)
-                }
     else:
-        info = {"inlet_area": parameters["inlet_area"],
-                "idFileLine": str(idFileLine),
-                "areaRatioLine": str(areaRatioLine)
-                }
-    write_parameters(info, path.join(dir_path, case_name))
+        mean_inflow_rate = 0.27 * parameters["inlet_area"]
+
+    find_boundaries(case_name, dir_path, mean_inflow_rate, network, polyDataVolMesh, verbose_print)
 
     # Display the flow split at the outlets, inlet flow rate, and probes.
     if viz:
