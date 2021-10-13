@@ -386,7 +386,8 @@ def compute_distance_to_sphere(surface, centerSphere, radiusSphere=0.0,
     N = surface.GetNumberOfPoints()
     number, names = get_number_of_arrays(surface)
     add = False
-    if distanceToSpheresArrayName not in names: add = True
+    if distanceToSpheresArrayName not in names:
+        add = True
 
     # Get array
     if add:

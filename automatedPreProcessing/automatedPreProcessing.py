@@ -141,9 +141,6 @@ def run_pre_processing(filename_model, verbose_print, smoothing_method, smoothin
             else:
                 sac_centerline.append(read_polydata(file_name_sac_centerlines.format(i)))
 
-    else:
-        num_anu = 0
-
     # Get 'center' and 'radius' of the aneurysm(s)
     sac_center = []
     misr_max = []
