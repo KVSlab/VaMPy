@@ -4,7 +4,8 @@ import os
 from morphman.common import *
 from vtk.numpy_interface import dataset_adapter as dsa
 
-from common import get_centers_for_meshing
+from common import get_centers_for_meshing, find_boundaries, setup_model_network, compute_flow_rate
+from visualize import visualize
 
 cell_id_name = "CellEntityIds"
 
@@ -66,7 +67,33 @@ def main(case_path, move_surface, add_extensions, edge_length, patient_specific,
         surface_to_mesh = add_flow_extensions(surface, model_path, moved_path, centerlines, edge_length)
 
     if not path.exists(mesh_path) or recompute_mesh and surface_to_mesh is not None:
-        generate_mesh(surface_to_mesh, mesh_path, mesh_xml_path, edge_length)
+        mesh = generate_mesh(surface_to_mesh, mesh_path, mesh_xml_path, edge_length)
+
+    if path.exists(mesh_path):
+        mesh = read_polydata(mesh_path)
+
+    find_ids(surface_to_mesh, model_path, mesh)
+
+
+def find_ids(surface_to_mesh, model_path, mesh):
+    file_name_flow_centerlines = model_path + "_cl_ext.vtp"
+    probe_path = model_path + "_probes"
+
+    print("-- Finding boundary IDs --")
+    inlet, outlets = get_centers_for_meshing(surface_to_mesh, True, model_path, flowext=True)
+    capped_surface = vmtk_cap_polydata(surface_to_mesh)
+    centerlines, _, _ = compute_centerlines(outlets, inlet, file_name_flow_centerlines, capped_surface,
+                                            resampling=0.1)
+    network, probe_points = setup_model_network(centerlines, probe_path, [], lambda *a: None)
+
+    parameters = get_parameters(model_path)
+
+    mean_inflow_rate = compute_flow_rate(True, inlet, parameters)
+
+    find_boundaries(model_path, mean_inflow_rate, network, mesh, lambda *a: None)
+
+    # Display the flow split at the outlets, inlet flow rate, and probes.
+    visualize(network.elements, probe_points, surface_to_mesh, mean_inflow_rate)
 
 
 def IdealVolume(t):

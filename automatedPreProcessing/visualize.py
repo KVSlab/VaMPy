@@ -16,6 +16,8 @@ def visualize(network_elements, probe_points, output_surface, mean_inflow_rate):
         output_surface (vtkPolyData): Surface model to visualize
         mean_inflow_rate (float): Mean inflow rate of input model
     """
+    print("--- Visualizing flow split at outlets, inlet flow rate, and probes in VTK render window. ")
+    print("--- Press 'q' inside the render window to exit.")
     points = vtk.vtkPoints()
     scalar = vtk.vtkDoubleArray()
     scalar.SetNumberOfComponents(1)

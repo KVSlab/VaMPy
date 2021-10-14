@@ -3,9 +3,7 @@ from __future__ import print_function
 
 import argparse
 
-import ImportData
 import ToolRepairSTL
-from NetworkBoundaryConditions import FlowSplitting
 # Local imports
 from common import *
 from simulate import run_simulation
@@ -313,66 +311,23 @@ def run_pre_processing(filename_model, verbose_print, smoothing_method, smoothin
             assert remeshed_surface.GetNumberOfPoints() > 0, \
                 "No points in surface mesh, try to remesh"
 
-        # Write mesh in VTU format
-        write_polydata(remeshed_surface, file_name_surface_name)
-        write_polydata(mesh, file_name_vtu_mesh)
-
-        # Write mesh to FEniCS to format
-        meshWriter = vmtkscripts.vmtkMeshWriter()
-        meshWriter.CellEntityIdsArrayName = "CellEntityIds"
-        meshWriter.Mesh = mesh
-        meshWriter.Mode = "ascii"
-        meshWriter.Compressed = compress_mesh
-        meshWriter.OutputFileName = file_name_xml_mesh
-        meshWriter.Execute()
-        polyDataVolMesh = mesh
+        polyDataVolMesh = write_mesh(compress_mesh, file_name_surface_name, file_name_vtu_mesh, file_name_xml_mesh,
+                                     mesh, remeshed_surface)
 
     else:
         polyDataVolMesh = read_polydata(file_name_vtu_mesh)
 
-    # Set the network object used in the scripts for 
-    # boundary conditions and probes.
-    network = ImportData.Network()
-    centerlinesBranches = ImportData.SetNetworkStructure(centerlines, network, verbose_print)
-
-    if not path.isfile(file_name_probe_points):
-        # Get the list of coordinates for the probe points along the network centerline.
-        listProbePoints = ImportData.GetListProbePoints(centerlinesBranches, network, verbose_print)
-        listProbePoints += region_center
-
-        print("--- Saving probes points in: %s\n" % file_name_probe_points)
-        probe_points = np.array(listProbePoints)
-        probe_points.dump(file_name_probe_points)
-    else:
-        probe_points = np.load(file_name_probe_points, allow_pickle=True)
-
-    # Set the flow split and inlet boundary condition
-    # Compute the outlet boundary condition percentages.
-    flowSplitting = FlowSplitting()
-    flowSplitting.ComputeAlphas(network, verbose_print)
-    flowSplitting.ComputeBetas(network, verbose_print)
-    flowSplitting.CheckTotalFlowRate(network, verbose_print)
+    network, probe_points = setup_model_network(centerlines, file_name_probe_points, region_center, verbose_print)
 
     # BSL method for mean inlet flow rate.
     parameters = get_parameters(path.join(dir_path, case_name))
 
-    # FIXME: Add plausible boundary conditions for atrial flow
-    flow_rate_factor = 0.27
-    if atrium_present:
-        Total_inlet_area = 0
-        num_inlets = len(inlet) // 3
-        for i in range(num_inlets):
-            Total_inlet_area += parameters["inlet%s_area" % i]
-        mean_inflow_rate = flow_rate_factor * Total_inlet_area
-    else:
-        mean_inflow_rate = flow_rate_factor * parameters["inlet_area"]
+    mean_inflow_rate = compute_flow_rate(atrium_present, inlet, parameters)
 
-    find_boundaries(case_name, dir_path, mean_inflow_rate, network, polyDataVolMesh, verbose_print)
+    find_boundaries(path.join(dir_path,case_name), mean_inflow_rate, network, polyDataVolMesh, verbose_print)
 
     # Display the flow split at the outlets, inlet flow rate, and probes.
     if viz:
-        print("--- Visualizing flow split at outlets, inlet flow rate, and probes in VTK render window. ")
-        print("--- Press 'q' inside the render window to exit.")
         visualize(network.elements, probe_points, surface, mean_inflow_rate)
 
     # Start simulation though ssh, without password
@@ -394,6 +349,7 @@ def run_pre_processing(filename_model, verbose_print, smoothing_method, smoothin
             script_file = open(file_name_run_script, "w")
             script_file.write(run_script)
             script_file.close()
+
         run_simulation(config_path, dir_path, case_name)
 
 

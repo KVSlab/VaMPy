@@ -1,5 +1,8 @@
 from morphman.common import *
 
+import ImportData
+from NetworkBoundaryConditions import FlowSplitting
+
 try:
     from vmtkpointselector import *
 except ImportError:
@@ -567,7 +570,7 @@ def compute_centers_for_meshing(polyData, atrium_present, case_path=None, test_c
     return center_, boundary_center
 
 
-def find_boundaries(case_name, dir_path, mean_inflow_rate, network, polyDataVolMesh, verbose_print):
+def find_boundaries(model_path, mean_inflow_rate, network, polyDataVolMesh, verbose_print):
     # Extract the surface mesh of the wall
     wallMesh = vtk_compute_threshold(polyDataVolMesh, "CellEntityIds", lower=0.5, upper=1.5)
     boundaryReferenceSystems = vmtkscripts.vmtkBoundaryReferenceSystems()
@@ -629,6 +632,64 @@ def find_boundaries(case_name, dir_path, mean_inflow_rate, network, polyDataVolM
         "mean_flow_rate": mean_inflow_rate,
         "area_ratio": area_ratios
     }
-    info_path = path.join(dir_path, case_name)
 
-    write_parameters(info, info_path)
+    write_parameters(info, model_path)
+
+
+def setup_model_network(centerlines, file_name_probe_points, region_center, verbose_print):
+    # Set the network object used in the scripts for
+    # boundary conditions and probes.
+    network = ImportData.Network()
+    centerlinesBranches = ImportData.SetNetworkStructure(centerlines, network, verbose_print)
+
+    if not path.isfile(file_name_probe_points):
+        # Get the list of coordinates for the probe points along the network centerline.
+        listProbePoints = ImportData.GetListProbePoints(centerlinesBranches, network, verbose_print)
+        listProbePoints += region_center
+
+        print("--- Saving probes points in: %s\n" % file_name_probe_points)
+        probe_points = np.array(listProbePoints)
+        probe_points.dump(file_name_probe_points)
+    else:
+        probe_points = np.load(file_name_probe_points, allow_pickle=True)
+
+    # Set the flow split and inlet boundary condition
+    # Compute the outlet boundary condition percentages.
+    flowSplitting = FlowSplitting()
+    flowSplitting.ComputeAlphas(network, verbose_print)
+    flowSplitting.ComputeBetas(network, verbose_print)
+    flowSplitting.CheckTotalFlowRate(network, verbose_print)
+
+    return network, probe_points
+
+
+def compute_flow_rate(atrium_present, inlet, parameters):
+    # FIXME: Add plausible boundary conditions for atrial flow
+    flow_rate_factor = 0.27
+    if atrium_present:
+        Total_inlet_area = 0
+        num_inlets = len(inlet) // 3
+        for i in range(num_inlets):
+            Total_inlet_area += parameters["inlet%s_area" % i]
+        mean_inflow_rate = flow_rate_factor * Total_inlet_area
+    else:
+        mean_inflow_rate = flow_rate_factor * parameters["inlet_area"]
+
+    return mean_inflow_rate
+
+
+def write_mesh(compress_mesh, file_name_surface_name, file_name_vtu_mesh, file_name_xml_mesh, mesh, remeshed_surface):
+    # Write mesh in VTU format
+    write_polydata(remeshed_surface, file_name_surface_name)
+    write_polydata(mesh, file_name_vtu_mesh)
+
+    # Write mesh to FEniCS to format
+    meshWriter = vmtkscripts.vmtkMeshWriter()
+    meshWriter.CellEntityIdsArrayName = "CellEntityIds"
+    meshWriter.Mesh = mesh
+    meshWriter.Mode = "ascii"
+    meshWriter.Compressed = compress_mesh
+    meshWriter.OutputFileName = file_name_xml_mesh
+    meshWriter.Execute()
+    polyDataVolMesh = mesh
+    return polyDataVolMesh
