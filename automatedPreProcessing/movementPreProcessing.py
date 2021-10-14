@@ -82,8 +82,7 @@ def find_ids(surface_to_mesh, model_path, mesh):
     print("-- Finding boundary IDs --")
     inlet, outlets = get_centers_for_meshing(surface_to_mesh, True, model_path, flowext=True)
     capped_surface = vmtk_cap_polydata(surface_to_mesh)
-    centerlines, _, _ = compute_centerlines(outlets, inlet, file_name_flow_centerlines, capped_surface,
-                                            resampling=0.1)
+    centerlines, _, _ = compute_centerlines(outlets, inlet, file_name_flow_centerlines, capped_surface, resampling=0.1)
     network, probe_points = setup_model_network(centerlines, probe_path, [], lambda *a: None)
 
     parameters = get_parameters(model_path)
