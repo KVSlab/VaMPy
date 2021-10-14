@@ -433,7 +433,7 @@ def read_command_line():
                         required=False,
                         dest='coarseningFactor',
                         default=1.0,
-                        help="Refine or coarsen the standard mesh size")
+                        help="Refine or coarsen the standard mesh size. The higher the value the coarser the mesh.")
 
     parser.add_argument('-sF', '--smoothingFactor',
                         type=float,
