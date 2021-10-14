@@ -5,8 +5,8 @@ import argparse
 
 import ImportData
 import ToolRepairSTL
-# Local imports
 from NetworkBoundaryConditions import FlowSplitting
+# Local imports
 from common import *
 from simulate import run_simulation
 from visualize import visualize
