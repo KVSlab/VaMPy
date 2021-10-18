@@ -1,6 +1,5 @@
 import json
 import pickle
-from pprint import pprint
 
 import numpy as np
 from oasis.problems.NSfracStep.MovingCommon import mesh_velocity_setup, get_visualization_files, mesh_velocity_solve
@@ -24,7 +23,7 @@ def problem_parameters(commandline_kwargs, NS_parameters, NS_expressions, **NS_n
         NS_parameters.update(
             compute_volume=False,
             mean_velocity=0.1,  # Simulate with constant mean velocity
-            rigid_walls=True,  # Run rigid wall simulation
+            rigid_walls=False,  # Run rigid wall simulation
             # Fluid parameters
             # Viscosity [nu_inf: 0.0035 Pa-s / 1060 kg/m^3 = 3.3018868E-6 m^2/s == 3.3018868E-3 mm^2/ms]
             nu=3.3018868e-3,
@@ -32,9 +31,9 @@ def problem_parameters(commandline_kwargs, NS_parameters, NS_expressions, **NS_n
             id_in=[],  # Inlet boundary ID
             id_out=[],  # Outlet boundary IDs
             # Simulation parameters
-            T=1000,  # 1045,  # Run simulation for 1 cardiac cycles [ms]
-            dt=50,  # 0.05,  # 10 000 steps per cycle [ms]
-            no_of_cycles=5.0,  # Number of cycles
+            cycle=1000,  # 1045,  # Run simulation for 1 cardiac cycles [ms]
+            no_of_cycles=2.0,  # Number of cycles
+            dt=1,  # 0.05,  # 10 000 steps per cycle [ms]
             dump_stats=100,
             store_data=2000000,
             store_data_tstep=5,  # Start storing data at 1st cycle
@@ -56,11 +55,6 @@ def problem_parameters(commandline_kwargs, NS_parameters, NS_expressions, **NS_n
     case_name = mesh_file.split(".")[0]
     NS_parameters["folder"] = path.join(NS_parameters["folder"], case_name)
 
-    if MPI.rank(MPI.comm_world) == 0:
-        print("=== Starting simulation for case: {} ===".format(case_name))
-        print("Running with the following parameters:")
-        pprint(NS_parameters)
-
 
 def mesh(mesh_path, **NS_namespace):
     # Read mesh and print mesh information
@@ -70,7 +64,7 @@ def mesh(mesh_path, **NS_namespace):
     return mesh
 
 
-def pre_boundary_condition(mesh, mesh_path, id_out, id_in, T, **NS_namespace):
+def pre_boundary_condition(mesh, mesh_path, id_out, id_in, no_of_cycles, cycle, **NS_namespace):
     # Variables needed during the simulation
     D = mesh.geometry().dim()
     boundary = MeshFunction("size_t", mesh, D - 1, mesh.domains())
@@ -92,11 +86,12 @@ def pre_boundary_condition(mesh, mesh_path, id_out, id_in, T, **NS_namespace):
         area_total += assemble(Constant(1.0) * ds_new(ID))
 
     # Compute flow rate
+    T = no_of_cycles * cycle
     flow_rate_data = np.loadtxt(mesh_path.split(".")[0] + "_flux.txt")
     t = np.linspace(0, T, len(flow_rate_data))
     flow_rate = splrep(t, flow_rate_data, s=2, per=True)
 
-    return dict(boundary=boundary, ds_new=ds_new, area_total=area_total, flow_rate=flow_rate, id_wall=id_wall)
+    return dict(boundary=boundary, ds_new=ds_new, area_total=area_total, flow_rate=flow_rate, id_wall=id_wall, T=T)
 
 
 class Surface_counter(UserExpression):
@@ -175,10 +170,10 @@ class Wall_motion(UserExpression):
             self.counter = -1
 
 
-def create_bcs(NS_expressions, x_, boundary, V, Q, T, mesh, mesh_path, id_in, id_out, id_wall,
-               tstep, dt, area_total, flow_rate, no_of_cycles, t, mean_velocity, **NS_namespace):
+def create_bcs(NS_expressions, cycle, x_, boundary, V, Q, mesh, mesh_path, id_in, id_out, id_wall,
+               tstep, dt, area_total, flow_rate, t, mean_velocity, **NS_namespace):
     # Create inlet boundary conditions
-    N = int(T / dt)
+    N = int(cycle / dt)
     bc_inlets = {}
     for i, ID in enumerate(id_in):
         tmp_area, tmp_center, tmp_radius, tmp_normal = compute_boundary_geometry_acrn(mesh, id_in[i], boundary)
@@ -203,7 +198,6 @@ def create_bcs(NS_expressions, x_, boundary, V, Q, T, mesh, mesh_path, id_in, id
     print("Loading displacement points")
     # Get mesh motion
     points = np.load(mesh_path.split(".")[0] + "_points.np", allow_pickle=True)
-    cycle = T * no_of_cycles
 
     # Define wall movement
     surface_counter = Surface_counter(points, cycle, element=V.ufl_element())
@@ -229,7 +223,13 @@ def create_bcs(NS_expressions, x_, boundary, V, Q, T, mesh, mesh_path, id_in, id
         NS_expressions["outlet_%s" % coor] = outlet_bc
 
     #  Fluid velocity at walls
-    bcu_wall_x = bcu_wall_y = bcu_wall_z = DirichletBC(V, noslip, boundary, id_wall)
+    bcu_wall = [DirichletBC(V, noslip, boundary, id_wall),
+                DirichletBC(V, noslip, boundary, id_wall),
+                DirichletBC(V, noslip, boundary, id_wall)]
+
+    bcu_wall = []
+    for i, coor in enumerate(['x', 'y', 'z']):
+        bcu_wall.append(DirichletBC(V, NS_expressions["wall_%s" % coor], boundary, id_wall))
 
     # Create lists with all boundary conditions
     bc_u0 = []
@@ -239,9 +239,9 @@ def create_bcs(NS_expressions, x_, boundary, V, Q, T, mesh, mesh_path, id_in, id
         bc_u0.append(bc_inlets[ID][0])
         bc_u1.append(bc_inlets[ID][1])
         bc_u2.append(bc_inlets[ID][2])
-    bc_u0.append(bcu_wall_x)
-    bc_u1.append(bcu_wall_y)
-    bc_u2.append(bcu_wall_z)
+    bc_u0.append(bcu_wall[0])
+    bc_u1.append(bcu_wall[1])
+    bc_u2.append(bcu_wall[2])
 
     return dict(u0=bc_u0, u1=bc_u1, u2=bc_u2, p=bc_p)
 
@@ -315,7 +315,7 @@ def temporal_hook(u_, mesh, newfolder, tstep, t, save_step_problem, u_vec, viz_u
         viz_u.write(u_vec, t)
 
     if tstep % save_step_problem * 5 == 0:
-        L_mitral = 20
+        L_mitral = 26
         h = mesh.hmin()
         ComputeReynoldsNumberAndCFL(u_, L_mitral, nu, mesh, t, tstep, dt, h, dynamic_mesh=False)
 
