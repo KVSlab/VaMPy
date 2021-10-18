@@ -1,5 +1,6 @@
 import json
 import pickle
+from pprint import pprint
 
 import numpy as np
 from oasis.problems.NSfracStep.MovingCommon import mesh_velocity_setup, get_visualization_files, mesh_velocity_solve
@@ -54,6 +55,11 @@ def problem_parameters(commandline_kwargs, NS_parameters, NS_expressions, **NS_n
     mesh_file = NS_parameters["mesh_path"].split("/")[-1]
     case_name = mesh_file.split(".")[0]
     NS_parameters["folder"] = path.join(NS_parameters["folder"], case_name)
+
+    if MPI.rank(MPI.comm_world) == 0:
+        print("=== Starting simulation for case: {} ===".format(case_name))
+        print("Running with the following parameters:")
+        pprint(NS_parameters)
 
 
 def mesh(mesh_path, **NS_namespace):
