@@ -63,7 +63,7 @@ def run_pre_processing(filename_model, verbose_print, smoothing_method, smoothin
     print("--- Load model file\n")
     surface = read_polydata(filename_model)
 
-    if not is_surface_capped(surface) and smoothing_method != "voronoi":
+    if is_surface_capped(surface) and smoothing_method != "voronoi":
         print("--- Clipping the models inlets and outlets.\n")
         if not path.isfile(file_name_clipped_model):
             # TODO: Add input parameters as input to automatedPreProcessing
