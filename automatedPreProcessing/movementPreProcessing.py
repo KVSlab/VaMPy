@@ -1,5 +1,6 @@
 import argparse
 import os
+import shutil
 
 from morphman.common import *
 from vtk.numpy_interface import dataset_adapter as dsa
@@ -10,7 +11,8 @@ from visualize import visualize
 cell_id_name = "CellEntityIds"
 
 
-def main(case_path, move_surface, add_extensions, edge_length, patient_specific, recompute_mesh):
+def main(case_path, move_surface, add_extensions, edge_length, patient_specific, recompute_mesh, recompute_all,
+         flow_extension_length):
     """
     Automatically generate movement and  mesh of surface model in .vtu and .xml format.
     Assumes the user either has a set of displaced models or models with mapped displacement fields,
@@ -25,6 +27,7 @@ def main(case_path, move_surface, add_extensions, edge_length, patient_specific,
         edge_length (float): Mesh resolution, characteristic edge length
         patient_specific (bool): If case has patient-specific movement or not
         recompute_mesh (bool): Computes mesh if true
+        recompute_all (bool): Computes everything if true
     """
     # Find model_path
     if "vtp" in case_path:
@@ -38,6 +41,9 @@ def main(case_path, move_surface, add_extensions, edge_length, patient_specific,
     moved_path = model_path + "_moved"
     mesh_path = model_path + ".vtu"
     mesh_xml_path = mesh_path.replace(".vtu", ".xml")
+
+    if recompute_all:
+        remove_preprocessing_files(case_path, model_path, moved_path)
 
     if not path.exists(moved_path):
         os.mkdir(moved_path)
@@ -64,15 +70,29 @@ def main(case_path, move_surface, add_extensions, edge_length, patient_specific,
 
     # Add flow extensions
     if add_extensions and path.exists(moved_path):
-        surface_to_mesh = add_flow_extensions(surface, model_path, moved_path, centerlines, edge_length)
+        surface_to_mesh = add_flow_extensions(surface, model_path, moved_path, centerlines, flow_extension_length,
+                                              edge_length)
 
-    if not path.exists(mesh_path) or recompute_mesh and surface_to_mesh is not None:
+    if (not path.exists(mesh_path) or recompute_mesh) and surface_to_mesh is not None:
         mesh = generate_mesh(surface_to_mesh, mesh_path, mesh_xml_path, edge_length)
 
     if path.exists(mesh_path):
         mesh = read_polydata(mesh_path)
 
-    find_ids(surface_to_mesh, model_path, mesh)
+    if path.exists(mesh_path):
+        find_ids(surface_to_mesh, model_path, mesh)
+
+
+def remove_preprocessing_files(case_path, model_path, moved_path):
+    folder = model_path.rsplit("/", 1)[0]
+    folder_content = os.listdir(folder)
+    files_to_remove = [f for f in folder_content if not case_path.endswith(f) and not moved_path.endswith(f)]
+    for f in files_to_remove:
+        directory = path.join(folder, f)
+        if path.isdir(directory):
+            shutil.rmtree(directory)
+        else:
+            os.remove(directory)
 
 
 def find_ids(surface_to_mesh, model_path, mesh):
@@ -104,7 +124,6 @@ def IdealVolume(t):
     vmin = 37184.998997815936
     vmax = 19490.21405487303
     volume = (splev(t, LA_smooth) - vmin) / vmax
-
     return volume
 
 
@@ -125,12 +144,15 @@ def move_atrium_real(case_path, mapped_path, moved_path, case):
 
 def move_atrium(case_path, origin, moved_path, case, cycle=1.0, n_frames=20):
     # Params
-    A = 25 / 2
+    A = 25 / 3
     t_array = np.linspace(0, cycle, n_frames)
     volumes = []
 
     surface = read_polydata(case_path)
-    write_polydata(surface, path.join(moved_path, "%s_000.vtp" % case))
+    write_polydata(surface, path.join(moved_path, "%s_00.vtp" % case))
+
+    def SineVolume(t):
+        return -np.sin(np.pi * t)
 
     for i, t in enumerate(t_array):
         surface = read_polydata(case_path)
@@ -139,7 +161,8 @@ def move_atrium(case_path, origin, moved_path, case, cycle=1.0, n_frames=20):
 
         for j in range(len(points)):
             p = points[j]
-            displacement = IdealVolume(t)
+            # displacement = IdealVolume(t)
+            displacement = SineVolume(t)
 
             # Axial movement
             x_o = origin[0]
@@ -159,7 +182,7 @@ def move_atrium(case_path, origin, moved_path, case, cycle=1.0, n_frames=20):
 
         surface.SetPoints(points)
 
-        write_polydata(surface.VTKObject, path.join(moved_path, "%s_%03d.vtp" % (case, 5 + 5 * i)))
+        write_polydata(surface.VTKObject, path.join(moved_path, "%s_%02d.vtp" % (case, i + 1)))
         capped_surface = vmtk_cap_polydata(surface.VTKObject)
 
         volume = vtk_compute_mass_properties(capped_surface, compute_volume=True)
@@ -179,7 +202,7 @@ def capp_surface(remeshed_extended, offset=1):
     return surface
 
 
-def add_flow_extensions(surface, model_path, moved_path, centerline, resolution=1.9):
+def add_flow_extensions(surface, model_path, moved_path, centerline, flow_extension_length, resolution=1.9):
     # Create result paths
     points_path = model_path + "_points.np"
     remeshed_path = model_path + "_remeshed.vtp"
@@ -198,12 +221,19 @@ def add_flow_extensions(surface, model_path, moved_path, centerline, resolution=
         write_polydata(remeshed, remeshed_path)
 
     # Create surface extensions on the original surface
-    print("-- Adding flow extensions --")
-    length_in = 1.0
-    length_out = 1.0
-    remeshed_extended = add_flow_extension(remeshed, centerline, include_outlet=False, extension_length=length_in)
-    remeshed_extended = add_flow_extension(remeshed_extended, centerline, include_outlet=True,
-                                           extension_length=length_out)
+    if flow_extension_length is not None:
+        print("-- Adding flow extensions --")
+        remeshed_extended = add_flow_extension(remeshed, centerline, include_outlet=False,
+                                               extension_length=flow_extension_length)
+        remeshed_extended = add_flow_extension(remeshed_extended, centerline, include_outlet=True,
+                                               extension_length=flow_extension_length)
+
+        # Smooth at edges
+        remeshed_extended = vmtk_smooth_surface(remeshed_extended, "laplace", iterations=50)
+    else:
+        print("Skipping flow extensions")
+        remeshed_extended = vmtk_smooth_surface(remeshed, "laplace", iterations=25)
+
     write_polydata(remeshed_extended, remeshed_extended_path)
 
     # Get a point mapper
@@ -421,9 +451,9 @@ def add_flow_extension(surface, centerlines, include_outlet, extension_length=2.
     flowExtensionsFilter = vtkvmtk.vtkvmtkPolyDataFlowExtensionsFilter()
     flowExtensionsFilter.SetInputData(surface)
     flowExtensionsFilter.SetCenterlines(centerlines)
-    flowExtensionsFilter.SetSigma(1.0)
     flowExtensionsFilter.SetAdaptiveExtensionLength(1)
     flowExtensionsFilter.SetAdaptiveExtensionRadius(1)
+    flowExtensionsFilter.SetAdaptiveExtensionLength(1)
     flowExtensionsFilter.SetAdaptiveNumberOfBoundaryPoints(1)
     flowExtensionsFilter.SetExtensionRatio(extension_length)
     flowExtensionsFilter.SetExtensionRadius(1.0)
@@ -432,12 +462,10 @@ def add_flow_extension(surface, centerlines, include_outlet, extension_length=2.
     flowExtensionsFilter.SetExtensionModeToUseCenterlineDirection()
     flowExtensionsFilter.SetInterpolationModeToThinPlateSpline()
     flowExtensionsFilter.SetBoundaryIds(boundaryIds)
+    flowExtensionsFilter.SetSigma(1.0)
     flowExtensionsFilter.Update()
 
     surface = flowExtensionsFilter.GetOutput()
-
-    # Smooth at edges
-    surface = vmtk_smooth_surface(surface, "laplace", iterations=150)
 
     return surface
 
@@ -486,11 +514,16 @@ def read_command_line():
                         dest="patientSpecific", help="Use patient specific data or constructed movement.")
     parser.add_argument('-r', '--recompute-mesh', type=str2bool, required=False, default=False,
                         dest="recomputeMesh", help="Recomputes mesh if true.")
+    parser.add_argument('-ra', '--recompute-all', type=str2bool, required=False, default=False,
+                        dest="recomputeAll", help="Recomputes everything if true.")
+    parser.add_argument('-fl', '--flowextlen', dest="flowExtLen", default=None, type=float,
+                        help="Adds flow extensions of given length.")
 
     args, _ = parser.parse_known_args()
 
     return dict(case_path=args.fileNameModel, move_surface=args.moveSurface, add_extensions=args.addExtensions,
-                edge_length=args.edgeLength, patient_specific=args.patientSpecific, recompute_mesh=args.recomputeMesh)
+                edge_length=args.edgeLength, patient_specific=args.patientSpecific, recompute_mesh=args.recomputeMesh,
+                recompute_all=args.recomputeAll, flow_extension_length=args.flowExtLen)
 
 
 if __name__ == '__main__':
