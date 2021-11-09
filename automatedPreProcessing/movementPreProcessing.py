@@ -144,7 +144,7 @@ def move_atrium_real(case_path, mapped_path, moved_path, case):
 
 def move_atrium(case_path, origin, moved_path, case, cycle=1.0, n_frames=20):
     # Params
-    A = 25 / 3
+    A = 25 / 3 * 2
     t_array = np.linspace(0, cycle, n_frames)
     volumes = []
 
@@ -174,7 +174,8 @@ def move_atrium(case_path, origin, moved_path, case, cycle=1.0, n_frames=20):
             scaling_y = (y_0 - y_o)
             x_new = A / 100 * scaling_x * displacement
             y_new = A / 100 * scaling_y * displacement
-            z_new = A * displacement
+            z_new = A / 100 * scaling_y * displacement
+            #z_new = 0 # A * displacement
 
             # Longitudinal movement
             p_new = np.array([x_new, y_new, z_new])
