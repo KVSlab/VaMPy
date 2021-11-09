@@ -194,7 +194,7 @@ def compute_flow_metrics(folder, nu, dt):
 
     # Create xdmf files
     fullname = file_path_u.replace("u.h5", "%s.xdmf")
-    fullname = fullname.replace("Solutions", "mesh_info_testTKE")
+    fullname = fullname.replace("Solutions", "flow_metrices")
     var_name = ["u_mean", "l_pluss", "t_pluss", "CFL", "ssv", "length_scale", "time_scale", "velocity_scale", "u_mag",
                 "dl", "dissipation", "kinetic_energy", "turbulent_kinetic_engergy", "turbulent_dissipation", "u_prime",
                 "u_viz"]

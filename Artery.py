@@ -244,7 +244,7 @@ def pre_solve_hook(mesh, V, Q, newfolder, mesh_path, restart_folder, velocity_de
     # Tstep when solutions for post processing should start being saved
     save_solution_at_tstep = int(cardiac_cycle * save_solution_after_cycle / dt)
 
-    return dict(eval_dict=eval_dict, boundary=boundary, n=n, U=U, save_solution_at_tstep=save_solution_at_tstep)
+    return dict(eval_dict=eval_dict, boundary=boundary, n=n, U=U, u_mean=u_mean, u_mean0=u_mean0, u_mean1=u_mean1, u_mean2=u_mean2, save_solution_at_tstep=save_solution_at_tstep)
 
 
 def temporal_hook(u_, p_, mesh, tstep, save_probe_frequency, eval_dict, newfolder, id_in, id_out, boundary, n,
@@ -342,8 +342,7 @@ def theend_hook(u_mean, u_mean0, u_mean1, u_mean2, T, dt, save_solution_at_tstep
     u_mean_path = files["u_mean"]
 
     # divide the accumlated veloicty by the number of steps
-    # TODO : check NumTStepForAverage is correct or not
-    NumTStepForAverage = (T/dt - save_solution_at_tstep) / save_solution_frequency
+    NumTStepForAverage = (T/dt - save_solution_at_tstep) / save_solution_frequency + 1
     u_mean0.vector()[:] = u_mean0.vector()[:] /  NumTStepForAverage 
     u_mean1.vector()[:] = u_mean1.vector()[:] /  NumTStepForAverage 
     u_mean2.vector()[:] = u_mean2.vector()[:] /  NumTStepForAverage 
