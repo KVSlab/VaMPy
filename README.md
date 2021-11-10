@@ -71,7 +71,7 @@ oasis NSfracStep problem=Artery mesh_path=test/Case_test_71/Case_test_71.xml.gz
 
 Finally, you can create the WSS from the CFD simulation:
 ```
-python postprocessing/compute_wss.py --case path_to_results/data/[run_number]/VTK
+python postprocessing/compute_wss.py --case path_to_results/data/[run_number]/Solutions
 ```
 
 You can also compute flow related metrics using `compute_flow_metrics.py`, but you would need to adapt how the files are read in to match with `compute_wss.py`.
