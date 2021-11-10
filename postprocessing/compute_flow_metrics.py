@@ -106,7 +106,7 @@ def rate_of_dissipation(ssv, u, v, mesh, h, nu):
     return ssv
 
 
-def compute_flow_metrics(folder, nu, dt):
+def compute_flow_metrics(folder, nu, dt, velocity_degree):
     """
     Computes several flow field characteristics
     for velocity field stored at 'folder' location
@@ -138,7 +138,6 @@ def compute_flow_metrics(folder, nu, dt):
         mesh_file.read(mesh, "mesh", False)
 
     # Function space
-    velocity_degree = 1
     DG = FunctionSpace(mesh, 'DG', 0)
     V = VectorFunctionSpace(mesh, "CG", velocity_degree)
     Vv = FunctionSpace(mesh, "CG", velocity_degree)
@@ -194,20 +193,20 @@ def compute_flow_metrics(folder, nu, dt):
 
     # Create xdmf files
     fullname = file_path_u.replace("u.h5", "%s.xdmf")
-    fullname = fullname.replace("Solutions", "flow_metrices")
+    fullname = fullname.replace("Solutions", "flow_metrics")
     var_name = ["u_mean", "l_pluss", "t_pluss", "CFL", "ssv", "length_scale", "time_scale", "velocity_scale", "u_mag",
                 "dl", "dissipation", "kinetic_energy", "turbulent_kinetic_engergy", "turbulent_dissipation", "u_prime",
                 "u_viz"]
     # TODO: Add WSS, RRT, OSI, TWSSG, WSSG
-    metrices = {}
+    metrics = {}
     for vn in var_name:
         if MPI.rank(MPI.comm_world) == 0:
             print(fullname % vn)
-        metrices[vn] = XDMFFile(MPI.comm_world, fullname % vn)
-        metrices[vn].parameters["rewrite_function_mesh"] = False
-        metrices[vn].parameters["flush_output"] = True
+        metrics[vn] = XDMFFile(MPI.comm_world, fullname % vn)
+        metrics[vn].parameters["rewrite_function_mesh"] = False
+        metrics[vn].parameters["flush_output"] = True
 
-    metrices["dl"].write(dl)
+    metrics["dl"].write(dl)
 
     # Get u mean
     u_mean_file_path = file_path_u.replace("u.h5", "u_mean.h5")
@@ -305,17 +304,17 @@ def compute_flow_metrics(folder, nu, dt):
     turbulent_dissipation_avg.vector()[:] = turbulent_dissipation_avg.vector()[:] / N
 
     # Store average data
-    metrices["CFL"].write(CFL_avg)
-    metrices["l_pluss"].write(l_pluss_avg)
-    metrices["t_pluss"].write(t_pluss_avg)
-    metrices["length_scale"].write(length_scale_avg)
-    metrices["time_scale"].write(time_scale_avg)
-    metrices["velocity_scale"].write(velocity_scale_avg)
-    metrices["dissipation"].write(dissipation_avg)
-    metrices["kinetic_energy"].write(kinetic_energy_avg)
-    metrices["turbulent_kinetic_engergy"].write(turbulent_kinetic_engergy_avg)
-    metrices["turbulent_dissipation"].write(turbulent_dissipation_avg)
-    metrices["u_mean"].write(u_mean)
+    metrics["CFL"].write(CFL_avg)
+    metrics["l_pluss"].write(l_pluss_avg)
+    metrics["t_pluss"].write(t_pluss_avg)
+    metrics["length_scale"].write(length_scale_avg)
+    metrics["time_scale"].write(time_scale_avg)
+    metrics["velocity_scale"].write(velocity_scale_avg)
+    metrics["dissipation"].write(dissipation_avg)
+    metrics["kinetic_energy"].write(kinetic_energy_avg)
+    metrics["turbulent_kinetic_engergy"].write(turbulent_kinetic_engergy_avg)
+    metrics["turbulent_dissipation"].write(turbulent_dissipation_avg)
+    metrics["u_mean"].write(u_mean)
 
     # Print info
     flow_metrics = [("dx", dl), ("l+", l_pluss_avg), ("t+", t_pluss_avg), ("Length scale", length_scale_avg),
@@ -338,4 +337,4 @@ def compute_flow_metrics(folder, nu, dt):
 
 if __name__ == '__main__':
     folder, nu, dt, velocity_degree = read_command_line()
-    compute_flow_metrics(folder, nu, dt)
+    compute_flow_metrics(folder, nu, dt, velocity_degree)
