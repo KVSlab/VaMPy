@@ -144,7 +144,7 @@ def compute_flow_metrics(folder, nu, dt, velocity_degree):
 
     # Mesh info
     h = CellDiameter(mesh)
-    dl = project(h, DG)
+    characteristic_edge_length = project(h, DG)
 
     # Functions for storing values
     v = TestFunction(DG)
@@ -153,10 +153,10 @@ def compute_flow_metrics(folder, nu, dt, velocity_degree):
     u_prime = Function(V)
 
     # pluss-values
-    l_pluss_avg = Function(DG)
-    l_pluss = Function(DG)
-    t_pluss_avg = Function(DG)
-    t_pluss = Function(DG)
+    l_plus_avg = Function(DG)
+    l_plus = Function(DG)
+    t_plus_avg = Function(DG)
+    t_plus = Function(DG)
 
     # Kolmogorov scales
     length_scale = Function(DG)
@@ -177,8 +177,8 @@ def compute_flow_metrics(folder, nu, dt, velocity_degree):
     # Energy
     kinetic_energy = Function(Vv)
     kinetic_energy_avg = Function(Vv)
-    turbulent_kinetic_engergy = Function(Vv)
-    turbulent_kinetic_engergy_avg = Function(Vv)
+    turbulent_kinetic_energy = Function(Vv)
+    turbulent_kinetic_energy_avg = Function(Vv)
 
     u0 = Function(Vv)
     u1 = Function(Vv)
@@ -194,8 +194,8 @@ def compute_flow_metrics(folder, nu, dt, velocity_degree):
     # Create xdmf files
     fullname = file_path_u.replace("u.h5", "%s.xdmf")
     fullname = fullname.replace("Solutions", "flow_metrics")
-    var_name = ["u_mean", "l_pluss", "t_pluss", "CFL", "ssv", "length_scale", "time_scale", "velocity_scale", "u_mag",
-                "dl", "dissipation", "kinetic_energy", "turbulent_kinetic_engergy", "turbulent_dissipation", "u_prime",
+    var_name = ["u_mean", "l_plus", "t_plus", "CFL", "ssv", "length_scale", "time_scale", "velocity_scale", "u_mag",
+                "characteristic_edge_length", "dissipation", "kinetic_energy", "turbulent_kinetic_energy", "turbulent_dissipation", "u_prime",
                 "u_viz"]
     # TODO: Add WSS, RRT, OSI, TWSSG, WSSG
     metrics = {}
@@ -206,7 +206,7 @@ def compute_flow_metrics(folder, nu, dt, velocity_degree):
         metrics[vn].parameters["rewrite_function_mesh"] = False
         metrics[vn].parameters["flush_output"] = True
 
-    metrics["dl"].write(dl)
+    metrics["characteristic_edge_length"].write(characteristic_edge_length)
 
     # Get u mean
     u_mean_file_path = file_path_u.replace("u.h5", "u_mean.h5")
@@ -224,7 +224,7 @@ def compute_flow_metrics(folder, nu, dt, velocity_degree):
       
         # Compute CFL
         u_mag = project(sqrt(inner(u, u)), DG)
-        CFL.vector().set_local(u_mag.vector().get_local() / dl.vector().get_local() * dt)
+        CFL.vector().set_local(u_mag.vector().get_local() / characteristic_edge_length.vector().get_local() * dt)
         CFL.vector().apply("insert")
         CFL_avg.vector().axpy(1, CFL.vector())
 
@@ -234,14 +234,14 @@ def compute_flow_metrics(folder, nu, dt, velocity_degree):
 
         # Compute l+ 
         u_star = np.sqrt(ssv.vector().get_local() * nu)
-        l_pluss.vector().set_local(u_star * dl.vector().get_local() / nu)
-        l_pluss.vector().apply("insert")
-        l_pluss_avg.vector().axpy(1, l_pluss.vector())
+        l_plus.vector().set_local(u_star * characteristic_edge_length.vector().get_local() / nu)
+        l_plus.vector().apply("insert")
+        l_plus_avg.vector().axpy(1, l_plus.vector())
 
         # Compute t+
-        t_pluss.vector().set_local(nu / u_star ** 2)
-        t_pluss.vector().apply("insert")
-        t_pluss_avg.vector().axpy(1, t_pluss.vector())
+        t_plus.vector().set_local(nu / u_star ** 2)
+        t_plus.vector().apply("insert")
+        t_plus_avg.vector().axpy(1, t_plus.vector())
 
         # Compute Kolmogorov
         rate_of_dissipation(dissipation, u, v, mesh, h, nu)
@@ -285,42 +285,42 @@ def compute_flow_metrics(folder, nu, dt, velocity_degree):
         assign(u1_prime, u_prime.sub(1))
         assign(u2_prime, u_prime.sub(2))
 
-        turbulent_kinetic_engergy.vector().set_local(
+        turbulent_kinetic_energy.vector().set_local(
             0.5 * (u0_prime.vector().get_local() ** 2 + u1_prime.vector().get_local() ** 2 + u2_prime.vector().get_local() ** 2))
-        turbulent_kinetic_engergy.vector().apply("insert")
-        turbulent_kinetic_engergy_avg.vector().axpy(1, turbulent_kinetic_engergy.vector())
+        turbulent_kinetic_energy.vector().apply("insert")
+        turbulent_kinetic_energy_avg.vector().axpy(1, turbulent_kinetic_energy.vector())
 
     # Get avg
     N = len(dataset_names)
-    l_pluss_avg.vector()[:] = l_pluss_avg.vector()[:] / N
-    t_pluss_avg.vector()[:] = t_pluss_avg.vector()[:] / N
+    l_plus_avg.vector()[:] = l_plus_avg.vector()[:] / N
+    t_plus_avg.vector()[:] = t_plus_avg.vector()[:] / N
     length_scale_avg.vector()[:] = length_scale_avg.vector()[:] / N
     time_scale_avg.vector()[:] = time_scale_avg.vector()[:] / N
     velocity_scale_avg.vector()[:] = velocity_scale_avg.vector()[:] / N
     CFL_avg.vector()[:] = CFL_avg.vector()[:] / N
     dissipation_avg.vector()[:] = dissipation_avg.vector()[:] / N
     kinetic_energy_avg.vector()[:] = kinetic_energy_avg.vector()[:] / N
-    turbulent_kinetic_engergy_avg.vector()[:] = turbulent_kinetic_engergy_avg.vector()[:] / N
+    turbulent_kinetic_energy_avg.vector()[:] = turbulent_kinetic_energy_avg.vector()[:] / N
     turbulent_dissipation_avg.vector()[:] = turbulent_dissipation_avg.vector()[:] / N
 
     # Store average data
     metrics["CFL"].write(CFL_avg)
-    metrics["l_pluss"].write(l_pluss_avg)
-    metrics["t_pluss"].write(t_pluss_avg)
+    metrics["l_plus"].write(l_plus_avg)
+    metrics["t_plus"].write(t_plus_avg)
     metrics["length_scale"].write(length_scale_avg)
     metrics["time_scale"].write(time_scale_avg)
     metrics["velocity_scale"].write(velocity_scale_avg)
     metrics["dissipation"].write(dissipation_avg)
     metrics["kinetic_energy"].write(kinetic_energy_avg)
-    metrics["turbulent_kinetic_engergy"].write(turbulent_kinetic_engergy_avg)
+    metrics["turbulent_kinetic_energy"].write(turbulent_kinetic_energy_avg)
     metrics["turbulent_dissipation"].write(turbulent_dissipation_avg)
     metrics["u_mean"].write(u_mean)
 
     # Print info
-    flow_metrics = [("dx", dl), ("l+", l_pluss_avg), ("t+", t_pluss_avg), ("Length scale", length_scale_avg),
+    flow_metrics = [("dx", characteristic_edge_length), ("l+", l_plus_avg), ("t+", t_plus_avg), ("Length scale", length_scale_avg),
          ("Time scale", time_scale_avg), ("Velocity scale", velocity_scale), ("CFL", CFL_avg), ("SSV", ssv_avg),
          ("dissipation", dissipation), ("turbulent dissipation", turbulent_dissipation),
-         ("turbulent_kinetic_engergy", turbulent_kinetic_engergy), ("kinetic_energy", kinetic_energy)]
+         ("turbulent_kinetic_energy", turbulent_kinetic_energy), ("kinetic_energy", kinetic_energy)]
 
     for metric in flow_metrics:
         sum_ = MPI.sum(MPI.comm_world, np.sum(metric[1].vector().get_local()))
