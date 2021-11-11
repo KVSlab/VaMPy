@@ -1,8 +1,11 @@
 from argparse import ArgumentParser
 
-from dolfin import *
+try:
+    from dolfin import *
 
-parameters["allow_extrapolation"] = True
+    parameters["allow_extrapolation"] = True
+except ImportError:
+    pass
 
 
 def read_command_line():
