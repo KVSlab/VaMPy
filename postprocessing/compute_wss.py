@@ -211,5 +211,5 @@ def get_dabla_function():
 
 
 if __name__ == '__main__':
-    folder, nu, dt, velocity_degree = read_command_line()
+    folder, nu, dt, velocity_degree, _ = read_command_line()
     compute_wss(folder, nu, dt, velocity_degree)

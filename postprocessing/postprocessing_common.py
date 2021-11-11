@@ -14,10 +14,11 @@ def read_command_line():
     parser.add_argument('--nu', type=float, default=3.3018e-3, help="Viscosity used in simulation")
     parser.add_argument('--dt', type=float, default=0.0951, help="Time step of simulation")
     parser.add_argument('--velocity-degree', type=int, default=1, help="Degree of velocity element")
+    parser.add_argument('--no-of-cycles', type=float, default=1, help="Number of cardiac cycles")
 
     args = parser.parse_args()
 
-    return args.case, args.nu, args.dt, args.velocity_degree
+    return args.case, args.nu, args.dt, args.velocity_degree, args.no_of_cycles
 
 
 def epsilon(u):
