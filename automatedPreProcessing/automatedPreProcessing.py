@@ -12,7 +12,7 @@ from visualize import visualize
 
 def run_pre_processing(filename_model, verbose_print, smoothing_method, smoothing_factor, meshing_method,
                        refine_region, atrium_present, create_flow_extensions, viz, config_path, coarsening_factor,
-                       flow_extension_length, edge_length, compress_mesh=True):
+                       flow_extension_length, edge_length, region_points, compress_mesh=True):
     """
     Automatically generate mesh of surface model in .vtu and .xml format, including prescribed
     flow rates at inlet and outlet based on flow network model.
@@ -25,12 +25,15 @@ def run_pre_processing(filename_model, verbose_print, smoothing_method, smoothin
         smoothing_method (str): Method for surface smoothing
         smoothing_factor (float): Smoothing parameter
         meshing_method (str): Method for meshing
-        regine_region (bool): Refines selected region of input if True
+        refine_region (bool): Refines selected region of input if True
         atrium_present (bool): Determines whether this is an atrium case
         create_flow_extensions (bool): Adds flow extensions to mesh if True
         viz (bool): Visualize resulting surface model with flow rates
         config_path (str): Path to configuration file for remote simulation
         coarsening_factor (float): Refine or coarsen the standard mesh size with given factor
+        region_points (list): User defined points to define which region to refine
+        edge_length (float): Edge length used for meshing with constant element size
+        flow_extension_length (float): Factor defining length of flow extensions
         compress_mesh (bool): Compresses finalized mesh if True
     """
     # Get paths
@@ -113,7 +116,8 @@ def run_pre_processing(filename_model, verbose_print, smoothing_method, smoothin
     misr_max = []
 
     if refine_region:
-        regions = get_regions_to_refine(capped_surface, path.join(dir_path, case_name))
+        regions = get_regions_to_refine(capped_surface, region_points, path.join(dir_path, case_name))
+
         centerlineAnu, _, _ = compute_centerlines(source, regions, file_name_refine_region_centerlines, capped_surface,
                                                   resampling=0.1)
 
@@ -148,7 +152,8 @@ def run_pre_processing(filename_model, verbose_print, smoothing_method, smoothin
         region_centerlines = vtk_merge_polydata(refine_region_centerline)
 
         for region in refine_region_centerline:
-            region_center.append(region.GetPoints().GetPoint(region.GetNumberOfPoints() // 2))
+            region_factor = 0.9 if atrium_present else 0.5
+            region_center.append(region.GetPoints().GetPoint(int(region.GetNumberOfPoints() * region_factor)))
             tmp_misr = get_point_data_array(radiusArrayName, region)
             misr_max.append(tmp_misr.max())
 
@@ -324,7 +329,7 @@ def run_pre_processing(filename_model, verbose_print, smoothing_method, smoothin
 
     mean_inflow_rate = compute_flow_rate(atrium_present, inlet, parameters)
 
-    find_boundaries(path.join(dir_path,case_name), mean_inflow_rate, network, polyDataVolMesh, verbose_print)
+    find_boundaries(path.join(dir_path, case_name), mean_inflow_rate, network, polyDataVolMesh, verbose_print)
 
     # Display the flow split at the outlets, inlet flow rate, and probes.
     if viz:
@@ -418,6 +423,16 @@ def read_command_line():
                         help="Determine weather or not to refine a specific region of " +
                              "the input model. Default is False.")
 
+    parser.add_argument('-rp', '--region-points',
+                        dest="regionPoints",
+                        type=float,
+                        nargs="+",
+                        default=None,
+                        help="If -r or --refine-region is True, the user can provide the point(s)"
+                             " which defines the regions to refine. " +
+                             "Example providing the points (0.1, 5.0, -1) and (1, -5.2, 3.21):" +
+                             " --region-points 0.1 5 -1 1 5.24 3.21")
+
     parser.add_argument('-at', '--atrium',
                         dest="atriumPresent",
                         type=str2bool,
@@ -469,7 +484,7 @@ def read_command_line():
                 refine_region=args.refineRegion, atrium_present=args.atriumPresent,
                 create_flow_extensions=args.flowExtension, viz=args.viz, config_path=args.config,
                 coarsening_factor=args.coarseningFactor, flow_extension_length=args.flowExtLen,
-                edge_length=args.edgeLength)
+                edge_length=args.edgeLength, region_points=args.regionPoints)
 
 
 if __name__ == "__main__":

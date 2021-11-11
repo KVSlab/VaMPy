@@ -36,10 +36,10 @@ thetaStep = 2.0
 version = vtk.vtkVersion().GetVTKMajorVersion()
 
 
-def get_regions_to_refine(surface, dir_path):
+def get_regions_to_refine(surface, provided_points, dir_path):
     # Check if info exists
     if not path.isfile(path.join(dir_path, dir_path + ".txt")):
-        provide_region_points(surface, dir_path)
+        provide_region_points(surface, provided_points, dir_path)
 
     # Open info
     parameters = get_parameters(dir_path)
@@ -48,14 +48,14 @@ def get_regions_to_refine(surface, dir_path):
         if key.startswith("region_"):
             dome.append(value)
 
-    if dome == []:
-        dome = provide_region_points(surface, dir_path)
+    if not dome:
+        dome = provide_region_points(surface, provided_points, dir_path)
 
     # Flatten list
     return [item for sublist in dome for item in sublist]
 
 
-def provide_region_points(surface, dir_path=None):
+def provide_region_points(surface, provided_points, dir_path=None):
     """
     Get relevant region points from user selected points on a input surface.
 
@@ -70,14 +70,21 @@ def provide_region_points(surface, dir_path=None):
     cleaned_surface = vtk_clean_polydata(surface)
     triangulated_surface = vtk_triangulate_surface(cleaned_surface)
 
-    # Select seeds
-    SeedSelector = vmtkPickPointSeedSelector()
-    SeedSelector.SetSurface(triangulated_surface)
-    SeedSelector.Execute()
+    if provided_points is None:
+        # Select seeds
+        SeedSelector = vmtkPickPointSeedSelector()
+        SeedSelector.SetSurface(triangulated_surface)
+        SeedSelector.Execute()
 
-    regionSeedIds = SeedSelector.GetTargetSeedIds()
-    get_point = surface.GetPoints().GetPoint
-    points = [list(get_point(regionSeedIds.GetId(i))) for i in range(regionSeedIds.GetNumberOfIds())]
+        regionSeedIds = SeedSelector.GetTargetSeedIds()
+        get_point = surface.GetPoints().GetPoint
+        points = [list(get_point(regionSeedIds.GetId(i))) for i in range(regionSeedIds.GetNumberOfIds())]
+    else:
+        surface_locator = get_vtk_point_locator(surface)
+        provided_points = [[provided_points[3 * i], provided_points[3 * i + 1], provided_points[3 * i + 2]]
+                           for i in range(len(provided_points) // 3)]
+
+        points = [list(surface.GetPoint(surface_locator.FindClosestPoint(p))) for p in provided_points]
 
     if dir_path is not None:
         info = {"number_of_regions": len(points)}
@@ -340,8 +347,9 @@ def dist_sphere_constant(surface, centerlines, sac_center, misr_max, fileName, e
     for i in range(len(sac_center)):
         distance_to_sphere = compute_distance_to_sphere(distance_to_sphere,
                                                         sac_center[i],
-                                                        maxDistance=100,
-                                                        distanceScale=0.2 / (misr_max[i] * 2.))
+                                                        minDistance=edge_length / 3,
+                                                        maxDistance=edge_length,
+                                                        distanceScale=edge_length * 3 / 4 / (misr_max[i] * 2.))
 
     element_size = edge_length + np.zeros((surface.GetNumberOfPoints(), 1))
     if len(sac_center) != 0:
