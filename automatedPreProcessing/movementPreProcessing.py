@@ -227,7 +227,7 @@ def add_flow_extensions(surface, model_path, moved_path, centerline, flow_extens
         remeshed_extended = add_flow_extension(remeshed, centerline, include_outlet=False,
                                                extension_length=flow_extension_length)
         remeshed_extended = add_flow_extension(remeshed_extended, centerline, include_outlet=True,
-                                               extension_length=flow_extension_length)
+                                               extension_length=flow_extension_length, extension_mode="boundarynormal")
 
         # Smooth at edges
         remeshed_extended = vmtk_smooth_surface(remeshed_extended, "laplace", iterations=50)
