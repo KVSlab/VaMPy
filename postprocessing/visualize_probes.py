@@ -12,7 +12,8 @@ plt.rcParams["figure.figsize"] = [20, 10]
 plt.rcParams["figure.autolayout"] = True
 
 
-def visualize_probes(case_path, dt, no_of_cycles, probe_saving_frequency=100, cardiac_cycle=951):
+def visualize_probes(case_path, dt, no_of_cycles, probe_saving_frequency=100, cardiac_cycle=951, show_figure=True,
+                     save_figure=False):
     """
     Loads probe points from completed CFD simulation,
     and visualizes velocity (magnitude) and pressure at respective probes
@@ -59,8 +60,8 @@ def visualize_probes(case_path, dt, no_of_cycles, probe_saving_frequency=100, ca
         pressure_probe = path.join(case_path, "p_{}.probes".format(tstep))
         P = np.load(pressure_probe, allow_pickle=True)
 
-        # Find maximum velocity for scaling windows
-        max_U = np.median(U) if np.median(U) > max_U else max_U
+        # Find velocity and pressure for scaling windows
+        max_U = np.max(U) if np.max(U) > max_U else max_U
         max_P = np.median(P) if np.median(P) > max_P else max_P
 
         # Create subplot instances
@@ -92,8 +93,17 @@ def visualize_probes(case_path, dt, no_of_cycles, probe_saving_frequency=100, ca
             # Set title to probe number
             ax0.set_title('Probe {}'.format(k + 1), y=1.0, pad=-14)
 
-    print("-- Plotting velocity magnitude and pressure at probes")
-    plt.show()
+    if show_figure:
+        print("-- Plotting velocity magnitude and pressure at probes")
+        plt.show()
+
+    if save_figure:
+        save_path = path.join(case_path, "Probes.png")
+        print("-- Saving figure of velocity magnitude and pressure at probes at {}".format(save_path))
+        plt.savefig(save_path)
+
+    # Clear plotting figure
+    plt.clf()
 
 
 if __name__ == '__main__':
