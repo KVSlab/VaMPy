@@ -701,3 +701,47 @@ def write_mesh(compress_mesh, file_name_surface_name, file_name_vtu_mesh, file_n
     meshWriter.Execute()
     polyDataVolMesh = mesh
     return polyDataVolMesh
+
+
+def add_flow_extension(surface, centerlines, include_outlet, extension_length=2.0,
+                       extension_mode="centerlinedirection"):
+    # Mimick behaviour of vmtkflowextensionfilter
+    boundaryExtractor = vtkvmtk.vtkvmtkPolyDataBoundaryExtractor()
+    boundaryExtractor.SetInputData(surface)
+    boundaryExtractor.Update()
+    boundaries = boundaryExtractor.GetOutput()
+
+    # Find outlet
+    lengths = []
+    for i in range(boundaries.GetNumberOfCells()):
+        lengths.append(get_curvilinear_coordinate(boundaries.GetCell(i))[-1])
+    outlet_id = lengths.index(max(lengths))
+
+    # Exclude outlet or inlets
+    boundaryIds = vtk.vtkIdList()
+    for i in range(centerlines.GetNumberOfLines() + 1):
+        if include_outlet and i == outlet_id:
+            boundaryIds.InsertNextId(i)
+        if not include_outlet and i != outlet_id:
+            boundaryIds.InsertNextId(i)
+
+    flowExtensionsFilter = vtkvmtk.vtkvmtkPolyDataFlowExtensionsFilter()
+    flowExtensionsFilter.SetInputData(surface)
+    flowExtensionsFilter.SetCenterlines(centerlines)
+    flowExtensionsFilter.SetAdaptiveExtensionLength(1)
+    flowExtensionsFilter.SetAdaptiveNumberOfBoundaryPoints(1)
+    flowExtensionsFilter.SetExtensionRatio(extension_length)
+    flowExtensionsFilter.SetTransitionRatio(1.0)
+    flowExtensionsFilter.SetCenterlineNormalEstimationDistanceRatio(1.0)
+    if extension_mode == "centerlinedirection":
+        flowExtensionsFilter.SetExtensionModeToUseCenterlineDirection()
+    if extension_mode == "boundarynormal":
+        flowExtensionsFilter.SetExtensionModeToUseNormalToBoundary()
+    flowExtensionsFilter.SetInterpolationModeToThinPlateSpline()
+    flowExtensionsFilter.SetBoundaryIds(boundaryIds)
+    flowExtensionsFilter.SetSigma(1.0)
+    flowExtensionsFilter.Update()
+
+    surface = flowExtensionsFilter.GetOutput()
+
+    return surface

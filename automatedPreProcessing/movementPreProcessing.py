@@ -5,7 +5,7 @@ import shutil
 from morphman.common import *
 from vtk.numpy_interface import dataset_adapter as dsa
 
-from common import get_centers_for_meshing, find_boundaries, setup_model_network, compute_flow_rate
+from common import get_centers_for_meshing, find_boundaries, setup_model_network, compute_flow_rate, add_flow_extension
 from visualize import visualize
 
 cell_id_name = "CellEntityIds"
@@ -175,7 +175,7 @@ def move_atrium(case_path, origin, moved_path, case, cycle=1.0, n_frames=20):
             x_new = A / 100 * scaling_x * displacement
             y_new = A / 100 * scaling_y * displacement
             z_new = A / 100 * scaling_y * displacement
-            #z_new = 0 # A * displacement
+            # z_new = 0 # A * displacement
 
             # Longitudinal movement
             p_new = np.array([x_new, y_new, z_new])
@@ -425,50 +425,6 @@ def get_point_map(remeshed, remeshed_extended):
     # Let the points corresponding to the caps have distance 0
     point_map = point_map.astype(int)
     return distances, point_map
-
-
-def add_flow_extension(surface, centerlines, include_outlet, extension_length=2.0):
-    # Mimick behaviour of vmtkflowextensionfilter
-    boundaryExtractor = vtkvmtk.vtkvmtkPolyDataBoundaryExtractor()
-    boundaryExtractor.SetInputData(surface)
-    boundaryExtractor.Update()
-    boundaries = boundaryExtractor.GetOutput()
-
-    # Find outlet
-    lengths = []
-    for i in range(boundaries.GetNumberOfCells()):
-        lengths.append(get_curvilinear_coordinate(boundaries.GetCell(i))[-1])
-    outlet_id = lengths.index(max(lengths))
-
-    # Exclude outlet or inlets
-    boundaryIds = vtk.vtkIdList()
-    for i in range(centerlines.GetNumberOfLines() + 1):
-        if include_outlet and i == outlet_id:
-            boundaryIds.InsertNextId(i)
-        else:
-            if i != outlet_id:
-                boundaryIds.InsertNextId(i)
-
-    flowExtensionsFilter = vtkvmtk.vtkvmtkPolyDataFlowExtensionsFilter()
-    flowExtensionsFilter.SetInputData(surface)
-    flowExtensionsFilter.SetCenterlines(centerlines)
-    flowExtensionsFilter.SetAdaptiveExtensionLength(1)
-    flowExtensionsFilter.SetAdaptiveExtensionRadius(1)
-    flowExtensionsFilter.SetAdaptiveExtensionLength(1)
-    flowExtensionsFilter.SetAdaptiveNumberOfBoundaryPoints(1)
-    flowExtensionsFilter.SetExtensionRatio(extension_length)
-    flowExtensionsFilter.SetExtensionRadius(1.0)
-    flowExtensionsFilter.SetTransitionRatio(1.0)
-    flowExtensionsFilter.SetCenterlineNormalEstimationDistanceRatio(1.0)
-    flowExtensionsFilter.SetExtensionModeToUseCenterlineDirection()
-    flowExtensionsFilter.SetInterpolationModeToThinPlateSpline()
-    flowExtensionsFilter.SetBoundaryIds(boundaryIds)
-    flowExtensionsFilter.SetSigma(1.0)
-    flowExtensionsFilter.Update()
-
-    surface = flowExtensionsFilter.GetOutput()
-
-    return surface
 
 
 def remesh_surface(surface, edge_length, exclude=None):
