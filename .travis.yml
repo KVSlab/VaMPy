@@ -25,6 +25,7 @@ install:
   - conda config --set restore_free_channel true
   - conda config --set always_yes yes --set changeps1 no
   - conda config --add channels vmtk
+  - conda config --add channels conda-forge
 
   # Set up environment
   - conda create -n vmtk_env vmtk pytest itk vtk llvm=3.3 paramiko matplotlib
