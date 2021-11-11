@@ -9,116 +9,20 @@ from postprocessing_common import read_command_line, epsilon
 set_log_active(False)
 
 
-def get_dataset_names(data_file, num_files=3000000, step=1, start=1, print_info=True, vector_filename="/velocity/vector_%d"):
-    """
-    Read velocity fields datasets and extract names of files
-
-    Args:
-        data_file (HDF5File): File object of velocity
-        num_files (int): Number of files
-        step (int): Step between each data dump
-        start (int): Step to start on
-        print_info (bool): Prints info about data if true
-        velocity_filename (str): Name of velocity files
-
-    Returns:
-        names (list): List of data file names
-    """
-    check = True
-
-    # Find start file
-    t0 = time()
-    while check:
-        if data_file.has_dataset(vector_filename % start):
-            check = False
-            start -= step
-            
-        start += step
-
-    # Get names
-    names = []
-    for i in range(num_files):
-        step = 1
-        index = start + i * step
-        if data_file.has_dataset(vector_filename % index):
-            names.append(vector_filename % index)
-
-    t1 = time()
-
-    # Print info
-    if MPI.rank(MPI.comm_world) == 0 and print_info:
-        print()
-        print("=" * 6 + " Timesteps to average over " + "=" * 6)
-        print("Length on data set names:", len(names))
-        print("Start index:", start)
-        print("Wanted num files:", num_files)
-        print("Step between files:", step)
-        print("Time used:", t1 - t0, "s")
-        print()
-
-    return names
-
-
-def rate_of_strain(ssv, u, v, mesh, h):
-    """
-    Computes rate of strain
-
-    Args:
-        ssv (Function): Function to save rate of strain to
-        u (Function): Function for velocity field
-        v (Function): Test function for velocity
-        mesh: Mesh to compute strain rate on
-        h (float): Cell diameter of mesh
-
-    Returns:
-        ssv (Function): Rate of strain
-    """
-    eps = epsilon(u)
-    f = sqrt(inner(eps, eps))
-    x = assemble(inner(f, v) / h * dx(mesh))
-    ssv.vector().set_local(x.get_local())
-    ssv.vector().apply("insert")
-
-    return ssv
-
-
-def rate_of_dissipation(ssv, u, v, mesh, h, nu):
-    """
-    Computes rate of dissipation
-
-    Args:
-        ssv (Function): Function to save rate of dissipation to
-        u (Function): Function for velocity field
-        v (Function): Test function for velocity
-        mesh: Mesh to compute dissipation rate on
-        h (float): Cell diameter of mesh
-        nu (float): Viscosity
-
-    Returns:
-        ssv (Function): Rate of dissipation
-    """
-    eps = epsilon(u)
-    f = 2 * nu * inner(eps, eps)
-    x = assemble(inner(f, v) / h * dx(mesh))
-    ssv.vector().set_local(x.get_local())
-    ssv.vector().apply("insert")
-
-    return ssv
-
-
-def compute_flow_metrics(folder, nu, dt, velocity_degree):
+def compute_flow_and_simulation_metrics(folder, nu, dt, velocity_degree):
     """
     Computes several flow field characteristics
     for velocity field stored at 'folder' location
     for flow_metrics given viscosity and time step
 
     Args:
+        velocity_degree (int): Finite element degree of velocity
         folder (str): Path to simulation results
         nu (float): Viscosity
         dt (float): Time step
 
     """
-     # File paths
+    # File paths
 
     file_path_u = path.join(folder, "u.h5")
     mesh_path = path.join(folder, "mesh.h5")
@@ -195,7 +99,8 @@ def compute_flow_metrics(folder, nu, dt, velocity_degree):
     fullname = file_path_u.replace("u.h5", "%s.xdmf")
     fullname = fullname.replace("Solutions", "flow_metrics")
     var_name = ["u_mean", "l_plus", "t_plus", "CFL", "ssv", "length_scale", "time_scale", "velocity_scale", "u_mag",
-                "characteristic_edge_length", "dissipation", "kinetic_energy", "turbulent_kinetic_energy", "turbulent_dissipation", "u_prime",
+                "characteristic_edge_length", "dissipation", "kinetic_energy", "turbulent_kinetic_energy",
+                "turbulent_dissipation", "u_prime",
                 "u_viz"]
     # TODO: Add WSS, RRT, OSI, TWSSG, WSSG
     metrics = {}
@@ -214,14 +119,14 @@ def compute_flow_metrics(folder, nu, dt, velocity_degree):
     tmp_file.read(u, "u_mean/vector_0")
     tmp_file.close()
     assign(u_mean, u)
-    
+
     for data in dataset_names:
         if MPI.rank(MPI.comm_world) == 0:
             print(data)
 
         # Time step and velocity
         f.read(u, data)
-      
+
         # Compute CFL
         u_mag = project(sqrt(inner(u, u)), DG)
         CFL.vector().set_local(u_mag.vector().get_local() / characteristic_edge_length.vector().get_local() * dt)
@@ -232,7 +137,7 @@ def compute_flow_metrics(folder, nu, dt, velocity_degree):
         rate_of_strain(ssv, u, v, mesh, h)
         ssv_avg.vector().axpy(1, ssv.vector())
 
-        # Compute l+ 
+        # Compute l+
         u_star = np.sqrt(ssv.vector().get_local() * nu)
         l_plus.vector().set_local(u_star * characteristic_edge_length.vector().get_local() / nu)
         l_plus.vector().apply("insert")
@@ -248,7 +153,7 @@ def compute_flow_metrics(folder, nu, dt, velocity_degree):
         ssv_ = dissipation.vector().get_local()
         dissipation_avg.vector().axpy(1, dissipation.vector())
 
-        # Compute u_prime 
+        # Compute u_prime
         u_prime.vector().set_local(u.vector().get_local() - u_mean.vector().get_local())
         u_prime.vector().apply("insert")
 
@@ -275,7 +180,7 @@ def compute_flow_metrics(folder, nu, dt, velocity_degree):
         assign(u0, u.sub(0))
         assign(u1, u.sub(1))
         assign(u2, u.sub(2))
-        
+
         kinetic_energy.vector().set_local(
             0.5 * (u0.vector().get_local() ** 2 + u1.vector().get_local() ** 2 + u2.vector().get_local() ** 2))
         kinetic_energy.vector().apply("insert")
@@ -286,7 +191,8 @@ def compute_flow_metrics(folder, nu, dt, velocity_degree):
         assign(u2_prime, u_prime.sub(2))
 
         turbulent_kinetic_energy.vector().set_local(
-            0.5 * (u0_prime.vector().get_local() ** 2 + u1_prime.vector().get_local() ** 2 + u2_prime.vector().get_local() ** 2))
+            0.5 * (
+                    u0_prime.vector().get_local() ** 2 + u1_prime.vector().get_local() ** 2 + u2_prime.vector().get_local() ** 2))
         turbulent_kinetic_energy.vector().apply("insert")
         turbulent_kinetic_energy_avg.vector().axpy(1, turbulent_kinetic_energy.vector())
 
@@ -317,10 +223,12 @@ def compute_flow_metrics(folder, nu, dt, velocity_degree):
     metrics["u_mean"].write(u_mean)
 
     # Print info
-    flow_metrics = [("dx", characteristic_edge_length), ("l+", l_plus_avg), ("t+", t_plus_avg), ("Length scale", length_scale_avg),
-         ("Time scale", time_scale_avg), ("Velocity scale", velocity_scale), ("CFL", CFL_avg), ("SSV", ssv_avg),
-         ("dissipation", dissipation), ("turbulent dissipation", turbulent_dissipation),
-         ("turbulent_kinetic_energy", turbulent_kinetic_energy), ("kinetic_energy", kinetic_energy)]
+    flow_metrics = [("dx", characteristic_edge_length), ("l+", l_plus_avg), ("t+", t_plus_avg),
+                    ("Length scale", length_scale_avg),
+                    ("Time scale", time_scale_avg), ("Velocity scale", velocity_scale), ("CFL", CFL_avg),
+                    ("SSV", ssv_avg),
+                    ("dissipation", dissipation), ("turbulent dissipation", turbulent_dissipation),
+                    ("turbulent_kinetic_energy", turbulent_kinetic_energy), ("kinetic_energy", kinetic_energy)]
 
     for metric in flow_metrics:
         sum_ = MPI.sum(MPI.comm_world, np.sum(metric[1].vector().get_local()))
@@ -335,6 +243,104 @@ def compute_flow_metrics(folder, nu, dt, velocity_degree):
             print(metric[0], "min:", min_)
 
 
+def get_dataset_names(data_file, num_files=3000000, step=1, start=1, print_info=True,
+                      vector_filename="/velocity/vector_%d"):
+    """
+    Read velocity fields datasets and extract names of files
+
+    Args:
+        data_file (HDF5File): File object of velocity
+        num_files (int): Number of files
+        step (int): Step between each data dump
+        start (int): Step to start on
+        print_info (bool): Prints info about data if true
+        vector_filename (str): Name of velocity files
+
+    Returns:
+        names (list): List of data file names
+    """
+    check = True
+
+    # Find start file
+    t0 = time()
+    while check:
+        if data_file.has_dataset(vector_filename % start):
+            check = False
+            start -= step
+
+        start += step
+
+    # Get names
+    names = []
+    for i in range(num_files):
+        step = 1
+        index = start + i * step
+        if data_file.has_dataset(vector_filename % index):
+            names.append(vector_filename % index)
+
+    t1 = time()
+
+    # Print info
+    if MPI.rank(MPI.comm_world) == 0 and print_info:
+        print()
+        print("=" * 6 + " Timesteps to average over " + "=" * 6)
+        print("Length on data set names:", len(names))
+        print("Start index:", start)
+        print("Wanted num files:", num_files)
+        print("Step between files:", step)
+        print("Time used:", t1 - t0, "s")
+        print()
+
+    return names
+
+
+def rate_of_strain(ssv, u, v, mesh, h):
+    """
+    Computes rate of strain
+
+    Args:
+        ssv (Function): Function to save rate of strain to
+        u (Function): Function for velocity field
+        v (Function): Test function for velocity
+        mesh: Mesh to compute strain rate on
+        h (float): Cell diameter of mesh
+
+    Returns:
+        ssv (Function): Rate of strain
+    """
+    eps = epsilon(u)
+    f = sqrt(inner(eps, eps))
+    x = assemble(inner(f, v) / h * dx(mesh))
+    ssv.vector().set_local(x.get_local())
+    ssv.vector().apply("insert")
+
+    return ssv
+
+
+def rate_of_dissipation(ssv, u, v, mesh, h, nu):
+    """
+    Computes rate of dissipation
+
+    Args:
+        ssv (Function): Function to save rate of dissipation to
+        u (Function): Function for velocity field
+        v (Function): Test function for velocity
+        mesh: Mesh to compute dissipation rate on
+        h (float): Cell diameter of mesh
+        nu (float): Viscosity
+
+    Returns:
+        ssv (Function): Rate of dissipation
+    """
+    eps = epsilon(u)
+    f = 2 * nu * inner(eps, eps)
+    x = assemble(inner(f, v) / h * dx(mesh))
+    ssv.vector().set_local(x.get_local())
+    ssv.vector().apply("insert")
+
+    return ssv
+
+
 if __name__ == '__main__':
     folder, nu, dt, velocity_degree = read_command_line()
-    compute_flow_metrics(folder, nu, dt, velocity_degree)
+    compute_flow_and_simulation_metrics(folder, nu, dt, velocity_degree)

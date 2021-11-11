@@ -2,7 +2,6 @@ from __future__ import print_function
 
 from pathlib import Path
 
-import numpy as np
 from dolfin import *
 
 from postprocessing_common import STRESS, read_command_line
@@ -10,7 +9,7 @@ from postprocessing_common import STRESS, read_command_line
 parameters["reorder_dofs_serial"] = False
 
 
-def compute_wss(case_path, nu, dt, velocity_degree):
+def compute_hemodynamic_indices(case_path, nu, dt, velocity_degree):
     """
     Loads velocity fields from completed CFD simulation,
     and computes and saves the following hemodynamic quantities:
@@ -212,4 +211,4 @@ def get_dabla_function():
 
 if __name__ == '__main__':
     folder, nu, dt, velocity_degree = read_command_line()
-    compute_wss(folder, nu, dt, velocity_degree)
+    compute_hemodynamic_indices(folder, nu, dt, velocity_degree)
