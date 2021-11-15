@@ -70,7 +70,7 @@ def run_pre_processing(filename_model, verbose_print, smoothing_method, smoothin
         print("--- Clipping the models inlets and outlets.\n")
         if not path.isfile(file_name_clipped_model):
             # TODO: Add input parameters as input to automatedPreProcessing
-            surface = get_uncapped_surface(surface, area_limit=20, circleness_limit=5)
+            surface = get_uncapped_surface(surface, 'gradients_limit=0.01', area_limit=20, circleness_limit=5)
             write_polydata(surface, file_name_clipped_model)
         else:
             surface = read_polydata(file_name_clipped_model)
