@@ -20,10 +20,8 @@ def compute_flow_and_simulation_metrics(folder, nu, dt, velocity_degree):
         folder (str): Path to simulation results
         nu (float): Viscosity
         dt (float): Time step
-
     """
     # File paths
-
     file_path_u = path.join(folder, "u.h5")
     mesh_path = path.join(folder, "mesh.h5")
 
@@ -56,7 +54,7 @@ def compute_flow_and_simulation_metrics(folder, nu, dt, velocity_degree):
     u_mean = Function(V)
     u_prime = Function(V)
 
-    # pluss-values
+    # Plus-values
     l_plus_avg = Function(DG)
     l_plus = Function(DG)
     t_plus_avg = Function(DG)
@@ -84,6 +82,7 @@ def compute_flow_and_simulation_metrics(folder, nu, dt, velocity_degree):
     turbulent_kinetic_energy = Function(Vv)
     turbulent_kinetic_energy_avg = Function(Vv)
 
+    # Velocity
     u0 = Function(Vv)
     u1 = Function(Vv)
     u2 = Function(Vv)
@@ -95,14 +94,13 @@ def compute_flow_and_simulation_metrics(folder, nu, dt, velocity_degree):
     CFL = Function(DG)
     CFL_avg = Function(DG)
 
-    # Create xdmf files
+    # Create XDMF files for saving metrics
     fullname = file_path_u.replace("u.h5", "%s.xdmf")
     fullname = fullname.replace("Solutions", "flow_metrics")
     var_name = ["u_mean", "l_plus", "t_plus", "CFL", "ssv", "length_scale", "time_scale", "velocity_scale", "u_mag",
                 "characteristic_edge_length", "dissipation", "kinetic_energy", "turbulent_kinetic_energy",
-                "turbulent_dissipation", "u_prime",
-                "u_viz"]
-    # TODO: Add WSS, RRT, OSI, TWSSG, WSSG
+                "turbulent_dissipation", "u_prime", "u_viz"]
+
     metrics = {}
     for vn in var_name:
         if MPI.rank(MPI.comm_world) == 0:
@@ -191,8 +189,9 @@ def compute_flow_and_simulation_metrics(folder, nu, dt, velocity_degree):
         assign(u2_prime, u_prime.sub(2))
 
         turbulent_kinetic_energy.vector().set_local(
-            0.5 * (
-                    u0_prime.vector().get_local() ** 2 + u1_prime.vector().get_local() ** 2 + u2_prime.vector().get_local() ** 2))
+            0.5 * (u0_prime.vector().get_local() ** 2
+                   + u1_prime.vector().get_local() ** 2
+                   + u2_prime.vector().get_local() ** 2))
         turbulent_kinetic_energy.vector().apply("insert")
         turbulent_kinetic_energy_avg.vector().axpy(1, turbulent_kinetic_energy.vector())
 
@@ -224,9 +223,8 @@ def compute_flow_and_simulation_metrics(folder, nu, dt, velocity_degree):
 
     # Print info
     flow_metrics = [("dx", characteristic_edge_length), ("l+", l_plus_avg), ("t+", t_plus_avg),
-                    ("Length scale", length_scale_avg),
-                    ("Time scale", time_scale_avg), ("Velocity scale", velocity_scale), ("CFL", CFL_avg),
-                    ("SSV", ssv_avg),
+                    ("Length scale", length_scale_avg), ("Time scale", time_scale_avg),
+                    ("Velocity scale", velocity_scale), ("CFL", CFL_avg), ("SSV", ssv_avg),
                     ("dissipation", dissipation), ("turbulent dissipation", turbulent_dissipation),
                     ("turbulent_kinetic_energy", turbulent_kinetic_energy), ("kinetic_energy", kinetic_energy)]
 
