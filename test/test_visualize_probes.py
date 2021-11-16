@@ -2,14 +2,14 @@ import os
 import sys
 
 sys.path.append("..")
-sys.path.append("../postprocessing")
+sys.path.append("../automatedPostProcessing")
 
-from postprocessing.visualize_probes import visualize_probes, read_command_line
+from automatedPostProcessing.visualize_probes import visualize_probes, read_command_line
 
 
 def test_visualize_probes():
     # Define input parameters
-    folder = "Case_test_71/Probes"
+    folder = "Case_test_artery/Probes"
     dt = 0.0951 * 5
     no_of_cycles = 0.05
 
