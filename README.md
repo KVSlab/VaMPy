@@ -75,3 +75,4 @@ python postprocessing/compute_wss.py --case path_to_results/data/[run_number]/So
 ```
 
 You can also compute flow related metrics using `compute_flow_metrics.py`, but you would need to adapt how the files are read in to match with `compute_wss.py`.
+To visualize velocity and pressure at the probes created by `Artery.py`, you can run the `visualize_probes.py` script, which has an additional dependency to [`Matplotlib`](https://github.com/matplotlib/matplotlib).
