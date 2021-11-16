@@ -2,7 +2,6 @@ from __future__ import print_function
 
 from pathlib import Path
 
-import numpy as np
 from dolfin import *
 
 from postprocessing_common import STRESS, read_command_line
@@ -15,9 +14,10 @@ def compute_wss(case_path, nu, dt, velocity_degree):
     Loads velocity fields from completed CFD simulation,
     and computes and saves the following hemodynamic quantities:
     (1) WSS - Wall shear stress
-    (2) TWSSG - Temporal wall shear stress gradient
-    (3) OSI - Oscillatory shear index
-    (4) RRT - Relative residence time
+    (2) TAWSS - Time averaged wall shear stress
+    (3) TWSSG - Temporal wall shear stress gradient
+    (4) OSI - Oscillatory shear index
+    (5) RRT - Relative residence time
 
     Args:
         velocity_degree (int): Finite element degree of velocity
@@ -62,9 +62,9 @@ def compute_wss(case_path, nu, dt, velocity_degree):
     WSS_mean = Function(V_b1)
     wss_mean = Function(U_b1)
 
-    # WSS_abs
-    WSS_abs = Function(U_b1)
-    wss_abs = Function(U_b1)
+    # TAWSS
+    TAWSS = Function(U_b1)
+    tawss = Function(U_b1)
 
     # TWSSG
     TWSSG = Function(U_b1)
@@ -74,6 +74,14 @@ def compute_wss(case_path, nu, dt, velocity_degree):
 
     stress = STRESS(u, 0.0, nu, mesh)
     dabla = get_dabla_function()
+
+    # Create writer for WSS
+    wss_path = (case_path / "WSS.xdmf").__str__()
+
+    wss_writer = XDMFFile(MPI.comm_world, wss_path)
+    wss_writer.parameters["flush_output"] = True
+    wss_writer.parameters["functions_share_mesh"] = True
+    wss_writer.parameters["rewrite_function_mesh"] = False
 
     if MPI.rank(MPI.comm_world) == 0:
         print("=" * 10, "Start post processing", "=" * 10)
@@ -100,8 +108,8 @@ def compute_wss(case_path, nu, dt, velocity_degree):
 
         if MPI.rank(MPI.comm_world) == 0:
             print("Compute WSS (absolute value)")
-        dabla(tau.vector(), wss_abs.vector())
-        WSS_abs.vector().axpy(1, wss_abs.vector())
+        dabla(tau.vector(), tawss.vector())
+        TAWSS.vector().axpy(1, tawss.vector())
 
         # Compute TWSSG
         if MPI.rank(MPI.comm_world) == 0:
@@ -117,29 +125,33 @@ def compute_wss(case_path, nu, dt, velocity_degree):
         tau_prev.vector().zero()
         tau_prev.vector().axpy(1, tau.vector())
 
+        # Save instantaneous WSS
+        tau.rename("WSS", "WSS")
+        wss_writer.write(tau, dt * file_counter)
+
         # Update file_counter
         file_counter += step
 
     print("=" * 10, "Saving hemodynamic indices", "=" * 10)
     n = (file_counter - start) // step
     TWSSG.vector()[:] = TWSSG.vector()[:] / n
-    WSS_abs.vector()[:] = WSS_abs.vector()[:] / n
+    TAWSS.vector()[:] = TAWSS.vector()[:] / n
     WSS_mean.vector()[:] = WSS_mean.vector()[:] / n
 
-    WSS_abs.rename("WSS", "WSS")
+    TAWSS.rename("TAWSS", "TAWSS")
     TWSSG.rename("TWSSG", "TWSSG")
 
     try:
         dabla(WSS_mean.vector(), wss_mean.vector())
         wss_mean_vec = wss_mean.vector().get_local()
-        wss_abs_vec = WSS_abs.vector().get_local()
+        tawss_vec = TAWSS.vector().get_local()
 
         # Compute RRT and OSI based on mean and absolute WSS
         RRT.vector().set_local(1 / wss_mean_vec)
         RRT.vector().apply("insert")
         RRT.rename("RRT", "RRT")
 
-        OSI.vector().set_local(0.5 * (1 - wss_mean_vec / wss_abs_vec))
+        OSI.vector().set_local(0.5 * (1 - wss_mean_vec / tawss_vec))
         OSI.vector().apply("insert")
         OSI.rename("OSI", "OSI")
         save = True
@@ -164,18 +176,18 @@ def compute_wss(case_path, nu, dt, velocity_degree):
         osi.write(OSI)
 
     # Save WSS and TWSSG
-    wss_path = (case_path / "WSS.xdmf").__str__()
+    tawss_path = (case_path / "TAWSS.xdmf").__str__()
     twssg_path = (case_path / "TWSSG.xdmf").__str__()
 
-    wss = XDMFFile(MPI.comm_world, wss_path)
+    tawss = XDMFFile(MPI.comm_world, tawss_path)
     twssg = XDMFFile(MPI.comm_world, twssg_path)
 
-    for f in [wss, twssg]:
+    for f in [tawss, twssg]:
         f.parameters["flush_output"] = True
         f.parameters["functions_share_mesh"] = True
         f.parameters["rewrite_function_mesh"] = False
 
-    wss.write(WSS_abs)
+    tawss.write(TAWSS)
     twssg.write(TWSSG)
 
 
