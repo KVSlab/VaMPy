@@ -336,5 +336,5 @@ def compute_flow_metrics(folder, nu, dt, velocity_degree):
 
 
 if __name__ == '__main__':
-    folder, nu, dt, velocity_degree = read_command_line()
+    folder, nu, dt, velocity_degree, _ = read_command_line()
     compute_flow_metrics(folder, nu, dt, velocity_degree)

@@ -40,8 +40,8 @@ install:
   - sed -i -e 's/len(self.TargetPoints)\/3/len\(self.TargetPoints\)\/\/3/g' ../../../miniconda/envs/vmtk_env/lib/python3.6/site-packages/vmtk/vmtkcenterlines.py
   - sed -i -e 's/(len(values) - 1)\/2/\(len\(values\) - 1\)\/\/2/g' ../../../miniconda/envs/vmtk_env/lib/python3.6/site-packages/vmtk/vmtksurfacecurvature.py
 
-  # Dependencies for code coverage
-  - pip install pytest-cov codecov
+  # Dependencies for code coverage and plotting
+  - pip install pytest-cov codecov matplotlib
 
 
 script:
