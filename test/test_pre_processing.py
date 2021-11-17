@@ -8,7 +8,7 @@ from automatedPreProcessing.automatedPreProcessing import read_command_line, run
 
 
 def test_pre_processing():
-    model_path = "Case_test_71/Case_test_71.vtp"
+    model_path = "Case_test_artery/artery.vtp"
     # Get default input parameters
     common_input = read_command_line()
     common_input.update(dict(meshing_method="diameter",

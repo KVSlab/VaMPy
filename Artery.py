@@ -1,11 +1,10 @@
 import json
 import pickle
-from os import makedirs
+from os import path, makedirs
 from pprint import pprint
 
 import numpy as np
 from fenicstools import Probes
-
 from oasis.problems.NSfracStep import *
 from Womersley import make_womersley_bcs, compute_boundary_geometry_acrn
 
@@ -22,6 +21,7 @@ One cardiac cycle is set to 0.951 s from [2], and scaled by a factor of 1000, he
 [2] Hoi, Yiemeng, et al. "Characterization of volumetric flow rate waveforms at the carotid bifurcations of older 
     adults." Physiological measurement 31.3 (2010): 291.
 """
+
 
 set_log_level(50)
 
@@ -198,8 +198,9 @@ def get_file_paths(folder):
 
     file_p = path.join(common_path, "p.h5")
     file_u = path.join(common_path, "u.h5")
+    file_u_mean = path.join(common_path, "u_mean.h5")
     file_mesh = path.join(common_path, "mesh.h5")
-    files = {"u": file_u, "p": file_p, "mesh": file_mesh}
+    files = {"u": file_u, "u_mean": file_u_mean, "p": file_p, "mesh": file_mesh}
 
     return files
 
@@ -239,16 +240,20 @@ def pre_solve_hook(mesh, V, Q, newfolder, mesh_path, restart_folder, velocity_de
     # Create vector function for storing velocity
     Vv = VectorFunctionSpace(mesh, "CG", velocity_degree)
     U = Function(Vv)
+    u_mean = Function(Vv)
+    u_mean0 = Function(V)
+    u_mean1 = Function(V)
+    u_mean2 = Function(V)
 
     # Tstep when solutions for post processing should start being saved
     save_solution_at_tstep = int(cardiac_cycle * save_solution_after_cycle / dt)
 
-    return dict(eval_dict=eval_dict, n=n, U=U, save_solution_at_tstep=save_solution_at_tstep, boundary=boundary)
+    return dict(eval_dict=eval_dict, boundary=boundary, n=n, U=U, u_mean=u_mean, u_mean0=u_mean0, u_mean1=u_mean1, u_mean2=u_mean2, save_solution_at_tstep=save_solution_at_tstep)
 
 
 def temporal_hook(u_, p_, mesh, tstep, save_probe_frequency, eval_dict, newfolder, id_in, id_out, boundary, n,
                   save_solution_frequency, NS_parameters, NS_expressions, area_ratio, t, save_solution_at_tstep,
-                  U, area_inlet, nu, **NS_namespace):
+                  U, area_inlet, nu, u_mean0, u_mean1, u_mean2, **NS_namespace):
     # Update boundary condition to current time
     for uc in NS_expressions["inlet"]:
         uc.set_t(t)
@@ -328,6 +333,31 @@ def temporal_hook(u_, p_, mesh, tstep, save_probe_frequency, eval_dict, newfolde
         viz_u = HDF5File(MPI.comm_world, u_path, file_mode=file_mode)
         viz_u.write(U, "/velocity", tstep)
         viz_u.close()
+
+        # Accumulate velocity
+        u_mean0.vector().axpy(1, u_[0].vector())
+        u_mean1.vector().axpy(1, u_[1].vector())
+        u_mean2.vector().axpy(1, u_[2].vector())
+
+def theend_hook(u_mean, u_mean0, u_mean1, u_mean2, T, dt, save_solution_at_tstep, save_solution_frequency, **NS_namespace):
+
+    # get the file path
+    files = NS_parameters['files']
+    u_mean_path = files["u_mean"]
+
+    # divide the accumlated veloicty by the number of steps
+    NumTStepForAverage = (T/dt - save_solution_at_tstep) / save_solution_frequency + 1
+    u_mean0.vector()[:] = u_mean0.vector()[:] /  NumTStepForAverage
+    u_mean1.vector()[:] = u_mean1.vector()[:] /  NumTStepForAverage
+    u_mean2.vector()[:] = u_mean2.vector()[:] /  NumTStepForAverage
+
+    assign(u_mean.sub(0), u_mean0)
+    assign(u_mean.sub(1), u_mean1)
+    assign(u_mean.sub(2), u_mean2)
+
+    # Save u_mean
+    with HDF5File(MPI.comm_world, u_mean_path, "w") as u_mean_file:
+        u_mean_file.write(u_mean, "u_mean")
 
 
 def beta(err, p):

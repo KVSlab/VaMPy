@@ -60,18 +60,19 @@ First, use the automatedPreProcessing to create a mesh, boundary conditions, and
 
 ```
 conda deactivate && conda activate vtk
-python automatedPreProcessing/automatedPreProcessing.py -m diameter -i test/Case_test_71/Case_test_71.vtp -c 1.3 
+python automatedPreProcessing/automatedPreProcessing.py -m diameter -i test/Case_test_artery/artery.vtp --aneurysm False -c 1.3
 ```
 
 Then run a CFD simulation for two cycles with 10 000 time steps per cycle and default parameters with Oasis:
 ```
 conda deactivate && conda activate fenics
-oasis NSfracStep problem=Artery mesh_path=test/Case_test_71/Case_test_71.xml.gz
+oasis NSfracStep problem=Artery mesh_path=test/Case_test_artery/artery.xml.gz
 ```
 
 Finally, you can create the WSS from the CFD simulation:
 ```
-python postprocessing/compute_wss.py --case path_to_results/data/[run_number]/VTK
+python postprocessing/compute_wss.py --case path_to_results/data/[run_number]/Solutions
 ```
 
 You can also compute flow related metrics using `compute_flow_metrics.py`, but you would need to adapt how the files are read in to match with `compute_wss.py`.
+To visualize velocity and pressure at the probes created by `Artery.py`, you can run the `visualize_probes.py` script, which has an additional dependency to [`Matplotlib`](https://github.com/matplotlib/matplotlib).

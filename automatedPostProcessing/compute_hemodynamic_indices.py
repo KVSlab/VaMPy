@@ -1,7 +1,7 @@
 from __future__ import print_function
 
 from pathlib import Path
-import numpy as np
+
 from dolfin import *
 
 from postprocessing_common import STRESS, read_command_line
@@ -9,25 +9,25 @@ from postprocessing_common import STRESS, read_command_line
 parameters["reorder_dofs_serial"] = False
 
 
-def compute_wss(case_path, nu, dt, velocity_degree):
+def compute_hemodynamic_indices(case_path, nu, dt, velocity_degree):
     """
     Loads velocity fields from completed CFD simulation,
     and computes and saves the following hemodynamic quantities:
     (1) WSS - Wall shear stress
-    (2) TWSSG - Temporal wall shear stress gradient
-    (3) OSI - Oscillatory shear index
-    (4) RRT - Relative residence time
+    (2) TAWSS - Time averaged wall shear stress
+    (3) TWSSG - Temporal wall shear stress gradient
+    (4) OSI - Oscillatory shear index
+    (5) RRT - Relative residence time
 
     Args:
+        velocity_degree (int): Finite element degree of velocity
         case_path (Path): Path to results from simulation
         nu (float): Viscosity
         dt (float): Time step of simulation
     """
     # File paths
     case_path = Path(case_path)
-    file_path_x = case_path / "u0.h5"
-    file_path_y = case_path / "u1.h5"
-    file_path_z = case_path / "u2.h5"
+    file_path_u = case_path / "u.h5"
     mesh_path = case_path / "mesh.h5"
 
     # Start post-processing from 2nd cycle using every 10th time step, or 2000 time steps per cycle
@@ -47,26 +47,24 @@ def compute_wss(case_path, nu, dt, velocity_degree):
     V_b1 = VectorFunctionSpace(bm, "CG", 1)
     U_b1 = FunctionSpace(bm, "CG", 1)
     V = VectorFunctionSpace(mesh, "CG", velocity_degree)
-    U = FunctionSpace(mesh, "CG", velocity_degree)
 
     if MPI.rank(MPI.comm_world) == 0:
         print("Define functions")
     u = Function(V)
-    u0 = Function(U)
-    u1 = Function(U)
-    u2 = Function(U)
 
     # RRT
-    rrt_ = Function(U_b1)
     RRT = Function(U_b1)
-
-    # WSS
-    WSS = Function(V_b1)
 
     # OSI
     OSI = Function(U_b1)
-    WSS_new = Function(U_b1)
-    osi_ = Function(U_b1)
+
+    # WSS_mean
+    WSS_mean = Function(V_b1)
+    wss_mean = Function(U_b1)
+
+    # TAWSS
+    TAWSS = Function(U_b1)
+    tawss = Function(U_b1)
 
     # TWSSG
     TWSSG = Function(U_b1)
@@ -77,40 +75,41 @@ def compute_wss(case_path, nu, dt, velocity_degree):
     stress = STRESS(u, 0.0, nu, mesh)
     dabla = get_dabla_function()
 
+    # Create writer for WSS
+    wss_path = (case_path / "WSS.xdmf").__str__()
+
+    wss_writer = XDMFFile(MPI.comm_world, wss_path)
+    wss_writer.parameters["flush_output"] = True
+    wss_writer.parameters["functions_share_mesh"] = True
+    wss_writer.parameters["rewrite_function_mesh"] = False
+
     if MPI.rank(MPI.comm_world) == 0:
-        print("Start 'simulation'")
+        print("=" * 10, "Start post processing", "=" * 10)
 
     file_counter = start
     while True:
-        # Read velocity components to respective functions and assign them to vector function u
+        # Read in velocity solution to vector function u
         try:
-            f1 = HDF5File(MPI.comm_world, file_path_x.__str__(), "r")
-            f2 = HDF5File(MPI.comm_world, file_path_y.__str__(), "r")
-            f3 = HDF5File(MPI.comm_world, file_path_z.__str__(), "r")
+            f = HDF5File(MPI.comm_world, file_path_u.__str__(), "r")
             vec_name = "/velocity/vector_%d" % file_counter
-            timestamp = f1.attributes(vec_name)["timestamp"]
-            print("Timestep: {}".format(timestamp))
-            f1.read(u0, vec_name)
-            f2.read(u1, vec_name)
-            f3.read(u2, vec_name)
+            timestamp = f.attributes(vec_name)["timestamp"]
+            print("=" * 10, "Timestep: {}".format(timestamp), "=" * 10)
+            f.read(u, vec_name)
         except:
-            print("Failed to read in velocity at file_counter={}".format(file_counter))
+            print("=" * 10, "Finished reading solutions", "=" * 10)
             break
-        assign(u.sub(0), u0)
-        assign(u.sub(1), u1)
-        assign(u.sub(2), u2)
 
         # Compute WSS
         if MPI.rank(MPI.comm_world) == 0:
-            print("Compute WSS")
+            print("Compute WSS (mean)")
         tau = stress()
         tau.vector()[:] = tau.vector()[:] * 1000
-        WSS.vector().axpy(1, tau.vector())
+        WSS_mean.vector().axpy(1, tau.vector())
 
         if MPI.rank(MPI.comm_world) == 0:
-            print("Compute OSI")
-        dabla(tau.vector(), osi_.vector())
-        OSI.vector().axpy(1, osi_.vector())
+            print("Compute WSS (absolute value)")
+        dabla(tau.vector(), tawss.vector())
+        TAWSS.vector().axpy(1, tawss.vector())
 
         # Compute TWSSG
         if MPI.rank(MPI.comm_world) == 0:
@@ -122,31 +121,39 @@ def compute_wss(case_path, nu, dt, velocity_degree):
 
         # Update tau
         if MPI.rank(MPI.comm_world) == 0:
-            print("Update WSS")
+            print("Update WSS \n")
         tau_prev.vector().zero()
         tau_prev.vector().axpy(1, tau.vector())
+
+        # Save instantaneous WSS
+        tau.rename("WSS", "WSS")
+        wss_writer.write(tau, dt * file_counter)
 
         # Update file_counter
         file_counter += step
 
+    print("=" * 10, "Saving hemodynamic indices", "=" * 10)
     n = (file_counter - start) // step
     TWSSG.vector()[:] = TWSSG.vector()[:] / n
-    WSS.vector()[:] = WSS.vector()[:] / n
-    OSI.vector()[:] = OSI.vector()[:] / n
-    WSS_new.vector()[:] = OSI.vector()[:]
+    TAWSS.vector()[:] = TAWSS.vector()[:] / n
+    WSS_mean.vector()[:] = WSS_mean.vector()[:] / n
+
+    TAWSS.rename("TAWSS", "TAWSS")
+    TWSSG.rename("TWSSG", "TWSSG")
 
     try:
-        dabla(WSS.vector(), rrt_.vector())
-        rrt_arr = rrt_.vector().get_local()
-        rrt_arr[rrt_arr.nonzero()[0]] = 1e-6
-        rrt_arr[np.isnan(rrt_arr)] = 1e-6
-        RRT.vector().apply("insert")
+        dabla(WSS_mean.vector(), wss_mean.vector())
+        wss_mean_vec = wss_mean.vector().get_local()
+        tawss_vec = TAWSS.vector().get_local()
 
-        OSI_arr = OSI.vector().get_local()
-        OSI_arr[OSI_arr.nonzero()[0]] = 1e-6
-        OSI_arr[np.isnan(OSI_arr)] = 1e-6
-        OSI.vector().set_local(0.5*(1 - rrt_arr / OSI_arr))
+        # Compute RRT and OSI based on mean and absolute WSS
+        RRT.vector().set_local(1 / wss_mean_vec)
+        RRT.vector().apply("insert")
+        RRT.rename("RRT", "RRT")
+
+        OSI.vector().set_local(0.5 * (1 - wss_mean_vec / tawss_vec))
         OSI.vector().apply("insert")
+        OSI.rename("OSI", "OSI")
         save = True
     except:
         print("Failed to compute OSI and RRT")
@@ -169,18 +176,18 @@ def compute_wss(case_path, nu, dt, velocity_degree):
         osi.write(OSI)
 
     # Save WSS and TWSSG
-    wss_path = (case_path / "WSS.xdmf").__str__()
+    tawss_path = (case_path / "TAWSS.xdmf").__str__()
     twssg_path = (case_path / "TWSSG.xdmf").__str__()
 
-    wss = XDMFFile(MPI.comm_world, wss_path)
+    tawss = XDMFFile(MPI.comm_world, tawss_path)
     twssg = XDMFFile(MPI.comm_world, twssg_path)
 
-    for f in [wss, twssg]:
+    for f in [tawss, twssg]:
         f.parameters["flush_output"] = True
         f.parameters["functions_share_mesh"] = True
         f.parameters["rewrite_function_mesh"] = False
 
-    wss.write(WSS_new)
+    tawss.write(TAWSS)
     twssg.write(TWSSG)
 
 
@@ -216,5 +223,5 @@ def get_dabla_function():
 
 
 if __name__ == '__main__':
-    folder, nu, dt, velocity_degree = read_command_line()
-    compute_wss(folder, nu, dt, velocity_degree)
+    folder, nu, dt, velocity_degree, _ = read_command_line()
+    compute_hemodynamic_indices(folder, nu, dt, velocity_degree)
