@@ -26,14 +26,9 @@ install:
   - conda config --set always_yes yes --set changeps1 no
   - conda config --add channels vmtk
   - conda config --add channels morphman
-  - conda config --add channels conda-forge
 
   # Set up environments
   - conda create -n morphmanEnv morphman pytest llvm=3.3 paramiko
-
-  # Dependencies for code coverage and plotting
-  - pip install pytest-cov codecov matplotlib
-  - pip install -U numpy
 
   # Activate environment
   - source activate morphmanEnv
@@ -46,7 +41,9 @@ install:
   - sed -i -e 's/len(self.TargetPoints)\/3/len\(self.TargetPoints\)\/\/3/g' ../../../miniconda/envs/morphmanEnv/lib/python3.6/site-packages/vmtk/vmtkcenterlines.py
   - sed -i -e 's/(len(values) - 1)\/2/\(len\(values\) - 1\)\/\/2/g' ../../../miniconda/envs/morphmanEnv/lib/python3.6/site-packages/vmtk/vmtksurfacecurvature.py
 
-
+  # Dependencies for code coverage and plotting
+  - pip install pytest-cov codecov matplotlib
+  - pip install -U numpy
 
 script:
   - cd test
