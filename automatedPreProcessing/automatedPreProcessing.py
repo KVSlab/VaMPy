@@ -92,11 +92,8 @@ def run_pre_processing(filename_model, verbose_print, smoothing_method, smoothin
             parameters["check_surface"] = True
             write_parameters(parameters, path.join(dir_path, case_name))
 
-    # Capp surface if open
-    if not compute_centers_for_meshing(surface, atrium_present, test_capped=True):
-        capped_surface = vmtk_cap_polydata(surface)
-    else:
-        capped_surface = surface
+    # Create a capped version of the surface
+    capped_surface = vmtk_cap_polydata(surface)
 
     # Get centerlines
     print("--- Get centerlines\n")
@@ -107,8 +104,7 @@ def run_pre_processing(filename_model, verbose_print, smoothing_method, smoothin
     else:
         source = inlet
         target = outlets
-    centerlines, _, _ = compute_centerlines(source, target, file_name_centerlines, capped_surface, resampling=0.1,
-                                            end_point=0)
+    centerlines, _, _ = compute_centerlines(source, target, file_name_centerlines, capped_surface, resampling=0.1)
     tol = get_centerline_tolerance(centerlines)
 
     # Get 'center' and 'radius' of the regions(s)
@@ -210,21 +206,10 @@ def run_pre_processing(filename_model, verbose_print, smoothing_method, smoothin
         else:
             surface = read_polydata(file_name_surface_smooth)
 
-    elif smoothing_method == "laplace":
-        print("--- Smooth surface: Laplacian smoothing\n")
+    elif smoothing_method in ["laplace", "taubin"]:
+        print("--- Smooth surface: {} smoothing\n".format(smoothing_method.capitalize()))
         if not path.isfile(file_name_surface_smooth):
-            surface = vmtk_smooth_surface(surface, smoothing_method)
-
-            # Save the smoothed surface
-            write_polydata(surface, file_name_surface_smooth)
-
-        else:
-            surface = read_polydata(file_name_surface_smooth)
-
-    elif smoothing_method == "taubin":
-        print("--- Smooth surface: Taubin smoothing\n")
-        if not path.isfile(file_name_surface_smooth):
-            surface = vmtk_smooth_surface(surface, smoothing_method)
+            surface = vmtk_smooth_surface(surface, smoothing_method, iterations=400)
 
             # Save the smoothed surface
             write_polydata(surface, file_name_surface_smooth)
@@ -321,6 +306,7 @@ def run_pre_processing(filename_model, verbose_print, smoothing_method, smoothin
     # BSL method for mean inlet flow rate.
     parameters = get_parameters(path.join(dir_path, case_name))
 
+    print("--- Computing flow rates and flow split, and setting boundary IDs\n")
     mean_inflow_rate = compute_flow_rate(atrium_present, inlet, parameters)
 
     find_boundaries(path.join(dir_path, case_name), mean_inflow_rate, network, polyDataVolMesh, verbose_print)
