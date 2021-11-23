@@ -29,7 +29,7 @@ install:
   # Set up environment
   - conda create -n vmtk_env -c anaconda vtk=8.1.0
   - source activate vmtk_env
-  - conda install -c vmtk pytest itk vtk llvm=3.3 paramiko
+  - conda install -c vmtk vmtk pytest itk llvm=3.3 paramiko
 
   # Activate environment
 
