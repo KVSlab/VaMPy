@@ -14,7 +14,7 @@ from visualize import visualize
 
 def run_pre_processing(filename_model, verbose_print, smoothing_method, smoothing_factor, smooth_aneurysm,
                        meshing_method, aneurysm_present, create_flow_extensions, viz, config_path, number_of_sac_points,
-                       coarsening_factor, compress_mesh=True):
+                       coarsening_factor, compress_mesh):
     """
     Automatically generate mesh of surface model in .vtu and .xml format, including prescribed
     flow rates at inlet and outlet based on flow network model.
@@ -498,6 +498,13 @@ def read_command_line():
                         default='example/surface.vtp',
                         help="Input file containing the 3D model.")
 
+    parser.add_argument('-cM', '--compress-mesh',
+                        type=str2bool,
+                        required=False,
+                        dest='compressMesh',
+                        default=True,
+                        help="Compress output mesh after generation.")
+
     parser.add_argument('-sM', '--smoothingMethod',
                         type=str,
                         required=False,
@@ -539,7 +546,7 @@ def read_command_line():
     parser.add_argument('-a', '--aneurysm',
                         dest="aneu",
                         type=str2bool,
-                        default=True,
+                        default=False,
                         help="Determine weather or not the model has a aneurysm. Default is False.")
 
     parser.add_argument('-f', '--flowext',
@@ -586,7 +593,7 @@ def read_command_line():
                 smoothing_factor=args.smoothingFactor, smooth_aneurysm=args.smoothingAneurysm,
                 meshing_method=args.meshingMethod, aneurysm_present=args.aneu, create_flow_extensions=args.fext,
                 viz=args.viz, config_path=args.config, number_of_sac_points=args.sacpts,
-                coarsening_factor=args.coarseningFactor)
+                coarsening_factor=args.coarseningFactor, compress_mesh=args.compressMesh)
 
 
 if __name__ == "__main__":
