@@ -7,8 +7,8 @@ Aneurysm workflow is a collection of scripts to run an aneurysm problem with `Oa
 `GitHub <https://github.com/KVSlab/Aneurysm_workflow>`_.
 
 
-Compatibility and Dependencies
-==============================
+Dependencies
+============
 The general dependencies of Aneurysm workflow are
 
 * VMTK 1.4.0
@@ -50,7 +50,6 @@ Now, all that is left is to clone the `Aneurysm_workflow` repository::
 
 Now you are all set, and can start using Aneurysm workflow.
 
-============
 Known issues
 ============
 

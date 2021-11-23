@@ -35,7 +35,6 @@ Documentation
 -------------
 For detailed installation notes and an introduction to Aneurysm workflow, please refer to the [documentation](https://aneurysmworkflow.readthedocs.io/en/latest/).
 
-
 Installation
 ------------
 For reference, Aneurysm workflow requires the following dependencies: VTK > 8.1, Numpy <= 1.13, SciPy > 1.0.0, VMTK 1.4, ITK, Paramiko, and FEniCS. 
@@ -46,9 +45,9 @@ Then create two environments, one for `vmtk/vtk` and one for `fenics` by executi
     conda create -n vtk -c vmtk python=3.6 itk vtk vmtk paramiko
     conda create -n fenics -c conda-forge fenics
 
-You might run into a problem with VMTK 1.4 if using Python 3, or if you are a Linux user. Therefore, we have provided a set of temporary fixes for these known issues  [here](https://aneurysmworkflow.readthedocs.io/en/latest/installation.html#known-issues).
+You might run into a problem with VMTK 1.4 if using Python 3, or if you are a Linux user, and have therefore provided a set of temporary fixes for these known issues [here](https://aneurysmworkflow.readthedocs.io/en/latest/installation.html#known-issues).
 
-Now, you need to install [`Oasis`](https://github.com/mikaem/Oasis) and [`fenicstools`](https://github.com/mikaem/fenicstools/). You can do so with the following commands:
+Next, you need to install [`Oasis`](https://github.com/mikaem/Oasis) and [`fenicstools`](https://github.com/mikaem/fenicstools/). You can do so with the following commands:
 
     conda activate fenics
     git clone https://github.com/mikaem/Oasis
@@ -61,33 +60,14 @@ Similarly, `fenicstools` can be installed as follows:
     cd fenicstools
     pip install . 
     pip install cppimport
-    
-If you have a cleaner install instruction please edit the above. 
 
-Finally, you are ready to clone the `Aneurysm_workflow` repository:
+Finally, you are ready to clone and use the `Aneurysm_workflow` repository:
 
     git clone https://github.com/KVSLab/Aneurysm_workflow.git
     cd Aneurysm_workflow
 
+Issues
+------
+Please report bugs and other issues through the issue tracker at:
 
-## Usage
-First, use the automatedPreProcessing to create a mesh, boundary conditions, and probes for sampling. 
-
-```
-conda deactivate && conda activate vtk
-python automatedPreProcessing/automatedPreProcessing.py -m diameter -i test/Case_test_artery/artery.vtp --aneurysm False -c 1.3
-```
-
-Then run a CFD simulation for two cycles with 10 000 time steps per cycle and default parameters with Oasis:
-```
-conda deactivate && conda activate fenics
-oasis NSfracStep problem=Artery mesh_path=test/Case_test_artery/artery.xml.gz
-```
-
-Finally, you can create the WSS from the CFD simulation:
-```
-python postprocessing/compute_wss.py --case path_to_results/data/[run_number]/Solutions
-```
-
-You can also compute flow related metrics using `compute_flow_metrics.py`, but you would need to adapt how the files are read in to match with `compute_wss.py`.
-To visualize velocity and pressure at the probes created by `Artery.py`, you can run the `visualize_probes.py` script, which has an additional dependency to [`Matplotlib`](https://github.com/matplotlib/matplotlib).
+https://github.com/KVSlab/Aneurysm_workflow/issues
