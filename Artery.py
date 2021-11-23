@@ -316,7 +316,7 @@ def temporal_hook(u_, p_, mesh, tstep, save_probe_frequency, eval_dict, newfolde
 
         # Get save paths
         files = NS_parameters['files']
-        file_mode = "w" if tstep == save_solution_at_tstep else "a"
+        file_mode = "w" if tstep == save_solution_frequency else "a"
         p_path = files['p']
         u_path = files['u']
 
