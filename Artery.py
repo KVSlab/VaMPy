@@ -127,6 +127,7 @@ def create_bcs(t, NS_expressions, V, Q, area_ratio, area_inlet, mesh, mesh_path,
                **NS_namespace):
     # Mesh function
     boundary = MeshFunction("size_t", mesh, mesh.geometry().dim() - 1, mesh.domains())
+    boundary.set_values(boundary.array())
 
     # Read case parameters
     parameters_file_path = mesh_path.split(".")[0] + ".json"
@@ -206,8 +207,11 @@ def get_file_paths(folder):
 
 def pre_solve_hook(mesh, V, Q, newfolder, mesh_path, restart_folder, velocity_degree, cardiac_cycle,
                    save_solution_after_cycle, dt, **NS_namespace):
+    # Mesh function
+    boundary = MeshFunction("size_t", mesh, mesh.geometry().dim() - 1, mesh.domains())
+    boundary.set_values(boundary.array())
+
     # Create point for evaluation
-    boundary = MeshFunction("size_t", mesh, 2, mesh.domains())
     n = FacetNormal(mesh)
     eval_dict = {}
     rel_path = mesh_path.split(".")[0] + "_probe_point"
