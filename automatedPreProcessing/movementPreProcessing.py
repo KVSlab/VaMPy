@@ -5,14 +5,15 @@ import shutil
 from morphman.common import *
 from vtk.numpy_interface import dataset_adapter as dsa
 
-from common import get_centers_for_meshing, find_boundaries, setup_model_network, compute_flow_rate, add_flow_extension
+from common import get_centers_for_meshing, find_boundaries, setup_model_network, compute_flow_rate, add_flow_extension, \
+    move_surface_model, get_point_map
 from visualize import visualize
 
 cell_id_name = "CellEntityIds"
 
 
 def main(case_path, move_surface, add_extensions, edge_length, patient_specific, recompute_mesh, recompute_all,
-         flow_extension_length):
+         flow_extension_length, clamp_boundaries):
     """
     Automatically generate movement and  mesh of surface model in .vtu and .xml format.
     Assumes the user either has a set of displaced models or models with mapped displacement fields,
@@ -21,6 +22,8 @@ def main(case_path, move_surface, add_extensions, edge_length, patient_specific,
     Can add patient-specific or arbitrary movement to model.
 
     Args:
+        flow_extension_length (float): Length of flow extensions, factor of MISR
+        clamp_boundaries (bool): Clamps inlet(s) and outlet if true
         case_path (str): Path to case
         move_surface (bool): To move surface or not
         add_extensions (bool): To add flow extensions or not
@@ -71,10 +74,10 @@ def main(case_path, move_surface, add_extensions, edge_length, patient_specific,
     # Add flow extensions
     if add_extensions and path.exists(moved_path):
         surface_to_mesh = add_flow_extensions(surface, model_path, moved_path, centerlines, flow_extension_length,
-                                              edge_length)
+                                              clamp_boundaries, edge_length)
 
     if (not path.exists(mesh_path) or recompute_mesh) and surface_to_mesh is not None:
-        mesh = generate_mesh(surface_to_mesh, mesh_path, mesh_xml_path, edge_length)
+        mesh = generate_mesh_without_layers(surface_to_mesh, mesh_path, mesh_xml_path, edge_length, centerlines)
 
     if path.exists(mesh_path):
         mesh = read_polydata(mesh_path)
@@ -203,7 +206,8 @@ def capp_surface(remeshed_extended, offset=1):
     return surface
 
 
-def add_flow_extensions(surface, model_path, moved_path, centerline, flow_extension_length, resolution=1.9):
+def add_flow_extensions(surface, model_path, moved_path, centerline, flow_extension_length, clamp_boundaries,
+                        resolution=1.9):
     # Create result paths
     points_path = model_path + "_points.np"
     remeshed_path = model_path + "_remeshed.vtp"
@@ -232,8 +236,8 @@ def add_flow_extensions(surface, model_path, moved_path, centerline, flow_extens
         # Smooth at edges
         remeshed_extended = vmtk_smooth_surface(remeshed_extended, "laplace", iterations=50)
     else:
-        print("Skipping flow extensions")
-        remeshed_extended = vmtk_smooth_surface(remeshed, "laplace", iterations=25)
+        print("-- Skipping flow extensions --")
+        remeshed_extended = vmtk_smooth_surface(remeshed, "laplace", iterations=50)
 
     write_polydata(remeshed_extended, remeshed_extended_path)
 
@@ -256,8 +260,7 @@ def add_flow_extensions(surface, model_path, moved_path, centerline, flow_extens
         new_path = path.join(extended_path, model_path.split("/")[-1])
         if not path.exists(new_path):
             move_surface_model(tmp_surface, surface, remeshed, remeshed_extended, distance, point_map, new_path, i,
-                               points)
-
+                               points, clamp_boundaries)
     # Resample points and write to file
     N = 200
     points[:, :, -1] = points[:, :, 0]
@@ -274,7 +277,7 @@ def add_flow_extensions(surface, model_path, moved_path, centerline, flow_extens
     return remeshed_extended
 
 
-def generate_mesh(surface, mesh_path, mesh_xml_path, resolution):
+def generate_mesh_without_layers(surface, mesh_path, mesh_xml_path, resolution):
     # Cap mitral valve
     print("-- Meshing surface --")
     surface = dsa.WrapDataObject(surface)
@@ -321,110 +324,6 @@ def generate_mesh(surface, mesh_path, mesh_xml_path, resolution):
     meshWriter.Execute()
 
     return mesh
-
-
-def move_surface_model(surface, original, remeshed, remeshed_extended, distance, point_map, file_path, i, points):
-    surface = dsa.WrapDataObject(surface)
-    original = dsa.WrapDataObject(original)
-    remeshed = dsa.WrapDataObject(remeshed)
-    remeshed_extended = dsa.WrapDataObject(remeshed_extended)
-
-    if "displacement" in original.PointData.keys():
-        original.VTKObject.GetPointData().RemoveArray("displacement")
-
-    if "displacement" in remeshed_extended.PointData.keys():
-        remeshed_extended.VTKObject.GetPointData().RemoveArray("displacement")
-
-    # Get displacement field
-    original.PointData.append(surface.Points - original.Points, "displacement")
-
-    # Get
-    projector = vmtkscripts.vmtkSurfaceProjection()
-    projector.Surface = remeshed_extended.VTKObject
-    projector.ReferenceSurface = original.VTKObject
-    projector.Execute()
-
-    # New surface
-    new_surface = projector.Surface
-    new_surface = dsa.WrapDataObject(new_surface)
-
-    # Manipulate displacement in the extensions
-    displacement = new_surface.PointData["displacement"]
-    displacement[remeshed.Points.shape[0]:] = distance * displacement[point_map]
-
-    # Move the mesh points
-    new_surface.Points += displacement
-    write_polydata(new_surface.VTKObject, file_path)
-    points[:, :, i] = new_surface.Points.copy()
-    new_surface.Points -= displacement
-
-
-def get_point_map(remeshed, remeshed_extended):
-    remeshed = dsa.WrapDataObject(remeshed)
-    remeshed_extended = dsa.WrapDataObject(remeshed_extended)
-
-    # Get lengths
-    num_re = remeshed.Points.shape[0]
-    num_ext = remeshed_extended.Points.shape[0] - remeshed.Points.shape[0]
-
-    # Get locators
-    inner_feature = vtk_compute_connectivity(vtk_extract_feature_edges(remeshed.VTKObject))
-    outer_feature = vtk_compute_connectivity(vtk_extract_feature_edges(remeshed_extended.VTKObject))
-    locator_remeshed = get_vtk_point_locator(remeshed.VTKObject)
-
-    n_features = outer_feature.GetPointData().GetArray("RegionId").GetValue(outer_feature.GetNumberOfPoints() - 1)
-    inner_features = np.array(
-        [vtk_compute_threshold(inner_feature, "RegionId", i, i + 0.1, source=0) for i in range(n_features + 1)])
-    outer_features = np.array(
-        [vtk_compute_threshold(outer_feature, "RegionId", i, i + 0.1, source=0) for i in range(n_features + 1)])
-
-    inner_regions = [dsa.WrapDataObject(feature) for feature in inner_features]
-    inner_locators = [get_vtk_point_locator(feature) for feature in inner_features]
-    inner_points = [feature.GetNumberOfPoints() for feature in inner_features]
-
-    outer_regions = [dsa.WrapDataObject(feature) for feature in outer_features]
-    outer_locators = [get_vtk_point_locator(feature) for feature in outer_features]
-    outer_points = [feature.GetNumberOfPoints() for feature in outer_features]
-    boundary_map = {i: j for i, j in zip(np.argsort(inner_points), np.argsort(outer_points))}
-
-    # Get distance and point map
-    distances = np.zeros(num_ext)
-    point_map = np.zeros(num_ext)
-
-    for i in range(num_ext):
-        point = remeshed_extended.Points[num_re + i]
-        tmp_dist = 1E16
-        tmp_id = -1
-        # Some hacks to find the correct corresponding points
-        for region_id in range(len(outer_features)):
-            region_id_out = boundary_map[region_id]
-            id_i = inner_locators[region_id].FindClosestPoint(point)
-            id_o = outer_locators[region_id_out].FindClosestPoint(point)
-
-            p_i = inner_features[region_id].GetPoint(id_i)
-            p_o = outer_features[region_id_out].GetPoint(id_o)
-
-            dist_o = get_distance(point, p_i)
-            dist_i = get_distance(point, p_o)
-            dist_total = dist_i + dist_o
-            if dist_total < tmp_dist:
-                tmp_dist = dist_total
-                tmp_id = region_id
-
-        regionId = tmp_id
-        regionId_out = boundary_map[regionId]
-        inner_id = inner_locators[regionId].FindClosestPoint(point)
-        outer_id = outer_locators[regionId_out].FindClosestPoint(point)
-
-        dist_to_boundary = get_distance(point, outer_regions[regionId_out].Points[outer_id])
-        dist_between_boundaries = get_distance(inner_regions[regionId].Points[inner_id],
-                                               outer_regions[regionId_out].Points[outer_id])
-        distances[i] = dist_to_boundary / dist_between_boundaries
-        point_map[i] = locator_remeshed.FindClosestPoint(inner_regions[regionId].Points[inner_id])
-
-    # Let the points corresponding to the caps have distance 0
-    point_map = point_map.astype(int)
-    return distances, point_map
 
 
 def remesh_surface(surface, edge_length, exclude=None):
@@ -475,12 +374,14 @@ def read_command_line():
                         dest="recomputeAll", help="Recomputes everything if true.")
     parser.add_argument('-fl', '--flowextlen', dest="flowExtLen", default=None, type=float,
                         help="Adds flow extensions of given length.")
+    parser.add_argument('-c', '--clamp-boundaries', dest="clamp", default=False, type=str2bool,
+                        help="Clamps boundaries at inlet(s) and outlet if true.")
 
     args, _ = parser.parse_known_args()
 
     return dict(case_path=args.fileNameModel, move_surface=args.moveSurface, add_extensions=args.addExtensions,
                 edge_length=args.edgeLength, patient_specific=args.patientSpecific, recompute_mesh=args.recomputeMesh,
-                recompute_all=args.recomputeAll, flow_extension_length=args.flowExtLen)
+                recompute_all=args.recomputeAll, flow_extension_length=args.flowExtLen, clamp_boundaries=args.clamp)
 
 
 if __name__ == '__main__':

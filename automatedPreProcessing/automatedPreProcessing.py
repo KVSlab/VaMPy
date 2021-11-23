@@ -6,13 +6,15 @@ import argparse
 import ToolRepairSTL
 # Local imports
 from common import *
+from movementPreProcessing import get_point_map
 from simulate import run_simulation
 from visualize import visualize
 
 
 def run_pre_processing(filename_model, verbose_print, smoothing_method, smoothing_factor, meshing_method,
                        refine_region, atrium_present, create_flow_extensions, viz, config_path, coarsening_factor,
-                       flow_extension_length, edge_length, region_points, compress_mesh=True):
+                       flow_extension_length, edge_length, region_points, dynamic_mesh, clamp_boundaries,
+                       compress_mesh=True):
     """
     Automatically generate mesh of surface model in .vtu and .xml format, including prescribed
     flow rates at inlet and outlet based on flow network model.
@@ -35,6 +37,8 @@ def run_pre_processing(filename_model, verbose_print, smoothing_method, smoothin
         edge_length (float): Edge length used for meshing with constant element size
         flow_extension_length (float): Factor defining length of flow extensions
         compress_mesh (bool): Compresses finalized mesh if True
+        dynamic_mesh (bool): Computes projected movement for displaced surfaces located in [filename_model]_moved folder
+        clamp_boundaries (bool): Clamps inlet(s) and outlet if true
     """
     # Get paths
     abs_path = path.abspath(path.dirname(__file__))
@@ -59,6 +63,9 @@ def run_pre_processing(filename_model, verbose_print, smoothing_method, smoothin
     file_name_xml_mesh = path.join(dir_path, case_name + ".xml")
     file_name_vtu_mesh = path.join(dir_path, case_name + ".vtu")
     file_name_run_script = path.join(dir_path, case_name + ".sh")
+    file_name_displacement_points = path.join(dir_path, case_name + "_points.np")
+    folder_moved_surfaces = path.join(dir_path, case_name + "_moved")
+    folder_extended_surfaces = path.join(dir_path, case_name + "_extended")
 
     print("\n--- Working on case:", case_name, "\n")
 
@@ -226,55 +233,70 @@ def run_pre_processing(filename_model, verbose_print, smoothing_method, smoothin
             print("--- Adding flow extensions\n")
             # Add extension normal on boundary for atrium models
             extension = "boundarynormal" if atrium_present else "centerlinedirection"
-            surface = add_flow_extension(surface, centerlines, include_outlet=False,
-                                         extension_length=flow_extension_length)
-            surface = add_flow_extension(surface, centerlines, include_outlet=True,
-                                         extension_length=flow_extension_length, extension_mode=extension)
+            surface_extended = add_flow_extension(surface, centerlines, include_outlet=False,
+                                                  extension_length=flow_extension_length)
+            surface_extended = add_flow_extension(surface_extended, centerlines, include_outlet=True,
+                                                  extension_length=flow_extension_length, extension_mode=extension)
 
-            surface = vmtk_smooth_surface(surface, "laplace", iterations=200)
-            write_polydata(surface, file_name_model_flow_ext)
+            write_polydata(surface_extended, file_name_model_flow_ext)
 
         else:
-            surface = read_polydata(file_name_model_flow_ext)
+            surface_extended = read_polydata(file_name_model_flow_ext)
+    else:
+        surface_extended = surface
 
-    # Capp surface with flow extensions
-    capped_surface = vmtk_cap_polydata(surface)
+    # Smooth and capp surface with flow extensions
+    surface_extended = vmtk_smooth_surface(surface_extended, "laplace", iterations=200)
+    capped_surface = vmtk_cap_polydata(surface_extended)
+
+    if dynamic_mesh:
+        # Get a point mapper
+        distance, point_map = get_point_map(surface, surface_extended)
+
+        # Project displacement between surfaces
+        points = project_displacement(clamp_boundaries, distance, folder_extended_surfaces, folder_moved_surfaces,
+                                      point_map, surface, surface_extended)
+
+        # Save displacement to numpy array
+        save_displacement(file_name_displacement_points, points)
 
     # Get new centerlines with the flow extensions
-    if not path.isfile(file_name_flow_centerlines):
-        print("--- Compute the model centerlines with flow extension.\n")
-        # Compute the centerlines. FIXIT: There are several inlets and one outet for atrium case 
-        inlet, outlets = get_centers_for_meshing(surface, atrium_present, path.join(dir_path, case_name), flowext=True)
-        if atrium_present:
-            source = outlets
-            target = inlet
-        else:
-            source = inlet
-            target = outlets
-        centerlines, _, _ = compute_centerlines(source, target, file_name_flow_centerlines, capped_surface,
-                                                resampling=0.1)
+    if create_flow_extensions:
+        if not path.isfile(file_name_flow_centerlines):
+            print("--- Compute the model centerlines with flow extension.\n")
+            # Compute the centerlines. FIXIT: There are several inlets and one outet for atrium case
+            inlet, outlets = get_centers_for_meshing(surface_extended, atrium_present, path.join(dir_path, case_name),
+                                                     flowext=True)
+            if atrium_present:
+                source = outlets
+                target = inlet
+            else:
+                source = inlet
+                target = outlets
+            centerlines, _, _ = compute_centerlines(source, target, file_name_flow_centerlines, capped_surface,
+                                                    resampling=0.1)
 
-    else:
-        centerlines = read_polydata(file_name_flow_centerlines)
+        else:
+            centerlines = read_polydata(file_name_flow_centerlines)
 
     # Choose input for the mesh
     print("--- Computing distance to sphere\n")
     if meshing_method == "constant":
         if not path.isfile(file_name_distance_to_sphere_const):
-            distance_to_sphere = dist_sphere_constant(surface, centerlines, region_center, misr_max,
+            distance_to_sphere = dist_sphere_constant(surface_extended, centerlines, region_center, misr_max,
                                                       file_name_distance_to_sphere_const, edge_length)
         else:
             distance_to_sphere = read_polydata(file_name_distance_to_sphere_const)
 
     elif meshing_method == "curvature":
         if not path.isfile(file_name_distance_to_sphere_curv):
-            distance_to_sphere = dist_sphere_curv(surface, centerlines, region_center, misr_max,
+            distance_to_sphere = dist_sphere_curv(surface_extended, centerlines, region_center, misr_max,
                                                   file_name_distance_to_sphere_curv, coarsening_factor)
         else:
             distance_to_sphere = read_polydata(file_name_distance_to_sphere_curv)
     elif meshing_method == "diameter":
         if not path.isfile(file_name_distance_to_sphere_diam):
-            distance_to_sphere = dist_sphere_diam(surface, centerlines, region_center, misr_max,
+            distance_to_sphere = dist_sphere_diam(surface_extended, centerlines, region_center, misr_max,
                                                   file_name_distance_to_sphere_diam, coarsening_factor)
         else:
             distance_to_sphere = read_polydata(file_name_distance_to_sphere_diam)
@@ -313,7 +335,7 @@ def run_pre_processing(filename_model, verbose_print, smoothing_method, smoothin
 
     # Display the flow split at the outlets, inlet flow rate, and probes.
     if viz:
-        visualize(network.elements, probe_points, surface, mean_inflow_rate)
+        visualize(network.elements, probe_points, surface_extended, mean_inflow_rate)
 
     # Start simulation though ssh, without password
     if config_path is not None:
@@ -431,6 +453,19 @@ def read_command_line():
                         type=float,
                         help="Length of flow extensions.")
 
+    parser.add_argument('-dm', '--dynamic-mesh',
+                        dest="dynamicMesh",
+                        default=False,
+                        type=str2bool,
+                        help="If true, assumes a dynamic mesh and will perform computation of projection " +
+                             "between moved surfaces located in the '[filename_model]_moved' folder.")
+
+    parser.add_argument('-cl', '--clamp-boundaries',
+                        dest="clampBoundaries",
+                        default=False,
+                        type=str2bool,
+                        help="Clamps boundaries at inlet(s) and outlet if true.")
+
     parser.add_argument('-vz', '--visualize',
                         dest="viz",
                         default=True,
@@ -464,7 +499,8 @@ def read_command_line():
                 refine_region=args.refineRegion, atrium_present=args.atriumPresent,
                 create_flow_extensions=args.flowExtension, viz=args.viz, config_path=args.config,
                 coarsening_factor=args.coarseningFactor, flow_extension_length=args.flowExtLen,
-                edge_length=args.edgeLength, region_points=args.regionPoints)
+                edge_length=args.edgeLength, region_points=args.regionPoints, dynamic_mesh=args.dynamicMesh,
+                clamp_boundaries=args.clampBoundaries)
 
 
 if __name__ == "__main__":
