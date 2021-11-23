@@ -99,20 +99,6 @@ htmlhelp_basename = 'workflow_docs_help'
 #
 # latex_elements = {}
 #
-# latex_documents = [
-#     (master_doc, 'morphMan_docs.tex', 'morphman\\_docs Documentation',
-#      'Aslak W. Bergersen & Henrik A. Kjeldsberg', 'manual'),
-# ]
-#
-# man_pages = [
-#     (master_doc, 'morphMan_docs', u'morphMan_docs Documentation',
-#      [author], 1)
-# ]
-# texinfo_documents = [
-#     (master_doc, 'morphMan_docs', u'morphman Documentation',
-#      author, 'morphMan_docs', 'One line description of project.',
-#      'Miscellaneous'),
-# ]
 
 # -- Options for Epub output ----------------------------------------------
 
