@@ -6,7 +6,10 @@ from dolfin import *
 
 from postprocessing_common import STRESS, read_command_line
 
-parameters["reorder_dofs_serial"] = False
+try:
+    parameters["reorder_dofs_serial"] = False
+except NameError:
+    pass
 
 
 def compute_hemodynamic_indices(case_path, nu, dt, velocity_degree):

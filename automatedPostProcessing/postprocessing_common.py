@@ -2,8 +2,10 @@ from argparse import ArgumentParser
 
 try:
     from dolfin import *
-
-    parameters["allow_extrapolation"] = True
+    try:
+        parameters["allow_extrapolation"] = True
+    except NameError:
+        pass
 except ImportError:
     pass
 

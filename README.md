@@ -1,4 +1,4 @@
-# Aneurysm workflow
+## Aneurysm workflow
 [![Build Status](https://travis-ci.com/KVSlab/Aneurysm_workflow.svg?token=qbve9tcy6am6sUJksBcu&branch=master)](https://travis-ci.com/KVSlab/Aneurysm_workflow)
 [![codecov](https://codecov.io/gh/KVSlab/Aneurysm_workflow/branch/master/graph/badge.svg?token=M2NMX6HOSZ)](https://codecov.io/gh/KVSlab/Aneurysm_workflow)
 
@@ -9,51 +9,66 @@
     Meshed aneurysm model showing inlet flow rate, outlet flow split, and probes.
 </p>
 
-## Description
-Aneurysm workflow is a collection of scripts to run an aneurysm problem with [Oasis](https://github.com/mikaem/Oasis). There are also scripts for a variety of post-processing; WSS-based metrics, more advanced turbulence metrics, and a variety of morphological parameters. The latter is implemented through automated neck plane detection, but are not adapted to the `Aneurysm_workflow` pipeline and are here merely for convenience.
+Description
+-----------
+Aneurysm workflow is a collection of scripts to prepare, run, and analyze cardiac and atrial problems. This includes scripts for a variety of post-processing; WSS-based metrics, more advanced turbulence metrics, and a variety of morphological parameters. 
 
-## Authors
-These scripts was written by
-- Aslak Wigdahl Bergersen
-- Christophe Chnafa
-- Henrik A. Kjeldsberg
+The goal of the workflow is to provide research groups, and other individuals, with a set of tools for both pre- and post-processing patient-specific geometries.
+Additionally, the workflow provides problem files for a set of vascular problems, which are readily available for simulation using the open-source CFD solver [Oasis](https://github.com/mikaem/Oasis).
 
-## Installation
-You can choose how to install the dependencies, but the fastest way to get started is to first install anaconda or miniconda on your computer. Then create two environments, one for `vmtk/vtk` and one for `fenics` by executing the following in a terminal:
-```
-conda create -n vtk -c vmtk python=3.6 itk vtk vmtk paramiko
-conda create -n fenics -c conda-forge fenics
-```
+Authors
+-------
+Aneurysm workflow has been developed by
 
-You might run into a problem with vmtk (1.4) if using python 3. To fix this, please [follow these instructions](https://morphman.readthedocs.io/en/latest/installation.html#basic-installation) for fixing the centerline problem. For fixing mesh writing change line 263 of vmtkmeshwriter.py (using the same path as described in the link) to:
-```
-file = open(self.OutputFileName, 'rb')
-````
-and line 267 to
-```
-gzfile = gzip.open(self.OutputFileName, 'wb')
-```
-Please note that these changes are fixed in the development version of vmtk, but a new version has not been released in a long time.
+* Aslak Wigdahl Bergersen
+* Christophe Chnafa
+* Henrik A. Kjeldsberg
+
+Licence
+-------
+Aneurysm workflow is licensed under the GNU GPL, version 3 or (at your option) any
+later version.
+
+Aneurysm workflow is Copyright (2018-2021) by the authors.
+
+Documentation
+-------------
+For detailed installation notes and an introduction to Aneurysm workflow, please refer to the [documentation](https://aneurysmworkflow.readthedocs.io/en/latest/).
+
+
+Installation
+------------
+For reference, Aneurysm workflow requires the following dependencies: VTK > 8.1, Numpy <= 1.13, SciPy > 1.0.0, VMTK 1.4, ITK, Paramiko, and FEniCS. 
+If you are on Windows, macOS or Linux you can install all the general dependencies through anaconda.
+First install Anaconda or Miniconda (preferably the Python 3.6 version).
+Then create two environments, one for `vmtk/vtk` and one for `fenics` by executing the following in a terminal
+
+    conda create -n vtk -c vmtk python=3.6 itk vtk vmtk paramiko
+    conda create -n fenics -c conda-forge fenics
+
+You might run into a problem with VMTK 1.4 if using Python 3, or if you are a Linux user. Therefore, we have provided a set of temporary fixes for these known issues  [here](https://aneurysmworkflow.readthedocs.io/en/latest/installation.html#known-issues).
 
 Now, you need to install [`Oasis`](https://github.com/mikaem/Oasis) and [`fenicstools`](https://github.com/mikaem/fenicstools/). You can do so with the following commands:
-```
-conda activate fenics
-cd [path_to_your_installation_folder]
-git clone https://github.com/mikaem/Oasis
-cd Oasis
-pip install .  # add "--user" if you are on a cluster, or "-e" if you are changing the Oasis source code
-cd ..
-pip install cppimport
-git clone https://github.com/mikaem/fenicstools.git
-cd fenicstools
-pip install . 
-```
 
-If you have a cleaner install instruction please edit the above. Now, all that is left is to clone the `Aneurysm_workflow` repository:
-```
-git clone https://github.com/KVSLab/Aneurysm_workflow.git
-cd Aneurysm_workflow
-```
+    conda activate fenics
+    git clone https://github.com/mikaem/Oasis
+    cd Oasis
+    pip install .  # add "--user" if you are on a cluster, or "-e" if you are changing the Oasis source code
+
+Similarly, `fenicstools` can be installed as follows:
+
+    git clone https://github.com/mikaem/fenicstools.git
+    cd fenicstools
+    pip install . 
+    pip install cppimport
+    
+If you have a cleaner install instruction please edit the above. 
+
+Finally, you are ready to clone the `Aneurysm_workflow` repository:
+
+    git clone https://github.com/KVSLab/Aneurysm_workflow.git
+    cd Aneurysm_workflow
+
 
 ## Usage
 First, use the automatedPreProcessing to create a mesh, boundary conditions, and probes for sampling. 

@@ -7,10 +7,6 @@ import numpy as np
 
 from postprocessing_common import read_command_line
 
-# Plotting parameters
-plt.rcParams["figure.figsize"] = [20, 10]
-plt.rcParams["figure.autolayout"] = True
-
 
 def visualize_probes(case_path, dt, no_of_cycles, probe_saving_frequency=100, cardiac_cycle=951, show_figure=True,
                      save_figure=False):
