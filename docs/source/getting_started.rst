@@ -1,14 +1,16 @@
-.. title:: Using Aneurysm workflow
+.. title:: Using VaMPy
 
 .. _getting_started:
 
-=======================
-Using Aneurysm workflow
-=======================
+====================================
+Using the Vascular Modeling Pypeline
+====================================
+The Vascular Modeling Pypeline is a collection of scripts to prepare, run, and analyze vascular morphologies. This includes pre-processing scripts for generating a volumetric mesh, defining physiological boundary conditions, and inserting probes for sampling velocity and pressure. For the computational fluid dynamics (CFD) simulation, we have included an artery problem file used for running the simulation with `Oasis <https://github.com/mikaem/Oasis>`_.
+Finally, there are a variety of post-processing scripts, which computes wall shear stress-based metrics, more advanced turbulence metrics, and a variety of morphological parameters. In this walkthrough, we exemplify the usage by preparing, simulating, and post-processing the `internal carotid artery <https://en.wikipedia.org/wiki/Internal_carotid_artery>`_, although the software may be readily used for other tubular or vascular shapes.
 
 Pre-processing: Meshing and boundary conditions
 ===============================================
-The first step of using Aneurysm workflow is pre-processing. The pre-processing scripts are located inside the ``automatedPreProcessing`` folder, and we will be executing the ``automatedPreProcessing.py`` script to generate a mesh, boundary conditions, and probes for velocity and pressure sampling. Here we will perform pre-processing for the artery case located in the ``test`` folder.
+The first step of using the Vascular Modeling Pypeline is pre-processing. The pre-processing scripts are located inside the ``automatedPreProcessing`` folder, and we will be executing the ``automatedPreProcessing.py`` script to generate a mesh, boundary conditions, and probes for velocity and pressure sampling. Here we will perform pre-processing for the artery case located in the ``test`` folder.
 Start by entering the ``vmtk`` conda environment::
 
     conda deactivate && conda activate vtk
@@ -22,7 +24,7 @@ The pre-processing script will also produce an info file and a probe file, named
 
 Computational fluid dynamics simulations in Oasis
 =================================================
-The next step of using Aneurysm workflow is performing the simulations with the `Oasis <https://github.com/mikaem/Oasis>`_ computational fluid dynamics (CFD) solver.
+The next step of using the Vascular Modeling Pypeline is performing the CFD simulations with `Oasis`.
 First, activate the ``fenics`` conda environment::
 
     conda deactivate && conda activate fenics
@@ -31,12 +33,12 @@ Then, to run a CFD simulation for two cycles with 10 000 time steps per cycle an
 
     oasis NSfracStep problem=Artery mesh_path=test/Case_test_artery/artery.xml.gz
 
-Running the simulations will create the result folder ``results_artery`` (specific to this problem), with the results and corresponding mesh saved compactly as HDF5 format.
+Running the simulations will create the result folder ``results_artery`` (specific to the artery problem), with the results and corresponding mesh saved compactly in HDF5 format.
 
-Post-processing: Hemodynamic indices, simulation metrics, and probes
-====================================================================
-Following the CFD simulations, the last usage of Aneurysm workflow is the post-processing part.
-You can start by computing the wall shear stress (WSS), oscillatory shear index and other hemodynamic indices by executing the following command::
+Post-processing: Hemodynamic indices, flow and simulation metrics, and probes
+=============================================================================
+Following the CFD simulations, the last usage of the Vascular Modeling Pypeline is the post-processing part.
+You can start by computing the wall shear stress, oscillatory shear index and other hemodynamic indices by executing the following command::
 
     python automatedPostProcessing/compute_hemodynamic_indices.py --case results_artery/data/[run_number]/Solutions
 
@@ -52,6 +54,6 @@ Note that this has an additional dependency to `Matplotlib <https://github.com/m
 
 Features and issues
 ===================
-The existing methods provide many degrees of freedom, however, if you need a specific method or functionality, please do not hesitate to propose enhancements in the `issue tracker <https://github.com/KVSlab/Aneurysm_workflow/issues>`_, or create a `pull request <https://github.com/KVSlab/Aneurysm_workflow/pulls>`_ with new features.
-Similarly, we highly appreciate that you report any bugs or other issues you may experience in the `issue tracker <https://github.com/KVSlab/Aneurysm_workflow/issues>`_.
+The existing methods provide many degrees of freedom, however, if you need a specific method or functionality, please do not hesitate to propose enhancements in the `issue tracker <https://github.com/KVSlab/VaMPy/issues>`_, or create a `pull request <https://github.com/KVSlab/VaMPy/pulls>`_ with new features.
+Similarly, we highly appreciate that you report any bugs or other issues you may experience in the `issue tracker <https://github.com/KVSlab/VaMPy/issues>`_.
 

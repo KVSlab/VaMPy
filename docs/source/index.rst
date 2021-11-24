@@ -1,16 +1,15 @@
-.. title:: Aneurysm workflow
+.. title:: Vascular Modeling Pypeline
 
-=================
-Aneurysm workflow
-=================
+==========================
+Vascular Modeling Pypeline
+==========================
 
-Documentation for `Aneurysm workflow <https://github.com/KVSlab/Aneurysm_workflow>`_.
+Documentation for the `Vascular Modeling Pypeline <https://github.com/KVSlab/VaMPy>`_.
 
 .. toctree::
    :maxdepth: 2
 
    installation
    getting_started
-   tutorials
    scripts
 

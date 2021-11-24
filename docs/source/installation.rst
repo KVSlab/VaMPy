@@ -3,13 +3,13 @@
 ============
 Installation
 ============
-Aneurysm workflow is a collection of scripts to run an aneurysm problem with `Oasis <https://github.com/mikaem/Oasis>`_. There are also scripts for a variety of post-processing; WSS-based metrics, more advanced turbulence metrics, and a variety of morphological parameters. The project is accessible through
-`GitHub <https://github.com/KVSlab/Aneurysm_workflow>`_.
+The Vascular Modeling Pypeline (VaMPy) is a collection of scripts to run an aneurysm problem with `Oasis <https://github.com/mikaem/Oasis>`_. There are also scripts for a variety of post-processing; WSS-based metrics, more advanced turbulence metrics, and a variety of morphological parameters. The project is accessible through
+`GitHub <https://github.com/KVSlab/VaMPy>`_.
 
 
 Dependencies
 ============
-The general dependencies of Aneurysm workflow are
+The general dependencies of VaMPy are
 
 * VMTK 1.4.0
 * VTK 8.1.0
@@ -43,12 +43,12 @@ You can do so with the following commands::
     cd fenicstools
     pip install . 
 
-Now, all that is left is to clone the `Aneurysm_workflow` repository::
+Now, all that is left is to clone the `VaMPy` repository::
 
-    git clone https://github.com/KVSLab/Aneurysm_workflow.git
-    cd Aneurysm_workflow
+    git clone https://github.com/KVSLab/VaMPy.git
+    cd VaMPy
 
-Now you are all set, and can start using Aneurysm workflow.
+Now you are all set, and can start using the Vascular Modeling Pypeline.
 
 Known issues
 ============

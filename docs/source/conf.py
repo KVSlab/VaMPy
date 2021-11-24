@@ -27,7 +27,7 @@ sys.path.insert(0, os.path.join(workflow_root, "automatedPostProcessing"))
 
 # -- Project information -----------------------------------------------------
 
-project = 'Aneurysm workflow'
+project = 'Vascular Modeling Pypeline'
 copyright = '2021, Aslak W. Bergersen & Christophe Chnafa & Henrik A. Kjeldsberg'
 author = 'Aslak W. Bergersen & Christophe Chnafa & Henrik A. Kjeldsberg'
 
