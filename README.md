@@ -11,7 +11,7 @@
 
 Description
 -----------
-The Vascular Modeling Pypeline (VaMPy) is a collection of scripts used to prepare, run, and analyze cardiac and atrial problems.  This includes pre-processing scripts for meshing and probe sampling, a [Oasis](https://github.com/mikaem/Oasis) problem file for simulating flow in the [internal carotid artery](https://en.wikipedia.org/wiki/Internal_carotid_artery), and a variety of post-processing scripts for computing WSS-based metrics, more advanced turbulence metrics, and a variety of morphological parameters in patient-specific geometries. 
+The Vascular Modeling Pypeline (VaMPy) is a collection of scripts used to prepare, run, and analyze cardiac and atrial morphologies.  This includes pre-processing scripts for meshing and probe sampling, a [Oasis](https://github.com/mikaem/Oasis) problem file for simulating flow in the [internal carotid artery](https://en.wikipedia.org/wiki/Internal_carotid_artery), and a variety of post-processing scripts for computing WSS-based metrics, more advanced turbulence metrics, and a variety of morphological parameters in patient-specific geometries. 
 
 
 Authors
