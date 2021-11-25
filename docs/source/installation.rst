@@ -29,19 +29,14 @@ Then create two environments, one for `VMTK <http://www.vmtk.org/>`_ and one for
 
 You can then activate your environment by running ``source activate [ENVIRONMENT NAME]``.
 
-The next step is to install `Oasis <https://github.com/mikaem/Oasis>`_ and `fenicstools <https://github.com/mikaem/fenicstools/>`_.
+The next step is to install `Oasis <https://github.com/mikaem/Oasis>`_.
 You can do so with the following commands::
 
     conda activate fenics
     cd [path_to_your_installation_folder]
     git clone https://github.com/mikaem/Oasis
     cd Oasis
-    pip install .  # add "--user" if you are on a cluster, or "-e" if you are changing the Oasis source code
-    cd ..
-    pip install cppimport
-    git clone https://github.com/mikaem/fenicstools.git
-    cd fenicstools
-    pip install . 
+    pip install .  && pip install cppimport
 
 Now, all that is left is to clone the `VaMPy` repository::
 
