@@ -6,7 +6,7 @@
     <img src=test/processed_model.png width="640 height="280" alt="Output pre processing"/>
 </p>
 <p align="center">
-    Meshed aneurysm model showing inlet flow rate, outlet flow split, and probes.
+    Meshed and processed aneurysm model. Volumetric mesh (left), inlet flow rate, outlet flow split, and probes (middle), and temporal wall shear stress gradient (right).
 </p>
 
 Description
