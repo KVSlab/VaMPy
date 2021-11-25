@@ -4,9 +4,9 @@ from os import path, makedirs
 from pprint import pprint
 
 import numpy as np
-from fenicstools import Probes
 from oasis.problems.NSfracStep import *
 
+from Probe import Probes
 from Womersley import make_womersley_bcs, compute_boundary_geometry_acrn
 
 """
@@ -130,7 +130,7 @@ def create_bcs(t, NS_expressions, V, Q, area_ratio, area_inlet, mesh, mesh_path,
     boundary.set_values(boundary.array())
 
     # Read case parameters
-    parameters_file_path = mesh_path.split(".")[0] + ".json"
+    parameters_file_path = mesh_path.split(".xml")[0] + ".json"
     with open(parameters_file_path) as f:
         parameters = json.load(f)
 
@@ -214,7 +214,7 @@ def pre_solve_hook(mesh, V, Q, newfolder, mesh_path, restart_folder, velocity_de
     # Create point for evaluation
     n = FacetNormal(mesh)
     eval_dict = {}
-    rel_path = mesh_path.split(".")[0] + "_probe_point"
+    rel_path = mesh_path.split(".xml")[0] + "_probe_point"
     probe_points = np.load(rel_path, encoding='latin1', fix_imports=True, allow_pickle=True)
 
     # Store points file in checkpoint
@@ -248,7 +248,8 @@ def pre_solve_hook(mesh, V, Q, newfolder, mesh_path, restart_folder, velocity_de
     # Tstep when solutions for post processing should start being saved
     save_solution_at_tstep = int(cardiac_cycle * save_solution_after_cycle / dt)
 
-    return dict(eval_dict=eval_dict, boundary=boundary, n=n, U=U, u_mean=u_mean, u_mean0=u_mean0, u_mean1=u_mean1, u_mean2=u_mean2, save_solution_at_tstep=save_solution_at_tstep)
+    return dict(eval_dict=eval_dict, boundary=boundary, n=n, U=U, u_mean=u_mean, u_mean0=u_mean0, u_mean1=u_mean1,
+                u_mean2=u_mean2, save_solution_at_tstep=save_solution_at_tstep)
 
 
 def temporal_hook(u_, p_, mesh, tstep, save_probe_frequency, eval_dict, newfolder, id_in, id_out, boundary, n,
@@ -333,23 +334,24 @@ def temporal_hook(u_, p_, mesh, tstep, save_probe_frequency, eval_dict, newfolde
         viz_u = HDF5File(MPI.comm_world, u_path, file_mode=file_mode)
         viz_u.write(U, "/velocity", tstep)
         viz_u.close()
-    
+
         # Accumulate velocity
         u_mean0.vector().axpy(1, u_[0].vector())
         u_mean1.vector().axpy(1, u_[1].vector())
         u_mean2.vector().axpy(1, u_[2].vector())
 
-def theend_hook(u_mean, u_mean0, u_mean1, u_mean2, T, dt, save_solution_at_tstep, save_solution_frequency, **NS_namespace):
 
+def theend_hook(u_mean, u_mean0, u_mean1, u_mean2, T, dt, save_solution_at_tstep, save_solution_frequency,
+                **NS_namespace):
     # get the file path
     files = NS_parameters['files']
     u_mean_path = files["u_mean"]
 
     # divide the accumlated veloicty by the number of steps
-    NumTStepForAverage = (T/dt - save_solution_at_tstep) / save_solution_frequency + 1
-    u_mean0.vector()[:] = u_mean0.vector()[:] /  NumTStepForAverage 
-    u_mean1.vector()[:] = u_mean1.vector()[:] /  NumTStepForAverage 
-    u_mean2.vector()[:] = u_mean2.vector()[:] /  NumTStepForAverage 
+    NumTStepForAverage = (T / dt - save_solution_at_tstep) / save_solution_frequency + 1
+    u_mean0.vector()[:] = u_mean0.vector()[:] / NumTStepForAverage
+    u_mean1.vector()[:] = u_mean1.vector()[:] / NumTStepForAverage
+    u_mean2.vector()[:] = u_mean2.vector()[:] / NumTStepForAverage
 
     assign(u_mean.sub(0), u_mean0)
     assign(u_mean.sub(1), u_mean1)
