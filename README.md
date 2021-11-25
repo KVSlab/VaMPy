@@ -41,7 +41,7 @@ conda activate fenics
 cd [path_to_your_installation_folder]
 git clone https://github.com/mikaem/Oasis
 cd Oasis
-pip install .  # add "--user" if you are on a cluster, or "-e" if you are changing the Oasis source code
+pip install . && pip install cppimport # add "--user" if you are on a cluster, or "-e" if you are changing the Oasis source code
 ```
 
 Now, all that is left is to clone the `Aneurysm_workflow` repository:
