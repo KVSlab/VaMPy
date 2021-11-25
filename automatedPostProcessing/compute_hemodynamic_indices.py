@@ -190,6 +190,9 @@ def compute_hemodynamic_indices(case_path, nu, dt, velocity_degree):
     tawss.write(TAWSS)
     twssg.write(TWSSG)
 
+    print("========== Post processing finished ==========")
+    print("Results saved to: {}".format(case_path))
+
 
 def get_dabla_function():
     """
