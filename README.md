@@ -52,14 +52,7 @@ Next, you need to install [`Oasis`](https://github.com/mikaem/Oasis) and [`fenic
     conda activate fenics
     git clone https://github.com/mikaem/Oasis
     cd Oasis
-    pip install .  # add "--user" if you are on a cluster, or "-e" if you are changing the Oasis source code
-
-Similarly, `fenicstools` can be installed as follows:
-
-    git clone https://github.com/mikaem/fenicstools.git
-    cd fenicstools
-    pip install . 
-    pip install cppimport
+    pip install . && pip install cppimport # add "--user" if you are on a cluster, or "-e" if you are changing the Oasis source code
 
 Finally, you are ready to clone and use the `VaMPy` repository:
 
