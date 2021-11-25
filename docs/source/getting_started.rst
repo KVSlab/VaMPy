@@ -27,11 +27,11 @@ Computational fluid dynamics simulations in Oasis
 The next step of using the Vascular Modeling Pypeline is performing the CFD simulations with `Oasis`.
 First, activate the ``fenics`` conda environment::
 
-    conda deactivate && conda activate fenics
+    conda deactivate && conda activate fenics && cd simulation
 
 Then, to run a CFD simulation for two cycles with 10 000 time steps per cycle and default parameters with Oasis, execute the following command::
 
-    oasis NSfracStep problem=Artery mesh_path=test/Case_test_artery/artery.xml.gz
+    oasis NSfracStep problem=Artery mesh_path=../test/Case_test_artery/artery.xml.gz && cd ..
 
 Running the simulations will create the result folder ``results_artery`` (specific to the artery problem), with the results and corresponding mesh saved compactly in HDF5 format.
 
