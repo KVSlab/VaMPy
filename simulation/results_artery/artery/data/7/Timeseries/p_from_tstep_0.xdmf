@@ -1,0 +1,97 @@
+<?xml version="1.0"?>
+<!DOCTYPE Xdmf SYSTEM "Xdmf.dtd" []>
+<Xdmf Version="3.0" xmlns:xi="http://www.w3.org/2001/XInclude">
+  <Domain>
+    <Grid Name="TimeSeries_p" GridType="Collection" CollectionType="Temporal">
+      <Grid Name="mesh" GridType="Uniform">
+        <Topology NumberOfElements="159197" TopologyType="Tetrahedron" NodesPerElement="4">
+          <DataItem Dimensions="159197 4" NumberType="UInt" Format="HDF">p_from_tstep_0.h5:/Mesh/0/mesh/topology</DataItem>
+        </Topology>
+        <Geometry GeometryType="XYZ">
+          <DataItem Dimensions="28129 3" Format="HDF">p_from_tstep_0.h5:/Mesh/0/mesh/geometry</DataItem>
+        </Geometry>
+        <Time Value="10" />
+        <Attribute Name="p" AttributeType="Scalar" Center="Node">
+          <DataItem Dimensions="28129 1" Format="HDF">p_from_tstep_0.h5:/VisualisationVector/0</DataItem>
+        </Attribute>
+      </Grid>
+      <Grid>
+        <xi:include xpointer="xpointer(//Grid[@Name=&quot;TimeSeries_p&quot;]/Grid[1]/*[self::Topology or self::Geometry])" />
+        <Time Value="20" />
+        <Attribute Name="p" AttributeType="Scalar" Center="Node">
+          <DataItem Dimensions="28129 1" Format="HDF">p_from_tstep_0.h5:/VisualisationVector/1</DataItem>
+        </Attribute>
+      </Grid>
+      <Grid>
+        <xi:include xpointer="xpointer(//Grid[@Name=&quot;TimeSeries_p&quot;]/Grid[1]/*[self::Topology or self::Geometry])" />
+        <Time Value="30" />
+        <Attribute Name="p" AttributeType="Scalar" Center="Node">
+          <DataItem Dimensions="28129 1" Format="HDF">p_from_tstep_0.h5:/VisualisationVector/2</DataItem>
+        </Attribute>
+      </Grid>
+      <Grid>
+        <xi:include xpointer="xpointer(//Grid[@Name=&quot;TimeSeries_p&quot;]/Grid[1]/*[self::Topology or self::Geometry])" />
+        <Time Value="40" />
+        <Attribute Name="p" AttributeType="Scalar" Center="Node">
+          <DataItem Dimensions="28129 1" Format="HDF">p_from_tstep_0.h5:/VisualisationVector/3</DataItem>
+        </Attribute>
+      </Grid>
+      <Grid>
+        <xi:include xpointer="xpointer(//Grid[@Name=&quot;TimeSeries_p&quot;]/Grid[1]/*[self::Topology or self::Geometry])" />
+        <Time Value="50" />
+        <Attribute Name="p" AttributeType="Scalar" Center="Node">
+          <DataItem Dimensions="28129 1" Format="HDF">p_from_tstep_0.h5:/VisualisationVector/4</DataItem>
+        </Attribute>
+      </Grid>
+      <Grid>
+        <xi:include xpointer="xpointer(//Grid[@Name=&quot;TimeSeries_p&quot;]/Grid[1]/*[self::Topology or self::Geometry])" />
+        <Time Value="60" />
+        <Attribute Name="p" AttributeType="Scalar" Center="Node">
+          <DataItem Dimensions="28129 1" Format="HDF">p_from_tstep_0.h5:/VisualisationVector/5</DataItem>
+        </Attribute>
+      </Grid>
+      <Grid>
+        <xi:include xpointer="xpointer(//Grid[@Name=&quot;TimeSeries_p&quot;]/Grid[1]/*[self::Topology or self::Geometry])" />
+        <Time Value="70" />
+        <Attribute Name="p" AttributeType="Scalar" Center="Node">
+          <DataItem Dimensions="28129 1" Format="HDF">p_from_tstep_0.h5:/VisualisationVector/6</DataItem>
+        </Attribute>
+      </Grid>
+      <Grid>
+        <xi:include xpointer="xpointer(//Grid[@Name=&quot;TimeSeries_p&quot;]/Grid[1]/*[self::Topology or self::Geometry])" />
+        <Time Value="80" />
+        <Attribute Name="p" AttributeType="Scalar" Center="Node">
+          <DataItem Dimensions="28129 1" Format="HDF">p_from_tstep_0.h5:/VisualisationVector/7</DataItem>
+        </Attribute>
+      </Grid>
+      <Grid>
+        <xi:include xpointer="xpointer(//Grid[@Name=&quot;TimeSeries_p&quot;]/Grid[1]/*[self::Topology or self::Geometry])" />
+        <Time Value="90" />
+        <Attribute Name="p" AttributeType="Scalar" Center="Node">
+          <DataItem Dimensions="28129 1" Format="HDF">p_from_tstep_0.h5:/VisualisationVector/8</DataItem>
+        </Attribute>
+      </Grid>
+      <Grid>
+        <xi:include xpointer="xpointer(//Grid[@Name=&quot;TimeSeries_p&quot;]/Grid[1]/*[self::Topology or self::Geometry])" />
+        <Time Value="100" />
+        <Attribute Name="p" AttributeType="Scalar" Center="Node">
+          <DataItem Dimensions="28129 1" Format="HDF">p_from_tstep_0.h5:/VisualisationVector/9</DataItem>
+        </Attribute>
+      </Grid>
+      <Grid>
+        <xi:include xpointer="xpointer(//Grid[@Name=&quot;TimeSeries_p&quot;]/Grid[1]/*[self::Topology or self::Geometry])" />
+        <Time Value="110" />
+        <Attribute Name="p" AttributeType="Scalar" Center="Node">
+          <DataItem Dimensions="28129 1" Format="HDF">p_from_tstep_0.h5:/VisualisationVector/10</DataItem>
+        </Attribute>
+      </Grid>
+      <Grid>
+        <xi:include xpointer="xpointer(//Grid[@Name=&quot;TimeSeries_p&quot;]/Grid[1]/*[self::Topology or self::Geometry])" />
+        <Time Value="120" />
+        <Attribute Name="p" AttributeType="Scalar" Center="Node">
+          <DataItem Dimensions="28129 1" Format="HDF">p_from_tstep_0.h5:/VisualisationVector/11</DataItem>
+        </Attribute>
+      </Grid>
+    </Grid>
+  </Domain>
+</Xdmf>
