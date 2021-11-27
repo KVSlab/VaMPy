@@ -177,7 +177,9 @@ def compute_flow_and_simulation_metrics(folder, nu, dt, velocity_degree):
         # Compute both kinetic energy and turbulent kinetic energy
         assign(u0, u.sub(0))
         assign(u1, u.sub(1))
-        assign(u2, u.sub(2))
+        
+        if mesh.geometry().dim() == 3:
+            assign(u2, u.sub(2))
 
         kinetic_energy.vector().set_local(
             0.5 * (u0.vector().get_local() ** 2 + u1.vector().get_local() ** 2 + u2.vector().get_local() ** 2))
@@ -186,7 +188,9 @@ def compute_flow_and_simulation_metrics(folder, nu, dt, velocity_degree):
 
         assign(u0_prime, u_prime.sub(0))
         assign(u1_prime, u_prime.sub(1))
-        assign(u2_prime, u_prime.sub(2))
+
+        if mesh.geometry().dim() == 3:
+            assign(u2_prime, u_prime.sub(2))
 
         turbulent_kinetic_energy.vector().set_local(
             0.5 * (u0_prime.vector().get_local() ** 2
