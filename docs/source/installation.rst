@@ -56,20 +56,17 @@ Known issues
   Please change the path separation symbol to match your operating system and change ``python3.6`` to the python version you are using. If you are using Miniconda, replace `anaconda3` with `miniconda3`.
   Using this path you can run the two following lines::
 
-    sed -i -e 's/len(self.SourcePoints)\/3/len\(self.SourcePoints\)\/\/3/g' /Users/[Name]/anaconda3/envs/[your_environment]/lib/python3.6/site-packages/vmtk/vmtkcenterlines.py
-    sed -i -e 's/len(self.TargetPoints)\/3/len\(self.TargetPoints\)\/\/3/g' /Users/[Name]/anaconda3/envs/[your_environment]/lib/python3.6/site-packages/vmtk/vmtkcenterlines.py
+    sed -i -e 's/len(self.SourcePoints)\/3/len\(self.SourcePoints\)\/\/3/g' /Users/[Name]/anaconda3/envs/vmtk/lib/python3.6/site-packages/vmtk/vmtkcenterlines.py
+    sed -i -e 's/len(self.TargetPoints)\/3/len\(self.TargetPoints\)\/\/3/g' /Users/[Name]/anaconda3/envs/vmtk/lib/python3.6/site-packages/vmtk/vmtkcenterlines.py
 
   Similarly, for `vmtksurfacecurvature.py`, run the following command::
 
-    sed -i -e 's/(len(values) - 1)\/2/\(len\(values\) - 1\)\/\/2/g' /Users/[Name]/anaconda3/envs/[your_environment]/lib/python3.6/site-packages/vmtk/vmtksurfacecurvature.py
+    sed -i -e 's/(len(values) - 1)\/2/\(len\(values\) - 1\)\/\/2/g' /Users/[Name]/anaconda3/envs/vmtk/lib/python3.6/site-packages/vmtk/vmtksurfacecurvature.py
 
-  Finally, to fix the issues in `vmtkmeshwriter.py`, change line 263 to::
+  Finally, to fix the issues in `vmtkmeshwriter.py`, run the following commands::
 
-    file = open(self.OutputFileName, 'rb')
-
-  and line 267 to::
-
-    gzfile = gzip.open(self.OutputFileName, 'wb')
+    sed -i -e "s/file = open(self.OutputFileName, 'r')/file = open\(self\.OutputFileName, \'rb\'\)/g" /Users/[Name]/anaconda3/envs/vmtk/lib/python3.6/site-packages/vmtk/vmtkmeshwriter.py
+    sed -i -e "s/gzfile = gzip.open(self.OutputFileName, 'w')/gzfile = gzip\.open\(self\.OutputFileName, \'wb\'\)/g" /Users/[Name]/anaconda3/envs/vmtk/lib/python3.6/site-packages/vmtk/vmtkmeshwriter.py
 
   Please note that these changes are fixed in the development version of `VMTK`, but a new version has not been released in a while.
 
