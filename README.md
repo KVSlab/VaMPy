@@ -36,7 +36,7 @@ For detailed installation notes and an introduction to VaMPy, please refer to th
 Installation
 ------------
 For reference, VaMPy requires the following dependencies: VTK > 8.1, Numpy <= 1.13, SciPy > 1.0.0, VMTK 1.4, ITK, Paramiko, and FEniCS. 
-If you are on Windows, macOS or Linux you can install all the general dependencies through anaconda.
+If you are on Windows, macOS or Linux you can install all the general dependencies through [Anaconda](https://docs.conda.io/projects/conda/en/latest/user-guide/install/index.html).
 First install Anaconda or Miniconda (preferably the Python 3.6 version).
 Then create two environments, one for `vmtk/vtk` and one for `fenics` by executing the following in a terminal
 
