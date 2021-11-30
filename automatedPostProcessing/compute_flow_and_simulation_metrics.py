@@ -6,7 +6,10 @@ from dolfin import *
 
 from postprocessing_common import read_command_line, epsilon
 
-set_log_active(False)
+try:
+    set_log_active(False)
+except NameError:
+    pass
 
 
 def compute_flow_and_simulation_metrics(folder, nu, dt, velocity_degree):
