@@ -34,25 +34,19 @@ def apply_vmtk_hotfixes(username, anaconda_version="miniconda3", conda_environme
     print("=== Editing VMTK files located in: {} ".format(
         path.join(install_path, centerlines_path.rsplit("vmtk", 1)[0])))
 
-    system("""sed -i -e 's/len(self.SourcePoints)\/3/len\(self.SourcePoints\)\/\/3/g' {}""".format(path1))
-    system("""sed -i -e 's/len(self.TargetPoints)\/3/len\(self.TargetPoints\)\/\/3/g' {}""".format(path1))
-    system("""sed -i -e 's/(len(values) - 1)\/2/\(len\(values\) - 1\)\/\/2/g' {}""".format(path2))
+    system("""sed -i 's/len(self.SourcePoints)\/3/len\(self.SourcePoints\)\/\/3/g' {}""".format(path1))
+    system("""sed -i 's/len(self.TargetPoints)\/3/len\(self.TargetPoints\)\/\/3/g' {}""".format(path1))
+    system("""sed -i 's/(len(values) - 1)\/2/\(len\(values\) - 1\)\/\/2/g' {}""".format(path2))
     system(
-        """sed -i -e "s/file = open(self.OutputFileName, 'r')/file = open\(self\.OutputFileName, \'rb\'\)/g" {}""".format(
+        """sed -i "s/file = open(self.OutputFileName, 'r')/file = open\(self\.OutputFileName, \'rb\'\)/g" {}""".format(
             path3))
     system(
-        """sed -i -e "s/gzfile = gzip.open(self.OutputFileName, 'w')/gzfile = gzip\.open\(self\.OutputFileName, \'wb\'\)/g" {}""".format(
+        r"""sed -i "s/gzfile = gzip.open(self.OutputFileName, 'w')/gzfile = gzip\.open\(self\.OutputFileName, \'wb\'\)/g" {}""".format(
             path3))
 
 
 if __name__ == "__main__":
-    print('Enter your PC/Mac/Linux username:')
-    username = input()
-    print('Enter Anaconda version: (anaconda, miniconda):')
-    anaconda_version = input()
-    print('Enter Anaconda environment (default is: vmtk):')
-    anaconda_environment = input()
-    if anaconda_environment == '':
-        anaconda_environment = "vmtk"
-
+    username="henrik"
+    anaconda_version="miniconda"
+    anaconda_environment = "vmtktest"
     apply_vmtk_hotfixes(username, anaconda_version, anaconda_environment)
