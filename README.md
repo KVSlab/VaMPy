@@ -33,6 +33,7 @@ and line 267 to
 ```
 gzfile = gzip.open(self.OutputFileName, 'wb')
 ```
+Alternatively, run the script `apply_vmtk_hotfixes.py`, which will automatically apply the required changes.
 Please note that these changes are fixed in the development version of vmtk, but a new version has not been released in a long time.
 
 Now, you need to install [`Oasis`](https://github.com/mikaem/Oasis). You can do so with the following commands:
