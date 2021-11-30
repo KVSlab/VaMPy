@@ -3,7 +3,7 @@
 ============
 Installation
 ============
-The Vascular Modeling Pypeline (VaMPy) is a collection of scripts to run an aneurysm problem with `Oasis <https://github.com/mikaem/Oasis>`_. There are also scripts for a variety of post-processing; WSS-based metrics, more advanced turbulence metrics, and a variety of morphological parameters. The project is accessible through
+The Vascular Modeling Pypeline (VaMPy) is a collection of scripts used to prepare, run, and analyze cardiac and atrial morphologies.  This includes pre-processing scripts for meshing and probe sampling, a `Oasis <https://github.com/mikaem/Oasis>`_ problem file for simulating flow in the `internal carotid artery <https://en.wikipedia.org/wiki/Internal_carotid_artery>`_, and a variety of post-processing scripts for computing WSS-based metrics, more advanced turbulence metrics, and a variety of morphological parameters in patient-specific geometries. The project is accessible through
 `GitHub <https://github.com/KVSlab/VaMPy>`_.
 
 
@@ -16,7 +16,7 @@ The general dependencies of VaMPy are
 * Numpy <= 1.13
 * SciPy 1.1.0
 * Paramiko
-* Python (2.7 or >=3.5)
+* Python >=3.5
 
 Basic Installation
 ==================

@@ -51,4 +51,5 @@ if __name__ == "__main__":
     anaconda_environment = input()
     if anaconda_environment == '':
         anaconda_environment = "vmtk"
+
     apply_vmtk_hotfixes(username, anaconda_version, anaconda_environment)
