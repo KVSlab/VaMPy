@@ -48,7 +48,11 @@ Now you are all set, and can start using the Vascular Modeling Pypeline.
 Known issues
 ============
 
-.. WARNING:: The `VMTK` version 1.4, the one currently distributed with Anaconda, has a Python3 bug in `vmtkcenterlines`, `vmtksurfacecurvature`, and `vmtkmeshwriter`. As a workaround you have to change these files. To find out where they are located you can use the ``which`` command  while in the ``vmtk`` environment. For `vmtkcenterlines` you can use the following command::
+.. WARNING:: The `VMTK` version 1.4, the one currently distributed with Anaconda, has a Python3 bug in `vmtkcenterlines`, `vmtksurfacecurvature`, and `vmtkmeshwriter`. As a workaround you have to change these files. We have provided the script `apply_vmtk_hotfixes.py`, which will automatically edit the files for you, provided your local username, Anaconda version and environment name. The script may be executed with the following command::
+
+    python apply_vmtk_hotfixes.py
+
+Alternatively, you may edit them manually. To find out where they are located you can use the ``which`` command  while in the ``vmtk`` environment. For `vmtkcenterlines` you can use the following command::
   
     which vmtkcenterlines
 
@@ -56,17 +60,16 @@ Known issues
   Please change the path separation symbol to match your operating system and change ``python3.6`` to the python version you are using. If you are using Miniconda, replace `anaconda3` with `miniconda3`.
   Using this path you can run the two following lines::
 
-    sed -i -e 's/len(self.SourcePoints)\/3/len\(self.SourcePoints\)\/\/3/g' /Users/[Name]/anaconda3/envs/vmtk/lib/python3.6/site-packages/vmtk/vmtkcenterlines.py
-    sed -i -e 's/len(self.TargetPoints)\/3/len\(self.TargetPoints\)\/\/3/g' /Users/[Name]/anaconda3/envs/vmtk/lib/python3.6/site-packages/vmtk/vmtkcenterlines.py
+    sed -i -e 's/len(self.SourcePoints)\/3/len\(self.SourcePoints\)\/\/3/g' /Users/[Username]/anaconda3/envs/vmtk/lib/python3.6/site-packages/vmtk/vmtkcenterlines.py
+    sed -i -e 's/len(self.TargetPoints)\/3/len\(self.TargetPoints\)\/\/3/g' /Users/[Username]/anaconda3/envs/vmtk/lib/python3.6/site-packages/vmtk/vmtkcenterlines.py
 
   Similarly, for `vmtksurfacecurvature.py`, run the following command::
 
-    sed -i -e 's/(len(values) - 1)\/2/\(len\(values\) - 1\)\/\/2/g' /Users/[Name]/anaconda3/envs/vmtk/lib/python3.6/site-packages/vmtk/vmtksurfacecurvature.py
+    sed -i -e 's/(len(values) - 1)\/2/\(len\(values\) - 1\)\/\/2/g' /Users/[Username]/anaconda3/envs/vmtk/lib/python3.6/site-packages/vmtk/vmtksurfacecurvature.py
 
-  Finally, to fix the issues in `vmtkmeshwriter.py`, run the following commands::
+  Finally, to fix the issue in `vmtkmeshwriter.py`, run the following command::
 
-    sed -i -e "s/file = open(self.OutputFileName, 'r')/file = open\(self\.OutputFileName, \'rb\'\)/g" /Users/[Name]/anaconda3/envs/vmtk/lib/python3.6/site-packages/vmtk/vmtkmeshwriter.py
-    sed -i -e "s/gzfile = gzip.open(self.OutputFileName, 'w')/gzfile = gzip\.open\(self\.OutputFileName, \'wb\'\)/g" /Users/[Name]/anaconda3/envs/vmtk/lib/python3.6/site-packages/vmtk/vmtkmeshwriter.py
+    sed -i -e "s/file = open(self.OutputFileName, 'r')/file = open\(self\.OutputFileName, \'rb\'\)/g" /Users/[Username]/anaconda3/envs/vmtk/lib/python3.6/site-packages/vmtk/vmtkmeshwriter.py
 
   Please note that these changes are fixed in the development version of `VMTK`, but a new version has not been released in a while.
 

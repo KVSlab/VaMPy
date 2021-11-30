@@ -43,7 +43,7 @@ Then create two environments, one for `vmtk/vtk` and one for `fenics` by executi
     conda create -n vmtk -c vmtk python=3.6 itk vtk vmtk paramiko
     conda create -n fenics -c conda-forge fenics
 
-You might run into a problem with VMTK 1.4 if using Python 3, or if you are a Linux user, and have therefore provided a set of temporary fixes for these known issues [here](https://vampy.readthedocs.io/en/latest/installation.html#known-issues).
+You might run into a problem with VMTK 1.4 if using Python 3, or if you are a Linux user, and we have therefore provided a set of temporary fixes for these known issues [here](https://vampy.readthedocs.io/en/latest/installation.html#known-issues).
 
 Next, you need to install [`Oasis`](https://github.com/mikaem/Oasis). You can do so with the following commands:
 
