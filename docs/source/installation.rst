@@ -53,7 +53,7 @@ Known issues
 
     python apply_vmtk_hotfixes.py
 
-Alternatively, you may edit them manually. To find out where they are located you can use the ``which`` command  while in the ``vmtk`` environment. For `vmtkcenterlines` you can use the following command::
+  Alternatively, you may edit them manually. To find out where they are located you can use the ``which`` command  while in the ``vmtk`` environment. For `vmtkcenterlines` you can use the following command::
   
     which vmtkcenterlines
 
