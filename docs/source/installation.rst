@@ -28,7 +28,7 @@ Then create two environments, one for `VMTK <http://www.vmtk.org/>`_ and one for
     conda create -n fenics -c conda-forge fenics
 
 You can then activate your environment by running ``source activate [ENVIRONMENT NAME]``.
-Windows user may need to install FEniCS as described `here <https://fenicsproject.org/download/>`_.
+Windows users may need to install FEniCS as described `here <https://fenicsproject.org/download/>`_.
 
 The next step is to install `Oasis <https://github.com/mikaem/Oasis>`_.
 You can do so with the following commands::
@@ -37,7 +37,7 @@ You can do so with the following commands::
     cd [path_to_your_installation_folder]
     git clone https://github.com/mikaem/Oasis
     cd Oasis
-    pip install .  && pip install cppimport # add "--user" if you are on a cluster, or "-e" if you are changing the Oasis source code
+    pip install .  && pip install cppimport
 
 Now, all that is left is to clone the `VaMPy` repository::
 
@@ -49,11 +49,11 @@ Now you are all set, and can start using the Vascular Modeling Pypeline.
 Known issues
 ============
 
-.. WARNING:: The `VMTK` version 1.4, the one currently distributed with Anaconda, has a Python3 bug in `vmtkcenterlines`, `vmtksurfacecurvature`, and `vmtkmeshwriter`. As a workaround you have to change these files. We have provided the script `apply_vmtk_hotfixes.py`, which will automatically edit the files for you, provided your local username, Anaconda version and environment name. The script may be executed with the following command::
+.. WARNING:: The `VMTK` version 1.4, the one currently distributed with Anaconda, has a Python3 bug in ``vmtkcenterlines.py``, ``vmtksurfacecurvature.py``, and ``vmtkmeshwriter.py``. As a workaround you have to change these files. We have provided the script ``apply_vmtk_hotfixes.py``, which will automatically edit the files for you, provided you enter your local username, Anaconda version and environment name. The script may be executed with the following command::
 
     python apply_vmtk_hotfixes.py
 
-  Alternatively, you may edit them manually. To find out where they are located you can use the ``which`` command  while in the ``vmtk`` environment. For `vmtkcenterlines` you can use the following command::
+  Alternatively, you may edit the files manually. To find out where they are located you can use the ``which`` command  while in the ``vmtk`` environment. For `vmtkcenterlines` you can use the following command::
   
     which vmtkcenterlines
 
@@ -70,7 +70,7 @@ Known issues
 
   Finally, to fix the issue in `vmtkmeshwriter.py`, run the following command::
 
-    sed -i -e "s/file = open(self.OutputFileName, 'r')/file = open\(self\.OutputFileName, \'rb\'\)/g" /Users/[Username]/anaconda3/envs/vmtk/lib/python3.6/site-packages/vmtk/vmtkmeshwriter.py
+    sed -i -e -r "s/file = open\(self\.OutputFileName, ?\'r\'\)/file = open\(self\.OutputFileName, \'rb\'\)/g" /Users/[Username]/anaconda3/envs/vmtk/lib/python3.6/site-packages/vmtk/vmtkmeshwriter.py
 
   Please note that these changes are fixed in the development version of `VMTK`, but a new version has not been released in a while.
 
@@ -96,7 +96,7 @@ Known issues
 
   Install `VTK` 8.1.0 from the official Anaconda channel::
 
-    conda install -c anaconda vtk
+    conda install -c anaconda vtk=8.1.0
 
   Finally, install `VMTK` again::
 
