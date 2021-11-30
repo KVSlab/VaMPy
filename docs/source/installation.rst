@@ -37,7 +37,7 @@ You can do so with the following commands::
     cd [path_to_your_installation_folder]
     git clone https://github.com/mikaem/Oasis
     cd Oasis
-    pip install .  && pip install cppimport
+    pip install cppimport && pip install . 
 
 Now, all that is left is to clone the `VaMPy` repository::
 
