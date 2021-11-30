@@ -35,21 +35,16 @@ gzfile = gzip.open(self.OutputFileName, 'wb')
 ```
 Please note that these changes are fixed in the development version of vmtk, but a new version has not been released in a long time.
 
-Now, you need to install [`Oasis`](https://github.com/mikaem/Oasis) and [`fenicstools`](https://github.com/mikaem/fenicstools/). You can do so with the following commands:
+Now, you need to install [`Oasis`](https://github.com/mikaem/Oasis). You can do so with the following commands:
 ```
 conda activate fenics
 cd [path_to_your_installation_folder]
 git clone https://github.com/mikaem/Oasis
 cd Oasis
-pip install .  # add "--user" if you are on a cluster, or "-e" if you are changing the Oasis source code
-cd ..
-pip install cppimport
-git clone https://github.com/mikaem/fenicstools.git
-cd fenicstools
-pip install . 
+pip install . && pip install cppimport # add "--user" if you are on a cluster, or "-e" if you are changing the Oasis source code
 ```
 
-If you have a cleaner install instruction please edit the above. Now, all that is left is to clone the `Aneurysm_workflow` repository:
+Now, all that is left is to clone the `Aneurysm_workflow` repository:
 ```
 git clone https://github.com/KVSLab/Aneurysm_workflow.git
 cd Aneurysm_workflow
@@ -65,8 +60,8 @@ python automatedPreProcessing/automatedPreProcessing.py -m diameter -i test/Case
 
 Then run a CFD simulation for two cycles with 10 000 time steps per cycle and default parameters with Oasis:
 ```
-conda deactivate && conda activate fenics
-oasis NSfracStep problem=Artery mesh_path=test/Case_test_artery/artery.xml.gz
+conda deactivate && conda activate fenics && cd simulation
+oasis NSfracStep problem=Artery mesh_path=../test/Case_test_artery/artery.xml.gz && cd ..
 ```
 
 Finally, you can create the WSS from the CFD simulation:

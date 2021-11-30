@@ -42,10 +42,7 @@ install:
   - sed -i -e 's/(len(values) - 1)\/2/\(len\(values\) - 1\)\/\/2/g' ../../../miniconda/envs/morphmanEnv/lib/python3.6/site-packages/vmtk/vmtksurfacecurvature.py
 
   # Dependencies for code coverage and plotting
-  - pip install pytest-cov codecov matplotlib
-  - pip install -U numpy
-  - pip install -U scipy
-
+  - pip install pytest-cov codecov
 
 
 script:
