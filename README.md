@@ -29,10 +29,6 @@ You might run into a problem with vmtk (1.4) if using python 3. To fix this, ple
 ```
 file = open(self.OutputFileName, 'rb')
 ````
-and line 267 to
-```
-gzfile = gzip.open(self.OutputFileName, 'wb')
-```
 Alternatively, run the script `apply_vmtk_hotfixes.py`, which will automatically apply the required changes.
 Please note that these changes are fixed in the development version of vmtk, but a new version has not been released in a long time.
 
