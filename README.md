@@ -1,6 +1,7 @@
 ## VaMPy - Vascular Modeling Pypeline
 [![Build Status](https://travis-ci.com/KVSlab/Aneurysm_workflow.svg?token=qbve9tcy6am6sUJksBcu&branch=master)](https://travis-ci.com/KVSlab/Aneurysm_workflow)
-[![codecov](https://codecov.io/gh/KVSlab/Aneurysm_workflow/branch/master/graph/badge.svg?token=M2NMX6HOSZ)](https://codecov.io/gh/KVSlab/Aneurysm_workflow)
+[![codecov](https://codecov.io/gh/KVSlab/VaMPy/branch/master/graph/badge.svg?token=M2NMX6HOSZ)](https://codecov.io/gh/KVSlab/VaMPy)
+[![Documentation Status](https://readthedocs.org/projects/vampy/badge/?version=latest)](https://vampy.readthedocs.io/en/latest/?badge=latest)
 
 <p align="center">
     <img src=test/processed_model.png width="830 height="370" alt="Output pre processing"/>
