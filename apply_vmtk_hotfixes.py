@@ -37,13 +37,12 @@ def apply_vmtk_hotfixes(username, anaconda_version="miniconda3", conda_environme
     system("""sed -i 's/len(self.SourcePoints)\/3/len\(self.SourcePoints\)\/\/3/g' {}""".format(path1))
     system("""sed -i 's/len(self.TargetPoints)\/3/len\(self.TargetPoints\)\/\/3/g' {}""".format(path1))
     system("""sed -i 's/(len(values) - 1)\/2/\(len\(values\) - 1\)\/\/2/g' {}""".format(path2))
-    for space in ['', ' ']:
-        system(
-            """sed -i "s/file = open(self.OutputFileName,{}'r')/file = open\(self\.OutputFileName, \'rb\'\)/g" {}""".format(
-                space, path3))
-        system(
-            r"""sed -i "s/gzfile = gzip.open(self.OutputFileName,{}'w')/gzfile = gzip\.open\(self\.OutputFileName, \'wb\'\)/g" {}""".format(
-                space, path3))
+    system(
+        """sed -i "s/file = open(self.OutputFileName,'r')/file = open\(self\.OutputFileName, \'rb\'\)/g" {}""".format(
+            path3))
+    system(
+        """sed -i "s/file = open(self.OutputFileName, 'r')/file = open\(self\.OutputFileName, \'rb\'\)/g" {}""".format(
+            path3))
 
 
 if __name__ == "__main__":
