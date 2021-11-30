@@ -46,7 +46,7 @@ def apply_vmtk_hotfixes(username, anaconda_version="miniconda3", conda_environme
 
 
 if __name__ == "__main__":
-    print('Enter your username:')
+    print('Enter your PC/Mac/Linux username:')
     username = input()
     print('Enter Anaconda version: (anaconda, miniconda):')
     anaconda_version = input()
