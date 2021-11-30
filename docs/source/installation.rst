@@ -15,8 +15,8 @@ The general dependencies of VaMPy are
 * VTK 8.1.0
 * Numpy <= 1.13
 * SciPy 1.1.0
+* Paramiko
 * Python (2.7 or >=3.5)
-
 
 Basic Installation
 ==================
@@ -28,6 +28,7 @@ Then create two environments, one for `VMTK <http://www.vmtk.org/>`_ and one for
     conda create -n fenics -c conda-forge fenics
 
 You can then activate your environment by running ``source activate [ENVIRONMENT NAME]``.
+Windows user may need to install FEniCS as described `here <https://fenicsproject.org/download/>`_.
 
 The next step is to install `Oasis <https://github.com/mikaem/Oasis>`_.
 You can do so with the following commands::
@@ -36,7 +37,7 @@ You can do so with the following commands::
     cd [path_to_your_installation_folder]
     git clone https://github.com/mikaem/Oasis
     cd Oasis
-    pip install .  && pip install cppimport
+    pip install .  && pip install cppimport # add "--user" if you are on a cluster, or "-e" if you are changing the Oasis source code
 
 Now, all that is left is to clone the `VaMPy` repository::
 
