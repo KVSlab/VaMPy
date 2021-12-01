@@ -53,7 +53,7 @@ Next, you need to install [`Oasis`](https://github.com/mikaem/Oasis). You can do
     cd Oasis
     pip install . && pip install cppimport 
 
-Finally, you are ready to clone and use the `VaMPy` repository:
+Finally, you are ready to clone and use the Vascular Modeling Pypeline:
 
     git clone https://github.com/KVSLab/VaMPy.git
     cd VaMPy
