@@ -38,12 +38,15 @@ def apply_vmtk_hotfixes(username, anaconda_version="miniconda3", conda_environme
 
     print("=== Editing VMTK files located in: {} ".format(
         path.join(install_path, centerlines_path.rsplit("vmtk", 1)[0])))
-    print(path3)
+
     system("""sed -i -e 's/len(self.SourcePoints)\/3/len\(self.SourcePoints\)\/\/3/g' {}""".format(path1))
     system("""sed -i -e 's/len(self.TargetPoints)\/3/len\(self.TargetPoints\)\/\/3/g' {}""".format(path1))
     system("""sed -i -e 's/(len(values) - 1)\/2/\(len\(values\) - 1\)\/\/2/g' {}""".format(path2))
     system(
-        """sed -i -e -r "s/file = open\(self\.OutputFileName, ?\'r\'\)/file = open\(self\.OutputFileName, \'rb\'\)/g" {}""".format(
+        """sed -i -e "s/file = open(self.OutputFileName,'r')/file = open\(self\.OutputFileName, \'rb\'\)/g" {}""".format(
+            path3))
+    system(
+        """sed -i -e "s/file = open(self.OutputFileName, 'r')/file = open\(self\.OutputFileName, \'rb\'\)/g" {}""".format(
             path3))
 
 
