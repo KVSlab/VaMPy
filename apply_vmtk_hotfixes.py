@@ -19,13 +19,18 @@ def apply_vmtk_hotfixes(username, anaconda_version="miniconda3", conda_environme
     elif platform == "win32":
         install_path = r"C:\Users\{}\{}3".format(username, anaconda_version.capitalize())
 
-    centerlines_path = r"envs/{}/lib/python3.6/site-packages/vmtk/vmtkcenterlines.py".format(conda_environment)
-    curvature_path = r"envs/{}/lib/python3.6/site-packages/vmtk/vmtksurfacecurvature.py".format(conda_environment)
-    writer_path = r"envs/{}/lib/python3.6/site-packages/vmtk/vmtkmeshwriter.py".format(conda_environment)
     if platform == "win32":
-        centerlines_path = centerlines_path.replace(r"/", r"\\")
-        curvature_path = curvature_path.replace(r"/", r"\\")
-        writer_path = writer_path.replace(r"/", r"\\")
+        vmtk_path = "envs/{}/Lib/site-packages/vmtk"
+    else:
+        vmtk_path = "envs/{}/lib/python3.6/site-packages/vmtk"
+
+    centerlines_path = path.join(vmtk_path.format(conda_environment), "vmtkcenterlines.py")
+    curvature_path = path.join(vmtk_path.format(conda_environment), "vmtksurfacecurvature.py")
+    writer_path = path.join(vmtk_path.format(conda_environment), "vmtkmeshwriter.py")
+    if platform == "win32":
+        centerlines_path = centerlines_path.replace("/", "\\")
+        curvature_path = curvature_path.replace("/", "\\")
+        writer_path = writer_path.replace("/", "\\")
 
     path1 = path.join(install_path, centerlines_path)
     path2 = path.join(install_path, curvature_path)
@@ -33,12 +38,15 @@ def apply_vmtk_hotfixes(username, anaconda_version="miniconda3", conda_environme
 
     print("=== Editing VMTK files located in: {} ".format(
         path.join(install_path, centerlines_path.rsplit("vmtk", 1)[0])))
-    print(path3)
+
     system("""sed -i -e 's/len(self.SourcePoints)\/3/len\(self.SourcePoints\)\/\/3/g' {}""".format(path1))
     system("""sed -i -e 's/len(self.TargetPoints)\/3/len\(self.TargetPoints\)\/\/3/g' {}""".format(path1))
     system("""sed -i -e 's/(len(values) - 1)\/2/\(len\(values\) - 1\)\/\/2/g' {}""".format(path2))
     system(
-        """sed -i -e -r "s/file = open\(self\.OutputFileName, ?\'r\'\)/file = open\(self\.OutputFileName, \'rb\'\)/g" {}""".format(
+        """sed -i -e "s/file = open(self.OutputFileName,'r')/file = open\(self\.OutputFileName, \'rb\'\)/g" {}""".format(
+            path3))
+    system(
+        """sed -i -e "s/file = open(self.OutputFileName, 'r')/file = open\(self\.OutputFileName, \'rb\'\)/g" {}""".format(
             path3))
 
 
