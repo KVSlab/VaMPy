@@ -11,9 +11,9 @@ Finally, there are a variety of post-processing scripts, which computes wall she
 Pre-processing: Meshing and boundary conditions
 ===============================================
 The first step of using the Vascular Modeling Pypeline is pre-processing. The pre-processing scripts are located inside the ``automatedPreProcessing`` folder, and we will be executing the ``automatedPreProcessing.py`` script to generate a mesh, boundary conditions, and probes for velocity and pressure sampling. Here we will perform pre-processing for the artery case located in the ``test`` folder.
-Start by entering the ``vmtk`` conda environment::
+Start by entering the ``morphman`` conda environment::
 
-    conda deactivate && conda activate vmtk
+    conda deactivate && conda activate morphman
 
 Then, to perform meshing, execute the following command::
 

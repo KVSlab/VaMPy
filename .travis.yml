@@ -24,21 +24,21 @@ install:
   # Set conda parameters
   - conda config --set restore_free_channel true
   - conda config --set always_yes yes --set changeps1 no
-  - conda config --add channels vmtk
+  - conda config --add channels morphman
 
   # Set up environment
-  - conda create -n vmtk_env vmtk pytest itk vtk llvm=3.3 paramiko
+  - conda create -n morphman morphman pytest llvm=3.3 paramiko
 
   # Activate environment
-  - source activate vmtk_env
+  - source activate morphman
 
   # Useful for debugging any issues with conda
   - conda info -a
 
   # / -> // in vmtkcenterlines.py and vmtksurfacecurvature.py
-  - sed -i -e 's/len(self.SourcePoints)\/3/len\(self.SourcePoints\)\/\/3/g' ../../../miniconda/envs/vmtk_env/lib/python3.6/site-packages/vmtk/vmtkcenterlines.py
-  - sed -i -e 's/len(self.TargetPoints)\/3/len\(self.TargetPoints\)\/\/3/g' ../../../miniconda/envs/vmtk_env/lib/python3.6/site-packages/vmtk/vmtkcenterlines.py
-  - sed -i -e 's/(len(values) - 1)\/2/\(len\(values\) - 1\)\/\/2/g' ../../../miniconda/envs/vmtk_env/lib/python3.6/site-packages/vmtk/vmtksurfacecurvature.py
+  - sed -i -e 's/len(self.SourcePoints)\/3/len\(self.SourcePoints\)\/\/3/g' ../../../miniconda/envs/morphman/lib/python3.6/site-packages/vmtk/vmtkcenterlines.py
+  - sed -i -e 's/len(self.TargetPoints)\/3/len\(self.TargetPoints\)\/\/3/g' ../../../miniconda/envs/morphman/lib/python3.6/site-packages/vmtk/vmtkcenterlines.py
+  - sed -i -e 's/(len(values) - 1)\/2/\(len\(values\) - 1\)\/\/2/g' ../../../miniconda/envs/morphman/lib/python3.6/site-packages/vmtk/vmtksurfacecurvature.py
 
   # Dependencies for code coverage and plotting
   - pip install pytest-cov codecov

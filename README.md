@@ -36,15 +36,15 @@ For detailed installation notes and an introduction to VaMPy, please refer to th
 
 Installation
 ------------
-For reference, VaMPy requires the following dependencies: VTK > 8.1, Numpy <= 1.13, SciPy > 1.0.0, VMTK 1.4, ITK, Paramiko, and FEniCS. 
+For reference, VaMPy requires the following dependencies: morphMan, FEniCS, and Paramiko. 
 If you are on Windows, macOS or Linux you can install all the general dependencies through [Anaconda](https://docs.conda.io/projects/conda/en/latest/user-guide/install/index.html).
 First install Anaconda or Miniconda (preferably the Python 3.6 version).
-Then create two environments, one for `VMTK` and one for `FEniCS` by executing the following in a terminal
+Then create two environments, one for `morphMan` and one for `FEniCS` by executing the following in a terminal
 
-    conda create -n vmtk -c vmtk python=3.6 itk vtk vmtk paramiko
+    conda create -n morphman -c morphman python=3.6 paramiko
     conda create -n fenics -c conda-forge fenics
 
-You might run into a problem with VMTK 1.4 if using Python 3, or if you are a Linux user, and we have therefore provided a set of temporary fixes for these known issues [here](https://vampy.readthedocs.io/en/latest/installation.html#known-issues).
+You might run into a problem with the `morphMan` dependency `VMTK` 1.4 if using Python 3, or if you are a Linux user, and we have therefore provided a set of temporary fixes for these known issues [here](https://vampy.readthedocs.io/en/latest/installation.html#known-issues).
 
 Next, you need to install [`Oasis`](https://github.com/mikaem/Oasis). You can do so with the following commands:
 

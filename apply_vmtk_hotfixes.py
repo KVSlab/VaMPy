@@ -51,9 +51,9 @@ if __name__ == "__main__":
     username = input()
     print('Enter Anaconda version: (anaconda, miniconda):')
     anaconda_version = input()
-    print('Enter Anaconda environment (default is: vmtk):')
+    print('Enter Anaconda environment (default is: morphman):')
     anaconda_environment = input()
     if anaconda_environment == '':
-        anaconda_environment = "vmtk"
+        anaconda_environment = "morphman"
 
     apply_vmtk_hotfixes(username, anaconda_version, anaconda_environment)
