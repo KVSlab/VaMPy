@@ -235,7 +235,7 @@ def run_pre_processing(filename_model, verbose_print, smoothing_method, smoothin
     else:
         surface_extended = surface
 
-    # Smooth and capp surface with flow extensions
+    # Capp surface with flow extensions
     capped_surface = vmtk_cap_polydata(surface_extended)
 
     # Get new centerlines with the flow extensions
