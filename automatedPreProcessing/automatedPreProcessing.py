@@ -98,12 +98,9 @@ def run_pre_processing(filename_model, verbose_print, smoothing_method, smoothin
     # Get centerlines
     print("--- Get centerlines\n")
     inlet, outlets = get_centers_for_meshing(surface, is_atrium, path.join(dir_path, case_name))
-    if is_atrium:
-        source = outlets
-        target = inlet
-    else:
-        source = inlet
-        target = outlets
+    source = outlets if is_atrium else inlet
+    target = inlet if is_atrium else outlets
+
     centerlines, _, _ = compute_centerlines(source, target, file_name_centerlines, capped_surface, resampling=0.1)
     tol = get_centerline_tolerance(centerlines)
 
@@ -249,12 +246,8 @@ def run_pre_processing(filename_model, verbose_print, smoothing_method, smoothin
             inlet, outlets = get_centers_for_meshing(surface_extended, is_atrium, path.join(dir_path, case_name),
                                                      flowext=True)
             # FIXME: There are several inlets and one outlet for atrium case
-            if is_atrium:
-                source = outlets
-                target = inlet
-            else:
-                source = inlet
-                target = outlets
+            source = outlets if is_atrium else inlet
+            target = inlet if is_atrium else outlets
             centerlines, _, _ = compute_centerlines(source, target, file_name_flow_centerlines, capped_surface,
                                                     resampling=0.1)
 
