@@ -37,6 +37,16 @@ version = vtk.vtkVersion().GetVTKMajorVersion()
 
 
 def get_regions_to_refine(surface, provided_points, dir_path):
+    """
+
+    Args:
+        surface:
+        provided_points:
+        dir_path:
+
+    Returns:
+
+    """
     # Check if info exists
     if not path.isfile(path.join(dir_path, dir_path + ".txt")):
         provide_region_points(surface, provided_points, dir_path)
@@ -263,6 +273,19 @@ def get_centers_for_meshing(surface, atrium_present, dir_path, flowext=False):
 
 
 def dist_sphere_curv(surface, centerlines, sac_center, misr_max, fileName, factor):
+    """
+
+    Args:
+        surface:
+        centerlines:
+        sac_center:
+        misr_max:
+        fileName:
+        factor:
+
+    Returns:
+
+    """
     # Get longest centerline
     length = []
     for i in range(centerlines.GetNumberOfLines()):
@@ -335,6 +358,19 @@ def dist_sphere_curv(surface, centerlines, sac_center, misr_max, fileName, facto
 
 
 def dist_sphere_constant(surface, centerlines, sac_center, misr_max, fileName, edge_length):
+    """
+
+    Args:
+        surface:
+        centerlines:
+        sac_center:
+        misr_max:
+        fileName:
+        edge_length:
+
+    Returns:
+
+    """
     # Constant meshing method with possible refined area.
     # --- Compute the distanceToCenterlines
     distTocenterlines = vmtkscripts.vmtkDistanceToCenterlines()
@@ -364,6 +400,19 @@ def dist_sphere_constant(surface, centerlines, sac_center, misr_max, fileName, e
 
 
 def dist_sphere_diam(surface, centerlines, sac_center, misr_max, fileName, factor):
+    """
+
+    Args:
+        surface:
+        centerlines:
+        sac_center:
+        misr_max:
+        fileName:
+        factor:
+
+    Returns:
+
+    """
     # Meshing method following Owais way.
     # --- Compute the distanceToCenterlines
     distTocenterlines = vmtkscripts.vmtkDistanceToCenterlines()
@@ -404,6 +453,14 @@ def dist_sphere_diam(surface, centerlines, sac_center, misr_max, fileName, facto
 
 
 def mesh_alternative(surface):
+    """
+
+    Args:
+        surface:
+
+    Returns:
+
+    """
     print("--- Meshing failed.")
     print("--- Proceeding with surface smooting and meshing.")
     surface = vmtk_smooth_surface(surface, "laplace", iterations=500)
@@ -421,6 +478,21 @@ def compute_distance_to_sphere(surface, centerSphere, radiusSphere=0.0,
                                distanceOffset=0.0, distanceScale=0.01,
                                minDistance=0.2, maxDistance=0.3,
                                distanceToSpheresArrayName="DistanceToSpheres"):
+    """
+
+    Args:
+        surface:
+        centerSphere:
+        radiusSphere:
+        distanceOffset:
+        distanceScale:
+        minDistance:
+        maxDistance:
+        distanceToSpheresArrayName:
+
+    Returns:
+
+    """
     # Check if there allready exists a distance to spheres
     N = surface.GetNumberOfPoints()
     number, names = get_number_of_arrays(surface)
@@ -462,6 +534,14 @@ def compute_distance_to_sphere(surface, centerSphere, radiusSphere=0.0,
 
 
 def generate_mesh(surface):
+    """
+
+    Args:
+        surface:
+
+    Returns:
+
+    """
     # Compute the mesh.
     meshGenerator = vmtkscripts.vmtkMeshGenerator()
     meshGenerator.Surface = surface
@@ -489,6 +569,19 @@ def generate_mesh(surface):
 
 
 def find_boundaries(model_path, mean_inflow_rate, network, polyDataVolMesh, verbose_print, is_atrium):
+    """
+
+    Args:
+        model_path:
+        mean_inflow_rate:
+        network:
+        polyDataVolMesh:
+        verbose_print:
+        is_atrium:
+
+    Returns:
+
+    """
     # Extract the surface mesh of the wall
     wallMesh = vtk_compute_threshold(polyDataVolMesh, "CellEntityIds", lower=0.5, upper=1.5)
     boundaryReferenceSystems = vmtkscripts.vmtkBoundaryReferenceSystems()
@@ -561,6 +654,17 @@ def find_boundaries(model_path, mean_inflow_rate, network, polyDataVolMesh, verb
 
 
 def setup_model_network(centerlines, file_name_probe_points, region_center, verbose_print):
+    """
+
+    Args:
+        centerlines:
+        file_name_probe_points:
+        region_center:
+        verbose_print:
+
+    Returns:
+
+    """
     # Set the network object used in the scripts for
     # boundary conditions and probes.
     network = ImportData.Network()
@@ -588,6 +692,16 @@ def setup_model_network(centerlines, file_name_probe_points, region_center, verb
 
 
 def compute_flow_rate(atrium_present, inlet, parameters):
+    """
+
+    Args:
+        atrium_present:
+        inlet:
+        parameters:
+
+    Returns:
+
+    """
     # FIXME: Add plausible boundary conditions for atrial flow
     flow_rate_factor = 0.27
     if atrium_present:
@@ -603,6 +717,19 @@ def compute_flow_rate(atrium_present, inlet, parameters):
 
 
 def write_mesh(compress_mesh, file_name_surface_name, file_name_vtu_mesh, file_name_xml_mesh, mesh, remeshed_surface):
+    """
+
+    Args:
+        compress_mesh:
+        file_name_surface_name:
+        file_name_vtu_mesh:
+        file_name_xml_mesh:
+        mesh:
+        remeshed_surface:
+
+    Returns:
+
+    """
     # Write mesh in VTU format
     write_polydata(remeshed_surface, file_name_surface_name)
     write_polydata(mesh, file_name_vtu_mesh)
