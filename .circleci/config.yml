@@ -12,7 +12,7 @@ jobs:
     steps:
       - checkout
       - run:
-          name: Install miniconda, edit VMTK files, and run tests
+          name: Install miniconda
           command: |
             # Install anaconda
             wget https://repo.anaconda.com/miniconda/Miniconda3-latest-Linux-x86_64.sh -O ~/miniconda.sh
