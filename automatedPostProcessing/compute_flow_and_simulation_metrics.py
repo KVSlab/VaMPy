@@ -3,7 +3,6 @@ from time import time
 
 import numpy as np
 from dolfin import *
-
 from postprocessing_common import read_command_line, epsilon
 
 try:
@@ -343,5 +342,5 @@ def rate_of_dissipation(ssv, u, v, mesh, h, nu):
 
 
 if __name__ == '__main__':
-    folder, nu, dt, velocity_degree, _ = read_command_line()
+    folder, nu, _, dt, velocity_degree, _ = read_command_line()
     compute_flow_and_simulation_metrics(folder, nu, dt, velocity_degree)

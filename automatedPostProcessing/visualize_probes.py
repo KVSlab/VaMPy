@@ -4,7 +4,6 @@ from os import path
 
 import matplotlib.pyplot as plt
 import numpy as np
-
 from postprocessing_common import read_command_line
 
 
@@ -21,6 +20,8 @@ def visualize_probes(case_path, dt, no_of_cycles, probe_saving_frequency=100, ca
         no_of_cycles (float): Amount of cardiac cycles
         case_path (str): Path to results from simulation
         dt (float): Time step of simulation
+        show_figure (bool): Shows figure if True
+        save_figure (bool): Saves figure if True
     """
     # Plotting variables
     colors = ["red", "blue"]
@@ -103,5 +104,5 @@ def visualize_probes(case_path, dt, no_of_cycles, probe_saving_frequency=100, ca
 
 
 if __name__ == '__main__':
-    folder, _, dt, _, no_of_cycles = read_command_line()
+    folder, _, _, dt, _, no_of_cycles = read_command_line()
     visualize_probes(folder, dt, no_of_cycles)

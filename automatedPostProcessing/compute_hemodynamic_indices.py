@@ -3,7 +3,6 @@ from __future__ import print_function
 from pathlib import Path
 
 from dolfin import *
-
 from postprocessing_common import STRESS, read_command_line
 
 try:
@@ -12,7 +11,7 @@ except NameError:
     pass
 
 
-def compute_hemodynamic_indices(case_path, nu, dt, velocity_degree):
+def compute_hemodynamic_indices(case_path, nu, rho, dt, velocity_degree):
     """
     Loads velocity fields from completed CFD simulation,
     and computes and saves the following hemodynamic quantities:
@@ -22,10 +21,14 @@ def compute_hemodynamic_indices(case_path, nu, dt, velocity_degree):
     (4) OSI - Oscillatory shear index
     (5) RRT - Relative residence time
 
+    The resulting wall shear stress will be in units Pascal [Pa], given that the provided
+    density (rho) is in [kg/m^3], the time step (dt) is in [ms], and viscosity (nu) is in [mm^2/ms].
+
     Args:
         velocity_degree (int): Finite element degree of velocity
         case_path (Path): Path to results from simulation
-        nu (float): Viscosity
+        nu (float): Kinematic viscosity
+        rho (float): Fluid density
         dt (float): Time step of simulation
     """
     # File paths
@@ -106,7 +109,7 @@ def compute_hemodynamic_indices(case_path, nu, dt, velocity_degree):
         if MPI.rank(MPI.comm_world) == 0:
             print("Compute WSS (mean)")
         tau = stress()
-        tau.vector()[:] = tau.vector()[:] * 1000
+        tau.vector()[:] = tau.vector()[:] * rho
         WSS_mean.vector().axpy(1, tau.vector())
 
         if MPI.rank(MPI.comm_world) == 0:
@@ -229,5 +232,5 @@ def get_dabla_function():
 
 
 if __name__ == '__main__':
-    folder, nu, dt, velocity_degree, _ = read_command_line()
-    compute_hemodynamic_indices(folder, nu, dt, velocity_degree)
+    folder, nu, rho, dt, velocity_degree, _ = read_command_line()
+    compute_hemodynamic_indices(folder, nu, rho, dt, velocity_degree)
