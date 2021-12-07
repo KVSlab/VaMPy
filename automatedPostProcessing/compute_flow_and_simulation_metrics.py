@@ -112,7 +112,7 @@ def compute_flow_and_simulation_metrics(folder, nu, dt, velocity_degree):
         metrics[vn].parameters["rewrite_function_mesh"] = False
         metrics[vn].parameters["flush_output"] = True
 
-    metrics["characteristic_edge_length"].write(characteristic_edge_length)
+    metrics["characteristic_edge_length"].write_checkpoint(characteristic_edge_length, "characteristic_edge_length")
 
     # Get u mean
     u_mean_file_path = file_path_u.replace("u.h5", "u_mean.h5")
@@ -212,17 +212,17 @@ def compute_flow_and_simulation_metrics(folder, nu, dt, velocity_degree):
     turbulent_dissipation_avg.vector()[:] = turbulent_dissipation_avg.vector()[:] / N
 
     # Store average data
-    metrics["CFL"].write(CFL_avg)
-    metrics["l_plus"].write(l_plus_avg)
-    metrics["t_plus"].write(t_plus_avg)
-    metrics["length_scale"].write(length_scale_avg)
-    metrics["time_scale"].write(time_scale_avg)
-    metrics["velocity_scale"].write(velocity_scale_avg)
-    metrics["dissipation"].write(dissipation_avg)
-    metrics["kinetic_energy"].write(kinetic_energy_avg)
-    metrics["turbulent_kinetic_energy"].write(turbulent_kinetic_energy_avg)
-    metrics["turbulent_dissipation"].write(turbulent_dissipation_avg)
-    metrics["u_mean"].write(u_mean)
+    metrics["CFL"].write_checkpoint(CFL_avg, "CFL")
+    metrics["l_plus"].write_checkpoint(l_plus_avg, "l_plus")
+    metrics["t_plus"].write_checkpoint(t_plus_avg, "t_plus")
+    metrics["length_scale"].write_checkpoint(length_scale_avg, "length_scale")
+    metrics["time_scale"].write_checkpoint(time_scale_avg, "time_scale")
+    metrics["velocity_scale"].write_checkpoint(velocity_scale_avg, "velocity_scale")
+    metrics["dissipation"].write_checkpoint(dissipation_avg, "dissipation")
+    metrics["kinetic_energy"].write_checkpoint(kinetic_energy_avg, "kinetic_energy")
+    metrics["turbulent_kinetic_energy"].write_checkpoint(turbulent_kinetic_energy_avg, "turbulent_kinetic_energy")
+    metrics["turbulent_dissipation"].write_checkpoint(turbulent_dissipation_avg, "turbulent_dissipation")
+    metrics["u_mean"].write_checkpoint(u_mean, "u_mean")
 
     # Print info
     flow_metrics = [("dx", characteristic_edge_length), ("l+", l_plus_avg), ("t+", t_plus_avg),
