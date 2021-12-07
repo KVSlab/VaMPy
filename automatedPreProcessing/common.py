@@ -8,7 +8,7 @@ try:
 except ImportError:
     pass
 import numpy as np
-from os import path, remove
+from os import path
 
 # Global array names
 radiusArrayName = 'MaximumInscribedSphereRadius'
@@ -70,6 +70,7 @@ def provide_region_points(surface, provided_points, dir_path=None):
     Get relevant region points from user selected points on a input surface.
 
     Args:
+        provided_points:
         surface (vtkPolyData): Surface model.
         dir_path (str): Location of info.json file
 
@@ -130,7 +131,7 @@ def make_voronoi_diagram(surface, file_path):
     return voronoi.VoronoiDiagram
 
 
-def compute_centers_for_meshing(polyData, atrium_present, case_path=None, test_capped=False):
+def compute_centers_for_meshing(surface, atrium_present, case_path=None, test_capped=False):
     """
     Compute the center of all the openings in the surface. The inlet is chosen based on
     the largest area for arteries (or aneurysm). However, for atrium, the outlet is chosen based on
@@ -138,7 +139,7 @@ def compute_centers_for_meshing(polyData, atrium_present, case_path=None, test_c
 
     Args:
         test_capped (bool): Check if surface is capped.
-        polyData (vtkPolyData): centers of the openings.
+        surface (vtkPolyData): centers of the openings.
         case_path (str): path to case directory.
         atrium_present (bool): Check if it is an atrium model.
 
@@ -147,11 +148,11 @@ def compute_centers_for_meshing(polyData, atrium_present, case_path=None, test_c
         outlet_centers (list): A flattened list with all the outlet centers.
     """
     # Get cells which are open
-    cells = vtk_extract_feature_edges(polyData)
+    cells = vtk_extract_feature_edges(surface)
 
     if cells.GetNumberOfCells() == 0 and not test_capped:
         print("WARNING: The model is capped, so it is uncapped, but the method is experimental.")
-        uncapped_surface = get_uncapped_surface(polyData)
+        uncapped_surface = get_uncapped_surface(surface)
         compute_centers_for_meshing(uncapped_surface, atrium_present, case_path, test_capped)
     elif cells.GetNumberOfCells() == 0 and test_capped:
         return False, 0
@@ -220,14 +221,15 @@ def compute_centers_for_meshing(polyData, atrium_present, case_path=None, test_c
     return center_, boundary_center
 
 
-def get_centers_for_meshing(surface, atrium_present, dir_path, flowext=False):
+def get_centers_for_meshing(surface, atrium_present, dir_path, use_flow_extensions=False):
     """
     Get the centers of the inlet and outlets.
 
     Args:
         surface (vtkPolyData): An open surface.
+        atrium_present:
         dir_path (str): Path to the case file.
-        flowext (bool): Turn on/off flow extension.
+        use_flow_extensions (bool): Turn on/off flow extension.
 
     Returns:
         inlet (list): A flatt list with the point of the inlet
@@ -235,7 +237,7 @@ def get_centers_for_meshing(surface, atrium_present, dir_path, flowext=False):
     """
 
     # Check if info exists
-    if flowext or not path.isfile(path.join(dir_path, dir_path + ".json")):
+    if use_flow_extensions or not path.isfile(path.join(dir_path, dir_path + ".json")):
         compute_centers_for_meshing(surface, atrium_present, dir_path)
 
     # Open info
@@ -272,7 +274,7 @@ def get_centers_for_meshing(surface, atrium_present, dir_path, flowext=False):
     return inlets, outlets
 
 
-def dist_sphere_curv(surface, centerlines, sac_center, misr_max, fileName, factor):
+def dist_sphere_curvature(surface, centerlines, sac_center, misr_max, save_path, factor):
     """
 
     Args:
@@ -280,7 +282,7 @@ def dist_sphere_curv(surface, centerlines, sac_center, misr_max, fileName, facto
         centerlines:
         sac_center:
         misr_max:
-        fileName:
+        save_path:
         factor:
 
     Returns:
@@ -331,7 +333,7 @@ def dist_sphere_curv(surface, centerlines, sac_center, misr_max, fileName, facto
     # Add the center of the sac
     for i in range(len(sac_center)):
         distance_to_sphere = compute_distance_to_sphere(distance_to_sphere, sac_center[i],
-                                                        distanceScale=0.2 / (misr_max[i] * 2.5))
+                                                        distance_scale=0.2 / (misr_max[i] * 2.5))
 
     # Compute curvature
     curvatureFilter = vmtkscripts.vmtkSurfaceCurvature()
@@ -352,12 +354,12 @@ def dist_sphere_curv(surface, centerlines, sac_center, misr_max, fileName, facto
     size_vtk_array = create_vtk_array(size_array, "Size")
     curvatureSurface.GetPointData().AddArray(size_vtk_array)
 
-    write_polydata(curvatureSurface, fileName)
+    write_polydata(curvatureSurface, save_path)
 
     return distance_to_sphere
 
 
-def dist_sphere_constant(surface, centerlines, sac_center, misr_max, fileName, edge_length):
+def dist_sphere_constant(surface, centerlines, sac_center, misr_max, save_path, edge_length):
     """
 
     Args:
@@ -365,7 +367,7 @@ def dist_sphere_constant(surface, centerlines, sac_center, misr_max, fileName, e
         centerlines:
         sac_center:
         misr_max:
-        fileName:
+        save_path:
         edge_length:
 
     Returns:
@@ -373,19 +375,19 @@ def dist_sphere_constant(surface, centerlines, sac_center, misr_max, fileName, e
     """
     # Constant meshing method with possible refined area.
     # --- Compute the distanceToCenterlines
-    distTocenterlines = vmtkscripts.vmtkDistanceToCenterlines()
-    distTocenterlines.Surface = surface
-    distTocenterlines.Centerlines = centerlines
-    distTocenterlines.Execute()
-    distance_to_sphere = distTocenterlines.Surface
+    distToCenterlines = vmtkscripts.vmtkDistanceToCenterlines()
+    distToCenterlines.Surface = surface
+    distToCenterlines.Centerlines = centerlines
+    distToCenterlines.Execute()
+    distance_to_sphere = distToCenterlines.Surface
 
     # Reduce element size in region
     for i in range(len(sac_center)):
         distance_to_sphere = compute_distance_to_sphere(distance_to_sphere,
                                                         sac_center[i],
-                                                        minDistance=edge_length / 3,
-                                                        maxDistance=edge_length,
-                                                        distanceScale=edge_length * 3 / 4 / (misr_max[i] * 2.))
+                                                        min_distance=edge_length / 3,
+                                                        max_distance=edge_length,
+                                                        distance_scale=edge_length * 3 / 4 / (misr_max[i] * 2.))
 
     element_size = edge_length + np.zeros((surface.GetNumberOfPoints(), 1))
     if len(sac_center) != 0:
@@ -394,12 +396,12 @@ def dist_sphere_constant(surface, centerlines, sac_center, misr_max, fileName, e
 
     vtk_array = create_vtk_array(element_size, "Size")
     distance_to_sphere.GetPointData().AddArray(vtk_array)
-    write_polydata(distance_to_sphere, fileName)
+    write_polydata(distance_to_sphere, save_path)
 
     return distance_to_sphere
 
 
-def dist_sphere_diam(surface, centerlines, sac_center, misr_max, fileName, factor):
+def dist_sphere_diam(surface, centerlines, sac_center, misr_max, save_path, factor):
     """
 
     Args:
@@ -407,7 +409,7 @@ def dist_sphere_diam(surface, centerlines, sac_center, misr_max, fileName, facto
         centerlines:
         sac_center:
         misr_max:
-        fileName:
+        save_path:
         factor:
 
     Returns:
@@ -415,11 +417,11 @@ def dist_sphere_diam(surface, centerlines, sac_center, misr_max, fileName, facto
     """
     # Meshing method following Owais way.
     # --- Compute the distanceToCenterlines
-    distTocenterlines = vmtkscripts.vmtkDistanceToCenterlines()
-    distTocenterlines.Surface = surface
-    distTocenterlines.Centerlines = centerlines
-    distTocenterlines.Execute()
-    distance_to_sphere = distTocenterlines.Surface
+    distToCenterlines = vmtkscripts.vmtkDistanceToCenterlines()
+    distToCenterlines.Surface = surface
+    distToCenterlines.Centerlines = centerlines
+    distToCenterlines.Execute()
+    distance_to_sphere = distToCenterlines.Surface
 
     # Compute element size based on diameter
     upper = 20
@@ -437,8 +439,8 @@ def dist_sphere_diam(surface, centerlines, sac_center, misr_max, fileName, facto
     for i in range(len(sac_center)):
         distance_to_sphere = compute_distance_to_sphere(distance_to_sphere,
                                                         sac_center[i],
-                                                        maxDistance=100,
-                                                        distanceScale=0.2 / (misr_max[i] * 2.))
+                                                        max_distance=100,
+                                                        distance_scale=0.2 / (misr_max[i] * 2.))
     if len(sac_center) == 0:
         element_size *= factor
     else:
@@ -447,7 +449,7 @@ def dist_sphere_diam(surface, centerlines, sac_center, misr_max, fileName, facto
 
     vtk_array = create_vtk_array(element_size, "Size")
     distance_to_sphere.GetPointData().AddArray(vtk_array)
-    write_polydata(distance_to_sphere, fileName)
+    write_polydata(distance_to_sphere, save_path)
 
     return distance_to_sphere
 
@@ -465,29 +467,27 @@ def mesh_alternative(surface):
     print("--- Proceeding with surface smooting and meshing.")
     surface = vmtk_smooth_surface(surface, "laplace", iterations=500)
 
-    subdiv = vmtkscripts.vmtkSurfaceSubdivision()
-    subdiv.Surface = surface
-    subdiv.Method = "butterfly"
-    subdiv.Execute()
-    surface = subdiv.Surface
+    surfaceSubdivision = vmtkscripts.vmtkSurfaceSubdivision()
+    surfaceSubdivision.Surface = surface
+    surfaceSubdivision.Method = "butterfly"
+    surfaceSubdivision.Execute()
+    surface = surfaceSubdivision.Surface
 
     return vmtk_smooth_surface(surface, "laplace", iterations=500)
 
 
-def compute_distance_to_sphere(surface, centerSphere, radiusSphere=0.0,
-                               distanceOffset=0.0, distanceScale=0.01,
-                               minDistance=0.2, maxDistance=0.3,
-                               distanceToSpheresArrayName="DistanceToSpheres"):
+def compute_distance_to_sphere(surface, center_sphere, radius_sphere=0.0, distance_offset=0.0, distance_scale=0.01,
+                               min_distance=0.2, max_distance=0.3, distanceToSpheresArrayName="DistanceToSpheres"):
     """
 
     Args:
         surface:
-        centerSphere:
-        radiusSphere:
-        distanceOffset:
-        distanceScale:
-        minDistance:
-        maxDistance:
+        center_sphere:
+        radius_sphere:
+        distance_offset:
+        distance_scale:
+        min_distance:
+        max_distance:
         distanceToSpheresArrayName:
 
     Returns:
@@ -512,18 +512,18 @@ def compute_distance_to_sphere(surface, centerSphere, radiusSphere=0.0,
         distanceToSphere = dist_array.GetComponent(i, 0)
 
         # Get distance, but factor in size of sphere
-        newDist = get_distance(centerSphere, surface.GetPoints().GetPoint(i)) - radiusSphere
+        newDist = get_distance(center_sphere, surface.GetPoints().GetPoint(i)) - radius_sphere
 
         # Set offset and scale distance
-        newDist = distanceOffset + newDist * distanceScale
+        newDist = distance_offset + newDist * distance_scale
 
         # Capp to min distance
-        if newDist < minDistance:
-            newDist = minDistance
+        if newDist < min_distance:
+            newDist = min_distance
 
         # Capp to max distance
-        if newDist > maxDistance:
-            newDist = maxDistance
+        if newDist > max_distance:
+            newDist = max_distance
 
         # Keep smallest distance
         newDist = min(newDist, distanceToSphere) if not add else newDist
@@ -568,14 +568,14 @@ def generate_mesh(surface):
     return mesh, remeshSurface
 
 
-def find_boundaries(model_path, mean_inflow_rate, network, polyDataVolMesh, verbose_print, is_atrium):
+def find_boundaries(model_path, mean_inflow_rate, network, mesh, verbose_print, is_atrium):
     """
 
     Args:
         model_path:
         mean_inflow_rate:
         network:
-        polyDataVolMesh:
+        mesh:
         verbose_print:
         is_atrium:
 
@@ -583,7 +583,7 @@ def find_boundaries(model_path, mean_inflow_rate, network, polyDataVolMesh, verb
 
     """
     # Extract the surface mesh of the wall
-    wallMesh = vtk_compute_threshold(polyDataVolMesh, "CellEntityIds", lower=0.5, upper=1.5)
+    wallMesh = vtk_compute_threshold(mesh, "CellEntityIds", lower=0.5, upper=1.5)
     boundaryReferenceSystems = vmtkscripts.vmtkBoundaryReferenceSystems()
     boundaryReferenceSystems.Surface = wallMesh
     boundaryReferenceSystems.Execute()
@@ -592,7 +592,7 @@ def find_boundaries(model_path, mean_inflow_rate, network, polyDataVolMesh, verb
     refSystem.GetPointData().AddArray(cellEntityIdsArray)
 
     # Extract the surface mesh of the end caps
-    boundarySurface = vtk_compute_threshold(polyDataVolMesh, "CellEntityIds", upper=1.5, threshold_type="upper")
+    boundarySurface = vtk_compute_threshold(mesh, "CellEntityIds", upper=1.5, threshold_type="upper")
     pointCells = vtk.vtkIdList()
     surfaceCellEntityIdsArray = vtk.vtkIntArray()
     surfaceCellEntityIdsArray.DeepCopy(boundarySurface.GetCellData().GetArray('CellEntityIds'))
@@ -742,8 +742,6 @@ def write_mesh(compress_mesh, file_name_surface_name, file_name_vtu_mesh, file_n
     meshWriter.Compressed = compress_mesh
     meshWriter.OutputFileName = file_name_xml_mesh
     meshWriter.Execute()
-    polyDataVolMesh = mesh
-    return polyDataVolMesh
 
 
 def add_flow_extension(surface, centerlines, include_outlet, extension_length=2.0,

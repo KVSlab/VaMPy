@@ -2,6 +2,7 @@
 from __future__ import print_function
 
 import argparse
+from os import remove
 
 import ToolRepairSTL
 # Local imports
@@ -244,7 +245,7 @@ def run_pre_processing(filename_model, verbose_print, smoothing_method, smoothin
             print("--- Compute the model centerlines with flow extension.\n")
             # Compute the centerlines.
             inlet, outlets = get_centers_for_meshing(surface_extended, is_atrium, path.join(dir_path, case_name),
-                                                     flowext=True)
+                                                     use_flow_extensions=True)
             # FIXME: There are several inlets and one outlet for atrium case
             source = outlets if is_atrium else inlet
             target = inlet if is_atrium else outlets
@@ -265,8 +266,8 @@ def run_pre_processing(filename_model, verbose_print, smoothing_method, smoothin
 
     elif meshing_method == "curvature":
         if not path.isfile(file_name_distance_to_sphere_curv):
-            distance_to_sphere = dist_sphere_curv(surface_extended, centerlines, region_center, misr_max,
-                                                  file_name_distance_to_sphere_curv, coarsening_factor)
+            distance_to_sphere = dist_sphere_curvature(surface_extended, centerlines, region_center, misr_max,
+                                                       file_name_distance_to_sphere_curv, coarsening_factor)
         else:
             distance_to_sphere = read_polydata(file_name_distance_to_sphere_curv)
     elif meshing_method == "diameter":
@@ -292,11 +293,11 @@ def run_pre_processing(filename_model, verbose_print, smoothing_method, smoothin
             assert remeshed_surface.GetNumberOfPoints() > 0, \
                 "No points in surface mesh, try to remesh"
 
-        polyDataVolMesh = write_mesh(compress_mesh, file_name_surface_name, file_name_vtu_mesh, file_name_xml_mesh,
-                                     mesh, remeshed_surface)
+        write_mesh(compress_mesh, file_name_surface_name, file_name_vtu_mesh, file_name_xml_mesh,
+                   mesh, remeshed_surface)
 
     else:
-        polyDataVolMesh = read_polydata(file_name_vtu_mesh)
+        mesh = read_polydata(file_name_vtu_mesh)
 
     network, probe_points = setup_model_network(centerlines, file_name_probe_points, region_center, verbose_print)
 
@@ -306,8 +307,7 @@ def run_pre_processing(filename_model, verbose_print, smoothing_method, smoothin
     print("--- Computing flow rates and flow split, and setting boundary IDs\n")
     mean_inflow_rate = compute_flow_rate(is_atrium, inlet, parameters)
 
-    find_boundaries(path.join(dir_path, case_name), mean_inflow_rate, network, polyDataVolMesh, verbose_print,
-                    is_atrium)
+    find_boundaries(path.join(dir_path, case_name), mean_inflow_rate, network, mesh, verbose_print, is_atrium)
 
     # Display the flow split at the outlets, inlet flow rate, and probes.
     if viz:
