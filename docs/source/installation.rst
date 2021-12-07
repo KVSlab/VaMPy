@@ -11,6 +11,7 @@ Dependencies
 ============
 The general dependencies of VaMPy are
 
+* VMTK 1.4
 * morphMan
 * FEniCS
 * Paramiko
@@ -19,9 +20,9 @@ Basic Installation
 ==================
 You can choose how to install the dependencies, but the fastest way to get started is to install the dependencies through Anaconda.
 First, install Anaconda or Miniconda (preferably the Python 3.6 version) on your computer.
-Then create two environments, one for `VMTK <http://www.vmtk.org/>`_ and one for `FEniCS <https://fenicsproject.org/>`_ by executing the following in a terminal window::
+Then create two environments, one for `morphMan <https://github.com/KVSlab/morphMan>`_ and `VMTK <http://www.vmtk.org/>`_, and one for `FEniCS <https://fenicsproject.org/>`_ by executing the following in a terminal window::
 
-    conda create -n morphman -c morphman python=3.6 paramiko
+    conda create -n morphman -c vmtk -c morphman morphman python=3.6 paramiko
     conda create -n fenics -c conda-forge fenics
 
 You can then activate your environment by running ``source activate [ENVIRONMENT NAME]``.

@@ -41,7 +41,7 @@ If you are on Windows, macOS or Linux you can install all the general dependenci
 First install Anaconda or Miniconda (preferably the Python 3.6 version).
 Then create two environments, one for `morphMan` and one for `FEniCS` by executing the following in a terminal
 
-    conda create -n morphman -c morphman python=3.6 paramiko
+    conda create -n morphman -c vmtk -c morphman morphman python=3.6 paramiko
     conda create -n fenics -c conda-forge fenics
 
 You might run into a problem with the `morphMan` dependency `VMTK` 1.4 if using Python 3, or if you are a Linux user, and we have therefore provided a set of temporary fixes for these known issues [here](https://vampy.readthedocs.io/en/latest/installation.html#known-issues).
