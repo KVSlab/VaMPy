@@ -4,7 +4,6 @@ from os import path, makedirs
 from pprint import pprint
 
 import numpy as np
-from IPython import embed
 from Probe import Probes
 from Womersley import make_womersley_bcs, compute_boundary_geometry_acrn
 from oasis.problems.NSfracStep import *
