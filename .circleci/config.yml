@@ -1,0 +1,58 @@
+version: 2.1
+workflows:
+  version: 2
+  test:
+    jobs:
+      - install-and-test
+jobs:
+  install-and-test:
+    docker:
+      - image: cimg/python:3.8
+    working_directory: ~/repo
+    steps:
+      - checkout
+      - run:
+          name: Install miniconda, edit VMTK files, and run tests
+          command: |
+            # Install anaconda
+            wget https://repo.anaconda.com/miniconda/Miniconda3-latest-Linux-x86_64.sh -O ~/miniconda.sh
+            bash ~/miniconda.sh -b -p $HOME/miniconda
+      - run:
+          name: Setup environment and run tests
+          command: |
+            # Export path
+            export PATH="$HOME/miniconda/bin:$PATH"
+            hash -r
+
+            # Set conda parameters
+            conda config --set restore_free_channel true
+            conda config --set always_yes yes --set changeps1 no
+            conda config --add channels vmtk
+
+            # Set up environment
+            conda create -n vmtk_env vmtk pytest itk vtk llvm=3.3 paramiko
+
+            # Activate environment
+            source activate vmtk_env
+
+            # Useful for debugging any issues with conda
+            conda info -a
+
+            # Dependencies for code coverage
+            pip install pytest-cov codecov
+
+            # Edit VMTK files
+            sed -i -e 's/len(self.SourcePoints)\/3/len\(self.SourcePoints\)\/\/3/g' $HOME/miniconda/envs/vmtk_env/lib/python3.6/site-packages/vmtk/vmtkcenterlines.py
+            sed -i -e 's/len(self.TargetPoints)\/3/len\(self.TargetPoints\)\/\/3/g' $HOME/miniconda/envs/vmtk_env/lib/python3.6/site-packages/vmtk/vmtkcenterlines.py
+            sed -i -e 's/(len(values) - 1)\/2/\(len\(values\) - 1\)\/\/2/g' $HOME/miniconda/envs/vmtk_env/lib/python3.6/site-packages/vmtk/vmtksurfacecurvature.py
+
+            # Run tests
+            cd test
+            pip install pytest
+            pytest --cov=./
+
+      # store artifacts (for example logs, binaries, etc)
+      # to be available in the web app or through the API
+      - store_artifacts:
+          path: test-reports
+
