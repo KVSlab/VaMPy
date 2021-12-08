@@ -23,6 +23,33 @@ One cardiac cycle is set to 0.951 s from [2], and scaled by a factor of 1000, he
     adults." Physiological measurement 31.3 (2010): 291.
 """
 
+# This is a FEniCS specific command to control the desired level of output to the screen here set to "critical" (errors that may lead to data corruption and suchlike)
+# Area ratio for the flow outlets
+# Duration of cardiac cycle [ms]
+# Dump frequency for sampling velocity & pressure at probes along the centerline done at each time step
+# Save frequency of the entire velocity and pressure field for post processing
+# Frequency for printing solver statistics
+# Preferred results folder name
+# Path to the mesh
+# pressure_degree=1, # Polynomial order of for the pressure finite element. Normally linear (1)
+# velocity_degree=1, # Polynomial order of for the velocity finite element. Normally linear (1) or quadratic (2).
+# Specific flow rate = Normalised flow wave form * prescribed flow rate
+# Scale normalised flow wave form to [ms]
+# Scale time in normalised flow wave form to [ms]
+# Oasis hook called before simulation start
+# Oasis hook called at each time step
+# Oasis hook called after each time step
+# Oasis hook called after the simulation has finished
+# if master:
+
+#             print 'Using P -',V.ufl_element().degree(), 'P -',Q.ufl_element().degree(), 'elements'
+
+# num_dofs = sum(([q_[ui].vector().size()  for ui in u_components]))
+#         if MPI.process_number() == 0:
+# 		print 'num u dofs is ', num_dofs
+#         num_dofs = sum(([q_[ui].vector().size()  for ui in sys_comp]))
+# 	if MPI.process_number() == 0:
+# 	        print 'tot num dofs is ', num_dofs
 set_log_level(50)
 
 
@@ -81,48 +108,6 @@ def mesh(mesh_path, **NS_namespace):
     return mesh
 
 
-def print_mesh_information(mesh):
-    comm = MPI.comm_world
-    local_xmin = mesh.coordinates()[:, 0].min()
-    local_xmax = mesh.coordinates()[:, 0].max()
-    local_ymin = mesh.coordinates()[:, 1].min()
-    local_ymax = mesh.coordinates()[:, 1].max()
-    local_zmin = mesh.coordinates()[:, 2].min()
-    local_zmax = mesh.coordinates()[:, 2].max()
-    xmin = comm.gather(local_xmin, 0)
-    xmax = comm.gather(local_xmax, 0)
-    ymin = comm.gather(local_ymin, 0)
-    ymax = comm.gather(local_ymax, 0)
-    zmin = comm.gather(local_zmin, 0)
-    zmax = comm.gather(local_zmax, 0)
-
-    local_num_cells = mesh.num_cells()
-    local_num_edges = mesh.num_edges()
-    local_num_faces = mesh.num_faces()
-    local_num_facets = mesh.num_facets()
-    local_num_vertices = mesh.num_vertices()
-    num_cells = comm.gather(local_num_cells, 0)
-    num_edges = comm.gather(local_num_edges, 0)
-    num_faces = comm.gather(local_num_faces, 0)
-    num_facets = comm.gather(local_num_facets, 0)
-    num_vertices = comm.gather(local_num_vertices, 0)
-    volume = assemble(Constant(1) * dx(mesh))
-
-    if MPI.rank(MPI.comm_world) == 0:
-        print("=== Mesh information ===")
-        print("X range: {} to {} (delta: {:.4f})".format(min(xmin), max(xmax), max(xmax) - min(xmin)))
-        print("Y range: {} to {} (delta: {:.4f})".format(min(ymin), max(ymax), max(ymax) - min(ymin)))
-        print("Z range: {} to {} (delta: {:.4f})".format(min(zmin), max(zmax), max(zmax) - min(zmin)))
-        print("Number of cells: {}".format(sum(num_cells)))
-        print("Number of cells per processor: {}".format(int(np.mean(num_cells))))
-        print("Number of edges: {}".format(sum(num_edges)))
-        print("Number of faces: {}".format(sum(num_faces)))
-        print("Number of facets: {}".format(sum(num_facets)))
-        print("Number of vertices: {}".format(sum(num_vertices)))
-        print("Volume: {:.4f}".format(volume))
-        print("Number of cells per volume: {:.4f}".format(sum(num_cells) / volume))
-
-
 def create_bcs(t, NS_expressions, V, Q, area_ratio, area_inlet, mesh, mesh_path, nu, id_in, id_out, pressure_degree,
                **NS_namespace):
     # Mesh function
@@ -144,7 +129,7 @@ def create_bcs(t, NS_expressions, V, Q, area_ratio, area_inlet, mesh, mesh_path,
 
     # Load normalized time and flow rate values
     t_values, Q_ = np.loadtxt(path.join(path.dirname(path.abspath(__file__)), "ICA_values")).T
-    Q_values = Q_mean * Q_  # Specific flow rate * Flow wave form
+    Q_values = Q_mean * Q_  # Specific flow rate  = Normalized flow wave form * Prescribed flow rate
     t_values *= 1000  # Scale to [ms]
     tmp_area, tmp_center, tmp_radius, tmp_normal = compute_boundary_geometry_acrn(mesh, id_in[0], boundary)
 
@@ -433,3 +418,45 @@ def update_pressure_condition(NS_expressions, area_ratio, boundary, id_in, id_ou
                 NS_expressions[out_id].p = p_old * beta(R_err, p_old) * M_err ** E
 
     return Q_ideals, Q_in, Q_outs
+
+
+def print_mesh_information(mesh):
+    comm = MPI.comm_world
+    local_xmin = mesh.coordinates()[:, 0].min()
+    local_xmax = mesh.coordinates()[:, 0].max()
+    local_ymin = mesh.coordinates()[:, 1].min()
+    local_ymax = mesh.coordinates()[:, 1].max()
+    local_zmin = mesh.coordinates()[:, 2].min()
+    local_zmax = mesh.coordinates()[:, 2].max()
+    xmin = comm.gather(local_xmin, 0)
+    xmax = comm.gather(local_xmax, 0)
+    ymin = comm.gather(local_ymin, 0)
+    ymax = comm.gather(local_ymax, 0)
+    zmin = comm.gather(local_zmin, 0)
+    zmax = comm.gather(local_zmax, 0)
+
+    local_num_cells = mesh.num_cells()
+    local_num_edges = mesh.num_edges()
+    local_num_faces = mesh.num_faces()
+    local_num_facets = mesh.num_facets()
+    local_num_vertices = mesh.num_vertices()
+    num_cells = comm.gather(local_num_cells, 0)
+    num_edges = comm.gather(local_num_edges, 0)
+    num_faces = comm.gather(local_num_faces, 0)
+    num_facets = comm.gather(local_num_facets, 0)
+    num_vertices = comm.gather(local_num_vertices, 0)
+    volume = assemble(Constant(1) * dx(mesh))
+
+    if MPI.rank(MPI.comm_world) == 0:
+        print("=== Mesh information ===")
+        print("X range: {} to {} (delta: {:.4f})".format(min(xmin), max(xmax), max(xmax) - min(xmin)))
+        print("Y range: {} to {} (delta: {:.4f})".format(min(ymin), max(ymax), max(ymax) - min(ymin)))
+        print("Z range: {} to {} (delta: {:.4f})".format(min(zmin), max(zmax), max(zmax) - min(zmin)))
+        print("Number of cells: {}".format(sum(num_cells)))
+        print("Number of cells per processor: {}".format(int(np.mean(num_cells))))
+        print("Number of edges: {}".format(sum(num_edges)))
+        print("Number of faces: {}".format(sum(num_faces)))
+        print("Number of facets: {}".format(sum(num_facets)))
+        print("Number of vertices: {}".format(sum(num_vertices)))
+        print("Volume: {:.4f}".format(volume))
+        print("Number of cells per volume: {:.4f}".format(sum(num_cells) / volume))
