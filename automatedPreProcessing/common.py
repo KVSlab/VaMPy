@@ -12,6 +12,7 @@ import numpy as np
 from os import path, listdir, mkdir
 
 # Global array names
+cell_id_name = "CellEntityIds"
 radiusArrayName = 'MaximumInscribedSphereRadius'
 parallelTransportNormalsArrayName = 'ParallelTransportNormals'
 groupIDsArrayName = "GroupIds"
@@ -345,20 +346,24 @@ def dist_sphere_constant(surface, centerlines, sac_center, misr_max, fileName, e
     distance_to_sphere = distTocenterlines.Surface
 
     # Reduce element size in region
+    F = 3 / 4  # For 3xMISIR
+    F = 1  # for refining
     for i in range(len(sac_center)):
         distance_to_sphere = compute_distance_to_sphere(distance_to_sphere,
                                                         sac_center[i],
                                                         minDistance=edge_length / 3,
                                                         maxDistance=edge_length,
-                                                        distanceScale=edge_length * 3 / 4 / (misr_max[i] * 2.))
+                                                        distanceScale=(edge_length * F * 3 / 4 / (misr_max[i] * 2.)))
 
     element_size = edge_length + np.zeros((surface.GetNumberOfPoints(), 1))
     if len(sac_center) != 0:
         distance_to_spheres_array = get_point_data_array("DistanceToSpheres", distance_to_sphere)
+        # element_size = np.maximum(element_size, distance_to_spheres_array)
         element_size = np.minimum(element_size, distance_to_spheres_array)
 
     vtk_array = create_vtk_array(element_size, "Size")
     distance_to_sphere.GetPointData().AddArray(vtk_array)
+
     write_polydata(distance_to_sphere, fileName)
 
     return distance_to_sphere
@@ -456,10 +461,37 @@ def compute_distance_to_sphere(surface, centerSphere, radiusSphere=0.0,
 
         # Keep smallest distance
         newDist = min(newDist, distanceToSphere) if not add else newDist
-
+        # TODO: Edit if coarsening
+        s = 3  # 2 and 3 works
+        # Coarsening:
+        # dist_array.SetComponent(i, 0, s * 1.9 - (s - 1) * newDist)
         dist_array.SetComponent(i, 0, newDist)
 
     return surface
+
+
+def remesh_surface(surface, edge_length, exclude=None):
+    surface = dsa.WrapDataObject(surface)
+    if cell_id_name not in surface.CellData.keys():
+        surface.CellData.append(np.zeros(surface.VTKObject.GetNumberOfCells()) + 1, cell_id_name)
+    remeshing = vmtkscripts.vmtkSurfaceRemeshing()
+    remeshing.Surface = surface.VTKObject
+    remeshing.CellEntityIdsArrayName = cell_id_name
+    remeshing.TargetEdgeLength = edge_length
+    remeshing.MaxEdgeLength = 1e6
+    remeshing.MinEdgeLength = 0.0
+    remeshing.TargetEdgeLengthFactor = 1.0
+    remeshing.TargetEdgeLengthArrayName = ""
+    remeshing.TriangleSplitFactor = 5.0
+    remeshing.ElementSizeMode = "edgelength"
+    if exclude is not None:
+        remeshing.ExcludeEntityIds = exclude
+
+    remeshing.Execute()
+
+    remeshed_surface = remeshing.Surface
+
+    return remeshed_surface
 
 
 def generate_mesh(surface):
@@ -917,7 +949,7 @@ def save_displacement(file_name_displacement_points, points):
 
 
 def project_displacement(clamp_boundaries, distance, folder_extended_surfaces, folder_moved_surfaces, point_map,
-                         surface, surface_extended):
+                         surface, surface_extended, remeshed):
     """
 
     Args:
@@ -933,7 +965,7 @@ def project_displacement(clamp_boundaries, distance, folder_extended_surfaces, f
 
     """
     # Add extents to all surfaces
-    extended_surfaces = sorted([f for f in listdir(folder_moved_surfaces) if f[:2] == "LA"])
+    extended_surfaces = sorted([f for f in listdir(folder_moved_surfaces) if f[:2] in ["LA", "Co", "Fu"]])
     if not path.exists(folder_extended_surfaces):
         mkdir(folder_extended_surfaces)
 
@@ -950,7 +982,63 @@ def project_displacement(clamp_boundaries, distance, folder_extended_surfaces, f
         tmp_surface = read_polydata(model_path)
         new_path = path.join(folder_extended_surfaces, model_path.split("/")[-1])
         if not path.exists(new_path):
-            move_surface_model(tmp_surface, surface, surface, surface_extended, distance, point_map, new_path, i,
+            move_surface_model(tmp_surface, surface, remeshed, surface_extended, distance, point_map, new_path, i,
                                points, clamp_boundaries)
 
     return points
+
+
+def create_funnel(surface, cl, cl_ext, radius):
+    surface = dsa.WrapDataObject(surface)
+    points = surface.Points
+    p0 = np.array(cl.GetPoint(0))  # At MV
+    p1 = np.array(cl_ext.GetPoint(0))  # At flow extension boundary
+    n = n_z = (p1 - p0) / la.norm(p1 - p0)
+    n_x = np.array([0, -n[2], n[1]])
+    n_y = np.cross(n_z, n_x)
+    tol = 1E-1
+    max_dist = get_distance_between_points(p0, p1) + tol
+
+    for j in range(len(points)):
+        p = points[j]
+
+        current_dist_p0 = get_distance_to_plane(n, p0, p)
+        current_dist_p1 = get_distance_to_plane(n, p1, p)
+        if current_dist_p0 <= max_dist and current_dist_p1 <= max_dist:
+            x_mark = (p - p0).dot(n_x)
+            y_mark = (p - p0).dot(n_y)
+            z_mark = (p - p0).dot(n_z)
+
+            def get_scale(d):
+                # TODO: Find choice for "1.2" based on MISR
+                return -d / max_dist * 0.95
+
+            scale = get_scale(z_mark)
+            x_new = x_mark * scale
+            y_new = y_mark * scale
+            z_new = 0
+
+            X_mark = np.array([x_new, y_new, z_new])
+            R_inv = np.array([n_x, n_y, n_z]).T
+
+            p_new = R_inv.dot(X_mark)
+
+        else:
+            p_new = np.array([0, 0, 0])
+
+        points[j] += p_new
+
+    surface.SetPoints(points)
+
+    return surface.VTKObject
+
+
+def get_distance_between_points(p0, p1):
+    p0 = np.array(p0)
+    p1 = np.array(p1)
+
+    return la.norm(p1 - p0)
+
+
+def get_distance_to_plane(n, P, Q):
+    return np.abs(n.dot(P - Q)) / la.norm(n)

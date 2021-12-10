@@ -6,7 +6,7 @@ from morphman.common import *
 from vtk.numpy_interface import dataset_adapter as dsa
 
 from common import get_centers_for_meshing, find_boundaries, setup_model_network, compute_flow_rate, add_flow_extension, \
-    move_surface_model, get_point_map
+    move_surface_model, get_point_map, create_funnel
 from visualize import visualize
 
 cell_id_name = "CellEntityIds"
@@ -77,7 +77,7 @@ def main(case_path, move_surface, add_extensions, edge_length, patient_specific,
                                               clamp_boundaries, edge_length)
 
     if (not path.exists(mesh_path) or recompute_mesh) and surface_to_mesh is not None:
-        mesh = generate_mesh_without_layers(surface_to_mesh, mesh_path, mesh_xml_path, edge_length, centerlines)
+        mesh = generate_mesh_without_layers(surface_to_mesh, mesh_path, mesh_xml_path, edge_length)
 
     if path.exists(mesh_path):
         mesh = read_polydata(mesh_path)
@@ -213,6 +213,8 @@ def add_flow_extensions(surface, model_path, moved_path, centerline, flow_extens
     remeshed_path = model_path + "_remeshed.vtp"
     extended_path = model_path + "_extended"
     remeshed_extended_path = model_path + "_remeshed_extended.vtp"
+    extended_cl_path = model_path + "_cl_ext.vtp"
+    funnel_path = model_path + "_funnel.vtp"
     if not path.exists(extended_path):
         os.mkdir(extended_path)
 
@@ -231,7 +233,8 @@ def add_flow_extensions(surface, model_path, moved_path, centerline, flow_extens
         remeshed_extended = add_flow_extension(remeshed, centerline, include_outlet=False,
                                                extension_length=flow_extension_length)
         remeshed_extended = add_flow_extension(remeshed_extended, centerline, include_outlet=True,
-                                               extension_length=flow_extension_length, extension_mode="boundarynormal")
+                                               extension_length=flow_extension_length * 3,
+                                               extension_mode="boundarynormal")
 
         # Smooth at edges
         remeshed_extended = vmtk_smooth_surface(remeshed_extended, "laplace", iterations=50)
@@ -241,11 +244,20 @@ def add_flow_extensions(surface, model_path, moved_path, centerline, flow_extens
 
     write_polydata(remeshed_extended, remeshed_extended_path)
 
+    capped_surface = vmtk_cap_polydata(remeshed_extended)
+    outlets, inlet = get_centers_for_meshing(remeshed_extended, True, model_path)
+    centerlines_extended, _, _ = compute_centerlines(inlet, outlets, extended_cl_path, capped_surface, resampling=0.1)
+    cl0 = extract_single_line(centerline, 0)
+    cl0_ext = extract_single_line(centerlines_extended, 1)
+
+    remeshed_extended = create_funnel(remeshed_extended, cl0, cl0_ext, 1)
+    write_polydata(remeshed_extended, funnel_path)
+
     # Get a point mapper
     distance, point_map = get_point_map(remeshed, remeshed_extended)
 
     # Add extents to all surfaces
-    extended_surfaces = sorted([f for f in os.listdir(moved_path) if f[:2] == "LA"])
+    extended_surfaces = sorted([f for f in os.listdir(moved_path) if f[:2] == "LA" or f[:2] == "Fu"])
     n_surfaces = len(extended_surfaces)
 
     print("-- Projecting surfaces --")
