@@ -23,6 +23,7 @@ eikonalSolutionArrayName = 'EikonalSolutionArray'
 edgeArrayName = 'EdgeArray'
 edgePCoordArrayName = 'EdgePCoordArray'
 costFunctionArrayName = 'CostFunctionArray'
+distanceToSpheresArrayName = "DistanceToSpheres"
 
 # Options not available from commandline
 divergingRatioToSpacingTolerance = 2.0
@@ -38,14 +39,15 @@ version = vtk.vtkVersion().GetVTKMajorVersion()
 
 def get_regions_to_refine(surface, provided_points, dir_path):
     """
+    Determines which regions to refine.
 
     Args:
-        surface:
-        provided_points:
-        dir_path:
+        surface (vtkPoylData): Surface model
+        provided_points (ndarray): Points defining regions to refine
+        dir_path (str): Path to save directory
 
     Returns:
-
+        region_points (list): List of points representing regions to refine
     """
     # Check if info exists
     if not path.isfile(path.join(dir_path, dir_path + ".txt")):
@@ -70,7 +72,7 @@ def provide_region_points(surface, provided_points, dir_path=None):
     Get relevant region points from user selected points on a input surface.
 
     Args:
-        provided_points:
+        provided_points (ndarray): Point(s) representing area to refine
         surface (vtkPolyData): Surface model.
         dir_path (str): Location of info.json file
 
@@ -131,7 +133,7 @@ def make_voronoi_diagram(surface, file_path):
     return voronoi.VoronoiDiagram
 
 
-def compute_centers_for_meshing(surface, atrium_present, case_path=None, test_capped=False):
+def compute_centers_for_meshing(surface, is_atrium, case_path=None, test_capped=False):
     """
     Compute the center of all the openings in the surface. The inlet is chosen based on
     the largest area for arteries (or aneurysm). However, for atrium, the outlet is chosen based on
@@ -141,7 +143,7 @@ def compute_centers_for_meshing(surface, atrium_present, case_path=None, test_ca
         test_capped (bool): Check if surface is capped.
         surface (vtkPolyData): centers of the openings.
         case_path (str): path to case directory.
-        atrium_present (bool): Check if it is an atrium model.
+        is_atrium (bool): Check if it is an atrium model.
 
     Returns:
         inlet_center (list): Inlet center.
@@ -153,7 +155,7 @@ def compute_centers_for_meshing(surface, atrium_present, case_path=None, test_ca
     if cells.GetNumberOfCells() == 0 and not test_capped:
         print("WARNING: The model is capped, so it is uncapped, but the method is experimental.")
         uncapped_surface = get_uncapped_surface(surface)
-        compute_centers_for_meshing(uncapped_surface, atrium_present, case_path, test_capped)
+        compute_centers_for_meshing(uncapped_surface, is_atrium, case_path, test_capped)
     elif cells.GetNumberOfCells() == 0 and test_capped:
         return False, 0
 
@@ -190,13 +192,8 @@ def compute_centers_for_meshing(surface, atrium_present, case_path=None, test_ca
         center.append(np.mean(points[(region_array == i).nonzero()[0]], axis=0))
 
     # Assume multiple inlets for atrium, and multiple outlets for arteries
-    if atrium_present:
-        # Store the center and area
-        boundary_name = "outlet"
-        boundaries_name = "inlet%d"
-    else:
-        boundary_name = "inlet"
-        boundaries_name = "outlet%d"
+    boundary_name = "outlet" if is_atrium else "inlet"
+    boundaries_name = "inlet%d" if is_atrium else "outlet%d"
 
     boundary_area_name = boundary_name + "_area"
     boundaries_area_name = boundaries_name + "_area"
@@ -221,13 +218,13 @@ def compute_centers_for_meshing(surface, atrium_present, case_path=None, test_ca
     return center_, boundary_center
 
 
-def get_centers_for_meshing(surface, atrium_present, dir_path, use_flow_extensions=False):
+def get_centers_for_meshing(surface, is_atrium, dir_path, use_flow_extensions=False):
     """
     Get the centers of the inlet and outlets.
 
     Args:
         surface (vtkPolyData): An open surface.
-        atrium_present:
+        is_atrium (bool): True if model represents atrium
         dir_path (str): Path to the case file.
         use_flow_extensions (bool): Turn on/off flow extension.
 
@@ -238,7 +235,7 @@ def get_centers_for_meshing(surface, atrium_present, dir_path, use_flow_extensio
 
     # Check if info exists
     if use_flow_extensions or not path.isfile(path.join(dir_path, dir_path + ".json")):
-        compute_centers_for_meshing(surface, atrium_present, dir_path)
+        compute_centers_for_meshing(surface, is_atrium, dir_path)
 
     # Open info
     parameters = get_parameters(dir_path)
@@ -254,18 +251,18 @@ def get_centers_for_meshing(surface, atrium_present, dir_path, use_flow_extensio
     num_outlets = len(outlets) // 3
     num_inlets = len(inlets) // 3
 
-    if atrium_present and num_inlets != 0:
+    if is_atrium and num_inlets != 0:
         inlets = []
         for i in range(num_inlets):
             inlets += parameters["inlet%d" % i]
-    if not atrium_present and num_outlets != 0:
+    if not is_atrium and num_outlets != 0:
         outlets = []
         for i in range(num_outlets):
             outlets += parameters["outlet%d" % i]
 
     # FIXIT: atrium case has several inlets (instead of inlet) and only one outlet (instead of outlets).
     if inlets == [] and outlets == []:
-        inlets, outlets = compute_centers_for_meshing(surface, atrium_present, dir_path)
+        inlets, outlets = compute_centers_for_meshing(surface, is_atrium, dir_path)
 
         print("The number of outlets =", len(outlets) // 3)
         print("The number of inlets =", len(inlets) // 3)
@@ -274,20 +271,24 @@ def get_centers_for_meshing(surface, atrium_present, dir_path, use_flow_extensio
     return inlets, outlets
 
 
-def dist_sphere_curvature(surface, centerlines, sac_center, misr_max, save_path, factor):
+def dist_sphere_curvature(surface, centerlines, region_center, misr_max, save_path, factor):
     """
+    Determines the target edge length for each cell on the surface, including
+    potential refinement or coarsening of certain user specified areas.
+    Level of refinement/coarseness is determined based on surface curvature.
 
     Args:
-        surface:
-        centerlines:
-        sac_center:
-        misr_max:
-        save_path:
-        factor:
+        surface (vtkPolyData): Input surface model
+        centerlines (vtkPolyData): Centerlines of input model
+        region_center (list): Point representing region to refine
+        misr_max (list): Maximum inscribed sphere radius in region of refinement
+        save_path (str): Location to store processed surface
+        factor (float): Coarsening factor, determining the level of refinement (<1) or coarsening (>1)
 
     Returns:
-
+        surface (vtkPolyData): Processed surface model with info on cell specific target edge length
     """
+
     # Get longest centerline
     length = []
     for i in range(centerlines.GetNumberOfLines()):
@@ -331,8 +332,8 @@ def dist_sphere_curvature(surface, centerlines, sac_center, misr_max, save_path,
     distance_to_sphere = compute_distance_to_sphere(surface, siphon_point)
 
     # Add the center of the sac
-    for i in range(len(sac_center)):
-        distance_to_sphere = compute_distance_to_sphere(distance_to_sphere, sac_center[i],
+    for i in range(len(region_center)):
+        distance_to_sphere = compute_distance_to_sphere(distance_to_sphere, region_center[i],
                                                         distance_scale=0.2 / (misr_max[i] * 2.5))
 
     # Compute curvature
@@ -359,19 +360,23 @@ def dist_sphere_curvature(surface, centerlines, sac_center, misr_max, save_path,
     return distance_to_sphere
 
 
-def dist_sphere_constant(surface, centerlines, sac_center, misr_max, save_path, edge_length):
+def dist_sphere_constant(surface, centerlines, region_center, misr_max, save_path, edge_length):
     """
+    Determines the target edge length for each cell on the surface, including
+    potential refinement or coarsening of certain user specified areas.
+    Level of refinement/coarseness is determined based on user selected region, otherwise a constant target edge length
+    is selected.
 
     Args:
-        surface:
-        centerlines:
-        sac_center:
-        misr_max:
-        save_path:
-        edge_length:
+        surface (vtkPolyData): Input surface model
+        centerlines (vtkPolyData): Centerlines of input model
+        region_center (list): Point representing region to refine
+        misr_max (list): Maximum inscribed sphere radius in region of refinement
+        save_path (str): Location to store processed surface
+        edge_length (float): Target edge length
 
     Returns:
-
+        surface (vtkPolyData): Processed surface model with info on cell specific target edge length
     """
     # Constant meshing method with possible refined area.
     # --- Compute the distanceToCenterlines
@@ -382,15 +387,15 @@ def dist_sphere_constant(surface, centerlines, sac_center, misr_max, save_path, 
     distance_to_sphere = distToCenterlines.Surface
 
     # Reduce element size in region
-    for i in range(len(sac_center)):
+    for i in range(len(region_center)):
         distance_to_sphere = compute_distance_to_sphere(distance_to_sphere,
-                                                        sac_center[i],
+                                                        region_center[i],
                                                         min_distance=edge_length / 3,
                                                         max_distance=edge_length,
                                                         distance_scale=edge_length * 3 / 4 / (misr_max[i] * 2.))
 
     element_size = edge_length + np.zeros((surface.GetNumberOfPoints(), 1))
-    if len(sac_center) != 0:
+    if len(region_center) != 0:
         distance_to_spheres_array = get_point_data_array("DistanceToSpheres", distance_to_sphere)
         element_size = np.minimum(element_size, distance_to_spheres_array)
 
@@ -401,19 +406,22 @@ def dist_sphere_constant(surface, centerlines, sac_center, misr_max, save_path, 
     return distance_to_sphere
 
 
-def dist_sphere_diam(surface, centerlines, sac_center, misr_max, save_path, factor):
+def dist_sphere_diam(surface, centerlines, region_center, misr_max, save_path, factor):
     """
+    Determines the target edge length for each cell on the surface, including
+    potential refinement or coarsening of certain user specified areas.
+    Level of refinement/coarseness is determined based on the distance to the centerline.
 
     Args:
-        surface:
-        centerlines:
-        sac_center:
-        misr_max:
-        save_path:
-        factor:
+        surface (vtkPolyData): Input surface model
+        centerlines (vtkPolyData): Centerlines of input model
+        region_center (list): Point representing region to refine
+        misr_max (list): Maximum inscribed sphere radius in region of refinement
+        save_path (str): Location to store processed surface
+        factor (float): Coarsening factor, determining the level of refinement (<1) or coarsening (>1)
 
     Returns:
-
+        surface (vtkPolyData): Processed surface model with info on cell specific target edge length
     """
     # Meshing method following Owais way.
     # --- Compute the distanceToCenterlines
@@ -433,15 +441,14 @@ def dist_sphere_diam(surface, centerlines, sac_center, misr_max, save_path, fact
     elements_vtk = create_vtk_array(element_size, "Num elements")
     distance_to_sphere.GetPointData().AddArray(elements_vtk)
     element_size = diameter_array / element_size
-    # element_size[element_size < 0.12] = 0.12
 
     # Reduce element size in aneurysm
-    for i in range(len(sac_center)):
+    for i in range(len(region_center)):
         distance_to_sphere = compute_distance_to_sphere(distance_to_sphere,
-                                                        sac_center[i],
+                                                        region_center[i],
                                                         max_distance=100,
                                                         distance_scale=0.2 / (misr_max[i] * 2.))
-    if len(sac_center) == 0:
+    if len(region_center) == 0:
         element_size *= factor
     else:
         distance_to_spheres_array = get_point_data_array("DistanceToSpheres", distance_to_sphere)
@@ -456,12 +463,13 @@ def dist_sphere_diam(surface, centerlines, sac_center, misr_max, save_path, fact
 
 def mesh_alternative(surface):
     """
+    Subdivides and smoothes the input surface model, preparing it for volumetric meshing.
 
     Args:
-        surface:
+        surface (vtkPolyData): Input surface model to be meshed alternatively
 
     Returns:
-
+        surface (vtkPolyData): Smoothed model
     """
     print("--- Meshing failed.")
     print("--- Proceeding with surface smooting and meshing.")
@@ -477,21 +485,21 @@ def mesh_alternative(surface):
 
 
 def compute_distance_to_sphere(surface, center_sphere, radius_sphere=0.0, distance_offset=0.0, distance_scale=0.01,
-                               min_distance=0.2, max_distance=0.3, distanceToSpheresArrayName="DistanceToSpheres"):
+                               min_distance=0.2, max_distance=0.3):
     """
+    Computes cell specific target edge length (distances) based on input criterion.
 
     Args:
-        surface:
-        center_sphere:
-        radius_sphere:
-        distance_offset:
-        distance_scale:
-        min_distance:
-        max_distance:
-        distanceToSpheresArrayName:
+        surface (vtkPolyData): Input surface model
+        center_sphere (list): Point representing region to refine
+        radius_sphere (list): Maximum inscribed sphere radius in region of refinement
+        distance_offset (float): Offsets the relevant region by a offset
+        distance_scale (float): Determines how the distance is scaled based on the distance from the relevant region
+        min_distance (float): Minimum distance away from the relevant region before scaling starts
+        max_distance (float): Maximum distance away from the relevant region before scaling stops
 
     Returns:
-
+        surface (vtkPolyData): Modified surface model with distances
     """
     # Check if there allready exists a distance to spheres
     N = surface.GetNumberOfPoints()
@@ -535,12 +543,14 @@ def compute_distance_to_sphere(surface, center_sphere, radius_sphere=0.0, distan
 
 def generate_mesh(surface):
     """
+    Generates a mesh suitable for CFD from a input surface model.
 
     Args:
-        surface:
+        surface (vtkPolyData): Surface model to be meshed.
 
     Returns:
-
+        mesh (vtkUnstructuredGrid): Output mesh
+        remeshedsurface (vtkPolyData): Remeshed version of the input model
     """
     # Compute the mesh.
     meshGenerator = vmtkscripts.vmtkMeshGenerator()
@@ -570,17 +580,16 @@ def generate_mesh(surface):
 
 def find_boundaries(model_path, mean_inflow_rate, network, mesh, verbose_print, is_atrium):
     """
+    Finds inlet and outlet boundary IDs after complete meshing, including
+    mean flow ratio and area ratios between outlets or inlets (determined by type of model)
 
     Args:
-        model_path:
-        mean_inflow_rate:
-        network:
-        mesh:
-        verbose_print:
-        is_atrium:
-
-    Returns:
-
+        model_path (str): Path to model files
+        mean_inflow_rate (float): Flow rate
+        network (Network): Flow splitting network based on network boundary condition
+        mesh (vtkUnstructuredGrid): Volumetric mesh
+        verbose_print (bool): Prints additional info if True
+        is_atrium (bool): Determines if model represents atrium or artery
     """
     # Extract the surface mesh of the wall
     wallMesh = vtk_compute_threshold(mesh, "CellEntityIds", lower=0.5, upper=1.5)
@@ -655,15 +664,17 @@ def find_boundaries(model_path, mean_inflow_rate, network, mesh, verbose_print, 
 
 def setup_model_network(centerlines, file_name_probe_points, region_center, verbose_print):
     """
+    Sets up network used for network boundary condition model.
 
     Args:
-        centerlines:
-        file_name_probe_points:
-        region_center:
-        verbose_print:
+        centerlines (vtkPolyData): Centerlines representing meshed model
+        file_name_probe_points (str): Save path of probe points
+        region_center (list): List of points representing region of refinement
+        verbose_print (bool): Prints additional info if True
 
     Returns:
-
+        network (Network): Network model
+        probe_points (ndarray): Probe points where velocity and pressure is to be sampled
     """
     # Set the network object used in the scripts for
     # boundary conditions and probes.
@@ -691,20 +702,21 @@ def setup_model_network(centerlines, file_name_probe_points, region_center, verb
     return network, probe_points
 
 
-def compute_flow_rate(atrium_present, inlet, parameters):
+def compute_flow_rate(is_atrium, inlet, parameters):
     """
+    Computes mean flow rate used as boundary condition for pulsatile flow condition
 
     Args:
-        atrium_present:
-        inlet:
-        parameters:
+        is_atrium (bool): Determines if model is atrium or artery
+        inlet (list): List of points representing midpoint of boundaries
+        parameters (dict): Dictionary containing model parameters
 
     Returns:
-
+        mean_inflow_rate (float): Mean inflow rate
     """
     # FIXME: Add plausible boundary conditions for atrial flow
     flow_rate_factor = 0.27
-    if atrium_present:
+    if is_atrium:
         Total_inlet_area = 0
         num_inlets = len(inlet) // 3
         for i in range(num_inlets):
@@ -718,17 +730,15 @@ def compute_flow_rate(atrium_present, inlet, parameters):
 
 def write_mesh(compress_mesh, file_name_surface_name, file_name_vtu_mesh, file_name_xml_mesh, mesh, remeshed_surface):
     """
+    Writes the mesh to DOLFIN format, and compresses to .gz format
 
     Args:
-        compress_mesh:
-        file_name_surface_name:
-        file_name_vtu_mesh:
-        file_name_xml_mesh:
-        mesh:
-        remeshed_surface:
-
-    Returns:
-
+        compress_mesh (bool): Compressed mesh to zipped format
+        file_name_surface_name (str): Path to remeshed surface model
+        file_name_vtu_mesh (str): Path to VTK mesh
+        file_name_xml_mesh (str): Path to XML mesh
+        mesh (vtuUnstructuredGrid): Meshed surface model
+        remeshed_surface (vtkPolyData): Remeshed surface model
     """
     # Write mesh in VTU format
     write_polydata(remeshed_surface, file_name_surface_name)
@@ -746,6 +756,19 @@ def write_mesh(compress_mesh, file_name_surface_name, file_name_vtu_mesh, file_n
 
 def add_flow_extension(surface, centerlines, include_outlet, extension_length=2.0,
                        extension_mode="boundarynormal"):
+    """
+    Adds flow extensions to either all inlets or all outlets with specified extension length.
+
+    Args:
+        surface (vtkPolyData): Surface model to extend
+        centerlines (vtkPolyData): Centerlines in model
+        include_outlet (bool): Determines if outlet should be included or not
+        extension_length (float): Determines length of flow extensions. Factor is multiplied with MISR at relevant boundary
+        extension_mode (str): Determines how extensions are place, either normal to boundary or following centerline direction
+
+    Returns:
+        surface_extended (vtkPolyData): Extended surface model
+    """
     # Mimick behaviour of vmtkflowextensionfilter
     boundaryExtractor = vtkvmtk.vtkvmtkPolyDataBoundaryExtractor()
     boundaryExtractor.SetInputData(surface)
@@ -783,6 +806,6 @@ def add_flow_extension(surface, centerlines, include_outlet, extension_length=2.
     flowExtensionsFilter.SetSigma(1.0)
     flowExtensionsFilter.Update()
 
-    surface = flowExtensionsFilter.GetOutput()
+    surface_extended = flowExtensionsFilter.GetOutput()
 
-    return surface
+    return surface_extended

@@ -13,7 +13,8 @@ from visualize import visualize
 
 def run_pre_processing(filename_model, verbose_print, smoothing_method, smoothing_factor, meshing_method,
                        refine_region, is_atrium, create_flow_extensions, viz, config_path, coarsening_factor,
-                       flow_extension_length, edge_length, region_points, compress_mesh):
+                       inlet_flow_extension_length, outlet_flow_extension_length, edge_length, region_points,
+                       compress_mesh):
     """
     Automatically generate mesh of surface model in .vtu and .xml format, including prescribed
     flow rates at inlet and outlet based on flow network model.
@@ -34,7 +35,8 @@ def run_pre_processing(filename_model, verbose_print, smoothing_method, smoothin
         coarsening_factor (float): Refine or coarsen the standard mesh size with given factor
         region_points (list): User defined points to define which region to refine
         edge_length (float): Edge length used for meshing with constant element size
-        flow_extension_length (float): Factor defining length of flow extensions
+        inlet_flow_extension_length (float): Factor defining length of flow extensions at the inlet(s)
+        outlet_flow_extension_length (float): Factor defining length of flow extensions at the outlet(s)
         compress_mesh (bool): Compresses finalized mesh if True
     """
     # Get paths
@@ -67,10 +69,15 @@ def run_pre_processing(filename_model, verbose_print, smoothing_method, smoothin
     print("--- Load model file\n")
     surface = read_polydata(filename_model)
 
-    if not is_surface_capped(surface) and smoothing_method != "voronoi":
-        print("--- Clipping the models inlets and outlets.\n")
+    # Check if surface is closed and uncapps model if True
+    if is_surface_capped(surface)[0] and smoothing_method != "voronoi":
         if not path.isfile(file_name_clipped_model):
+            print("--- Clipping the models inlets and outlets.\n")
             # TODO: Add input parameters as input to automatedPreProcessing
+            # Value of gradients_limit should be generally low, to detect flat surfaces corresponding
+            # to closed boundaries. Area_limit will set an upper limit of the detected area, may vary between models.
+            # The circleness_limit parameters determines the detected regions similarity to a circle, often assumed
+            # to be close to a circle.
             surface = get_uncapped_surface(surface, gradients_limit=0.01, area_limit=20, circleness_limit=5)
             write_polydata(surface, file_name_clipped_model)
         else:
@@ -225,9 +232,10 @@ def run_pre_processing(filename_model, verbose_print, smoothing_method, smoothin
             # Add extension normal on boundary for atrium models
             extension = "centerlinedirection" if is_atrium else "boundarynormal"
             surface_extended = add_flow_extension(surface, centerlines, include_outlet=False,
-                                                  extension_length=flow_extension_length, extension_mode=extension)
+                                                  extension_length=inlet_flow_extension_length,
+                                                  extension_mode=extension)
             surface_extended = add_flow_extension(surface_extended, centerlines, include_outlet=True,
-                                                  extension_length=flow_extension_length)
+                                                  extension_length=outlet_flow_extension_length)
 
             surface_extended = vmtk_smooth_surface(surface_extended, "laplace", iterations=200)
             write_polydata(surface_extended, file_name_model_flow_ext)
@@ -441,11 +449,18 @@ def read_command_line():
                         type=str2bool,
                         help="Add flow extensions to to the model.")
 
-    parser.add_argument('-fl', '--flowextlen',
-                        dest="flowExtLen",
+    parser.add_argument('-fli', '--inletFlowext',
+                        dest="inletFlowExtLen",
                         default=5,
                         type=float,
-                        help="Length of flow extensions.")
+                        help="Length of flow extensions at inlet(s).")
+
+    parser.add_argument('-flo', '--outletFlowext',
+                        dest="outletFlowExtLen",
+                        default=5,
+                        type=float,
+                        help="Length of flow extensions at outlet(s).")
+
 
     parser.add_argument('-vz', '--visualize',
                         dest="viz",
@@ -479,8 +494,9 @@ def read_command_line():
                 smoothing_factor=args.smoothingFactor, meshing_method=args.meshingMethod,
                 refine_region=args.refineRegion, is_atrium=args.isAtrium,
                 create_flow_extensions=args.flowExtension, viz=args.viz, config_path=args.config,
-                coarsening_factor=args.coarseningFactor, flow_extension_length=args.flowExtLen,
-                edge_length=args.edgeLength, region_points=args.regionPoints, compress_mesh=args.compressMesh)
+                coarsening_factor=args.coarseningFactor, inlet_flow_extension_length=args.inletFlowExtLen,
+                edge_length=args.edgeLength, region_points=args.regionPoints, compress_mesh=args.compressMesh,
+                outlet_flow_extension_length=args.outletFlowExtLen)
 
 
 if __name__ == "__main__":
