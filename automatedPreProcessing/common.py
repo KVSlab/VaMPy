@@ -85,6 +85,7 @@ def provide_region_points(surface, provided_points, dir_path=None):
 
     if provided_points is None:
         # Select seeds
+        print("--- Please select regions to refine in rendered window")
         SeedSelector = vmtkPickPointSeedSelector()
         SeedSelector.SetSurface(triangulated_surface)
         SeedSelector.Execute()

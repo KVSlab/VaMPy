@@ -118,6 +118,9 @@ def run_pre_processing(filename_model, verbose_print, smoothing_method, smoothin
 
     if refine_region:
         regions = get_regions_to_refine(capped_surface, region_points, path.join(dir_path, case_name))
+        for i in range(len(regions) // 3):
+            print("--- Region to refine ({}): {:.3f} {:.3f} {:.3f}"
+                  .format(i + 1, regions[3 * i], regions[3 * i + 1], regions[3 * i + 2]))
 
         centerlineAnu, _, _ = compute_centerlines(source, regions, file_name_refine_region_centerlines, capped_surface,
                                                   resampling=0.1)
@@ -460,7 +463,6 @@ def read_command_line():
                         default=5,
                         type=float,
                         help="Length of flow extensions at outlet(s).")
-
 
     parser.add_argument('-vz', '--visualize',
                         dest="viz",
