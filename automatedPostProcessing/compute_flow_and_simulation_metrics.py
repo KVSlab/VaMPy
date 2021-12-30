@@ -5,12 +5,6 @@ import numpy as np
 from dolfin import *
 from postprocessing_common import read_command_line, epsilon
 
-try:
-    set_log_active(False)
-except NameError:
-    pass
-
-
 def compute_flow_and_simulation_metrics(folder, nu, dt, velocity_degree):
     """
     Computes several flow field characteristics
@@ -120,7 +114,11 @@ def compute_flow_and_simulation_metrics(folder, nu, dt, velocity_degree):
     tmp_file.close()
     assign(u_mean, u)
 
+    counter = 0
     for data in dataset_names:
+
+        counter += 1
+
         if MPI.rank(MPI.comm_world) == 0:
             print(data)
 
@@ -128,55 +126,77 @@ def compute_flow_and_simulation_metrics(folder, nu, dt, velocity_degree):
         f.read(u, data)
 
         # Compute CFL
+        t0 = Timer("CFL")
         u_mag = project(sqrt(inner(u, u)), DG)
         CFL.vector().set_local(u_mag.vector().get_local() / characteristic_edge_length.vector().get_local() * dt)
         CFL.vector().apply("insert")
         CFL_avg.vector().axpy(1, CFL.vector())
+        t0.stop()
 
         # Compute rate-of-strain
+        t0 = Timer("rate of strain")
         rate_of_strain(ssv, u, v, mesh, h)
         ssv_avg.vector().axpy(1, ssv.vector())
+        t0.stop()
 
         # Compute l+
+        t0 = Timer("l plus")
         u_star = np.sqrt(ssv.vector().get_local() * nu)
         l_plus.vector().set_local(u_star * characteristic_edge_length.vector().get_local() / nu)
         l_plus.vector().apply("insert")
         l_plus_avg.vector().axpy(1, l_plus.vector())
+        t0.stop()
 
         # Compute t+
+        t0 = Timer("t plus")
         t_plus.vector().set_local(nu / u_star ** 2)
         t_plus.vector().apply("insert")
         t_plus_avg.vector().axpy(1, t_plus.vector())
+        t0.stop()
 
         # Compute Kolmogorov
+        t0 = Timer("dissipation")
         rate_of_dissipation(dissipation, u, v, mesh, h, nu)
         ssv_ = dissipation.vector().get_local()
         dissipation_avg.vector().axpy(1, dissipation.vector())
+        t0.stop()
 
         # Compute u_prime
+        t0 = Timer("u prime")
         u_prime.vector().set_local(u.vector().get_local() - u_mean.vector().get_local())
         u_prime.vector().apply("insert")
+        t0.stop()
 
         # Compute Turbulent dissipation
+        t0 = Timer("turbulent dissipation")
         rate_of_dissipation(turbulent_dissipation, u_prime, v, mesh, h, nu)
         turbulent_dissipation_avg.vector().axpy(1, turbulent_dissipation.vector())
+        t0.stop()
 
         # Compute length scale
+        t0 = Timer("lendth scale")
         length_scale.vector().set_local((nu ** 3 / ssv_) ** (1. / 4))
         length_scale.vector().apply("insert")
         length_scale_avg.vector().axpy(1, length_scale.vector())
+        t0.stop()
 
         # Compute time scale
+        t0 = Timer("time scale")
         time_scale.vector().set_local((nu / ssv_) ** 0.5)
         time_scale.vector().apply("insert")
         time_scale_avg.vector().axpy(1, time_scale.vector())
+        t0.stop()
 
         # Compute velocity scale
+        t0 = Timer("velocity scale")
         velocity_scale.vector().set_local((ssv_ * nu) ** (1. / 4))
         velocity_scale.vector().apply("insert")
         velocity_scale_avg.vector().axpy(1, velocity_scale.vector())
+        t0.stop()
 
         # Compute both kinetic energy and turbulent kinetic energy
+
+        t0 = Timer("kinetic energy")
         assign(u0, u.sub(0))
         assign(u1, u.sub(1))
         assign(u2, u.sub(2))
@@ -185,7 +205,9 @@ def compute_flow_and_simulation_metrics(folder, nu, dt, velocity_degree):
             0.5 * (u0.vector().get_local() ** 2 + u1.vector().get_local() ** 2 + u2.vector().get_local() ** 2))
         kinetic_energy.vector().apply("insert")
         kinetic_energy_avg.vector().axpy(1, kinetic_energy.vector())
+        t0.stop()
 
+        t0 = Timer("turbulent kinetic energy")
         assign(u0_prime, u_prime.sub(0))
         assign(u1_prime, u_prime.sub(1))
         assign(u2_prime, u_prime.sub(2))
@@ -196,6 +218,10 @@ def compute_flow_and_simulation_metrics(folder, nu, dt, velocity_degree):
                    + u2_prime.vector().get_local() ** 2))
         turbulent_kinetic_energy.vector().apply("insert")
         turbulent_kinetic_energy_avg.vector().axpy(1, turbulent_kinetic_energy.vector())
+        t0.stop()
+
+        if counter % 10 == 0:
+            list_timings(TimingClear.clear, [TimingType.wall])
 
     # Get avg
     N = len(dataset_names)
