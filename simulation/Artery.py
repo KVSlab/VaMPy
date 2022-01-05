@@ -22,6 +22,7 @@ One cardiac cycle is set to 0.951 s from [2], and scaled by a factor of 1000, he
     adults." Physiological measurement 31.3 (2010): 291.
 """
 
+# FEniCS specific command to control the desired level of logging, here set to critical errors
 set_log_level(50)
 
 
@@ -42,22 +43,23 @@ def problem_parameters(commandline_kwargs, NS_parameters, NS_expressions, **NS_n
             # Geometry parameters
             id_in=[],  # Inlet boundary ID
             id_out=[],  # Outlet boundary IDs
-            area_ratio=[],
-            area_inlet=[],
+            area_ratio=[],  # Area ratio for the flow outlets
+            area_inlet=[],  # Area of inlet in [mm^2]
             # Simulation parameters
-            cardiac_cycle=cardiac_cycle,  # Cardiac cycle [ms]
+            cardiac_cycle=cardiac_cycle,  # Duration of cardiac cycle [ms]
             T=cardiac_cycle * number_of_cycles,  # Simulation end time [ms]
             dt=0.0951,  # Time step size [ms]
-            save_probe_frequency=100,  # Save frequency for sampling velocity & pressure at probes along the centerline
-            save_solution_frequency=5,  # Save frequency for post processing
+            dump_probe_frequency=100,  # Dump frequency for sampling velocity & pressure at probes along the centerline
+            save_solution_frequency=5,  # Save frequency for velocity and pressure field
             save_solution_after_cycle=1,  # Store solution after 1 cardiac cycle
             # Oasis specific parameters
             checkpoint=500,  # Checkpoint frequency
-            print_intermediate_info=100,
-            folder="results_artery",
-            mesh_path=commandline_kwargs["mesh_path"],
+            print_intermediate_info=100,  # Frequency for printing solver statistics
+            folder="results_artery",  # Preferred results folder name
+            mesh_path=commandline_kwargs["mesh_path"],  # Path to the mesh
             # Solver parameters
-            velocity_degree=1,
+            velocity_degree=1,  # Polynomial order of finite element for velocity. Normally linear (1) or quadratic (2)
+            pressure_degree=1,  # Polynomial order of finite element for pressure. Normally linear (1)
             use_krylov_solvers=True,
             krylov_solvers=dict(monitor_convergence=False)
         )
@@ -78,48 +80,6 @@ def mesh(mesh_path, **NS_namespace):
     print_mesh_information(mesh)
 
     return mesh
-
-
-def print_mesh_information(mesh):
-    comm = MPI.comm_world
-    local_xmin = mesh.coordinates()[:, 0].min()
-    local_xmax = mesh.coordinates()[:, 0].max()
-    local_ymin = mesh.coordinates()[:, 1].min()
-    local_ymax = mesh.coordinates()[:, 1].max()
-    local_zmin = mesh.coordinates()[:, 2].min()
-    local_zmax = mesh.coordinates()[:, 2].max()
-    xmin = comm.gather(local_xmin, 0)
-    xmax = comm.gather(local_xmax, 0)
-    ymin = comm.gather(local_ymin, 0)
-    ymax = comm.gather(local_ymax, 0)
-    zmin = comm.gather(local_zmin, 0)
-    zmax = comm.gather(local_zmax, 0)
-
-    local_num_cells = mesh.num_cells()
-    local_num_edges = mesh.num_edges()
-    local_num_faces = mesh.num_faces()
-    local_num_facets = mesh.num_facets()
-    local_num_vertices = mesh.num_vertices()
-    num_cells = comm.gather(local_num_cells, 0)
-    num_edges = comm.gather(local_num_edges, 0)
-    num_faces = comm.gather(local_num_faces, 0)
-    num_facets = comm.gather(local_num_facets, 0)
-    num_vertices = comm.gather(local_num_vertices, 0)
-    volume = assemble(Constant(1) * dx(mesh))
-
-    if MPI.rank(MPI.comm_world) == 0:
-        print("=== Mesh information ===")
-        print("X range: {} to {} (delta: {:.4f})".format(min(xmin), max(xmax), max(xmax) - min(xmin)))
-        print("Y range: {} to {} (delta: {:.4f})".format(min(ymin), max(ymax), max(ymax) - min(ymin)))
-        print("Z range: {} to {} (delta: {:.4f})".format(min(zmin), max(zmax), max(zmax) - min(zmin)))
-        print("Number of cells: {}".format(sum(num_cells)))
-        print("Number of cells per processor: {}".format(int(np.mean(num_cells))))
-        print("Number of edges: {}".format(sum(num_edges)))
-        print("Number of faces: {}".format(sum(num_faces)))
-        print("Number of facets: {}".format(sum(num_facets)))
-        print("Number of vertices: {}".format(sum(num_vertices)))
-        print("Volume: {:.4f}".format(volume))
-        print("Number of cells per volume: {:.4f}".format(sum(num_cells) / volume))
 
 
 def create_bcs(t, NS_expressions, V, Q, area_ratio, area_inlet, mesh, mesh_path, nu, id_in, id_out, pressure_degree,
@@ -143,8 +103,8 @@ def create_bcs(t, NS_expressions, V, Q, area_ratio, area_inlet, mesh, mesh_path,
 
     # Load normalized time and flow rate values
     t_values, Q_ = np.loadtxt(path.join(path.dirname(path.abspath(__file__)), "ICA_values")).T
-    Q_values = Q_mean * Q_  # Specific flow rate * Flow wave form
-    t_values *= 1000  # Scale to [ms]
+    Q_values = Q_mean * Q_  # Specific flow rate = Normalized flow wave form * Prescribed flow rate
+    t_values *= 1000  # Scale time in normalised flow wave form to [ms]
     tmp_area, tmp_center, tmp_radius, tmp_normal = compute_boundary_geometry_acrn(mesh, id_in[0], boundary)
 
     # Create Womersley boundary condition at inlet
@@ -188,22 +148,7 @@ def create_bcs(t, NS_expressions, V, Q, area_ratio, area_inlet, mesh, mesh_path,
                 p=bc_p)
 
 
-def get_file_paths(folder):
-    # Create folder where data and solutions (velocity, mesh, pressure) is stored
-    common_path = path.join(folder, "Solutions")
-    if MPI.rank(MPI.comm_world) == 0:
-        if not path.exists(common_path):
-            makedirs(common_path)
-
-    file_p = path.join(common_path, "p.h5")
-    file_u = path.join(common_path, "u.h5")
-    file_u_mean = path.join(common_path, "u_mean.h5")
-    file_mesh = path.join(common_path, "mesh.h5")
-    files = {"u": file_u, "u_mean": file_u_mean, "p": file_p, "mesh": file_mesh}
-
-    return files
-
-
+# Oasis hook called before simulation start
 def pre_solve_hook(mesh, V, Q, newfolder, mesh_path, restart_folder, velocity_degree, cardiac_cycle,
                    save_solution_after_cycle, dt, **NS_namespace):
     # Mesh function
@@ -250,7 +195,8 @@ def pre_solve_hook(mesh, V, Q, newfolder, mesh_path, restart_folder, velocity_de
                 u_mean2=u_mean2, save_solution_at_tstep=save_solution_at_tstep)
 
 
-def temporal_hook(u_, p_, mesh, tstep, save_probe_frequency, eval_dict, newfolder, id_in, id_out, boundary, n,
+# Oasis hook called after each time step
+def temporal_hook(u_, p_, mesh, tstep, dump_probe_frequency, eval_dict, newfolder, id_in, id_out, boundary, n,
                   save_solution_frequency, NS_parameters, NS_expressions, area_ratio, t, save_solution_at_tstep,
                   U, area_inlet, nu, u_mean0, u_mean1, u_mean2, **NS_namespace):
     # Update boundary condition to current time
@@ -283,7 +229,7 @@ def temporal_hook(u_, p_, mesh, tstep, save_probe_frequency, eval_dict, newfolde
     eval_dict["centerline_p_probes"](p_)
 
     # Store sampled velocity and pressure
-    if tstep % save_probe_frequency == 0:
+    if tstep % dump_probe_frequency == 0:
         # Save variables along the centerline for CFD simulation
         # diagnostics and light-weight post processing
         filepath = path.join(newfolder, "Probes")
@@ -339,6 +285,7 @@ def temporal_hook(u_, p_, mesh, tstep, save_probe_frequency, eval_dict, newfolde
         u_mean2.vector().axpy(1, u_[2].vector())
 
 
+# Oasis hook called after the simulation has finished
 def theend_hook(u_mean, u_mean0, u_mean1, u_mean2, T, dt, save_solution_at_tstep, save_solution_frequency,
                 **NS_namespace):
     # get the file path
@@ -362,8 +309,7 @@ def theend_hook(u_mean, u_mean0, u_mean1, u_mean2, T, dt, save_solution_at_tstep
 
 def beta(err, p):
     """
-    Adjusted choice of beta from
-    Gin and Steinman et al., A Dual-Pressure Boundary Condition doi:10.1115/1.1504446
+    Adjusted choice of beta for the dual-pressure boundary condition.
     Ramped up to desired value if flow rate error (err) increases
 
     Args:
@@ -387,9 +333,7 @@ def beta(err, p):
 
 def update_pressure_condition(NS_expressions, area_ratio, boundary, id_in, id_out, mesh, n, tstep, u_):
     """
-    Use Gin and Steinman et al., A Dual-Pressure Boundary Condition
-    for use in Simulations of Bifurcating Conduits
-    as pressure condition
+    Use a dual-pressure boundary condition as pressure condition at outlet.
     """
     Q_in = abs(assemble(dot(u_, n) * ds(id_in[0], domain=mesh, subdomain_data=boundary)))
     Q_outs = []
@@ -431,3 +375,61 @@ def update_pressure_condition(NS_expressions, area_ratio, boundary, id_in, id_ou
                 NS_expressions[out_id].p = p_old * beta(R_err, p_old) * M_err ** E
 
     return Q_ideals, Q_in, Q_outs
+
+
+def print_mesh_information(mesh):
+    comm = MPI.comm_world
+    local_xmin = mesh.coordinates()[:, 0].min()
+    local_xmax = mesh.coordinates()[:, 0].max()
+    local_ymin = mesh.coordinates()[:, 1].min()
+    local_ymax = mesh.coordinates()[:, 1].max()
+    local_zmin = mesh.coordinates()[:, 2].min()
+    local_zmax = mesh.coordinates()[:, 2].max()
+    xmin = comm.gather(local_xmin, 0)
+    xmax = comm.gather(local_xmax, 0)
+    ymin = comm.gather(local_ymin, 0)
+    ymax = comm.gather(local_ymax, 0)
+    zmin = comm.gather(local_zmin, 0)
+    zmax = comm.gather(local_zmax, 0)
+
+    local_num_cells = mesh.num_cells()
+    local_num_edges = mesh.num_edges()
+    local_num_faces = mesh.num_faces()
+    local_num_facets = mesh.num_facets()
+    local_num_vertices = mesh.num_vertices()
+    num_cells = comm.gather(local_num_cells, 0)
+    num_edges = comm.gather(local_num_edges, 0)
+    num_faces = comm.gather(local_num_faces, 0)
+    num_facets = comm.gather(local_num_facets, 0)
+    num_vertices = comm.gather(local_num_vertices, 0)
+    volume = assemble(Constant(1) * dx(mesh))
+
+    if MPI.rank(MPI.comm_world) == 0:
+        print("=== Mesh information ===")
+        print("X range: {} to {} (delta: {:.4f})".format(min(xmin), max(xmax), max(xmax) - min(xmin)))
+        print("Y range: {} to {} (delta: {:.4f})".format(min(ymin), max(ymax), max(ymax) - min(ymin)))
+        print("Z range: {} to {} (delta: {:.4f})".format(min(zmin), max(zmax), max(zmax) - min(zmin)))
+        print("Number of cells: {}".format(sum(num_cells)))
+        print("Number of cells per processor: {}".format(int(np.mean(num_cells))))
+        print("Number of edges: {}".format(sum(num_edges)))
+        print("Number of faces: {}".format(sum(num_faces)))
+        print("Number of facets: {}".format(sum(num_facets)))
+        print("Number of vertices: {}".format(sum(num_vertices)))
+        print("Volume: {:.4f}".format(volume))
+        print("Number of cells per volume: {:.4f}".format(sum(num_cells) / volume))
+
+
+def get_file_paths(folder):
+    # Create folder where data and solutions (velocity, mesh, pressure) is stored
+    common_path = path.join(folder, "Solutions")
+    if MPI.rank(MPI.comm_world) == 0:
+        if not path.exists(common_path):
+            makedirs(common_path)
+
+    file_p = path.join(common_path, "p.h5")
+    file_u = path.join(common_path, "u.h5")
+    file_u_mean = path.join(common_path, "u_mean.h5")
+    file_mesh = path.join(common_path, "mesh.h5")
+    files = {"u": file_u, "u_mean": file_u_mean, "p": file_p, "mesh": file_mesh}
+
+    return files
