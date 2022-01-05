@@ -174,7 +174,7 @@ def compute_flow_and_simulation_metrics(folder, nu, dt, velocity_degree):
         t0.stop()
 
         # Compute length scale
-        t0 = Timer("lendth scale")
+        t0 = Timer("length scale")
         length_scale.vector().set_local((nu ** 3 / ssv_) ** (1. / 4))
         length_scale.vector().apply("insert")
         length_scale_avg.vector().axpy(1, length_scale.vector())
