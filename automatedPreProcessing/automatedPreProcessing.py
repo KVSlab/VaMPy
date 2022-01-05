@@ -2,19 +2,19 @@
 from __future__ import print_function
 
 import argparse
+from os import remove
 
-import ImportData
 import ToolRepairSTL
-from NetworkBoundaryConditions import FlowSplitting
 # Local imports
 from common import *
 from simulate import run_simulation
 from visualize import visualize
 
 
-def run_pre_processing(filename_model, verbose_print, smoothing_method, smoothing_factor, smooth_aneurysm,
-                       meshing_method, aneurysm_present, create_flow_extensions, viz, config_path, number_of_sac_points,
-                       coarsening_factor, compress_mesh):
+def run_pre_processing(filename_model, verbose_print, smoothing_method, smoothing_factor, meshing_method,
+                       refine_region, is_atrium, create_flow_extensions, viz, config_path, coarsening_factor,
+                       inlet_flow_extension_length, outlet_flow_extension_length, edge_length, region_points,
+                       compress_mesh):
     """
     Automatically generate mesh of surface model in .vtu and .xml format, including prescribed
     flow rates at inlet and outlet based on flow network model.
@@ -26,14 +26,17 @@ def run_pre_processing(filename_model, verbose_print, smoothing_method, smoothin
         verbose_print (bool): Toggles verbose mode
         smoothing_method (str): Method for surface smoothing
         smoothing_factor (float): Smoothing parameter
-        smooth_aneurysm (bool): Toggles smoothing of aneurysm (if present)
         meshing_method (str): Method for meshing
-        aneurysm_present (bool): Determines if aneurysm is present
+        refine_region (bool): Refines selected region of input if True
+        is_atrium (bool): Determines whether this is an atrium case
         create_flow_extensions (bool): Adds flow extensions to mesh if True
         viz (bool): Visualize resulting surface model with flow rates
         config_path (str): Path to configuration file for remote simulation
-        number_of_sac_points (int): Number of sac points to evaluate (inside aneurysm)
         coarsening_factor (float): Refine or coarsen the standard mesh size with given factor
+        region_points (list): User defined points to define which region to refine
+        edge_length (float): Edge length used for meshing with constant element size
+        inlet_flow_extension_length (float): Factor defining length of flow extensions at the inlet(s)
+        outlet_flow_extension_length (float): Factor defining length of flow extensions at the outlet(s)
         compress_mesh (bool): Compresses finalized mesh if True
     """
     # Get paths
@@ -43,9 +46,10 @@ def run_pre_processing(filename_model, verbose_print, smoothing_method, smoothin
 
     # Naming conventions
     file_name_centerlines = path.join(dir_path, case_name + "_centerlines.vtp")
-    file_name_aneurysm_centerlines = path.join(dir_path, case_name + "_aneurysm_centerline.vtp")
-    file_name_sac_centerlines = path.join(dir_path, case_name + "_sac_centerline_{}.vtp")
+    file_name_refine_region_centerlines = path.join(dir_path, case_name + "_refine_region_centerline.vtp")
+    file_name_region_centerlines = path.join(dir_path, case_name + "_sac_centerline_{}.vtp")
     file_name_distance_to_sphere_diam = path.join(dir_path, case_name + "_distance_to_sphere_diam.vtp")
+    file_name_distance_to_sphere_const = path.join(dir_path, case_name + "_distance_to_sphere_const.vtp")
     file_name_distance_to_sphere_curv = path.join(dir_path, case_name + "_distance_to_sphere_curv.vtp")
     file_name_probe_points = path.join(dir_path, case_name + "_probe_point")
     file_name_voronoi = path.join(dir_path, case_name + "_voronoi.vtp")
@@ -63,22 +67,26 @@ def run_pre_processing(filename_model, verbose_print, smoothing_method, smoothin
 
     # Open the surface file.
     print("--- Load model file\n")
-    surface = ReadPolyData(filename_model)
+    surface = read_polydata(filename_model)
 
-    if not is_surface_capped and smoothing_method != "voronoi":
-        print("--- Clipping the models inlet and outlets.\n")
+    # Check if surface is closed and uncapps model if True
+    if is_surface_capped(surface)[0] and smoothing_method != "voronoi":
         if not path.isfile(file_name_clipped_model):
-            # TODO: Check if this is a valid call to this method
-            centerline = compute_centerlines([], [], None, surface, method="pickpoint")
-            surface = uncapp_surface(surface, centerline, filename=None)
+            print("--- Clipping the models inlets and outlets.\n")
+            # TODO: Add input parameters as input to automatedPreProcessing
+            # Value of gradients_limit should be generally low, to detect flat surfaces corresponding
+            # to closed boundaries. Area_limit will set an upper limit of the detected area, may vary between models.
+            # The circleness_limit parameters determines the detected regions similarity to a circle, often assumed
+            # to be close to a circle.
+            surface = get_uncapped_surface(surface, gradients_limit=0.01, area_limit=20, circleness_limit=5)
+            write_polydata(surface, file_name_clipped_model)
         else:
-            surface = ReadPolyData(file_name_clipped_model)
-
+            surface = read_polydata(file_name_clipped_model)
     parameters = get_parameters(path.join(dir_path, case_name))
 
     if "check_surface" not in parameters.keys():
-        surface = surface_cleaner(surface)
-        surface = triangulate_surface(surface)
+        surface = vtk_clean_polydata(surface)
+        surface = vtk_triangulate_surface(surface)
 
         # Check the mesh if there is redundant nodes or NaN triangles.
         ToolRepairSTL.surfaceOverview(surface)
@@ -92,34 +100,41 @@ def run_pre_processing(filename_model, verbose_print, smoothing_method, smoothin
             parameters["check_surface"] = True
             write_parameters(parameters, path.join(dir_path, case_name))
 
-    # Capp surface if open
-    if not compute_centers(surface, test_capped=True):
-        capped_surface = capp_surface(surface)
-    else:
-        capped_surface = surface
+    # Create a capped version of the surface
+    capped_surface = vmtk_cap_polydata(surface)
 
     # Get centerlines
     print("--- Get centerlines\n")
-    inlet, outlets = get_centers(surface, path.join(dir_path, case_name))
-    centerlines = compute_centerlines(inlet, outlets, file_name_centerlines,
-                                      capped_surface, resampling=0.1, end_point=0)
-    tol = get_tolerance(centerlines)
+    inlet, outlets = get_centers_for_meshing(surface, is_atrium, path.join(dir_path, case_name))
+    source = outlets if is_atrium else inlet
+    target = inlet if is_atrium else outlets
 
-    if aneurysm_present:
-        aneurysms = get_aneurysm_dome(capped_surface, path.join(dir_path, case_name))
-        centerlineAnu = compute_centerlines(inlet, aneurysms, file_name_aneurysm_centerlines,
-                                            capped_surface, resampling=0.1)
+    centerlines, _, _ = compute_centerlines(source, target, file_name_centerlines, capped_surface, resampling=0.1)
+    tol = get_centerline_tolerance(centerlines)
 
-        # Extract the aneurysm centerline
-        sac_centerline = []
+    # Get 'center' and 'radius' of the regions(s)
+    region_center = []
+    misr_max = []
+
+    if refine_region:
+        regions = get_regions_to_refine(capped_surface, region_points, path.join(dir_path, case_name))
+        for i in range(len(regions) // 3):
+            print("--- Region to refine ({}): {:.3f} {:.3f} {:.3f}"
+                  .format(i + 1, regions[3 * i], regions[3 * i + 1], regions[3 * i + 2]))
+
+        centerlineAnu, _, _ = compute_centerlines(source, regions, file_name_refine_region_centerlines, capped_surface,
+                                                  resampling=0.1)
+
+        # Extract the region centerline
+        refine_region_centerline = []
         info = get_parameters(path.join(dir_path, case_name))
-        num_anu = info["number_of_aneurysms"]
+        num_anu = info["number_of_regions"]
 
         # Compute mean distance between points
         for i in range(num_anu):
-            if not path.isfile(file_name_sac_centerlines.format(i)):
-                line = ExtractSingleLine(centerlineAnu, i)
-                locator = get_locator(centerlines)
+            if not path.isfile(file_name_region_centerlines.format(i)):
+                line = extract_single_line(centerlineAnu, i)
+                locator = get_vtk_point_locator(centerlines)
                 for j in range(line.GetNumberOfPoints() - 1, 0, -1):
                     point = line.GetPoints().GetPoint(j)
                     ID = locator.FindClosestPoint(point)
@@ -128,29 +143,22 @@ def run_pre_processing(filename_model, verbose_print, smoothing_method, smoothin
                     if dist <= tol:
                         break
 
-                tmp = ExtractSingleLine(line, 0, start_id=j)
-                WritePolyData(tmp, file_name_sac_centerlines.format(i))
+                tmp = extract_single_line(line, 0, start_id=j)
+                write_polydata(tmp, file_name_region_centerlines.format(i))
 
                 # List of VtkPolyData sac(s) centerline
-                sac_centerline.append(tmp)
+                refine_region_centerline.append(tmp)
 
             else:
-                sac_centerline.append(ReadPolyData(file_name_sac_centerlines.format(i)))
+                refine_region_centerline.append(read_polydata(file_name_region_centerlines.format(i)))
 
-    else:
-        num_anu = 0
-
-    # Get 'center' and 'radius' of the aneurysm(s)
-    sac_center = []
-    misr_max = []
-
-    if aneurysm_present:
         # Merge the sac centerline
-        sac_centerlines = merge_data(sac_centerline)
+        region_centerlines = vtk_merge_polydata(refine_region_centerline)
 
-        for sac in sac_centerline:
-            sac_center.append(sac.GetPoints().GetPoint(sac.GetNumberOfPoints() // 2))
-            tmp_misr = get_array(radiusArrayName, sac)
+        for region in refine_region_centerline:
+            region_factor = 0.9 if is_atrium else 0.5
+            region_center.append(region.GetPoints().GetPoint(int(region.GetNumberOfPoints() * region_factor)))
+            tmp_misr = get_point_data_array(radiusArrayName, region)
             misr_max.append(tmp_misr.max())
 
     # Smooth surface
@@ -159,35 +167,35 @@ def run_pre_processing(filename_model, verbose_print, smoothing_method, smoothin
         if not path.isfile(file_name_surface_smooth):
             # Get Voronoi diagram
             if not path.isfile(file_name_voronoi):
-                voronoi = makeVoronoiDiagram(surface, file_name_voronoi)
-                WritePolyData(voronoi, file_name_voronoi)
+                voronoi = make_voronoi_diagram(surface, file_name_voronoi)
+                write_polydata(voronoi, file_name_voronoi)
             else:
-                voronoi = ReadPolyData(file_name_voronoi)
+                voronoi = read_polydata(file_name_voronoi)
 
             # Get smooth Voronoi diagram
             if not path.isfile(file_name_voronoi_smooth):
-                if aneurysm_present:
-                    smooth_voronoi = SmoothVoronoiDiagram(voronoi, centerlines, smoothing_factor, sac_centerlines)
+                if refine_region:
+                    smooth_voronoi = smooth_voronoi_diagram(voronoi, centerlines, smoothing_factor, region_centerlines)
                 else:
-                    smooth_voronoi = SmoothVoronoiDiagram(voronoi, centerlines, smoothing_factor)
+                    smooth_voronoi = smooth_voronoi_diagram(voronoi, centerlines, smoothing_factor)
 
-                WritePolyData(smooth_voronoi, file_name_voronoi_smooth)
+                write_polydata(smooth_voronoi, file_name_voronoi_smooth)
             else:
-                smooth_voronoi = ReadPolyData(file_name_voronoi_smooth)
+                smooth_voronoi = read_polydata(file_name_voronoi_smooth)
 
             # Envelope the smooth surface
             surface = create_new_surface(smooth_voronoi)
 
             # Uncapp the surface
-            surface_uncapped = uncapp_surface(surface, centerlines, filename=None)
+            surface_uncapped = get_uncapped_surface(surface)
 
             # Check if there has been added new outlets
             num_outlets = centerlines.GetNumberOfLines()
-            num_outlets_after = compute_centers(surface_uncapped, test_capped=True)[1]
+            num_outlets_after = compute_centers(surface_uncapped, is_atrium, test_capped=True)[1]
 
             if num_outlets != num_outlets_after:
-                surface = vmtkSmoother(surface, "laplace", iterations=200)
-                WritePolyData(surface, file_name_surface_smooth)
+                surface = vmtk_smooth_surface(surface, "laplace", iterations=200)
+                write_polydata(surface, file_name_surface_smooth)
                 print(("ERROR: Automatic clipping failed. You have to open {} and " +
                        "manually clipp the branch which still is capped. " +
                        "Overwrite the current {} and restart the script.").format(
@@ -198,36 +206,24 @@ def run_pre_processing(filename_model, verbose_print, smoothing_method, smoothin
 
             # Smoothing to improve the quality of the elements
             # Consider to add a subdivision here as well.
-            surface = vmtkSmoother(surface, "laplace", iterations=200)
+            surface = vmtk_smooth_surface(surface, "laplace", iterations=200)
 
             # Write surface
-            WritePolyData(surface, file_name_surface_smooth)
+            write_polydata(surface, file_name_surface_smooth)
 
         else:
-            surface = ReadPolyData(file_name_surface_smooth)
+            surface = read_polydata(file_name_surface_smooth)
 
-
-    elif smoothing_method == "laplace":
-        print("--- Smooth surface: Laplacian smoothing\n")
+    elif smoothing_method in ["laplace", "taubin"]:
+        print("--- Smooth surface: {} smoothing\n".format(smoothing_method.capitalize()))
         if not path.isfile(file_name_surface_smooth):
-            surface = vmtkSmoother(surface, smoothing_method)
+            surface = vmtk_smooth_surface(surface, smoothing_method, iterations=400)
 
             # Save the smoothed surface
-            WritePolyData(surface, file_name_surface_smooth)
+            write_polydata(surface, file_name_surface_smooth)
 
         else:
-            surface = ReadPolyData(file_name_surface_smooth)
-
-    elif smoothing_method == "taubin":
-        print("--- Smooth surface: Taubin smoothing\n")
-        if not path.isfile(file_name_surface_smooth):
-            surface = vmtkSmoother(surface, smoothing_method)
-
-            # Save the smoothed surface
-            WritePolyData(surface, file_name_surface_smooth)
-
-        else:
-            surface = ReadPolyData(file_name_surface_smooth)
+            surface = read_polydata(file_name_surface_smooth)
 
     elif smoothing_method == "no_smooth" or None:
         print("--- No smoothing of surface\n")
@@ -235,57 +231,62 @@ def run_pre_processing(filename_model, verbose_print, smoothing_method, smoothin
     # Add flow extensions
     if create_flow_extensions:
         if not path.isfile(file_name_model_flow_ext):
-            print("--- Adding flow extensions")
-            extension = 5
+            print("--- Adding flow extensions\n")
+            # Add extension normal on boundary for atrium models
+            extension = "centerlinedirection" if is_atrium else "boundarynormal"
+            surface_extended = add_flow_extension(surface, centerlines, include_outlet=False,
+                                                  extension_length=inlet_flow_extension_length,
+                                                  extension_mode=extension)
+            surface_extended = add_flow_extension(surface_extended, centerlines, include_outlet=True,
+                                                  extension_length=outlet_flow_extension_length)
 
-            extender = vmtkscripts.vmtkFlowExtensions()
-            extender.Surface = surface
-            extender.AdaptiveExtensionLength = 1
-            extender.ExtensionRatio = extension
-            extender.Centerlines = centerlines
-            extender.ExtensionMode = "boundarynormal"
-            extender.CenterlineNormalEstimationDistanceRatio = 1.0
-            extender.Interactive = 0
-            extender.Execute()
-
-            surface = extender.Surface
-            surface = vmtkSmoother(surface, "laplace", iterations=200)
-            WritePolyData(surface, file_name_model_flow_ext)
-
+            surface_extended = vmtk_smooth_surface(surface_extended, "laplace", iterations=200)
+            write_polydata(surface_extended, file_name_model_flow_ext)
         else:
-            surface = ReadPolyData(file_name_model_flow_ext)
+            surface_extended = read_polydata(file_name_model_flow_ext)
+    else:
+        surface_extended = surface
 
     # Capp surface with flow extensions
-    capped_surface = capp_surface(surface)
+    capped_surface = vmtk_cap_polydata(surface_extended)
 
     # Get new centerlines with the flow extensions
-    if not path.isfile(file_name_flow_centerlines):
-        print("--- Compute the model centerlines with flow extension.")
-        # Compute the centerlines.
-        inlet, outlets = get_centers(surface, path.join(dir_path, case_name), flowext=True)
-        centerlines = compute_centerlines(inlet, outlets, file_name_flow_centerlines, capped_surface, resampling=0.5)
+    if create_flow_extensions:
+        if not path.isfile(file_name_flow_centerlines):
+            print("--- Compute the model centerlines with flow extension.\n")
+            # Compute the centerlines.
+            inlet, outlets = get_centers_for_meshing(surface_extended, is_atrium, path.join(dir_path, case_name),
+                                                     use_flow_extensions=True)
+            # FIXME: There are several inlets and one outlet for atrium case
+            source = outlets if is_atrium else inlet
+            target = inlet if is_atrium else outlets
+            centerlines, _, _ = compute_centerlines(source, target, file_name_flow_centerlines, capped_surface,
+                                                    resampling=0.1)
 
-    else:
-        centerlines = ReadPolyData(file_name_flow_centerlines)
+        else:
+            centerlines = read_polydata(file_name_flow_centerlines)
 
     # Choose input for the mesh
-    print("--- Computing distance to sphere")
-    if meshing_method == "curvature":
+    print("--- Computing distance to sphere\n")
+    if meshing_method == "constant":
+        if not path.isfile(file_name_distance_to_sphere_const):
+            distance_to_sphere = dist_sphere_constant(surface_extended, centerlines, region_center, misr_max,
+                                                      file_name_distance_to_sphere_const, edge_length)
+        else:
+            distance_to_sphere = read_polydata(file_name_distance_to_sphere_const)
+
+    elif meshing_method == "curvature":
         if not path.isfile(file_name_distance_to_sphere_curv):
-            distance_to_sphere = dist_sphere_curv(surface, centerlines,
-                                                  sac_center, misr_max,
-                                                  file_name_distance_to_sphere_curv,
-                                                  coarsening_factor)
+            distance_to_sphere = dist_sphere_curvature(surface_extended, centerlines, region_center, misr_max,
+                                                       file_name_distance_to_sphere_curv, coarsening_factor)
         else:
-            distance_to_sphere = ReadPolyData(file_name_distance_to_sphere_curv)
-    else:
+            distance_to_sphere = read_polydata(file_name_distance_to_sphere_curv)
+    elif meshing_method == "diameter":
         if not path.isfile(file_name_distance_to_sphere_diam):
-            distance_to_sphere = dist_sphere_diam(surface, centerlines,
-                                                  sac_center, misr_max,
-                                                  file_name_distance_to_sphere_diam,
-                                                  coarsening_factor)
+            distance_to_sphere = dist_sphere_diam(surface_extended, centerlines, region_center, misr_max,
+                                                  file_name_distance_to_sphere_diam, coarsening_factor)
         else:
-            distance_to_sphere = ReadPolyData(file_name_distance_to_sphere_diam)
+            distance_to_sphere = read_polydata(file_name_distance_to_sphere_diam)
 
     # Compute mesh
     if not path.isfile(file_name_vtu_mesh):
@@ -303,138 +304,27 @@ def run_pre_processing(filename_model, verbose_print, smoothing_method, smoothin
             assert remeshed_surface.GetNumberOfPoints() > 0, \
                 "No points in surface mesh, try to remesh"
 
-        # Write mesh in VTU format
-        WritePolyData(remeshed_surface, file_name_surface_name)
-        WritePolyData(mesh, file_name_vtu_mesh)
-
-        # Write mesh to FEniCS to format
-        meshWriter = vmtkscripts.vmtkMeshWriter()
-        meshWriter.CellEntityIdsArrayName = "CellEntityIds"
-        meshWriter.Mesh = mesh
-        meshWriter.Mode = "ascii"
-        meshWriter.Compressed = compress_mesh
-        meshWriter.OutputFileName = file_name_xml_mesh
-        meshWriter.Execute()
-        polyDataVolMesh = mesh
+        write_mesh(compress_mesh, file_name_surface_name, file_name_vtu_mesh, file_name_xml_mesh,
+                   mesh, remeshed_surface)
 
     else:
-        polyDataVolMesh = ReadPolyData(file_name_vtu_mesh)
+        mesh = read_polydata(file_name_vtu_mesh)
 
-    # Set the network object used in the scripts for 
-    # boundary conditions and probes.
-    network = ImportData.Network()
-    centerlinesBranches = ImportData.SetNetworkStructure(centerlines, network, verbose_print)
-
-    if not path.isfile(file_name_probe_points):
-        # Get the list of coordinates for the probe points along the network centerline.
-        listProbePoints = ImportData.GetListProbePoints(centerlinesBranches, network, verbose_print)
-        listProbePoints += sac_center
-
-        # Add points randomly in the sac.
-        # FIXME: This is not robust enough. Suggestion to fix: Extract the
-        # second half of the sac centerline, then get all points from the
-        # voronoi diagram which is closest to that part compared to any ther
-        # centerlines. Then randomly chose among those points. For now, simply
-        # add just one point (sac_center).
-        # numberOfPoints = numberOfSacPoints
-        # for k in range(num_anu):
-        #    u = np.random.uniform(0.0, 1.0, (numberOfPoints, 1))
-        #    theta = np.random.uniform(0., 1., (numberOfPoints, 1)) * np.pi
-        #    phi = np.arccos(1 - 2 * np.random.uniform(0.0, 1., (numberOfPoints, 1)))
-        #    radius = misr_max[k] * u**(0.3333)
-        #    x = radius * np.sin(theta) * np.cos(phi)
-        #    y = radius * np.sin(theta) * np.sin(phi)
-        #    z = radius * np.cos(theta)
-        #    for i in range(len(x)):
-        #        listProbePoints.append([np.array(misr_max_center[k][0] + x[i]).tolist()[0],
-        #                                np.array(misr_max_center[k][1] + y[i]).tolist()[0],
-        #                                np.array(misr_max_center[k][2] + z[i]).tolist()[0]])
-
-        print("--- Saving probes points in: ", file_name_probe_points)
-        probe_points = np.array(listProbePoints)
-        probe_points.dump(file_name_probe_points)
-    else:
-        probe_points = np.load(file_name_probe_points, allow_pickle=True)
-
-    # Set the flow split and inlet boundary condition
-    # Compute the outlet boundary condition percentages.
-    flowSplitting = FlowSplitting()
-    flowSplitting.ComputeAlphas(network, verbose_print)
-    flowSplitting.ComputeBetas(network, verbose_print)
-    flowSplitting.CheckTotalFlowRate(network, verbose_print)
+    network, probe_points = setup_model_network(centerlines, file_name_probe_points, region_center, verbose_print)
 
     # BSL method for mean inlet flow rate.
     parameters = get_parameters(path.join(dir_path, case_name))
-    mean_inflow_rate = 0.27 * parameters["inlet_area"]
 
-    # Extract the surface mesh of the wall
-    wallMesh = threshold(polyDataVolMesh, "CellEntityIds", lower=0.5, upper=1.5)
+    print("--- Computing flow rates and flow split, and setting boundary IDs\n")
+    mean_inflow_rate = compute_flow_rate(is_atrium, inlet, parameters)
 
-    boundaryReferenceSystems = vmtkscripts.vmtkBoundaryReferenceSystems()
-    boundaryReferenceSystems.Surface = wallMesh
-    boundaryReferenceSystems.Execute()
-    refSystem = boundaryReferenceSystems.ReferenceSystems
-    cellEntityIdsArray = get_vtk_array('CellEntityIds', 0, refSystem.GetNumberOfPoints())
-    refSystem.GetPointData().AddArray(cellEntityIdsArray)
-
-    # Extract the surface mesh of the end caps
-    boundarySurface = threshold(polyDataVolMesh, "CellEntityIds", upper=1.5, type="upper")
-
-    pointCells = vtk.vtkIdList()
-    surfaceCellEntityIdsArray = vtk.vtkIntArray()
-    surfaceCellEntityIdsArray.DeepCopy(boundarySurface.GetCellData().GetArray('CellEntityIds'))
-
-    # Find the corresponding couple (mesh outlet ID, network ID).
-    ids = []
-    for i in range(refSystem.GetNumberOfPoints()):
-        distancePoints = 10000000
-        pointId = boundarySurface.FindPoint(refSystem.GetPoint(i))
-        boundarySurface.GetPointCells(pointId, pointCells)
-        cellId = pointCells.GetId(0)
-        cellEntityId = surfaceCellEntityIdsArray.GetValue(cellId)
-        cellEntityIdsArray.SetValue(i, cellEntityId)
-
-        meshPoint = refSystem.GetPoint(i)
-        for element in network.elements:
-            if element.IsAnOutlet():
-                networkPoint = element.GetOutPointsx1()[0]
-            if element.IsAnInlet():
-                networkPoint = element.GetInPointsx0()[0]
-            if vtk.vtkMath.Distance2BetweenPoints(meshPoint, networkPoint) < distancePoints:
-                distancePoints = vtk.vtkMath.Distance2BetweenPoints(meshPoint, networkPoint)
-                closest = element.GetId()
-        if network.elements[closest].IsAnInlet():
-            verbose_print('I am the inlet, Sup?')
-            verbose_print(network.elements[closest].GetInPointsx0()[0])
-            ids.insert(0, [cellEntityId, mean_inflow_rate])
-        else:
-            beta = network.elements[closest].GetBeta()
-            ids.append([cellEntityId, beta])
-            verbose_print(beta)
-            verbose_print(network.elements[closest].GetOutPointsx1()[0])
-        verbose_print('CellEntityId: %d\n' % cellEntityId)
-        verbose_print('meshPoint: %f, %f, %f\n' % (meshPoint[0], meshPoint[1], meshPoint[2]))
-        verbose_print(ids)
-
-    # Store information for the solver.
-    idFileLine = case_name + ' ' + repr(ids[0][0] - 1) + ' '
-    areaRatioLine = case_name + ' '
-    for k in range(1, refSystem.GetNumberOfPoints() - 1):
-        idFileLine += repr(ids[k][0] - 1) + ','
-        areaRatioLine += repr(ids[k][1]) + ','
-    idFileLine += repr(ids[-1][0] - 1) + ' ' + repr(ids[0][1])
-    areaRatioLine += repr(ids[-1][1])
-    info = {"inlet_area": parameters["inlet_area"],
-            "idFileLine": str(idFileLine),
-            "areaRatioLine": str(areaRatioLine)
-            }
-    write_parameters(info, path.join(dir_path, case_name))
+    find_boundaries(path.join(dir_path, case_name), mean_inflow_rate, network, mesh, verbose_print, is_atrium)
 
     # Display the flow split at the outlets, inlet flow rate, and probes.
     if viz:
         print("--- Visualizing flow split at outlets, inlet flow rate, and probes in VTK render window. ")
         print("--- Press 'q' inside the render window to exit.")
-        visualize(network.elements, probe_points, surface, mean_inflow_rate)
+        visualize(network.elements, probe_points, surface_extended, mean_inflow_rate)
 
     # Start simulation though ssh, without password
     if config_path is not None:
@@ -458,32 +348,23 @@ def run_pre_processing(filename_model, verbose_print, smoothing_method, smoothin
 
         run_simulation(config_path, dir_path, case_name)
 
-
-def str2bool(arg):
-    """
-    Convert a string to boolean.
-
-    Args:
-        arg (str): Input string.
-
-    Returns:
-        return (bool): Converted string.
-    """
-    if arg.lower() in ('yes', 'true', 't', 'y', '1'):
-        return True
-    elif arg.lower() in ('no', 'false', 'f', 'n', '0'):
-        return False
-    else:
-        raise argparse.ArgumentTypeError('Boolean value expected.')
+    print("--- Removing unused pre-processing files")
+    files_to_remove = [file_name_centerlines, file_name_refine_region_centerlines, file_name_region_centerlines,
+                       file_name_distance_to_sphere_diam, file_name_distance_to_sphere_const,
+                       file_name_distance_to_sphere_curv, file_name_voronoi, file_name_voronoi_smooth,
+                       file_name_surface_smooth, file_name_model_flow_ext, file_name_clipped_model,
+                       file_name_flow_centerlines, file_name_surface_name]
+    for file in files_to_remove:
+        if path.exists(file):
+            remove(file)
 
 
 def read_command_line():
     """
     Read arguments from commandline and return all values in a dictionary.
     """
-    '''Command-line arguments.'''
     parser = argparse.ArgumentParser(
-        description="Automatic pre-processing for FEniCS.")
+        description="Automated pre-processing for vascular modeling.")
 
     parser.add_argument('-v', '--verbosity',
                         dest='verbosity',
@@ -513,14 +394,14 @@ def read_command_line():
                         choices=["voronoi", "no_smooth", "laplace", "taubin"],
                         help="Smoothing method, for now only Voronoi smoothing is available." +
                              " For Voronoi smoothing you can also control smoothingFactor" +
-                             " (default = 0.25)  and smoothingAneurysm (default = False).")
+                             " (default = 0.25).")
 
     parser.add_argument('-c', '--coarseningFactor',
                         type=float,
                         required=False,
                         dest='coarseningFactor',
                         default=1.0,
-                        help="Refine or coarsen the standard mesh size")
+                        help="Refine or coarsen the standard mesh size. The higher the value the coarser the mesh.")
 
     parser.add_argument('-sF', '--smoothingFactor',
                         type=float,
@@ -530,42 +411,64 @@ def read_command_line():
                         help="smoothingFactor for VoronoiSmoothing, removes all spheres which" +
                              " has a radius < MISR*(1-0.25), where MISR varying along the centerline.")
 
-    parser.add_argument('-sA', '--smoothAneurysm',
-                        type=str2bool,
-                        required=False,
-                        dest="smoothingAneurysm",
-                        help="When using Voronoi smoothing one can choose not to smooth the" +
-                             " aneurysm as this method often removes to much of the aneurysm")
-
     parser.add_argument('-m', '--meshingMethod',
                         dest="meshingMethod",
                         type=str,
-                        choices=["diameter", "curvature"],
+                        choices=["diameter", "curvature", "constant"],
                         default="diameter")
 
-    parser.add_argument('-a', '--aneurysm',
-                        dest="aneu",
+    parser.add_argument('-el', '--edge-length',
+                        dest="edgeLength",
+                        default=None,
+                        type=float,
+                        help="Characteristic edge length used for meshing.")
+
+    parser.add_argument('-r', '--refine-region',
+                        dest="refineRegion",
                         type=str2bool,
                         default=False,
-                        help="Determine weather or not the model has a aneurysm. Default is False.")
+                        help="Determine weather or not to refine a specific region of " +
+                             "the input model. Default is False.")
+
+    parser.add_argument('-rp', '--region-points',
+                        dest="regionPoints",
+                        type=float,
+                        nargs="+",
+                        default=None,
+                        help="If -r or --refine-region is True, the user can provide the point(s)"
+                             " which defines the regions to refine. " +
+                             "Example providing the points (0.1, 5.0, -1) and (1, -5.2, 3.21):" +
+                             " --region-points 0.1 5 -1 1 5.24 3.21")
+
+    parser.add_argument('-at', '--atrium',
+                        dest="isAtrium",
+                        type=str2bool,
+                        default=False,
+                        help="Determine weather or not the model is an Atrium model. Default is False.")
 
     parser.add_argument('-f', '--flowext',
-                        dest="fext",
+                        dest="flowExtension",
                         default=True,
                         type=str2bool,
                         help="Add flow extensions to to the model.")
+
+    parser.add_argument('-fli', '--inletFlowext',
+                        dest="inletFlowExtLen",
+                        default=5,
+                        type=float,
+                        help="Length of flow extensions at inlet(s).")
+
+    parser.add_argument('-flo', '--outletFlowext',
+                        dest="outletFlowExtLen",
+                        default=5,
+                        type=float,
+                        help="Length of flow extensions at outlet(s).")
 
     parser.add_argument('-vz', '--visualize',
                         dest="viz",
                         default=True,
                         type=str2bool,
                         help="Visualize surface, inlet, outlet and probes after meshing.")
-
-    parser.add_argument('-sp', '--sacpoints',
-                        type=int,
-                        help='Number of sac points to add',
-                        default=20,
-                        dest="sacpts")
 
     parser.add_argument('--simulationConfig',
                         type=str,
@@ -590,10 +493,12 @@ def read_command_line():
     verbose_print(args)
 
     return dict(filename_model=args.fileNameModel, verbose_print=verbose_print, smoothing_method=args.smoothingMethod,
-                smoothing_factor=args.smoothingFactor, smooth_aneurysm=args.smoothingAneurysm,
-                meshing_method=args.meshingMethod, aneurysm_present=args.aneu, create_flow_extensions=args.fext,
-                viz=args.viz, config_path=args.config, number_of_sac_points=args.sacpts,
-                coarsening_factor=args.coarseningFactor, compress_mesh=args.compressMesh)
+                smoothing_factor=args.smoothingFactor, meshing_method=args.meshingMethod,
+                refine_region=args.refineRegion, is_atrium=args.isAtrium,
+                create_flow_extensions=args.flowExtension, viz=args.viz, config_path=args.config,
+                coarsening_factor=args.coarseningFactor, inlet_flow_extension_length=args.inletFlowExtLen,
+                edge_length=args.edgeLength, region_points=args.regionPoints, compress_mesh=args.compressMesh,
+                outlet_flow_extension_length=args.outletFlowExtLen)
 
 
 if __name__ == "__main__":

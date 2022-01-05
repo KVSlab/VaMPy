@@ -2,6 +2,7 @@ from argparse import ArgumentParser
 
 try:
     from dolfin import *
+
     try:
         parameters["allow_extrapolation"] = True
     except NameError:
@@ -14,8 +15,8 @@ def read_command_line():
     """Read arguments from commandline"""
     parser = ArgumentParser()
 
-    parser.add_argument('--case', type=str, default="/results_folder/1/VTK", help="Path to simulation results",
-                        metavar="PATH")
+    parser.add_argument('--case', type=str, default="simulation/results_folder/1/Solutions",
+                        help="Path to simulation results", metavar="PATH")
     parser.add_argument('--nu', type=float, default=3.3018e-3,
                         help="Kinematic viscosity used in simulation, measured in [mm^2/ms]")
     parser.add_argument('--rho', type=float, default=1060,

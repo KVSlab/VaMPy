@@ -4,10 +4,9 @@ from os import path, makedirs
 from pprint import pprint
 
 import numpy as np
-from oasis.problems.NSfracStep import *
-
 from Probe import Probes
 from Womersley import make_womersley_bcs, compute_boundary_geometry_acrn
+from oasis.problems.NSfracStep import *
 
 """
 Problem file for running CFD simulation in arterial models consisting of one inlet, and two or more outlets.
@@ -40,7 +39,7 @@ def problem_parameters(commandline_kwargs, NS_parameters, NS_expressions, **NS_n
 
         NS_parameters.update(
             # Fluid parameters
-            nu=3.3018e-3,  # Kinematic viscosity
+            nu=3.3018e-3,  # Kinematic viscosity: 0.0035 Pa-s / 1060 kg/m^3 = 3.3018E-6 m^2/s = 3.3018-3 mm^2/ms
             # Geometry parameters
             id_in=[],  # Inlet boundary ID
             id_out=[],  # Outlet boundary IDs
@@ -87,20 +86,20 @@ def create_bcs(t, NS_expressions, V, Q, area_ratio, area_inlet, mesh, mesh_path,
                **NS_namespace):
     # Mesh function
     boundary = MeshFunction("size_t", mesh, mesh.geometry().dim() - 1, mesh.domains())
-    boundary.set_values(boundary.array())
 
     # Read case parameters
-    parameters_file_path = mesh_path.split(".xml")[0] + ".json"
-    with open(parameters_file_path) as f:
-        parameters = json.load(f)
+    info = mesh_path.split(".xml")[0] + "_info.json"
+    with open(info) as f:
+        info = json.load(f)
 
-    # Extract flow split ratios and inlet/outlet IDs
-    id_info = parameters['idFileLine'].split()
-    id_in.append(int(id_info[1]))
-    id_out[:] = [int(p) for p in id_info[2].split(",")]
-    Q_mean = float(id_info[3])
-    area_ratio[:] = [float(p) for p in parameters['areaRatioLine'].split()[-1].split(",")]
-    area_inlet.append(float(parameters['inlet_area']))
+    id_in[:] = info['inlet_id']
+    id_out[:] = info['outlet_ids']
+    id_wall = min(id_in + id_out) - 1
+
+    Q_mean = info['mean_flow_rate']
+
+    area_ratio[:] = info['area_ratio']
+    area_inlet.append(info['inlet_area'])
 
     # Load normalized time and flow rate values
     t_values, Q_ = np.loadtxt(path.join(path.dirname(path.abspath(__file__)), "ICA_values")).T
@@ -139,7 +138,7 @@ def create_bcs(t, NS_expressions, V, Q, area_ratio, area_inlet, mesh, mesh_path,
     wall = Constant(0.0)
 
     # Create Boundary conditions for the velocity
-    bc_wall = DirichletBC(V, wall, boundary, 0)
+    bc_wall = DirichletBC(V, wall, boundary, id_wall)
     bc_inlet = [DirichletBC(V, inlet[i], boundary, id_in[0]) for i in range(3)]
 
     # Return boundary conditions in dictionary
@@ -154,7 +153,6 @@ def pre_solve_hook(mesh, V, Q, newfolder, mesh_path, restart_folder, velocity_de
                    save_solution_after_cycle, dt, **NS_namespace):
     # Mesh function
     boundary = MeshFunction("size_t", mesh, mesh.geometry().dim() - 1, mesh.domains())
-    boundary.set_values(boundary.array())
 
     # Create point for evaluation
     n = FacetNormal(mesh)
@@ -267,9 +265,9 @@ def temporal_hook(u_, p_, mesh, tstep, dump_probe_frequency, eval_dict, newfolde
 
         # Get save paths
         files = NS_parameters['files']
-        file_mode = "w" if tstep == save_solution_frequency else "a"
         p_path = files['p']
         u_path = files['u']
+        file_mode = "w" if not path.exists(p_path) else "a"
 
         # Save pressure
         viz_p = HDF5File(MPI.comm_world, p_path, file_mode=file_mode)
