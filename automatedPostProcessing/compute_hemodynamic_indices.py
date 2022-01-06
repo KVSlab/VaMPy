@@ -10,8 +10,6 @@ try:
 except NameError:
     pass
 
-from IPython import embed
-
 def compute_hemodynamic_indices(case_path, nu, rho, dt, velocity_degree):
     """
     Loads velocity fields from completed CFD simulation,
