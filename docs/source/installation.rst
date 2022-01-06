@@ -40,6 +40,15 @@ Therefore, to install the `morphMan <https://github.com/KVSlab/morphMan>`_ softw
 
 You can then activate your environment by running ``source activate morphman``.
 
+.. WARNING:: You may experience errors regarding compatibility if Anaconda already has been configured with certain channels. To resolve this issue you can remove conflicting channels using::
+
+    conda config --remove channels [CHANNEL NAME]
+
+  Alternatively, you set your Anaconda channel priority to *flexible*, with the following command::
+
+    conda config --set channel_priority flexible
+
+
 Installing FEniCS and Oasis
 ===========================
 The next step is to create a separate environment for `FEniCS <https://fenicsproject.org/>`_, and installing `Oasis <https://github.com/mikaem/Oasis>`_.
