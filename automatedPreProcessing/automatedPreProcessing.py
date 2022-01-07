@@ -14,7 +14,7 @@ from visualize import visualize
 def run_pre_processing(filename_model, verbose_print, smoothing_method, smoothing_factor, meshing_method,
                        refine_region, is_atrium, create_flow_extensions, viz, config_path, coarsening_factor,
                        inlet_flow_extension_length, outlet_flow_extension_length, edge_length, region_points,
-                       compress_mesh):
+                       dynamic_mesh, clamp_boundaries, compress_mesh):
     """
     Automatically generate mesh of surface model in .vtu and .xml format, including prescribed
     flow rates at inlet and outlet based on flow network model.
@@ -38,6 +38,8 @@ def run_pre_processing(filename_model, verbose_print, smoothing_method, smoothin
         inlet_flow_extension_length (float): Factor defining length of flow extensions at the inlet(s)
         outlet_flow_extension_length (float): Factor defining length of flow extensions at the outlet(s)
         compress_mesh (bool): Compresses finalized mesh if True
+        dynamic_mesh (bool): Computes projected movement for displaced surfaces located in [filename_model]_moved folder
+        clamp_boundaries (bool): Clamps inlet(s) and outlet if true
     """
     # Get paths
     abs_path = path.abspath(path.dirname(__file__))
@@ -62,6 +64,9 @@ def run_pre_processing(filename_model, verbose_print, smoothing_method, smoothin
     file_name_xml_mesh = path.join(dir_path, case_name + ".xml")
     file_name_vtu_mesh = path.join(dir_path, case_name + ".vtu")
     file_name_run_script = path.join(dir_path, case_name + ".sh")
+    file_name_displacement_points = path.join(dir_path, case_name + "_points.np")
+    folder_moved_surfaces = path.join(dir_path, case_name + "_moved")
+    folder_extended_surfaces = path.join(dir_path, case_name + "_extended")
 
     print("\n--- Working on case:", case_name, "\n")
 
@@ -266,6 +271,9 @@ def run_pre_processing(filename_model, verbose_print, smoothing_method, smoothin
         else:
             centerlines = read_polydata(file_name_flow_centerlines)
 
+    print("--- Remeshing surface")
+    surface_extended = remesh_surface(surface_extended, edge_length)
+
     # Choose input for the mesh
     print("--- Computing distance to sphere\n")
     if meshing_method == "constant":
@@ -419,7 +427,7 @@ def read_command_line():
 
     parser.add_argument('-el', '--edge-length',
                         dest="edgeLength",
-                        default=None,
+                        default=1.0,
                         type=float,
                         help="Characteristic edge length used for meshing.")
 

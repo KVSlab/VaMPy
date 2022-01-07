@@ -2,6 +2,7 @@ from morphman.common import *
 
 import ImportData
 from NetworkBoundaryConditions import FlowSplitting
+from vtk.numpy_interface import dataset_adapter as dsa
 
 try:
     from vmtkpointselector import *
@@ -24,6 +25,7 @@ edgeArrayName = 'EdgeArray'
 edgePCoordArrayName = 'EdgePCoordArray'
 costFunctionArrayName = 'CostFunctionArray'
 distanceToSpheresArrayName = "DistanceToSpheres"
+cellEntityArrayName = "CellEntityIds"
 
 # Options not available from commandline
 divergingRatioToSpacingTolerance = 2.0
@@ -556,16 +558,18 @@ def generate_mesh(surface):
     # Compute the mesh.
     meshGenerator = vmtkscripts.vmtkMeshGenerator()
     meshGenerator.Surface = surface
-    meshGenerator.ElementSizeMode = "edgelengtharray"  # Variable size mesh
-    meshGenerator.TargetEdgeLengthArrayName = "Size"  # Variable size mesh
-    meshGenerator.BoundaryLayer = 1
-    meshGenerator.NumberOfSubLayers = 4
-    meshGenerator.BoundaryLayerOnCaps = 0
-    meshGenerator.BoundaryLayerThicknessFactor = 0.85
-    meshGenerator.SubLayerRatio = 0.75
-    meshGenerator.Tetrahedralize = 1
-    meshGenerator.VolumeElementScaleFactor = 0.8
-    meshGenerator.EndcapsEdgeLengthFactor = 1.0
+    #meshGenerator.ElementSizeMode = "edgelengtharray"  # Variable size mesh
+    #meshGenerator.TargetEdgeLengthArrayName = "Size"  # Variable size mesh#
+    meshGenerator.ElementSizeMode = "edgelength"  # Variable size mesh
+    meshGenerator.TargetEdgeLength= 0.5  # Variable size mesh
+    meshGenerator.BoundaryLayer = 0
+    # meshGenerator.NumberOfSubLayers = 4
+    # meshGenerator.BoundaryLayerOnCaps = 0
+    # meshGenerator.BoundaryLayerThicknessFactor = 0.85
+    # meshGenerator.SubLayerRatio = 0.75
+    # meshGenerator.Tetrahedralize = 1
+    # meshGenerator.VolumeElementScaleFactor = 0.8
+    # meshGenerator.EndcapsEdgeLengthFactor = 1.0
 
     # Mesh
     meshGenerator.Execute()
@@ -810,3 +814,28 @@ def add_flow_extension(surface, centerlines, include_outlet, extension_length=2.
     surface_extended = flowExtensionsFilter.GetOutput()
 
     return surface_extended
+
+
+
+def remesh_surface(surface, edge_length, exclude=None):
+    surface = dsa.WrapDataObject(surface)
+    if cellEntityArrayName not in surface.CellData.keys():
+        surface.CellData.append(np.zeros(surface.VTKObject.GetNumberOfCells()) + 1, cellEntityArrayName)
+    remeshing = vmtkscripts.vmtkSurfaceRemeshing()
+    remeshing.Surface = surface.VTKObject
+    remeshing.CellEntityIdsArrayName = cellEntityArrayName
+    remeshing.TargetEdgeLength = edge_length
+    remeshing.MaxEdgeLength = 1e6
+    remeshing.MinEdgeLength = 0.0
+    remeshing.TargetEdgeLengthFactor = 1.0
+    remeshing.TargetEdgeLengthArrayName = ""
+    remeshing.TriangleSplitFactor = 5.0
+    remeshing.ElementSizeMode = "edgelength"
+    if exclude is not None:
+        remeshing.ExcludeEntityIds = exclude
+
+    remeshing.Execute()
+
+    remeshed_surface = remeshing.Surface
+
+    return remeshed_surface
