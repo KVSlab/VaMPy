@@ -7,6 +7,7 @@ from os import remove
 import ToolRepairSTL
 # Local imports
 from common import *
+from moving_common import get_point_map, project_displacement, save_displacement
 from simulate import run_simulation
 from visualize import visualize
 
@@ -14,7 +15,7 @@ from visualize import visualize
 def run_pre_processing(filename_model, verbose_print, smoothing_method, smoothing_factor, meshing_method,
                        refine_region, is_atrium, create_flow_extensions, viz, config_path, coarsening_factor,
                        inlet_flow_extension_length, outlet_flow_extension_length, edge_length, region_points,
-                       dynamic_mesh, clamp_boundaries, compress_mesh):
+                       dynamic_mesh, clamp_boundaries, add_boundary_layer, compress_mesh):
     """
     Automatically generate mesh of surface model in .vtu and .xml format, including prescribed
     flow rates at inlet and outlet based on flow network model.
@@ -40,6 +41,7 @@ def run_pre_processing(filename_model, verbose_print, smoothing_method, smoothin
         compress_mesh (bool): Compresses finalized mesh if True
         dynamic_mesh (bool): Computes projected movement for displaced surfaces located in [filename_model]_moved folder
         clamp_boundaries (bool): Clamps inlet(s) and outlet if true
+        add_boundary_layer (bool): Adds boundary layers to walls if true
     """
     # Get paths
     abs_path = path.abspath(path.dirname(__file__))
@@ -60,6 +62,7 @@ def run_pre_processing(filename_model, verbose_print, smoothing_method, smoothin
     file_name_model_flow_ext = path.join(dir_path, case_name + "_flowext.vtp")
     file_name_clipped_model = path.join(dir_path, case_name + "_clippedmodel.vtp")
     file_name_flow_centerlines = path.join(dir_path, case_name + "_flow_cl.vtp")
+    file_name_remeshed = path.join(dir_path, case_name + "_remeshed.vtp")
     file_name_surface_name = path.join(dir_path, case_name + "_remeshed_surface.vtp")
     file_name_xml_mesh = path.join(dir_path, case_name + ".xml")
     file_name_vtu_mesh = path.join(dir_path, case_name + ".vtu")
@@ -120,51 +123,6 @@ def run_pre_processing(filename_model, verbose_print, smoothing_method, smoothin
     # Get 'center' and 'radius' of the regions(s)
     region_center = []
     misr_max = []
-
-    if refine_region:
-        regions = get_regions_to_refine(capped_surface, region_points, path.join(dir_path, case_name))
-        for i in range(len(regions) // 3):
-            print("--- Region to refine ({}): {:.3f} {:.3f} {:.3f}"
-                  .format(i + 1, regions[3 * i], regions[3 * i + 1], regions[3 * i + 2]))
-
-        centerlineAnu, _, _ = compute_centerlines(source, regions, file_name_refine_region_centerlines, capped_surface,
-                                                  resampling=0.1)
-
-        # Extract the region centerline
-        refine_region_centerline = []
-        info = get_parameters(path.join(dir_path, case_name))
-        num_anu = info["number_of_regions"]
-
-        # Compute mean distance between points
-        for i in range(num_anu):
-            if not path.isfile(file_name_region_centerlines.format(i)):
-                line = extract_single_line(centerlineAnu, i)
-                locator = get_vtk_point_locator(centerlines)
-                for j in range(line.GetNumberOfPoints() - 1, 0, -1):
-                    point = line.GetPoints().GetPoint(j)
-                    ID = locator.FindClosestPoint(point)
-                    tmp_point = centerlines.GetPoints().GetPoint(ID)
-                    dist = np.sqrt(np.sum((np.asarray(point) - np.asarray(tmp_point)) ** 2))
-                    if dist <= tol:
-                        break
-
-                tmp = extract_single_line(line, 0, start_id=j)
-                write_polydata(tmp, file_name_region_centerlines.format(i))
-
-                # List of VtkPolyData sac(s) centerline
-                refine_region_centerline.append(tmp)
-
-            else:
-                refine_region_centerline.append(read_polydata(file_name_region_centerlines.format(i)))
-
-        # Merge the sac centerline
-        region_centerlines = vtk_merge_polydata(refine_region_centerline)
-
-        for region in refine_region_centerline:
-            region_factor = 0.9 if is_atrium else 0.5
-            region_center.append(region.GetPoints().GetPoint(int(region.GetNumberOfPoints() * region_factor)))
-            tmp_misr = get_point_data_array(radiusArrayName, region)
-            misr_max.append(tmp_misr.max())
 
     # Smooth surface
     if smoothing_method == "voronoi":
@@ -231,9 +189,20 @@ def run_pre_processing(filename_model, verbose_print, smoothing_method, smoothin
             surface = read_polydata(file_name_surface_smooth)
 
     elif smoothing_method == "no_smooth" or None:
-        print("--- No smoothing of surface\n")
+        print("\n--- No smoothing of surface\n")
 
-    # Add flow extensions
+    # if edge_length is not None:
+    #     if not path.exists(file_name_remeshed):
+    #         print("-- Remeshing --")
+    #         remeshed = remesh_surface(surface, edge_length)
+    #         remeshed = vtk_clean_polydata(remeshed)
+    #         write_polydata(remeshed, file_name_remeshed)
+    #     else:
+    #         remeshed = read_polydata(file_name_remeshed)
+    # else:
+    #     remeshed = surface
+
+        # Add flow extensions
     if create_flow_extensions:
         if not path.isfile(file_name_model_flow_ext):
             print("--- Adding flow extensions\n")
@@ -255,6 +224,20 @@ def run_pre_processing(filename_model, verbose_print, smoothing_method, smoothin
     # Capp surface with flow extensions
     capped_surface = vmtk_cap_polydata(surface_extended)
 
+    if dynamic_mesh:
+        print("--- Computing mesh displacement and saving points to file")
+        # Get a point mapper
+        remeshed=surface
+        distance, point_map = get_point_map(remeshed, surface_extended)
+        #distance, point_map = get_point_map(remeshed, surface_extended)
+
+        # Project displacement between surfaces
+        points = project_displacement(clamp_boundaries, distance, folder_extended_surfaces, folder_moved_surfaces,
+                                      point_map, surface, surface_extended, remeshed)
+
+        # Save displacement to numpy array
+        save_displacement(file_name_displacement_points, points)
+
     # Get new centerlines with the flow extensions
     if create_flow_extensions:
         if not path.isfile(file_name_flow_centerlines):
@@ -271,8 +254,10 @@ def run_pre_processing(filename_model, verbose_print, smoothing_method, smoothin
         else:
             centerlines = read_polydata(file_name_flow_centerlines)
 
-    print("--- Remeshing surface")
-    surface_extended = remesh_surface(surface_extended, edge_length)
+    if refine_region:
+        region_centerlines = get_refine_region(capped_surface, case_name, centerlines, dir_path,
+                                               file_name_refine_region_centerlines, file_name_region_centerlines,
+                                               is_atrium, misr_max, region_center, region_points, source, tol)
 
     # Choose input for the mesh
     print("--- Computing distance to sphere\n")
@@ -300,14 +285,14 @@ def run_pre_processing(filename_model, verbose_print, smoothing_method, smoothin
     if not path.isfile(file_name_vtu_mesh):
         try:
             print("--- Computing mesh\n")
-            mesh, remeshed_surface = generate_mesh(distance_to_sphere)
+            mesh, remeshed_surface = generate_mesh(distance_to_sphere, add_boundary_layer)
             assert remeshed_surface.GetNumberOfPoints() > 0, \
                 "No points in surface mesh, try to remesh"
             assert mesh.GetNumberOfPoints() > 0, "No points in mesh, try to remesh"
 
         except:
             distance_to_sphere = mesh_alternative(distance_to_sphere)
-            mesh, remeshed_surface = generate_mesh(distance_to_sphere)
+            mesh, remeshed_surface = generate_mesh(distance_to_sphere, add_boundary_layer)
             assert mesh.GetNumberOfPoints() > 0, "No points in mesh, after remeshing"
             assert remeshed_surface.GetNumberOfPoints() > 0, \
                 "No points in surface mesh, try to remesh"
@@ -361,10 +346,55 @@ def run_pre_processing(filename_model, verbose_print, smoothing_method, smoothin
                        file_name_distance_to_sphere_diam, file_name_distance_to_sphere_const,
                        file_name_distance_to_sphere_curv, file_name_voronoi, file_name_voronoi_smooth,
                        file_name_surface_smooth, file_name_model_flow_ext, file_name_clipped_model,
-                       file_name_flow_centerlines, file_name_surface_name]
+                       file_name_flow_centerlines, file_name_surface_name, file_name_remeshed]
     for file in files_to_remove:
         if path.exists(file):
             remove(file)
+
+
+def get_refine_region(capped_surface, case_name, centerlines, dir_path, file_name_refine_region_centerlines,
+                      file_name_region_centerlines, is_atrium, misr_max, region_center, region_points, source, tol):
+    regions = get_regions_to_refine(capped_surface, region_points, path.join(dir_path, case_name))
+    for i in range(len(regions) // 3):
+        print("--- Region to refine ({}): {:.6f} {:.6f} {:.6f}"
+              .format(i + 1, regions[3 * i], regions[3 * i + 1], regions[3 * i + 2]))
+    centerline_region, _, _ = compute_centerlines(source, regions, file_name_refine_region_centerlines, capped_surface,
+                                              resampling=0.1)
+    # Extract the region centerline
+    refine_region_centerlines = []
+    info = get_parameters(path.join(dir_path, case_name))
+    num_regions = info["number_of_regions"]
+    # Compute mean distance between points
+    for i in range(num_regions):
+        if not path.isfile(file_name_region_centerlines.format(i)):
+            line = extract_single_line(centerline_region, i)
+            locator = get_vtk_point_locator(centerlines)
+            for j in range(line.GetNumberOfPoints() - 1, 0, -1):
+                point = line.GetPoints().GetPoint(j)
+                ID = locator.FindClosestPoint(point)
+                tmp_point = centerlines.GetPoints().GetPoint(ID)
+                dist = np.sqrt(np.sum((np.asarray(point) - np.asarray(tmp_point)) ** 2))
+                if dist <= tol:
+                    break
+
+            tmp = extract_single_line(line, 0, start_id=j)
+            write_polydata(tmp, file_name_region_centerlines.format(i))
+
+            # List of VtkPolyData sac(s) centerline
+            refine_region_centerlines.append(tmp)
+
+        else:
+            refine_region_centerlines.append(read_polydata(file_name_region_centerlines.format(i)))
+
+    # Merge the sac centerline
+    refine_region_centerline = vtk_merge_polydata(refine_region_centerlines)
+    for region in refine_region_centerlines:
+        region_factor = 0.9 if is_atrium else 0.5
+        region_center.append(region.GetPoints().GetPoint(int(region.GetNumberOfPoints() * region_factor)))
+        tmp_misr = get_point_data_array(radiusArrayName, region)
+        misr_max.append(tmp_misr.max())
+
+    return refine_region_centerline
 
 
 def read_command_line():
@@ -382,10 +412,9 @@ def read_command_line():
 
     parser.add_argument('-i', '--inputModel',
                         type=str,
-                        required=False,
+                        required=True,
                         dest='fileNameModel',
-                        default='example/surface.vtp',
-                        help="Input file containing the 3D model.")
+                        help="Path to input file containing the 3D model.")
 
     parser.add_argument('-cM', '--compress-mesh',
                         type=str2bool,
@@ -485,6 +514,25 @@ def read_command_line():
                         help='Path to configuration file for remote simulation. ' +
                              'See example/ssh_config.json for details')
 
+    parser.add_argument('-dm', '--dynamic-mesh',
+                        dest="dynamicMesh",
+                        default=False,
+                        type=str2bool,
+                        help="If true, assumes a dynamic mesh and will perform computation of projection " +
+                             "between moved surfaces located in the '[filename_model]_moved' folder.")
+
+    parser.add_argument('-cl', '--clamp-boundaries',
+                        dest="clampBoundaries",
+                        default=False,
+                        type=str2bool,
+                        help="Clamps boundaries at inlet(s) and outlet if true.")
+
+    parser.add_argument('-bl', '--boundary-layer',
+                        dest="addBoundaryLayer",
+                        default=True,
+                        type=str2bool,
+                        help="Adds boundary layers along geometry wall if true.")
+
     args, _ = parser.parse_known_args()
 
     if args.verbosity:
@@ -506,7 +554,8 @@ def read_command_line():
                 create_flow_extensions=args.flowExtension, viz=args.viz, config_path=args.config,
                 coarsening_factor=args.coarseningFactor, inlet_flow_extension_length=args.inletFlowExtLen,
                 edge_length=args.edgeLength, region_points=args.regionPoints, compress_mesh=args.compressMesh,
-                outlet_flow_extension_length=args.outletFlowExtLen)
+                outlet_flow_extension_length=args.outletFlowExtLen, dynamic_mesh=args.dynamicMesh,
+                clamp_boundaries=args.clampBoundaries, add_boundary_layer=args.addBoundaryLayer)
 
 
 if __name__ == "__main__":

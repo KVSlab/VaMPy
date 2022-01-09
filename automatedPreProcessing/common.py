@@ -1,8 +1,8 @@
 from morphman.common import *
+from vtk.numpy_interface import dataset_adapter as dsa
 
 import ImportData
 from NetworkBoundaryConditions import FlowSplitting
-from vtk.numpy_interface import dataset_adapter as dsa
 
 try:
     from vmtkpointselector import *
@@ -390,17 +390,24 @@ def dist_sphere_constant(surface, centerlines, region_center, misr_max, save_pat
     distance_to_sphere = distToCenterlines.Surface
 
     # Reduce element size in region
+    coarsen=True
+    if coarsen:
+        F = 3 / 4  # For 3xMISIR
+
     for i in range(len(region_center)):
         distance_to_sphere = compute_distance_to_sphere(distance_to_sphere,
                                                         region_center[i],
                                                         min_distance=edge_length / 3,
                                                         max_distance=edge_length,
-                                                        distance_scale=edge_length * 3 / 4 / (misr_max[i] * 2.))
+                                                        distance_scale=F * edge_length * 3 / 4 / (misr_max[i] * 2.))
 
     element_size = edge_length + np.zeros((surface.GetNumberOfPoints(), 1))
     if len(region_center) != 0:
         distance_to_spheres_array = get_point_data_array("DistanceToSpheres", distance_to_sphere)
-        element_size = np.minimum(element_size, distance_to_spheres_array)
+        if coarsen:
+            element_size = np.maximum(element_size, distance_to_spheres_array)
+        else:
+            element_size = np.minimum(element_size, distance_to_spheres_array)
 
     vtk_array = create_vtk_array(element_size, "Size")
     distance_to_sphere.GetPointData().AddArray(vtk_array)
@@ -539,17 +546,25 @@ def compute_distance_to_sphere(surface, center_sphere, radius_sphere=0.0, distan
         # Keep smallest distance
         newDist = min(newDist, distanceToSphere) if not add else newDist
 
-        dist_array.SetComponent(i, 0, newDist)
+        # TODO: Edit if coarsening
+        coarsen=True
+        if coarsen:
+            s = 4.9  # 2 and 3 works
+            # Coarsening:
+            dist_array.SetComponent(i, 0, s * 1.9 - (s - 1) * newDist)
+        else:
+            dist_array.SetComponent(i, 0, newDist)
 
     return surface
 
 
-def generate_mesh(surface):
+def generate_mesh(surface, add_boundary_layer):
     """
     Generates a mesh suitable for CFD from a input surface model.
 
     Args:
         surface (vtkPolyData): Surface model to be meshed.
+        add_boundary_layer (bool): Adds boundary layer if true
 
     Returns:
         mesh (vtkUnstructuredGrid): Output mesh
@@ -558,18 +573,20 @@ def generate_mesh(surface):
     # Compute the mesh.
     meshGenerator = vmtkscripts.vmtkMeshGenerator()
     meshGenerator.Surface = surface
-    #meshGenerator.ElementSizeMode = "edgelengtharray"  # Variable size mesh
-    #meshGenerator.TargetEdgeLengthArrayName = "Size"  # Variable size mesh#
-    meshGenerator.ElementSizeMode = "edgelength"  # Variable size mesh
-    meshGenerator.TargetEdgeLength= 0.5  # Variable size mesh
-    meshGenerator.BoundaryLayer = 0
-    # meshGenerator.NumberOfSubLayers = 4
-    # meshGenerator.BoundaryLayerOnCaps = 0
-    # meshGenerator.BoundaryLayerThicknessFactor = 0.85
-    # meshGenerator.SubLayerRatio = 0.75
-    # meshGenerator.Tetrahedralize = 1
-    # meshGenerator.VolumeElementScaleFactor = 0.8
-    # meshGenerator.EndcapsEdgeLengthFactor = 1.0
+    meshGenerator.ElementSizeMode = "edgelengtharray"  # Variable size mesh
+    meshGenerator.TargetEdgeLengthArrayName = "Size"  # Variable size mesh#
+    if add_boundary_layer:
+        meshGenerator.BoundaryLayer = 1
+        meshGenerator.BoundaryLayerOnCaps = 0
+        meshGenerator.NumberOfSubLayers = 4
+        meshGenerator.BoundaryLayerThicknessFactor = 0.85
+        meshGenerator.SubLayerRatio = 0.75
+        meshGenerator.Tetrahedralize = 1
+        meshGenerator.VolumeElementScaleFactor = 0.8
+        meshGenerator.EndcapsEdgeLengthFactor = 1.0
+    else:
+        meshGenerator.BoundaryLayer = 0
+        meshGenerator.BoundaryLayerOnCaps = 1
 
     # Mesh
     meshGenerator.Execute()
@@ -814,7 +831,6 @@ def add_flow_extension(surface, centerlines, include_outlet, extension_length=2.
     surface_extended = flowExtensionsFilter.GetOutput()
 
     return surface_extended
-
 
 
 def remesh_surface(surface, edge_length, exclude=None):
