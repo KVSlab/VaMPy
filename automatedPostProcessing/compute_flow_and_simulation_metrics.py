@@ -3,7 +3,9 @@ from time import time
 
 import numpy as np
 from dolfin import *
+
 from postprocessing_common import read_command_line, epsilon
+
 
 def compute_flow_and_simulation_metrics(folder, nu, dt, velocity_degree):
     """
@@ -199,7 +201,7 @@ def compute_flow_and_simulation_metrics(folder, nu, dt, velocity_degree):
         t0 = Timer("kinetic energy")
         assign(u0, u.sub(0))
         assign(u1, u.sub(1))
-        
+
         if mesh.geometry().dim() == 3:
             assign(u2, u.sub(2))
 
@@ -372,5 +374,5 @@ def rate_of_dissipation(ssv, u, v, mesh, h, nu):
 
 
 if __name__ == '__main__':
-    folder, nu, _, dt, velocity_degree, _ = read_command_line()
+    folder, nu, _, dt, velocity_degree = read_command_line()
     compute_flow_and_simulation_metrics(folder, nu, dt, velocity_degree)

@@ -40,15 +40,15 @@ Post-processing: Hemodynamic indices, flow and simulation metrics, and probes
 Following the CFD simulations, the last usage of the Vascular Modeling Pypeline is the post-processing part.
 You can start by computing the wall shear stress, oscillatory shear index and other hemodynamic indices by executing the following command::
 
-    python automatedPostProcessing/compute_hemodynamic_indices.py --case simulation/results_artery/data/[RUN_NUMBER]/Solutions
+    python automatedPostProcessing/compute_hemodynamic_indices.py --case simulation/results_artery/artery/data/[RUN_NUMBER]/Solutions
 
 To compute fluid dynamic quantities and simulation metrics, you may execute the following command::
 
-    python automatedPostProcessing/compute_flow_and_simulation_metrics.py --case simulation/results_artery/data/[RUN_NUMBER]/Solutions
+    python automatedPostProcessing/compute_flow_and_simulation_metrics.py --case simulation/results_artery/artery/data/[RUN_NUMBER]/Solutions
 
 Finally, to visualize velocity and pressure at the probes created by ``Artery.py``, you can run the ``visualize_probes.py`` script, by executing the following command::
 
-    python automatedPostProcessing/visualize_probes.py --case simulation/results_artery/data/[run_number]/Solutions
+    python automatedPostProcessing/visualize_probes.py --case simulation/results_artery/artery/data/[run_number]/Probes
 
 Note that this has an additional dependency to `Matplotlib <https://github.com/matplotlib/matplotlib>`_, which can quickly be installed with either `conda` or `pip`.
 
