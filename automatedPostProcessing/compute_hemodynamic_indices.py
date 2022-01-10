@@ -3,6 +3,7 @@ from __future__ import print_function
 from pathlib import Path
 
 from dolfin import *
+
 from postprocessing_common import STRESS, read_command_line
 
 try:
@@ -232,5 +233,5 @@ def get_dabla_function():
 
 
 if __name__ == '__main__':
-    folder, nu, rho, dt, velocity_degree, _ = read_command_line()
+    folder, nu, rho, dt, velocity_degree = read_command_line()
     compute_hemodynamic_indices(folder, nu, rho, dt, velocity_degree)
