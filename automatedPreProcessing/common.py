@@ -815,7 +815,7 @@ def add_flow_extension(surface, centerlines, include_outlet, extension_length=2.
     flowExtensionsFilter.SetInputData(surface)
     flowExtensionsFilter.SetCenterlines(centerlines)
     flowExtensionsFilter.SetAdaptiveExtensionLength(1)
-    flowExtensionsFilter.SetAdaptiveNumberOfBoundaryPoints(0)
+    flowExtensionsFilter.SetAdaptiveNumberOfBoundaryPoints(1)
     flowExtensionsFilter.SetExtensionRatio(extension_length)
     flowExtensionsFilter.SetTransitionRatio(1.0)
     flowExtensionsFilter.SetCenterlineNormalEstimationDistanceRatio(1.0)

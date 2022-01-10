@@ -3,6 +3,7 @@ from __future__ import print_function
 
 import argparse
 from os import remove
+from time import time
 
 import ToolRepairSTL
 # Local imports
@@ -191,24 +192,24 @@ def run_pre_processing(filename_model, verbose_print, smoothing_method, smoothin
     elif smoothing_method == "no_smooth" or None:
         print("\n--- No smoothing of surface\n")
 
-    # if edge_length is not None:
-    #     if not path.exists(file_name_remeshed):
-    #         print("-- Remeshing --")
-    #         remeshed = remesh_surface(surface, edge_length)
-    #         remeshed = vtk_clean_polydata(remeshed)
-    #         write_polydata(remeshed, file_name_remeshed)
-    #     else:
-    #         remeshed = read_polydata(file_name_remeshed)
-    # else:
-    #     remeshed = surface
+    if edge_length is not None:
+        if path.exists(file_name_remeshed):
+            remeshed = read_polydata(file_name_remeshed)
+        else:
+            print("-- Remeshing --")
+            remeshed = remesh_surface(surface, edge_length)
+            remeshed = vtk_clean_polydata(remeshed)
+            write_polydata(remeshed, file_name_remeshed)
+    else:
+        remeshed = surface
 
-        # Add flow extensions
+    # Add flow extensions
     if create_flow_extensions:
         if not path.isfile(file_name_model_flow_ext):
             print("--- Adding flow extensions\n")
             # Add extension normal on boundary for atrium models
             extension = "centerlinedirection" if is_atrium else "boundarynormal"
-            surface_extended = add_flow_extension(surface, centerlines, include_outlet=False,
+            surface_extended = add_flow_extension(remeshed, centerlines, include_outlet=False,
                                                   extension_length=inlet_flow_extension_length,
                                                   extension_mode=extension)
             surface_extended = add_flow_extension(surface_extended, centerlines, include_outlet=True,
@@ -227,9 +228,7 @@ def run_pre_processing(filename_model, verbose_print, smoothing_method, smoothin
     if dynamic_mesh:
         print("--- Computing mesh displacement and saving points to file")
         # Get a point mapper
-        remeshed=surface
         distance, point_map = get_point_map(remeshed, surface_extended)
-        #distance, point_map = get_point_map(remeshed, surface_extended)
 
         # Project displacement between surfaces
         points = project_displacement(clamp_boundaries, distance, folder_extended_surfaces, folder_moved_surfaces,
@@ -359,7 +358,7 @@ def get_refine_region(capped_surface, case_name, centerlines, dir_path, file_nam
         print("--- Region to refine ({}): {:.6f} {:.6f} {:.6f}"
               .format(i + 1, regions[3 * i], regions[3 * i + 1], regions[3 * i + 2]))
     centerline_region, _, _ = compute_centerlines(source, regions, file_name_refine_region_centerlines, capped_surface,
-                                              resampling=0.1)
+                                                  resampling=0.1)
     # Extract the region centerline
     refine_region_centerlines = []
     info = get_parameters(path.join(dir_path, case_name))
