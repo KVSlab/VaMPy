@@ -3,13 +3,13 @@ from __future__ import print_function
 from pathlib import Path
 
 from dolfin import *
+
 from postprocessing_common import STRESS, read_command_line
 
 try:
     parameters["reorder_dofs_serial"] = False
 except NameError:
     pass
-
 
 def compute_hemodynamic_indices(case_path, nu, rho, dt, velocity_degree):
     """
@@ -63,6 +63,9 @@ def compute_hemodynamic_indices(case_path, nu, rho, dt, velocity_degree):
 
     # OSI
     OSI = Function(U_b1)
+
+    # ECAP
+    ECAP = Function(U_b1)
 
     # WSS_mean
     WSS_mean = Function(V_b1)
@@ -160,6 +163,12 @@ def compute_hemodynamic_indices(case_path, nu, rho, dt, velocity_degree):
         OSI.vector().set_local(0.5 * (1 - wss_mean_vec / tawss_vec))
         OSI.vector().apply("insert")
         OSI.rename("OSI", "OSI")
+        
+        # Compute ECAP based on OSI and TAWSS
+        ECAP.vector().set_local(OSI.vector().get_local() / tawss_vec)
+        ECAP.vector().apply("insert")
+        ECAP.rename("ECAP", "ECAP")
+
         save = True
     except:
         print("Failed to compute OSI and RRT")
@@ -169,17 +178,21 @@ def compute_hemodynamic_indices(case_path, nu, rho, dt, velocity_degree):
         # Save OSI and RRT
         rrt_path = (case_path / "RRT.xdmf").__str__()
         osi_path = (case_path / "OSI.xdmf").__str__()
+        ecap_path = (case_path / "ECAP.xdmf").__str__()
+
 
         rrt = XDMFFile(MPI.comm_world, rrt_path)
         osi = XDMFFile(MPI.comm_world, osi_path)
+        ecap = XDMFFile(MPI.comm_world, ecap_path)
 
-        for f in [rrt, osi]:
+        for f in [rrt, osi, ecap]:
             f.parameters["flush_output"] = True
             f.parameters["functions_share_mesh"] = True
             f.parameters["rewrite_function_mesh"] = False
 
         rrt.write(RRT)
         osi.write(OSI)
+        ecap.write(ECAP)
 
     # Save WSS and TWSSG
     tawss_path = (case_path / "TAWSS.xdmf").__str__()
