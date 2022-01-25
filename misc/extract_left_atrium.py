@@ -7,7 +7,8 @@
 ## Test data can be aquired from the Left Atrium Segmentation Challenge
 ## http://www.cardiacatlas.org/challenges/left-atrium-segmentation-challenge/
 
-## Writen py Aslak W. Bergersen, 2019
+## Writen by Aslak W. Bergersen, 2019
+## Modified by Henrik A. Kjeldsberg, 2022
 
 import argparse
 import time
