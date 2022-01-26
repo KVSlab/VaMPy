@@ -9,8 +9,10 @@
 
 ## Writen py Aslak W. Bergersen, 2019
 
-
 import argparse
+import time
+
+from IPython import embed
 
 try:
     from morphman.common import *
@@ -18,6 +20,84 @@ try:
 except:
     raise ImportError("The scipt is dependent on morphMan, for install instructions see" + \
                       " https://morphman.readthedocs.io/en/latest/installation.html")
+
+try:
+    from vmtkpointselector import *
+except ImportError:
+    pass
+
+
+def get_surface_closest_to_point(clipped, point):
+    """Check the connectivty of a clipped surface, and attach all sections which are not
+    closest to the center of the clipping plane.
+
+    Args:
+        clipped (vtkPolyData): The clipped segments of the surface.
+        point (list): The point of interest. Keep region closest to this point
+
+    Returns:
+        surface (vtkPolyData): The surface where only one segment has been removed.
+    """
+    connectivity = vtk_compute_connectivity(clipped, mode="All")
+    if connectivity.GetNumberOfPoints() == 0:
+        return surface
+
+    region_id = get_point_data_array("RegionId", connectivity)
+    distances = []
+    regions = []
+    for i in range(int(region_id.max() + 1)):
+        regions.append(vtk_compute_threshold(connectivity, "RegionId", lower=i - 0.1, upper=i + 0.1, source=0))
+        locator = get_vtk_point_locator(regions[-1])
+        region_point = regions[-1].GetPoint(locator.FindClosestPoint(point))
+        distances.append(get_distance(region_point, point))
+
+    # Remove the region with the closest distance
+    region_of_interest = regions[distances.index(min(distances))]
+
+    return region_of_interest
+
+
+def provide_region_points(surface, provided_points, dir_path=None):
+    """
+    Get relevant region points from user selected points on a input surface.
+
+    Args:
+        provided_points (ndarray): Point(s) representing area to refine
+        surface (vtkPolyData): Surface model.
+        dir_path (str): Location of info.json file
+
+    Returns:
+        points (list): List of relevant outlet IDs
+    """
+    # Fix surface
+    cleaned_surface = vtk_clean_polydata(surface)
+    triangulated_surface = vtk_triangulate_surface(cleaned_surface)
+
+    if provided_points is None:
+        # Select seeds
+        print("--- Please select regions to refine in rendered window")
+        SeedSelector = vmtkPickPointSeedSelector()
+        SeedSelector.SetSurface(triangulated_surface)
+        SeedSelector.Execute()
+
+        regionSeedIds = SeedSelector.GetTargetSeedIds()
+        get_point = surface.GetPoints().GetPoint
+        points = [list(get_point(regionSeedIds.GetId(i))) for i in range(regionSeedIds.GetNumberOfIds())]
+    else:
+        surface_locator = get_vtk_point_locator(surface)
+        provided_points = [[provided_points[3 * i], provided_points[3 * i + 1], provided_points[3 * i + 2]]
+                           for i in range(len(provided_points) // 3)]
+
+        points = [list(surface.GetPoint(surface_locator.FindClosestPoint(p))) for p in provided_points]
+
+    if dir_path is not None:
+        info = {"number_of_regions": len(points)}
+
+        for i in range(len(points)):
+            info["region_%d" % i] = points[i]
+            write_parameters(info, dir_path)
+
+    return points
 
 
 def group_pvs(outlets):
@@ -177,6 +257,7 @@ def landmark_atrium(input_path, input_laa_path, output_path):
         input_path = input_path.replace(".vtk", ".vtp")
 
     centerline_path = base_path + "_centerline.vtp"
+    laa_centerline_path = base_path + "_laa_centerline.vtp"
     smooth_voronoi_path = base_path + "_smooth_voronoi.vtp"
     smoothed_surface_path = base_path + "_smooth_surface.vtp"
     full_centerline_path = base_path + "_full_centerline.vtp"
@@ -184,6 +265,7 @@ def landmark_atrium(input_path, input_laa_path, output_path):
 
     # Get an open and closed version of the surface
     surface, capped_surface = prepare_surface(base_path, input_path)
+    surface_with_laa, _ = prepare_surface(base_path, input_path)
 
     # Create two set of centerlines one from PV's to mitral plane, and another from left
     # to right PVs  and Voronoi diagram
@@ -269,12 +351,11 @@ def landmark_atrium(input_path, input_laa_path, output_path):
     # Landmark PV's
     new_surface_capped = vmtk_cap_polydata(new_surface)
     write_polydata(new_surface_capped, only_four_pvs_path)
-    for i in range(5):
+    for i in range(4):
         line = extract_single_line(centerlines, i)
         line = extract_single_line(line, 0, start_id=40, end_id=line.GetNumberOfPoints() - 100)
         line = compute_splined_centerline(line, nknots=10, isline=True)
         area, sections = vmtk_compute_centerline_sections(new_surface_capped, line)
-        write_polydata(sections, "tmp_area_{}.vtp".format(i))
 
         # Get arrays
         a = get_point_data_array("CenterlineSectionArea", area)
@@ -295,12 +376,35 @@ def landmark_atrium(input_path, input_laa_path, output_path):
         if surface.GetNumberOfCells() < clipped.GetNumberOfCells():
             surface, clipped = clipped, surface
 
-        write_polydata(surface, "new_surface_{}.vtp".format(i))
         surface = attach_clipped_regions_to_surface(surface, clipped, center)
-        write_polydata(surface, "new_surface_attached{}.vtp".format(i))
 
-    write_polydata(surface, base_path + "_no_PVs.vtp")
-    exit()
+    # Landmark MV
+    line = extract_single_line(centerlines, 0)
+    line = extract_single_line(line, 0, start_id=100, end_id=line.GetNumberOfPoints() - 40)
+    line = compute_splined_centerline(line, nknots=10, isline=True)
+    area, sections = vmtk_compute_centerline_sections(new_surface_capped, line)
+
+    # Get arrays
+    a = get_point_data_array("CenterlineSectionArea", area)
+    n = get_point_data_array("FrenetTangent", area, k=3)
+    l = get_curvilinear_coordinate(area)
+
+    # Compute 'derivative' of the area
+    dAdX = (a[1:, 0] - a[:-1, 0]) / (l[1:] - l[:-1])
+    # Stopping criteria
+    stop_id = np.nonzero(dAdX > 50)[0][0] + 3
+    normal = -n[stop_id]
+    center = area.GetPoint(stop_id)
+
+    # Clip the model
+    plane = vtk_plane(center, normal)
+    surface, clipped = vtk_clip_polydata(surface, plane)
+    if surface.GetNumberOfCells() < clipped.GetNumberOfCells():
+        surface, clipped = clipped, surface
+
+    surface = attach_clipped_regions_to_surface(surface, clipped, center)
+
+    write_polydata(surface, base_path + "_no_PVs_or_MV.vtp")
     # Compute distances
     distanceFilter = vmtkscripts.vmtkSurfaceDistance()
     distanceFilter.ReferenceSurface = new_surface
@@ -348,6 +452,93 @@ def landmark_atrium(input_path, input_laa_path, output_path):
 
         if d > tol:
             LAA_orifice.append(p)
+
+    if len(LAA_orifice) > 1:
+        LAA_orifice = np.array(LAA_orifice)
+        mean_LAA_orifice = np.average(LAA_orifice, axis=0)
+    else:
+        mean_LAA_orifice = LAA_orifice[0]
+
+    # Clip LAA
+    test_automated_clipping = False
+    if test_automated_clipping:
+
+        # Compute centerline to orifice from MV to get tangent
+        line = extract_single_line(centerlines, 0)
+        p_mv = np.array(line.GetPoint(0))
+        laa_centerlines, _, _ = compute_centerlines(p_mv.tolist(), mean_LAA_orifice.tolist(), laa_centerline_path,
+                                                    capped_surface, resampling=0.1,
+                                                    smooth=False, pole_ids=pole_ids,
+                                                    voronoi=voronoi, base_path=base_path)
+        laa_centerlines = vmtk_compute_geometric_features(laa_centerlines, False)
+
+        n_laa = get_point_data_array("FrenetTangent", laa_centerlines, k=3)
+        l_laa = np.linspace(0, 1, len(n_laa))
+        n_x = n_laa[:, 0]
+        diff = (n_x[1:] - n_x[:-1]) / (l_laa[1:] - l_laa[:-1])
+
+        skip = int(len(diff) * 0.01)  # Ignore part close to LAA edge
+        stop_id = np.nonzero(abs(diff[skip:]) > 50)[0][0] + 50
+        normal = n_laa[stop_id]
+        center = mean_LAA_orifice
+
+        plane = vtk_plane(center, normal)
+        new_surface, clipped = vtk_clip_polydata(surface_with_laa, plane)
+        write_polydata(new_surface, "newsurf.vtp")
+        write_polydata(clipped, "newsurf_clip.vtp")
+        if new_surface.GetNumberOfCells() < clipped.GetNumberOfCells():
+            new_surface, clipped = clipped, new_surface
+        new_surface = attach_clipped_regions_to_surface(new_surface, clipped, center)
+
+        write_polydata(new_surface, "newsurf_att.vtp")
+        write_polydata(clipped, "newsurf_clip_att.vtp")
+
+    else:
+        laa_point = provide_region_points(surface_with_laa, None, None)
+        la_point = laa_point[0]
+        # Compute centerline to orifice from MV to get tangent
+        line = extract_single_line(centerlines, 0)
+        p_mv = np.array(line.GetPoint(0))
+        laa_centerlines, _, _ = compute_centerlines(p_mv.tolist(), la_point, laa_centerline_path,
+                                                    capped_surface, resampling=0.1,
+                                                    smooth=False, pole_ids=pole_ids,
+                                                    voronoi=voronoi, base_path=base_path)
+
+        line = extract_single_line(laa_centerlines, 0, start_id=50, end_id=laa_centerlines.GetNumberOfPoints() - 50)
+        laa_l = get_curvilinear_coordinate(area)
+        step = 10 * np.mean(laa_l[1:] - laa_l[:-1])
+        line = vmtk_resample_centerline(line, step)
+        line = compute_splined_centerline(line, nknots=10, isline=True)
+        area, sections = vmtk_compute_centerline_sections(surface_with_laa, line)
+        write_polydata(sections, "tmp_area_LAA.vtp")
+
+        # Get arrays
+        a = get_point_data_array("CenterlineSectionArea", area)
+        n = get_point_data_array("FrenetTangent", area, k=3)
+        l = get_curvilinear_coordinate(area)
+
+        # Compute 'derivative' of the area
+        dAdX = (a[1:, 0] - a[:-1, 0]) / (l[1:] - l[:-1])
+        # Stopping criteria
+        stop_id = np.nonzero(dAdX < -500)[0][0] + 6
+        normal = n[stop_id]
+        center = area.GetPoint(stop_id)
+
+        np.savetxt("laa_a.txt", a)
+        np.savetxt("laa_l.txt", l)
+        np.savetxt("laa_dadx.txt", dAdX)
+
+        # Clip the model
+        plane = vtk_plane(center, normal)
+        surface, clipped = vtk_clip_polydata(surface_with_laa, plane)
+        if surface.GetNumberOfCells() > clipped.GetNumberOfCells():
+            surface, clipped = clipped, surface
+
+        surface = get_surface_closest_to_point(surface, center)
+
+        write_polydata(surface, base_path + "_isolated_LAA.vtp")
+
+        embed()
 
     # Compute distances
     old_surface = read_polydata(input_path)
@@ -417,11 +608,212 @@ def landmark_atrium(input_path, input_laa_path, output_path):
     return LA_full_volume, LA_volume, LAA_volume, PV_volume
 
 
+def extract_LA_and_LAA(input_path):
+    """Algorithm for detecting the left atrial appendage and isolate it from the atrium lumen
+     based on the cross-sectional area along enterlines.
+
+    Args:
+        file_path (str): Path to the surface for landmarking
+        input_path (str): Path to store the landmarked surface
+
+    Output:
+        surface (vtkPolyData): A landmarked surface
+    """
+    # File paths
+    base_path = get_path_names(input_path)
+
+    centerline_path = base_path + "_centerline.vtp"
+    la_and_laa_path = base_path + "_la_and_laa.vtp"
+
+    # Open the surface file.
+    print("--- Load model file\n")
+    surface = read_polydata(input_path)
+
+    is_capped, _ = is_surface_capped(surface)
+    if not is_capped:
+        capped_surface = vmtk_cap_polydata(surface)
+    else:
+        capped_surface = surface
+
+    # Get area and corresponding centers
+    parameters = get_parameters(base_path)
+    p_outlet = parameters['outlet']  # Get point at MV outlet
+
+    # Get inlets
+    inlets = []
+    areas = []
+    k = 0
+    while True:
+        try:
+            inlet_k = parameters['inlet{}'.format(k)]
+            area_k = parameters['inlet{}_area'.format(k)]
+            inlets.append(inlet_k)
+            areas.append(area_k)
+        except:
+            print("--- Found {} inlets".format(k))
+            break
+        k += 1
+
+    # Sort inlets and get four largest
+    sorted_inlets = [x for _, x in sorted(zip(areas, inlets))][-4:]
+    inlets_aslist = np.array(sorted_inlets).flatten().tolist()
+
+    # Make centerlines
+    # Check if voronoi and pole_ids exists
+    centerlines, _, _ = compute_centerlines(p_outlet, inlets_aslist,
+                                            centerline_path, capped_surface,
+                                            resampling=0.1, smooth=False,
+                                            base_path=base_path)
+
+    for i in range(4):
+        line = extract_single_line(centerlines, i)
+        line = extract_single_line(line, 0, start_id=40, end_id=line.GetNumberOfPoints() - 100)
+        line = compute_splined_centerline(line, nknots=10, isline=True)
+
+        # Resample line
+        l = get_curvilinear_coordinate(line)
+        step = 5 * np.mean(l[1:] - l[:-1])
+        line = vmtk_resample_centerline(line, step)
+
+        area, sections = vmtk_compute_centerline_sections(capped_surface, line)
+
+        # Get arrays
+        a = get_point_data_array("CenterlineSectionArea", area)
+        n = get_point_data_array("FrenetTangent", area, k=3)
+        l = get_curvilinear_coordinate(area)
+
+        # Compute 'derivative' of the area
+        dAdX = (a[1:, 0] - a[:-1, 0]) / (l[1:] - l[:-1])
+
+        stop_id = np.nonzero(dAdX < -50)[0][-1]  # - 3
+        normal = n[stop_id]
+        center = area.GetPoint(stop_id)
+
+        # Clip the model
+        plane = vtk_plane(center, normal)
+        surface, clipped = vtk_clip_polydata(surface, plane)
+        if surface.GetNumberOfCells() < clipped.GetNumberOfCells():
+            surface, clipped = clipped, surface
+
+        surface = attach_clipped_regions_to_surface(surface, clipped, center)
+
+    # Landmark MV
+    line = extract_single_line(centerlines, 0)
+    line = extract_single_line(line, 0, start_id=100, end_id=line.GetNumberOfPoints() - 40)
+    line = compute_splined_centerline(line, nknots=10, isline=True)
+
+    l = get_curvilinear_coordinate(line)
+    step = 5 * np.mean(l[1:] - l[:-1])
+    line = vmtk_resample_centerline(line, step)
+
+    area, sections = vmtk_compute_centerline_sections(capped_surface, line)
+
+    # Get arrays
+    a = get_point_data_array("CenterlineSectionArea", area)
+    n = get_point_data_array("FrenetTangent", area, k=3)
+    l = get_curvilinear_coordinate(area)
+
+    # Compute 'derivative' of the area
+    dAdX = (a[1:, 0] - a[:-1, 0]) / (l[1:] - l[:-1])
+    # Stopping criteria
+    stop_id = np.nonzero(dAdX > 50)[0][0] + 3
+    normal = -n[stop_id]
+    center = area.GetPoint(stop_id)
+
+    # Clip the model
+    plane = vtk_plane(center, normal)
+    surface, clipped = vtk_clip_polydata(surface, plane)
+    if surface.GetNumberOfCells() < clipped.GetNumberOfCells():
+        surface, clipped = clipped, surface
+
+    surface = attach_clipped_regions_to_surface(surface, clipped, center)
+
+    write_polydata(surface, la_and_laa_path)
+
+
+def extract_LAA(input_path):
+    """Algorithm for detecting the left atrial appendage and isolate it from the atrium lumen
+     based on the cross-sectional area along enterlines.
+
+    Args:
+        file_path (str): Path to the surface for landmarking
+        input_path (str): Path to store the landmarked surface
+
+    Output:
+        surface (vtkPolyData): A landmarked surface
+    """
+    # File paths
+    base_path = get_path_names(input_path)
+
+    laa_model_path = base_path + "_laa.vtp"
+    laa_centerline_path = base_path + "_laa_centerline.vtp"
+
+    # Open the surface file.
+    print("--- Load model file\n")
+    surface = read_polydata(input_path)
+
+    is_capped, _ = is_surface_capped(surface)
+    if not is_capped:
+        capped_surface = vmtk_cap_polydata(surface)
+    else:
+        capped_surface = surface
+
+    # Get area and corresponding centers
+    parameters = get_parameters(base_path)
+
+    p_outlet = parameters['outlet']  # Get point at MV outlet
+
+    p_laa = provide_region_points(surface, None, None)
+    la_point = p_laa[0]
+
+    # Compute centerline to orifice from MV to get tangent
+    laa_centerlines, _, _ = compute_centerlines(p_outlet, la_point, laa_centerline_path, capped_surface,
+                                                resampling=0.1, smooth=False, base_path=base_path)
+
+    line = extract_single_line(laa_centerlines, 0, start_id=50, end_id=laa_centerlines.GetNumberOfPoints() - 50)
+    laa_l = get_curvilinear_coordinate(line)
+    step = 10 * np.mean(laa_l[1:] - laa_l[:-1])
+    line = vmtk_resample_centerline(line, step)
+    line = compute_splined_centerline(line, nknots=10, isline=True)
+    area, sections = vmtk_compute_centerline_sections(surface, line)
+
+    # Get arrays
+    a = get_point_data_array("CenterlineSectionArea", area)
+    n = get_point_data_array("FrenetTangent", area, k=3)
+    l = get_curvilinear_coordinate(area)
+
+    # Compute 'derivative' of the area
+    dAdX = (a[1:, 0] - a[:-1, 0]) / (l[1:] - l[:-1])
+
+    # Stopping criteria
+    stop_id = np.nonzero(dAdX < -500)[0][0] + 6
+    normal = n[stop_id]
+    center = area.GetPoint(stop_id)
+
+    # Clip the model
+    plane = vtk_plane(center, normal)
+    surface, clipped = vtk_clip_polydata(surface, plane)
+    if surface.GetNumberOfCells() > clipped.GetNumberOfCells():
+        surface, clipped = clipped, surface
+
+    surface = get_surface_closest_to_point(surface, center)
+
+    print("--- Saving LAA to: {}".format(laa_model_path))
+    write_polydata(surface, laa_model_path)
+
+
 if __name__ == "__main__":
     parser = argparse.ArgumentParser()
     parser.add_argument("--case")
     args = parser.parse_args()
     case_path = args.case
-    laa_path = case_path.replace(".vtu", "_laa.vtu")
-    output_path = case_path.replace(".vtu", "_output.vtu")
-    landmark_atrium(case_path, laa_path, output_path)
+
+    t0 = time.time()
+    extract_LA_and_LAA(case_path)
+    t1 = time.time()
+    extract_LAA(case_path)
+    t2 = time.time()
+    print("--- Extraction complete")
+    scale = 1  # Get seconds
+    print("Time spent extracting LA & LAA: {:.3f} s".format((t1 - t0) / scale))
+    print("Time spent extracting LAA: {:.3f} s".format((t2 - t1) / scale))
