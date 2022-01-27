@@ -112,6 +112,10 @@ def extract_LA_and_LAA(input_path):
     """
     # File paths
     base_path = get_path_names(input_path)
+    model_name = base_path.split("/")[-1]
+    if "_" in model_name:
+        model_name = model_name.split("_")[0]
+        base_path = '/'.join(base_path.split("/")[:-1] + [model_name])
 
     centerline_path = base_path + "_centerline.vtp"
     la_and_laa_path = base_path + "_la_and_laa.vtp"
@@ -126,40 +130,21 @@ def extract_LA_and_LAA(input_path):
     else:
         capped_surface = vmtk_cap_polydata(surface)
 
-    # Get area and corresponding centers
-    parameters = get_parameters(base_path)
-    p_outlet = parameters['outlet']  # Get point at MV outlet
-
-    # Get inlets
-    inlets = []
-    areas = []
-    k = 0
-    while True:
-        try:
-            inlet_k = parameters['inlet{}'.format(k)]
-            area_k = parameters['inlet{}_area'.format(k)]
-            inlets.append(inlet_k)
-            areas.append(area_k)
-        except:
-            print("--- Found {} inlets".format(k))
-            break
-        k += 1
-
-    # Sort inlets and get four largest
-    sorted_inlets = [x for _, x in sorted(zip(areas, inlets))][-4:]
-    inlets_aslist = np.array(sorted_inlets).flatten().tolist()
+    # Centers
+    inlet, outlets = compute_centers(surface, base_path)
+    p_outlet = np.array(inlet)
 
     # Make centerlines
     # Check if voronoi and pole_ids exists
-    centerlines, _, _ = compute_centerlines(p_outlet, inlets_aslist,
-                                            centerline_path, capped_surface,
+    centerlines, _, _ = compute_centerlines(inlet, outlets, centerline_path, capped_surface,
                                             resampling=0.1, smooth=False,
                                             base_path=base_path)
 
     # Clip PVs
+    print("--- Clipping PVs")
     for i in range(4):
         line_tmp = extract_single_line(centerlines, i)
-        line = extract_single_line(line_tmp, 0, start_id=40, end_id=line_tmp.GetNumberOfPoints() - 100)
+        line = extract_single_line(line_tmp, 0, start_id=20, end_id=line_tmp.GetNumberOfPoints() - 20)
         line = compute_splined_centerline(line, nknots=10, isline=True)
 
         # Resample line
@@ -209,6 +194,7 @@ def extract_LA_and_LAA(input_path):
         surface = attach_clipped_regions_to_surface(surface, clipped, center)
 
     # Clip MV
+    print("--- Clipping MV")
     line = extract_single_line(centerlines, 0)
     line = extract_single_line(line, 0, start_id=100, end_id=line.GetNumberOfPoints() - 40)
     line = compute_splined_centerline(line, nknots=10, isline=True)
@@ -226,20 +212,35 @@ def extract_LA_and_LAA(input_path):
 
     # Compute 'derivative' of the area
     dAdX = (a[1:, 0] - a[:-1, 0]) / (l[1:] - l[:-1])
-    # Stopping criteria
-    stop_id = np.nonzero(dAdX > 50)[0][0] + 3
+    stop_id = np.nonzero(dAdX > 20)[0][0]
+
     normal = -n[stop_id]
     center = area.GetPoint(stop_id)
 
     # Clip the model
     plane = vtk_plane(center, normal)
     surface, clipped = vtk_clip_polydata(surface, plane)
-    if surface.GetNumberOfCells() < clipped.GetNumberOfCells():
+
+    # Find part to keep
+    surface = vtk_clean_polydata(surface)
+    clipped = vtk_clean_polydata(clipped)
+    p_boundary = p_outlet
+
+    surf_loc = get_vtk_point_locator(surface)
+    clip_loc = get_vtk_point_locator(clipped)
+    id_surf = surf_loc.FindClosestPoint(p_boundary)
+    id_clip = clip_loc.FindClosestPoint(p_boundary)
+    p_surface = np.array(surface.GetPoint(id_surf))
+    p_clipped = np.array(surface.GetPoint(id_clip))
+    dist_surface = np.linalg.norm(p_surface - p_boundary)
+    dist_clipped = np.linalg.norm(p_clipped - p_boundary)
+
+    if dist_surface < dist_clipped:
         surface, clipped = clipped, surface
 
     surface = attach_clipped_regions_to_surface(surface, clipped, center)
 
-    print("--- Saving LAA to: {}".format(la_and_laa_path))
+    print("--- Saving LA and LAA to: {}".format(la_and_laa_path))
     write_polydata(surface, la_and_laa_path)
 
 
@@ -256,6 +257,10 @@ def extract_LAA(input_path, laa_point):
     """
     # File paths
     base_path = get_path_names(input_path)
+    model_name = base_path.split("/")[-1]
+    if "_" in model_name:
+        model_name = model_name.split("_")[0]
+        base_path = '/'.join(base_path.split("/")[:-1] + [model_name])
 
     laa_model_path = base_path + "_laa.vtp"
     laa_centerline_path = base_path + "_laa_centerline.vtp"
@@ -272,11 +277,14 @@ def extract_LAA(input_path, laa_point):
 
     # Get area and corresponding centers
     parameters = get_parameters(base_path)
-
     p_outlet = parameters['outlet']  # Get point at MV outlet
+    # Check if LAA exists in parameters
+    if "region_0" in parameters.keys():
+        appendage_point = parameters["region_0"]
+    else:
+        p_laa = provide_region_points(capped_surface, laa_point, None)
+        appendage_point = p_laa[0]
 
-    p_laa = provide_region_points(capped_surface, laa_point, None)
-    appendage_point = p_laa[0]
     print("--- LAA defined at point: {:.6f} {:.6f} {:.6f}"
           .format(appendage_point[0], appendage_point[1], appendage_point[2]))
 
@@ -312,8 +320,23 @@ def extract_LAA(input_path, laa_point):
     plane = vtk_plane(center, normal)
     surface, clipped = vtk_clip_polydata(surface, plane)
 
-    if surface.GetNumberOfCells() > clipped.GetNumberOfCells():
+    # Find part to keep
+    surface = vtk_clean_polydata(surface)
+    clipped = vtk_clean_polydata(clipped)
+    p_boundary = appendage_point
+
+    surf_loc = get_vtk_point_locator(surface)
+    clip_loc = get_vtk_point_locator(clipped)
+    id_surf = surf_loc.FindClosestPoint(p_boundary)
+    id_clip = clip_loc.FindClosestPoint(p_boundary)
+    p_surface = np.array(surface.GetPoint(id_surf))
+    p_clipped = np.array(surface.GetPoint(id_clip))
+    dist_surface = np.linalg.norm(p_surface - p_boundary)
+    dist_clipped = np.linalg.norm(p_clipped - p_boundary)
+
+    if dist_surface > dist_clipped:
         surface, clipped = clipped, surface
+
     surface = get_surface_closest_to_point(surface, center)
 
     print("--- Saving LAA to: {}".format(laa_model_path))
