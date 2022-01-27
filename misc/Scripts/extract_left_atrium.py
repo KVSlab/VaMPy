@@ -158,8 +158,8 @@ def extract_LA_and_LAA(input_path):
 
     # Clip PVs
     for i in range(4):
-        line = extract_single_line(centerlines, i)
-        line = extract_single_line(line, 0, start_id=40, end_id=line.GetNumberOfPoints() - 100)
+        line_tmp = extract_single_line(centerlines, i)
+        line = extract_single_line(line_tmp, 0, start_id=40, end_id=line_tmp.GetNumberOfPoints() - 100)
         line = compute_splined_centerline(line, nknots=10, isline=True)
 
         # Resample line
@@ -177,14 +177,33 @@ def extract_LA_and_LAA(input_path):
         # Compute 'derivative' of the area
         dAdX = (a[1:, 0] - a[:-1, 0]) / (l[1:] - l[:-1])
 
-        stop_id = np.nonzero(dAdX < -50)[0][-1]  # - 3
+        # Check only from "middle" of lumen and towards PV
+        half_dAdX = int(len(dAdX) / 2)
+        dAdX = dAdX[half_dAdX:]
+
+        stop_id = np.nonzero(dAdX < -100)[0][-1] + half_dAdX + 3
+
         normal = n[stop_id]
         center = area.GetPoint(stop_id)
 
         # Clip the model
         plane = vtk_plane(center, normal)
         surface, clipped = vtk_clip_polydata(surface, plane)
-        if surface.GetNumberOfCells() < clipped.GetNumberOfCells():
+
+        # Find part to keep
+        surface = vtk_clean_polydata(surface)
+        clipped = vtk_clean_polydata(clipped)
+        p_boundary = np.array(line_tmp.GetPoint(line_tmp.GetNumberOfPoints() - 1))
+
+        surf_loc = get_vtk_point_locator(surface)
+        clip_loc = get_vtk_point_locator(clipped)
+        id_surf = surf_loc.FindClosestPoint(p_boundary)
+        id_clip = clip_loc.FindClosestPoint(p_boundary)
+        p_surface = np.array(surface.GetPoint(id_surf))
+        p_clipped = np.array(surface.GetPoint(id_clip))
+        dist_surface = np.linalg.norm(p_surface - p_boundary)
+        dist_clipped = np.linalg.norm(p_clipped - p_boundary)
+        if dist_surface < dist_clipped:
             surface, clipped = clipped, surface
 
         surface = attach_clipped_regions_to_surface(surface, clipped, center)
@@ -224,7 +243,7 @@ def extract_LA_and_LAA(input_path):
     write_polydata(surface, la_and_laa_path)
 
 
-def extract_LAA(input_path):
+def extract_LAA(input_path, laa_point):
     """Algorithm for detecting the left atrial appendage and isolate it from the atrium lumen
      based on the cross-sectional area along enterlines.
 
@@ -256,11 +275,13 @@ def extract_LAA(input_path):
 
     p_outlet = parameters['outlet']  # Get point at MV outlet
 
-    p_laa = provide_region_points(surface, None, None)
-    la_point = p_laa[0]
+    p_laa = provide_region_points(surface, laa_point, None)
+    appendage_point = p_laa[0]
+    print("--- LAA defined at point: {:.6f} {:.6f} {:.6f}"
+          .format(appendage_point[0], appendage_point[1], appendage_point[2]))
 
     # Compute centerline to orifice from MV to get tangent
-    laa_centerlines, _, _ = compute_centerlines(p_outlet, la_point, laa_centerline_path, capped_surface,
+    laa_centerlines, _, _ = compute_centerlines(p_outlet, appendage_point, laa_centerline_path, capped_surface,
                                                 resampling=0.1, smooth=False, base_path=base_path)
 
     line = extract_single_line(laa_centerlines, 0, start_id=50, end_id=laa_centerlines.GetNumberOfPoints() - 50)
@@ -298,13 +319,15 @@ def extract_LAA(input_path):
 if __name__ == "__main__":
     parser = argparse.ArgumentParser()
     parser.add_argument("--case")
+    parser.add_argument("--laa", default=None, type=float, nargs="+")
     args = parser.parse_args()
     case_path = args.case
+    laa_point = args.laa
 
     t0 = time.time()
-    extract_LA_and_LAA(case_path)
+    # extract_LA_and_LAA(case_path)
     t1 = time.time()
-    extract_LAA(case_path)
+    extract_LAA(case_path, laa_point)
     t2 = time.time()
     print("--- Extraction complete")
     scale = 1  # Get seconds
