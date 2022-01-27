@@ -80,7 +80,7 @@ def provide_region_points(surface, provided_points, dir_path=None):
         SeedSelector.Execute()
 
         regionSeedIds = SeedSelector.GetTargetSeedIds()
-        get_point = surface.GetPoints().GetPoint
+        get_point = triangulated_surface.GetPoints().GetPoint
         points = [list(get_point(regionSeedIds.GetId(i))) for i in range(regionSeedIds.GetNumberOfIds())]
     else:
         surface_locator = get_vtk_point_locator(surface)
@@ -120,11 +120,11 @@ def extract_LA_and_LAA(input_path):
     print("--- Load model file\n")
     surface = read_polydata(input_path)
 
-    is_capped, _ = is_surface_capped(surface)
-    if not is_capped:
-        capped_surface = vmtk_cap_polydata(surface)
-    else:
+    if is_surface_capped(surface)[0]:
         capped_surface = surface
+        surface = get_uncapped_surface(surface, gradients_limit=0.01, area_limit=20, circleness_limit=5)
+    else:
+        capped_surface = vmtk_cap_polydata(surface)
 
     # Get area and corresponding centers
     parameters = get_parameters(base_path)
@@ -275,7 +275,7 @@ def extract_LAA(input_path, laa_point):
 
     p_outlet = parameters['outlet']  # Get point at MV outlet
 
-    p_laa = provide_region_points(surface, laa_point, None)
+    p_laa = provide_region_points(capped_surface, laa_point, None)
     appendage_point = p_laa[0]
     print("--- LAA defined at point: {:.6f} {:.6f} {:.6f}"
           .format(appendage_point[0], appendage_point[1], appendage_point[2]))
@@ -299,17 +299,21 @@ def extract_LAA(input_path, laa_point):
     # Compute 'derivative' of the area
     dAdX = (a[1:, 0] - a[:-1, 0]) / (l[1:] - l[:-1])
 
+    # Check only from "middle" of lumen and towards PV
+    half_dAdX = int(len(dAdX) / 2)
+    dAdX = dAdX[half_dAdX:]
+
     # Stopping criteria
-    stop_id = np.nonzero(dAdX < -500)[0][0] + 6
+    stop_id = np.nonzero(dAdX < -500)[0][-1] + half_dAdX + 3
     normal = n[stop_id]
     center = area.GetPoint(stop_id)
 
     # Clip the model
     plane = vtk_plane(center, normal)
     surface, clipped = vtk_clip_polydata(surface, plane)
+
     if surface.GetNumberOfCells() > clipped.GetNumberOfCells():
         surface, clipped = clipped, surface
-
     surface = get_surface_closest_to_point(surface, center)
 
     print("--- Saving LAA to: {}".format(laa_model_path))
@@ -325,7 +329,7 @@ if __name__ == "__main__":
     laa_point = args.laa
 
     t0 = time.time()
-    # extract_LA_and_LAA(case_path)
+    extract_LA_and_LAA(case_path)
     t1 = time.time()
     extract_LAA(case_path, laa_point)
     t2 = time.time()
