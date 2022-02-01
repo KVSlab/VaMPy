@@ -201,7 +201,7 @@ def project_displacement(clamp_boundaries, distance, folder_extended_surfaces, f
     Returns:
     """
     # Add extents to all surfaces
-    extended_surfaces = sorted([f for f in listdir(folder_moved_surfaces) if f[:2] in ["LA", "Co", "Fu", "Ge"]])
+    extended_surfaces = sorted([f for f in listdir(folder_moved_surfaces) if f[:2] in ["LA", "Co", "Fu", "Ge", "Sm"]])
     if not path.exists(folder_extended_surfaces):
         mkdir(folder_extended_surfaces)
 

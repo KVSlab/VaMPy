@@ -209,7 +209,7 @@ def move_atrium_generic(remeshed_path, origin, moved_path, case, centerlines, cy
         return np.sin(np.pi * t)
 
     def get_scale(p):
-        return 0.5 * 0.4
+        return 0.5
 
     is_af = True
     for i, t in enumerate(t_array):
@@ -222,7 +222,8 @@ def move_atrium_generic(remeshed_path, origin, moved_path, case, centerlines, cy
 
             # Get displacement profile
             # displacement = IdealVolume(t)
-            d = GaussianVolume(t, is_af)
+            scale_all = 0.45
+            d = scale_all * GaussianVolume(t, is_af)
 
             d_z = d * get_scale(p)
 
