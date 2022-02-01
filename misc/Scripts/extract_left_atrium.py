@@ -142,7 +142,7 @@ def extract_LA_and_LAA(input_path):
 
     # Clip PVs
     print("--- Clipping PVs")
-    for i in range(4):
+    for i in range((len(outlets) // 3)):
         line_tmp = extract_single_line(centerlines, i)
         line = extract_single_line(line_tmp, 0, start_id=20, end_id=line_tmp.GetNumberOfPoints() - 20)
         line = compute_splined_centerline(line, nknots=10, isline=True)
@@ -185,7 +185,7 @@ def extract_LA_and_LAA(input_path):
         id_surf = surf_loc.FindClosestPoint(p_boundary)
         id_clip = clip_loc.FindClosestPoint(p_boundary)
         p_surface = np.array(surface.GetPoint(id_surf))
-        p_clipped = np.array(surface.GetPoint(id_clip))
+        p_clipped = np.array(clipped.GetPoint(id_clip))
         dist_surface = np.linalg.norm(p_surface - p_boundary)
         dist_clipped = np.linalg.norm(p_clipped - p_boundary)
         if dist_surface < dist_clipped:
@@ -231,7 +231,7 @@ def extract_LA_and_LAA(input_path):
     id_surf = surf_loc.FindClosestPoint(p_boundary)
     id_clip = clip_loc.FindClosestPoint(p_boundary)
     p_surface = np.array(surface.GetPoint(id_surf))
-    p_clipped = np.array(surface.GetPoint(id_clip))
+    p_clipped = np.array(clipped.GetPoint(id_clip))
     dist_surface = np.linalg.norm(p_surface - p_boundary)
     dist_clipped = np.linalg.norm(p_clipped - p_boundary)
 
@@ -269,15 +269,19 @@ def extract_LAA(input_path, laa_point):
     print("--- Load model file\n")
     surface = read_polydata(input_path)
 
-    is_capped, _ = is_surface_capped(surface)
-    if not is_capped:
-        capped_surface = vmtk_cap_polydata(surface)
-    else:
+    if is_surface_capped(surface)[0]:
         capped_surface = surface
+        surface = get_uncapped_surface(surface, gradients_limit=0.01, area_limit=20, circleness_limit=5)
+    else:
+        capped_surface = vmtk_cap_polydata(surface)
+
+    # Centers
+    inlet, outlets = compute_centers(surface, base_path)
+    p_outlet = inlet
 
     # Get area and corresponding centers
     parameters = get_parameters(base_path)
-    p_outlet = parameters['outlet']  # Get point at MV outlet
+
     # Check if LAA exists in parameters
     if "region_0" in parameters.keys():
         appendage_point = parameters["region_0"]
@@ -308,7 +312,7 @@ def extract_LAA(input_path, laa_point):
     dAdX = (a[1:, 0] - a[:-1, 0]) / (l[1:] - l[:-1])
 
     # Check only from "middle" of lumen and towards PV
-    half_dAdX = int(len(dAdX) / 2)
+    half_dAdX = int(len(dAdX) / 4)
     dAdX = dAdX[half_dAdX:]
 
     # Stopping criteria
@@ -330,7 +334,7 @@ def extract_LAA(input_path, laa_point):
     id_surf = surf_loc.FindClosestPoint(p_boundary)
     id_clip = clip_loc.FindClosestPoint(p_boundary)
     p_surface = np.array(surface.GetPoint(id_surf))
-    p_clipped = np.array(surface.GetPoint(id_clip))
+    p_clipped = np.array(clipped.GetPoint(id_clip))
     dist_surface = np.linalg.norm(p_surface - p_boundary)
     dist_clipped = np.linalg.norm(p_clipped - p_boundary)
 
@@ -351,12 +355,14 @@ if __name__ == "__main__":
     case_path = args.case
     laa_point = args.laa
 
+    scale = 1  # Get seconds
     t0 = time.time()
     extract_LA_and_LAA(case_path)
     t1 = time.time()
+    print("--- LA Extraction complete")
+    print("--- Time spent extracting LA & LAA: {:.3f} s".format((t1 - t0) / scale))
+
     extract_LAA(case_path, laa_point)
     t2 = time.time()
-    print("--- Extraction complete")
-    scale = 1  # Get seconds
-    print("Time spent extracting LA & LAA: {:.3f} s".format((t1 - t0) / scale))
-    print("Time spent extracting LAA: {:.3f} s".format((t2 - t1) / scale))
+    print("--- LAA Extraction complete")
+    print("--- Time spent extracting LAA: {:.3f} s".format((t2 - t1) / scale))
