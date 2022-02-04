@@ -351,9 +351,12 @@ if __name__ == "__main__":
     parser = argparse.ArgumentParser()
     parser.add_argument("--case")
     parser.add_argument("--laa", default=None, type=float, nargs="+")
+    parser.add_argument("--includes-laa", default=1)
     args = parser.parse_args()
     case_path = args.case
     laa_point = args.laa
+
+    print("--- Extracting from: {}".format(case_path))
 
     scale = 1  # Get seconds
     t0 = time.time()
@@ -362,7 +365,8 @@ if __name__ == "__main__":
     print("--- LA Extraction complete")
     print("--- Time spent extracting LA & LAA: {:.3f} s".format((t1 - t0) / scale))
 
-    extract_LAA(case_path, laa_point)
-    t2 = time.time()
-    print("--- LAA Extraction complete")
-    print("--- Time spent extracting LAA: {:.3f} s".format((t2 - t1) / scale))
+    if args.includes_laa:
+        extract_LAA(case_path, laa_point)
+        t2 = time.time()
+        print("--- LAA Extraction complete")
+        print("--- Time spent extracting LAA: {:.3f} s".format((t2 - t1) / scale))
