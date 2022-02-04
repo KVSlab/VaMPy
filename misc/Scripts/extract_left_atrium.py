@@ -296,7 +296,10 @@ def extract_LAA(input_path, laa_point):
     laa_centerlines, _, _ = compute_centerlines(p_outlet, appendage_point, laa_centerline_path, capped_surface,
                                                 resampling=0.1, smooth=False, base_path=base_path)
 
-    line = extract_single_line(laa_centerlines, 0, start_id=50, end_id=laa_centerlines.GetNumberOfPoints() - 50)
+    id_start = int(laa_centerlines.GetNumberOfPoints() * 0.2)
+    id_stop = int(laa_centerlines.GetNumberOfPoints() * 0.8)
+    line = extract_single_line(laa_centerlines, 0, start_id=id_start, end_id=id_stop)
+    write_polydata(line, base_path + "_cl_to_check.vtp")
     laa_l = get_curvilinear_coordinate(line)
     step = 10 * np.mean(laa_l[1:] - laa_l[:-1])
     line = vmtk_resample_centerline(line, step)
