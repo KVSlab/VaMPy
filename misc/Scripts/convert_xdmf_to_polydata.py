@@ -54,12 +54,16 @@ def convert_to_polydata(model, nr, index):
     # init the 'PiecewiseFunction' selected for 'OpacityTransferFunction'
     rRTxdmfDisplay.OpacityTransferFunction.Points = [1.165113091468811, 0.0, 0.5, 0.0, 135221.09375, 1.0, 0.5, 0.0]
 
+    # Hide orientation axes
+    renderView1.OrientationAxesVisibility = 0
     # reset view to fit data
     renderView1.ResetCamera(False)
 
     # get the material library
     materialLibrary1 = GetMaterialLibrary()
 
+    # Hide orientation axes
+    renderView1.OrientationAxesVisibility = 0
     # show color bar/color legend
     rRTxdmfDisplay.SetScalarBarVisibility(renderView1, True)
 
@@ -107,11 +111,15 @@ def convert_to_polydata(model, nr, index):
 
     # show color bar/color legend
     extractSurface1Display.SetScalarBarVisibility(renderView1, True)
+    # hide color bar/color legend
+    # tAWSSxdmfDisplay.SetScalarBarVisibility(renderView1, False)
 
     # update the view to ensure updated data information
     renderView1.Update()
 
     # save data
+    # Hide orientation axes
+    renderView1.OrientationAxesVisibility = 0
     SaveData('/Users/henriakj/PhD/OasisMove/results_moving_atrium/{}/data/{}/Solutions/{}.vtp'.format(model, nr, index),
              proxy=extractSurface1, PointDataArrays=['{}'.format(index)])
 
@@ -142,6 +150,16 @@ def convert_to_polydata(model, nr, index):
     # RenderAllViews()
     # alternatively, if you want to write images, you can use SaveScreenshot(...).
 
+    ResetSession()
+
+
+def ResetSession():
+    pxm = servermanager.ProxyManager()
+    pxm.UnRegisterProxies()
+    del pxm
+    Disconnect()
+    Connect()
+
 
 if __name__ == '__main__':
     parser = argparse.ArgumentParser()
@@ -152,5 +170,6 @@ if __name__ == '__main__':
     case = args.case
     number = args.nr
     index = args.id
+    print("--- Converting case: {}, number: {}, index: {}".format(case, number, index))
 
     convert_to_polydata(case, number, index)
