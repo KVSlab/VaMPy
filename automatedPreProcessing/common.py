@@ -390,12 +390,22 @@ def dist_sphere_constant(surface, centerlines, region_center, misr_max, save_pat
     distance_to_sphere = distToCenterlines.Surface
 
     # Reduce element size in region
-    coarsen=True
+    coarsen = False
     if coarsen:
         F = 3 / 4  # For 3xMISIR
-
-    for i in range(len(region_center)):
-        distance_to_sphere = compute_distance_to_sphere(distance_to_sphere,
+    else:
+        F = 1
+    use_laa = False
+    if use_laa:
+        # Test LAA specific refinement
+        laa_path = save_path.rsplit("/", 1)[0] + "/LA015_laa.vtp"
+        laa = read_polydata(laa_path)
+        for i in range(len(region_center)):
+            distance_to_sphere = compute_distance_to_surface(distance_to_sphere, laa, min_distance=edge_length / 3,
+                                                         max_distance=edge_length)
+    else:
+        for i in range(len(region_center)):
+            distance_to_sphere = compute_distance_to_sphere(distance_to_sphere,
                                                         region_center[i],
                                                         min_distance=edge_length / 3,
                                                         max_distance=edge_length,
@@ -547,13 +557,70 @@ def compute_distance_to_sphere(surface, center_sphere, radius_sphere=0.0, distan
         newDist = min(newDist, distanceToSphere) if not add else newDist
 
         # TODO: Edit if coarsening
-        coarsen=True
+        coarsen = False
         if coarsen:
             s = 4.9  # 2 and 3 works
             # Coarsening:
             dist_array.SetComponent(i, 0, s * 1.9 - (s - 1) * newDist)
         else:
             dist_array.SetComponent(i, 0, newDist)
+
+    return surface
+
+
+def compute_distance_to_surface(surface, subsurface, min_distance=0.2, max_distance=0.3):
+    """
+    Computes cell specific target edge length (distances) based on input criterion.
+
+    Args:
+        surface (vtkPolyData): Input surface model
+        subsurface (vtkPolyData): Surface model to compare with
+        min_distance (float): Minimum distance away from the relevant region before scaling starts
+        max_distance (float): Maximum distance away from the relevant region before scaling stops
+
+    Returns:
+        surface (vtkPolyData): Modified surface model with distances
+    """
+    # Check if there allready exists a distance to spheres
+    N = surface.GetNumberOfPoints()
+    number, names = get_number_of_arrays(surface)
+    add = False
+    if distanceToSpheresArrayName not in names:
+        add = True
+
+    # Get array
+    if add:
+        dist_array = get_vtk_array(distanceToSpheresArrayName, 1, N)
+        surface.GetPointData().AddArray(dist_array)
+    else:
+        dist_array = surface.GetPointData().GetArray("DistanceToSpheres")
+
+    # Define locators
+    subsurface_locator = get_vtk_point_locator(subsurface)
+
+    # Compute distance
+    distances = []
+    for i in range(N):
+        distanceToSphere = dist_array.GetComponent(i, 0)
+
+        p_surface = np.array(surface.GetPoint(i))
+        id_subsurface = subsurface_locator.FindClosestPoint(p_surface)
+        p_subsurface = subsurface.GetPoint(id_subsurface)
+        newDist = get_distance(p_surface, p_subsurface)
+
+        tolDist = 1.5
+        distances.append(newDist)
+
+        if newDist < tolDist:
+            newDist = min_distance
+        else:
+            dD = ((newDist - tolDist) / newDist) ** (3 / 2)
+            newDist = max(min_distance, dD * max_distance)
+
+        # Keep smallest distance
+        newDist = min(newDist, distanceToSphere) if not add else newDist
+
+        dist_array.SetComponent(i, 0, newDist)
 
     return surface
 
@@ -579,7 +646,10 @@ def generate_mesh(surface, add_boundary_layer):
         meshGenerator.BoundaryLayer = 1
         meshGenerator.BoundaryLayerOnCaps = 0
         meshGenerator.NumberOfSubLayers = 4
-        meshGenerator.BoundaryLayerThicknessFactor = 0.85
+        # normal, down down up up
+        # Cases 1 2 3 4 5 6. nr 3 = default
+        cases = [0.55, 0.7, 0.85, 1.0, 1.15, 1.3]
+        meshGenerator.BoundaryLayerThicknessFactor = cases[2]  # ID=2 = default
         meshGenerator.SubLayerRatio = 0.75
         meshGenerator.Tetrahedralize = 1
         meshGenerator.VolumeElementScaleFactor = 0.8
