@@ -650,6 +650,8 @@ def generate_mesh(surface, add_boundary_layer):
         # Cases 1 2 3 4 5 6. nr 3 = default
         cases = [0.55, 0.7, 0.85, 1.0, 1.15, 1.3]
         meshGenerator.BoundaryLayerThicknessFactor = cases[2]  # ID=2 = default
+        layer_ratios = [0.25, 0.40, 0.55, 0.70, 0.85, 1]
+        # meshGenerator.SubLayerRatio = layer_ratios[-3]
         meshGenerator.SubLayerRatio = 0.75
         meshGenerator.Tetrahedralize = 1
         meshGenerator.VolumeElementScaleFactor = 0.8
@@ -902,6 +904,64 @@ def add_flow_extension(surface, centerlines, include_outlet, extension_length=2.
 
     return surface_extended
 
+def tmp():
+    search_id = 0
+    f2_factors = [0.95, 1.25, 1.42, 1.11]
+    for i in range(centerlines.GetNumberOfLines()):
+        if include_outlet and i == outlet_id:
+            boundaryIds = vtk.vtkIdList()
+            boundaryIds.InsertNextId(i)
+        if not include_outlet:
+            boundaryIds = vtk.vtkIdList()
+            if i == 3:
+                boundaryIds.InsertNextId(1)
+            else:
+                boundaryIds.InsertNextId(0)
+            centerline = extract_single_line(centerlines, i)
+            r = centerlines.GetPointData().GetArray(radiusArrayName).GetTuple1(0 + search_id)
+            search_id += centerline.GetNumberOfPoints()
+            factor = extension_length / r * f2_factors[i]  # in [mm]
+
+            flowExtensionsFilter = vtkvmtk.vtkvmtkPolyDataFlowExtensionsFilter()
+            flowExtensionsFilter.SetInputData(surface)
+            flowExtensionsFilter.SetCenterlines(centerline)
+            flowExtensionsFilter.SetAdaptiveExtensionLength(1)
+            flowExtensionsFilter.SetAdaptiveNumberOfBoundaryPoints(1)
+            flowExtensionsFilter.SetExtensionRatio(factor)
+            flowExtensionsFilter.SetTransitionRatio(1.0)
+            flowExtensionsFilter.SetCenterlineNormalEstimationDistanceRatio(1.0)
+            if extension_mode == "centerlinedirection":
+                flowExtensionsFilter.SetExtensionModeToUseCenterlineDirection()
+            if extension_mode == "boundarynormal":
+                flowExtensionsFilter.SetExtensionModeToUseNormalToBoundary()
+            flowExtensionsFilter.SetInterpolationModeToThinPlateSpline()
+            flowExtensionsFilter.SetBoundaryIds(boundaryIds)
+            flowExtensionsFilter.SetSigma(1.0)
+            flowExtensionsFilter.Update()
+
+            surface = flowExtensionsFilter.GetOutput()
+
+    if include_outlet:
+        flowExtensionsFilter = vtkvmtk.vtkvmtkPolyDataFlowExtensionsFilter()
+        flowExtensionsFilter.SetInputData(surface)
+        flowExtensionsFilter.SetCenterlines(centerlines)
+        flowExtensionsFilter.SetAdaptiveExtensionLength(1)
+        flowExtensionsFilter.SetAdaptiveNumberOfBoundaryPoints(1)
+        flowExtensionsFilter.SetExtensionRatio(extension_length)
+        flowExtensionsFilter.SetTransitionRatio(1.0)
+        flowExtensionsFilter.SetCenterlineNormalEstimationDistanceRatio(1.0)
+        if extension_mode == "centerlinedirection":
+            flowExtensionsFilter.SetExtensionModeToUseCenterlineDirection()
+        if extension_mode == "boundarynormal":
+            flowExtensionsFilter.SetExtensionModeToUseNormalToBoundary()
+        flowExtensionsFilter.SetInterpolationModeToThinPlateSpline()
+        flowExtensionsFilter.SetBoundaryIds(boundaryIds)
+        flowExtensionsFilter.SetSigma(1.0)
+        flowExtensionsFilter.Update()
+
+        surface = flowExtensionsFilter.GetOutput()
+
+    return surface
 
 def remesh_surface(surface, edge_length, exclude=None):
     surface = dsa.WrapDataObject(surface)
