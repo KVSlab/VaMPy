@@ -354,7 +354,7 @@ if __name__ == "__main__":
     parser = argparse.ArgumentParser()
     parser.add_argument("--case")
     parser.add_argument("--laa", default=None, type=float, nargs="+")
-    parser.add_argument("--includes-laa", default=1)
+    parser.add_argument("--includes-laa", default=0)
     args = parser.parse_args()
     case_path = args.case
     laa_point = args.laa
