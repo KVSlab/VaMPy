@@ -645,14 +645,19 @@ def generate_mesh(surface, add_boundary_layer):
     if add_boundary_layer:
         meshGenerator.BoundaryLayer = 1
         meshGenerator.BoundaryLayerOnCaps = 0
-        meshGenerator.NumberOfSubLayers = 4
+        # n_layers = [1,2,3,4,6,8,10]
+        # meshGenerator.NumberOfSubLayers = n_layers[6]
         # normal, down down up up
         # Cases 1 2 3 4 5 6. nr 3 = default
         cases = [0.55, 0.7, 0.85, 1.0, 1.15, 1.3]
-        meshGenerator.BoundaryLayerThicknessFactor = cases[2]  # ID=2 = default
         layer_ratios = [0.25, 0.40, 0.55, 0.70, 0.85, 1]
         # meshGenerator.SubLayerRatio = layer_ratios[-3]
+        # Do 0 - 2 - 4 - 10 layer study
+        # Note: Defaults: 0.85, 4, 0.75
+        meshGenerator.BoundaryLayerThicknessFactor = 0.85  # ID=2 = default
+        meshGenerator.NumberOfSubLayers = 4
         meshGenerator.SubLayerRatio = 0.75
+
         meshGenerator.Tetrahedralize = 1
         meshGenerator.VolumeElementScaleFactor = 0.8
         meshGenerator.EndcapsEdgeLengthFactor = 1.0
