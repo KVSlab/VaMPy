@@ -1,0 +1,285 @@
+<html><head><meta http-equiv="Content-Type" content="text/html; charset=utf-8"></head><body style="word-wrap: break-word; -webkit-nbsp-mode: space; line-break: after-white-space;" class=""><div class=""></div><div class=""><br class=""></div><div class=""><br class=""><div><br class=""><blockquote type="cite" class=""><div class="">On May 26, 2021, at 10:41, Ehsan Khalili &lt;<a href="mailto:ehsan@simula.no" class="">ehsan@simula.no</a>&gt; wrote:</div><br class="Apple-interchange-newline"><div class=""><meta http-equiv="Content-Type" content="text/html; charset=utf-8" class=""><div dir="ltr" class=""><div class="">Hi Kei,</div><div class=""><br class=""></div><div class="">I would be grateful if you could share your 3D pipe mesh with us.</div><div class=""><br class=""></div><div class="">Best regards,</div><div class="">Ehsan<br class=""></div></div><br class=""><div class="gmail_quote"><div dir="ltr" class="gmail_attr">On Fri, 21 May 2021 at 09:58, Kristian Valen-Sendstad &lt;<a href="mailto:kvs@simula.no" class="">kvs@simula.no</a>&gt; wrote:<br class=""></div><blockquote class="gmail_quote" style="margin:0px 0px 0px 0.8ex;border-left:1px solid rgb(204,204,204);padding-left:1ex"><div dir="ltr" class=""><div dir="ltr" class="">Hi all,&nbsp;<br class=""><div class=""><br class=""></div><div class="">Please use the following coords:</div><div class=""><br class=""></div><div class=""><a href="https://simula.zoom.us/j/69600752109?pwd=bys0NzJwNE1YUWw5Y25DZ2NQL2lGdz09" target="_blank" class="">https://simula.zoom.us/j/69600752109?pwd=bys0NzJwNE1YUWw5Y25DZ2NQL2lGdz09</a><br class=""></div><div class=""><br class=""></div><div class="">KVS</div></div></div><br class=""><div class="gmail_quote"><div dir="ltr" class="gmail_attr">On Wed, 19 May 2021 at 10:33, Henrik Kjeldsberg &lt;<a href="mailto:henriakj@simula.no" target="_blank" class="">henriakj@simula.no</a>&gt; wrote:<br class=""></div><blockquote class="gmail_quote" style="margin:0px 0px 0px 0.8ex;border-left:1px solid rgb(204,204,204);padding-left:1ex"><div dir="ltr" class="">Hi Kei,<div class=""><br class=""></div><div class="">Sorry for the late reply, and thanks for your comments! I'll have a look.</div><div class="">Agree that it's more convenient to keep it on github.</div><div class=""><br class=""></div><div class="">Best,</div><div class="">Henrik</div></div><br class=""><div class="gmail_quote"><div dir="ltr" class="gmail_attr">On Wed, 12 May 2021 at 22:04, Kei Yamamoto &lt;<a href="mailto:keiya@math.uio.no" target="_blank" class="">keiya@math.uio.no</a>&gt; wrote:<br class=""></div><blockquote class="gmail_quote" style="margin:0px 0px 0px 0.8ex;border-left:1px solid rgb(204,204,204);padding-left:1ex">
+
+
+
+<div class="">
+Hi Henrik,
+<div class=""><br class="">
+</div>
+<div class="">Sorry for sending a message at this late hour.&nbsp;</div>
+<div class="">I am trying the updated workflow and so far it seems nice.</div>
+<div class="">I will test the post processing part later.&nbsp;</div>
+<div class=""><br class="">
+</div>
+<div class="">I added one comment regarding “save_solution_after_cycle” and also created one issue for the warnings that appeared during pre-processing.</div>
+<div class="">I thought it might be convenient to have it on github rather than on my google documents :)</div>
+<div class=""><br class="">
+</div>
+<div class="">Anyway, have a nice holiday and (a bit early) Gratulerer med 17.mai ! 🇳🇴</div>
+<div class=""><br class="">
+</div>
+<div class="">Best regards,</div>
+<div class="">Kei&nbsp;</div>
+<div class=""><br class="">
+</div>
+<div class="">
+<div class="">
+<blockquote type="cite" class="">
+<div class="">On May 11, 2021, at 18:26, Henrik Kjeldsberg &lt;<a href="mailto:henriakj@simula.no" target="_blank" class="">henriakj@simula.no</a>&gt; wrote:</div>
+<br class="">
+<div class="">
+<div dir="ltr" class="">
+<div dir="ltr" class="">Hi all,
+<div class=""><br class="">
+</div>
+<div class="">I've created a new branch on Aneurysm workflow called <b class="">artery-refactor -&nbsp;</b><a href="https://github.com/KVSlab/Aneurysm_workflow/tree/artery-refactor" target="_blank" class="">https://github.com/KVSlab/Aneurysm_workflow/tree/artery-refactor</a>&nbsp;&nbsp;</div>
+<div class="">It should contain most of the suggested changes we discussed today. I've run through this myself using the artery model which is located in the test-folder, for 200 timesteps and compared the results to the original Artery.py-file, and I can see
+ no differences in WSS or TWSSG.&nbsp;🤞</div>
+<div class=""><br class="">
+</div>
+<div class="">Kei and Ehsan, If you are able to test this it would be great! Just run the simulation for 100-200 or so timesteps, and check that you get consistent results.</div>
+<div class="">If you have any comments, suggestions, or discover any bugs or issues, you can add them to the pull request (PR) I made.</div>
+<div class="">If you haven't reviewed a PR before all you need to do is:</div>
+<div class=""><br class="">
+</div>
+<div class=""><b class="">For general comments:&nbsp;</b></div>
+<blockquote class="gmail_quote" style="margin:0px 0px 0px 0.8ex;border-left:1px solid rgb(204,204,204);padding-left:1ex">
+1) Go to&nbsp;<a href="https://github.com/KVSlab/Aneurysm_workflow/pull/15" target="_blank" class="">https://github.com/KVSlab/Aneurysm_workflow/pull/15</a></blockquote>
+<blockquote class="gmail_quote" style="margin:0px 0px 0px 0.8ex;border-left:1px solid rgb(204,204,204);padding-left:1ex">
+2) Scroll to the bottom and add your comment&nbsp;</blockquote>
+<div class=""><br class="">
+</div>
+<div class=""><b class="">For code specific comments:</b></div>
+<blockquote class="gmail_quote" style="margin:0px 0px 0px 0.8ex;border-left:1px solid rgb(204,204,204);padding-left:1ex">
+1) Go to&nbsp;<a href="https://github.com/KVSlab/Aneurysm_workflow/pull/15/files" target="_blank" class="">https://github.com/KVSlab/Aneurysm_workflow/pull/15/files</a> (or click 'Files changed' under the PR)</blockquote>
+<blockquote class="gmail_quote" style="margin:0px 0px 0px 0.8ex;border-left:1px solid rgb(204,204,204);padding-left:1ex">
+2) Scroll to the line you wish to comment and hover the mouse over it&nbsp;</blockquote>
+<blockquote class="gmail_quote" style="margin:0px 0px 0px 0.8ex;border-left:1px solid rgb(204,204,204);padding-left:1ex">
+3) Click the blue '+' sign and add your comment&nbsp;</blockquote>
+<div class=""></div>
+<div class="">&nbsp;<br class="">
+</div>
+<div class="">Best,</div>
+<div class="">Henrik</div>
+</div>
+<br class="">
+<div class="gmail_quote">
+<div dir="ltr" class="gmail_attr">On Tue, 11 May 2021 at 12:04, Kristian Valen-Sendstad &lt;<a href="mailto:kvs@simula.no" target="_blank" class="">kvs@simula.no</a>&gt; wrote:<br class="">
+</div>
+<blockquote class="gmail_quote" style="margin:0px 0px 0px 0.8ex;border-left:1px solid rgb(204,204,204);padding-left:1ex">
+<div dir="ltr" class="">Thanks, Kei :)<br class="">
+<div class=""><br class="">
+</div>
+<div class="">Best,&nbsp;</div>
+<div class="">KVS</div>
+</div>
+<br class="">
+<div class="gmail_quote">
+<div dir="ltr" class="gmail_attr">On Tue, 11 May 2021 at 11:55, Kei Yamamoto &lt;<a href="mailto:keiya@math.uio.no" target="_blank" class="">keiya@math.uio.no</a>&gt; wrote:<br class="">
+</div>
+<blockquote class="gmail_quote" style="margin:0px 0px 0px 0.8ex;border-left:1px solid rgb(204,204,204);padding-left:1ex">
+<div class="">Hi all,
+<div class=""><br class="">
+</div>
+<div class="">Thanks for today’s session.</div>
+<div class="">This is the link for the comments I made. Hope it will help.</div>
+<div class=""><br class="">
+</div>
+<div class=""><a href="https://docs.google.com/document/d/1ugC6E1TsHfqY5vibTeuYPeRvmIq8gNYuGv7AcOpNCKk/edit?usp=sharing" target="_blank" class="">https://docs.google.com/document/d/1ugC6E1TsHfqY5vibTeuYPeRvmIq8gNYuGv7AcOpNCKk/edit?usp=sharing</a></div>
+<div class=""><br class="">
+</div>
+<div class="">Best,</div>
+<div class="">Kei&nbsp;<br class="">
+<div class=""><br class="">
+<blockquote type="cite" class="">
+<div class="">On May 11, 2021, at 10:02, Kristian Valen-Sendstad &lt;<a href="mailto:kvs@simula.no" target="_blank" class="">kvs@simula.no</a>&gt; wrote:</div>
+<br class="">
+<div class="">
+<div dir="ltr" class="">
+<div dir="ltr" class="">Hi all,&nbsp;
+<div class=""><br class="">
+</div>
+<div class="">Here are the coords:</div>
+<div class=""><br class="">
+</div>
+<div class=""><a href="https://simula.zoom.us/j/62933533166?pwd=MkplU3Q4MGNKTUlrN3FLQm04ZCs4Zz09" target="_blank" class="">https://simula.zoom.us/j/62933533166?pwd=MkplU3Q4MGNKTUlrN3FLQm04ZCs4Zz09</a><br class="">
+</div>
+<div class=""><br class="">
+</div>
+<div class="">KVS</div>
+</div>
+</div>
+<br class="">
+<div class="gmail_quote">
+<div dir="ltr" class="gmail_attr">On Mon, 10 May 2021 at 18:42, Ehsan Khalili &lt;<a href="mailto:ehsan@simula.no" target="_blank" class="">ehsan@simula.no</a>&gt; wrote:<br class="">
+</div>
+<blockquote class="gmail_quote" style="margin:0px 0px 0px 0.8ex;border-left:1px solid rgb(204,204,204);padding-left:1ex">
+<div dir="auto" class="">
+<div class="">Hi all,
+<div dir="auto" class=""><br class="">
+</div>
+<div dir="auto" class="">Works for me as well.</div>
+<div dir="auto" class=""><br class="">
+</div>
+<div dir="auto" class="">Best regards,</div>
+<div dir="auto" class="">Ehsan</div>
+<br class="">
+<br class="">
+<div class="gmail_quote">
+<div dir="ltr" class="gmail_attr">On Mon, May 10, 2021, 18:32 Henrik Kjeldsberg &lt;<a href="mailto:henriakj@simula.no" target="_blank" class="">henriakj@simula.no</a>&gt; wrote:<br class="">
+</div>
+<blockquote class="gmail_quote" style="margin:0px 0px 0px 0.8ex;border-left:1px solid rgb(204,204,204);padding-left:1ex">
+<div dir="auto" class="">Works for me too!</div>
+<br class="">
+<div class="gmail_quote">
+<div dir="ltr" class="gmail_attr">man. 10. mai 2021, 17:52 skrev Kei Yamamoto &lt;<a href="mailto:keiya@math.uio.no" rel="noreferrer" target="_blank" class="">keiya@math.uio.no</a>&gt;:<br class="">
+</div>
+<blockquote class="gmail_quote" style="margin:0px 0px 0px 0.8ex;border-left:1px solid rgb(204,204,204);padding-left:1ex">
+<div class="">Yes, that works fine with me.
+<div class=""><br class="">
+</div>
+<div class="">Best,&nbsp;</div>
+<div class="">Kei&nbsp;<br class="">
+<div class=""><br class="">
+<blockquote type="cite" class="">
+<div class="">On May 10, 2021, at 17:47, Kristian Valen-Sendstad &lt;<a href="mailto:kvs@simula.no" rel="noreferrer noreferrer" target="_blank" class="">kvs@simula.no</a>&gt; wrote:</div>
+<br class="">
+<div class="">
+<div dir="ltr" class="">Hi everyone,&nbsp;
+<div class=""><br class="">
+</div>
+<div class="">I noticed that I forgot to specify a time. 10am?</div>
+<div class=""><br class="">
+</div>
+<div class="">KVS</div>
+</div>
+<br class="">
+<div class="gmail_quote">
+<div dir="ltr" class="gmail_attr">On Mon, 10 May 2021 at 17:26, Kristian Valen-Sendstad &lt;<a href="mailto:kvs@simula.no" rel="noreferrer noreferrer" target="_blank" class="">kvs@simula.no</a>&gt; wrote:<br class="">
+</div>
+<blockquote class="gmail_quote" style="margin:0px 0px 0px 0.8ex;border-left:1px solid rgb(204,204,204);padding-left:1ex">
+<div dir="ltr" class="">Thanks, guys. See you&nbsp;tomorrow.&nbsp;
+<div class=""><br class="">
+</div>
+<div class="">Best,</div>
+<div class="">KVS</div>
+</div>
+<br class="">
+<div class="gmail_quote">
+<div dir="ltr" class="gmail_attr">On Mon, 10 May 2021 at 13:10, Ehsan Khalili &lt;<a href="mailto:ehsan@simula.no" rel="noreferrer noreferrer" target="_blank" class="">ehsan@simula.no</a>&gt; wrote:<br class="">
+</div>
+<blockquote class="gmail_quote" style="margin:0px 0px 0px 0.8ex;border-left:1px solid rgb(204,204,204);padding-left:1ex">
+<div dir="ltr" class="">
+<div class="">Thanks. Sure, I will make a list of my questions.</div>
+<div class=""><br class="">
+</div>
+<div class="">Best regards,</div>
+<div class="">Ehsan<br class="">
+</div>
+</div>
+<br class="">
+<div class="gmail_quote">
+<div dir="ltr" class="gmail_attr">On Mon, 10 May 2021 at 13:05, Kei Yamamoto &lt;<a href="mailto:keiya@math.uio.no" rel="noreferrer noreferrer" target="_blank" class="">keiya@math.uio.no</a>&gt; wrote:<br class="">
+</div>
+<blockquote class="gmail_quote" style="margin:0px 0px 0px 0.8ex;border-left:1px solid rgb(204,204,204);padding-left:1ex">
+<div class="">Yes, I will git pull the updates and try to run it again today and updates the comments.&nbsp;
+<div class=""><br class="">
+</div>
+<div class="">Best,</div>
+<div class="">Kei&nbsp;<br class="">
+<div class=""><br class="">
+<blockquote type="cite" class="">
+<div class="">On May 10, 2021, at 12:57, Kristian Valen-Sendstad &lt;<a href="mailto:kvs@simula.no" rel="noreferrer noreferrer" target="_blank" class="">kvs@simula.no</a>&gt; wrote:</div>
+<br class="">
+<div class="">
+<div dir="ltr" class="">Hi&nbsp;Kei,&nbsp;
+<div class=""><br class="">
+</div>
+<div class="">That sounds&nbsp;good. Ehsan and Kei, could you please compile a list/presentation with all your questions and comments to the repository?&nbsp;</div>
+<div class=""><br class="">
+</div>
+<div class="">Best,&nbsp;</div>
+<div class="">KVS</div>
+</div>
+<br class="">
+<div class="gmail_quote">
+<div dir="ltr" class="gmail_attr">On Mon, 10 May 2021 at 11:31, Kei Yamamoto &lt;<a href="mailto:keiya@math.uio.no" rel="noreferrer noreferrer" target="_blank" class="">keiya@math.uio.no</a>&gt; wrote:<br class="">
+</div>
+<blockquote class="gmail_quote" style="margin:0px 0px 0px 0.8ex;border-left:1px solid rgb(204,204,204);padding-left:1ex">
+Hi Kristian, <br class="">
+<br class="">
+Happy raining Monday ! I am doing good :)<br class="">
+<br class="">
+I have a meeting with Mikael from 9am tomorrow but I am willing to participate after that.<br class="">
+<br class="">
+Best wishes,<br class="">
+Kei <br class="">
+<br class="">
+&gt; On May 10, 2021, at 11:27, Kristian Valen-Sendstad &lt;<a href="mailto:kvs@simula.no" rel="noreferrer noreferrer" target="_blank" class="">kvs@simula.no</a>&gt; wrote:<br class="">
+&gt; <br class="">
+&gt; Hi Kei, <br class="">
+&gt; <br class="">
+&gt; Happy Monday! I hope you are well. <br class="">
+&gt; <br class="">
+&gt; Henrik, Ehsan, and I are trying to improve Aneurysm Workflow and would really like to have your input. Would you be willing and able to share your experiences with us in the near future? Would tomorrow morning work for you?<br class="">
+&gt; <br class="">
+&gt; Best, <br class="">
+&gt; KVS<br class="">
+<br class="">
+</blockquote>
+</div>
+</div>
+</blockquote>
+</div>
+<br class="">
+</div>
+</div>
+</blockquote>
+</div>
+</blockquote>
+</div>
+</blockquote>
+</div>
+</div>
+</blockquote>
+</div>
+<br class="">
+</div>
+</div>
+</blockquote>
+</div>
+</blockquote>
+</div>
+</div>
+</div>
+</blockquote>
+</div>
+</div>
+</blockquote>
+</div>
+<br class="">
+</div>
+</div>
+</blockquote>
+</div>
+</blockquote>
+</div>
+<br clear="all" class="">
+<div class=""><br class="">
+</div>
+-- <br class="">
+<div dir="ltr" class="">
+<div dir="ltr" class="">Henrik</div>
+</div>
+</div>
+</div>
+</blockquote>
+</div>
+<br class="">
+</div>
+</div>
+
+</blockquote></div><br clear="all" class=""><div class=""><br class=""></div>-- <br class=""><div dir="ltr" class=""><div dir="ltr" class="">Henrik</div></div>
+</blockquote></div>
+</blockquote></div>
+</div></blockquote></div><br class=""></div></body></html>
