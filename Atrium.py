@@ -207,7 +207,6 @@ def create_bcs(t, NS_expressions, V, Q, area_ratio, mesh, mesh_path, nu, backflo
         for normal_component in tmp_normal:
             # _in = boundary_expression(coeffs, omega, period, tmp_normal, normal_component, tmp_area, tmp_center, tmp_radius,'parabolic',element = V.ufl_element())
             _in = InletParabolic( normal_component, tmp_center, tmp_area, None, flow_rate, area_total, element=V.ufl_element()) #parabolic profile
-            # _in = -normal_component * mean_velocity #plug profile
             inlet.append(_in)
         
         NS_expressions[ID] = inlet
@@ -333,10 +332,10 @@ def temporal_hook(h, u_, q_, p_, mesh, tstep, save_step_problem,dump_stats, newf
     #         uc.update(t)
                 
     # Compute flux and update pressure condition
-    if tstep >=1 and tstep %5 == 0:
+    if tstep >=1 and tstep %tstep_print == 0:
         Q_in, Q_ins, Q_out, V_out, V_ins = compute_flow_rates(NS_expressions, area_ratio, boundary, id_in, id_out, mesh, n, tstep, u_, newfolder, t)
 
-    if MPI.rank(MPI.comm_world) == 0 and tstep >=1 and tstep %5 == 0:
+    if MPI.rank(MPI.comm_world) == 0 and tstep >=1 and tstep %tstep_print == 0:
         velocity_path = path.join(newfolder, "Solutions", "velocity.txt")
         flowrate_path = path.join(newfolder, "Solutions", "flowrate.txt")
         # if not path.isdir(path.join(newfolder, "Solutions")):
