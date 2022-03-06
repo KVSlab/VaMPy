@@ -1,6 +1,7 @@
 from os import path, listdir, mkdir
 
 import numpy as np
+from IPython import embed
 from morphman.common import *
 from vtk.numpy_interface import dataset_adapter as dsa
 
@@ -75,8 +76,8 @@ def get_point_map(remeshed, remeshed_extended):
 
     for i in range(num_ext):
         point = remeshed_extended.Points[num_re + i]
-        tmp_dist = 1E16
         tmp_id = -1
+        tmp_cross_norm = 1e16
         # Some hacks to find the correct corresponding points
         for region_id in range(len(outer_features)):
             region_id_out = boundary_map[region_id]
@@ -86,11 +87,13 @@ def get_point_map(remeshed, remeshed_extended):
             p_i = inner_features[region_id].GetPoint(id_i)
             p_o = outer_features[region_id_out].GetPoint(id_o)
 
-            dist_o = get_distance(point, p_i)
-            dist_i = get_distance(point, p_o)
-            dist_total = dist_i + dist_o
-            if dist_total < tmp_dist:
-                tmp_dist = dist_total
+            # Compute norm of cross product between vectors pointing to surface point (on cylinder)
+            p_a = np.array(p_i) - np.array(point)
+            p_b = np.array(p_o) - np.array(point)
+            p_cross = np.cross(p_a, p_b)
+            p_cross_norm = np.linalg.norm(p_cross)
+            if p_cross_norm < tmp_cross_norm:
+                tmp_cross_norm = p_cross_norm
                 tmp_id = region_id
 
         regionId = tmp_id
@@ -220,7 +223,6 @@ def project_displacement(clamp_boundaries, distance, folder_extended_surfaces, f
         if not path.exists(new_path):
             move_surface_model(tmp_surface, surface, remeshed, surface_extended, distance, point_map, new_path, i,
                                points, clamp_boundaries)
-
     return points
 
 
@@ -267,6 +269,8 @@ def create_funnel(surface, cl, cl_ext, radius):
     surface.SetPoints(points)
 
     return surface.VTKObject
+
+
 def get_distance_between_points(p0, p1):
     p0 = np.array(p0)
     p1 = np.array(p1)
