@@ -6,9 +6,8 @@ import csv
 
 import numpy as np
 from numpy.core.fromnumeric import mean
-from .Womersley import make_womersley_bcs, compute_boundary_geometry_acrn
+from simulation.Womersley import make_womersley_bcs, compute_boundary_geometry_acrn
 
-#from fenicstools import Probes
 from oasis.problems.NSfracStep import *
 from scipy.interpolate import UnivariateSpline
 from scipy.integrate import simps, romberg
@@ -164,7 +163,6 @@ def create_bcs(t, NS_expressions, V, Q, area_ratio, mesh, mesh_path, nu, backflo
 
     # Get IDs for inlet(s) and outlet(s)
     info_path = mesh_path.split(".")[0] + "_info.json"
-    # info_path = mesh_path.split(".")[0] + ".json"
 
     with open(info_path) as f:
         info = json.load(f)
@@ -175,14 +173,21 @@ def create_bcs(t, NS_expressions, V, Q, area_ratio, mesh, mesh_path, nu, backflo
     if backflow:
         backflow_facets[:] = id_out
     #Q_mean = float(id_info[3])
-    area_ratio[:] = [0.3, 0.3, 0.2, 0.2] #info['area_ratio'] Take care about Q_ideal! #[float(p) for p in info['areaRatioLine'].split()[-1].split(",")]
+    #area_ratio[:] = [0.3, 0.3, 0.2, 0.2] #info['area_ratio'] Take care about Q_ideal! #[float(p) for p in info['areaRatioLine'].split()[-1].split(",")]
+    area_ratio = info['area_ratio']
+
     # Find corresponding areas
     area_total = 0
     for ID in id_in:
         area_total += assemble(Constant(1.0) * ds_new(ID))
 
-    area_in = np.array([info['inlet0_area'],info['inlet1_area'],info['inlet2_area'],info['inlet3_area']])
-    area_out = np.array([info['outlet_area']])
+    # Get inlet and outlet areas from json file
+    area_in = [info[key] for key in info.keys() if (key.startswith('inlet') and key.endswith('area'))]
+    area_out = [info[key] for key in info.keys() if (key.startswith('outlet') and key.endswith('area'))]
+    # Transform into np.array
+    area_in = np.array(area_in)
+    area_out = np.array(area_out)
+
     dim_MV = np.sqrt(4*area_in.max()/np.pi)  #[mm]
     dim_PV = np.sqrt(4*area_out/np.pi)
     NS_parameters['dim_MV'] = dim_MV
@@ -333,18 +338,25 @@ def temporal_hook(h, u_, q_, p_, mesh, tstep, save_step_problem,dump_stats, newf
                 
     # Compute flux and update pressure condition
     if tstep >=1 and tstep %tstep_print == 0:
-        Q_in, Q_ins, Q_out, V_out, V_ins = compute_flow_rates(NS_expressions, area_ratio, boundary, id_in, id_out, mesh, n, tstep, u_, newfolder, t)
+        #Q_in, Q_ins, Q_out, V_out, V_ins = compute_flow_rates(NS_expressions, area_ratio, boundary, id_in, id_out, mesh, n, tstep, u_, newfolder, t)
+        Q_ins, Q_outs, V_ins, V_outs = compute_flow_rates(NS_expressions, area_ratio, boundary, id_in, id_out, mesh, n, tstep, u_, newfolder, t)
 
     if MPI.rank(MPI.comm_world) == 0 and tstep >=1 and tstep %tstep_print == 0:
         velocity_path = path.join(newfolder, "Solutions", "velocity.txt")
         flowrate_path = path.join(newfolder, "Solutions", "flowrate.txt")
         # if not path.isdir(path.join(newfolder, "Solutions")):
         #     os.mkdir(path.join(newfolder, "Solutions"))
+        s = "{:2.4e} "
+        for i in range(len(V_outs) + len(V_ins)):
+            s = s + "{:.4f} "
+        s = s + "\n"
+
         with open(velocity_path, 'a') as filename:
-            filename.write("{:2.4e}, {:.4f}, {:.4f}, {:.4f}, {:.4f}, {:.4f} \n".format(t, V_out, V_ins[0], V_ins[1], V_ins[2], V_ins[3]))  
-        with open(flowrate_path, 'a') as fname:
-            fname.write("{:2.4e}, {:.4f}, {:.4f}, {:.4f}, {:.4f}, {:.4f}, {:.4f} \n".format(t, Q_out, Q_ins[0], Q_ins[1], Q_ins[2], Q_ins[3], sum(Q_ins)))  
-    
+            filename.write(s.format(*[t, *V_outs, *V_ins]))
+            #filename.write("{:2.4e}, {:.4f}, {:.4f}, {:.4f}, {:.4f}, {:.4f} \n".format(t, V_out, V_ins[0], V_ins[1], V_ins[2], V_ins[3]))
+        with open(flowrate_path, 'a') as filename:
+            #fname.write("{:2.4e}, {:.4f}, {:.4f}, {:.4f}, {:.4f}, {:.4f}, {:.4f} \n".format(t, Q_out, Q_ins[0], Q_ins[1], Q_ins[2], Q_ins[3], sum(Q_ins)))  
+            filename.write(s.format(*[t, *Q_outs, *Q_ins]))
 
     if tstep % tstep_print == 0:
         DG = FunctionSpace(mesh, "DG", 0)
@@ -470,15 +482,24 @@ def compute_flow_rates(NS_expressions, area_ratio, boundary, id_in, id_out, mesh
     f = Function(V)
     f.vector()[:] = 1.
 
-    Q_out = abs(assemble(dot(u_, n) * ds(id_out[0], domain=mesh, subdomain_data=boundary)))
-    dso = assemble(f*ds(id_out[0], domain=mesh, subdomain_data=boundary))
-    # print('id_out:', id_out[0], dso)
-    V_out = Q_out/ dso
+    Q_outs = []
+    V_outs = []
+    timer = Timer("compute_flow_rates - Compute V_out")
+    for i, out_id in enumerate(id_out):
+        Q_out = abs(assemble(dot(u_, n) * ds(out_id, domain=mesh, subdomain_data=boundary)))
+        dso = assemble(f*ds(out_id, domain=mesh, subdomain_data=boundary))
+        # print('id_out:', id_out[0], dso)
+        V_out = Q_out/ dso
+        Q_outs.append(Q_out)
+        V_outs.append(V_out)
+    timer.stop()
+    print("Time compute_flow_rates - Compute V_out = ", timer.elapsed()[0])
     
     f.vector()[:] = 1.
     Q_ins = []
     Q_ideals = []
     V_ins = []
+    timer = Timer("compute_flow_rates - Compute V_in")
     for i, in_id in enumerate(id_in):
         Q_in = abs(assemble(dot(u_, n) * ds(in_id, domain=mesh, subdomain_data=boundary)))
         dsi = assemble(f*ds(in_id, domain=mesh, subdomain_data=boundary))
@@ -488,7 +509,11 @@ def compute_flow_rates(NS_expressions, area_ratio, boundary, id_in, id_out, mesh
         V_ins.append(V_in)
         #Q_ideal = area_ratio[i] * Q_in  #FIXIT: area_ratio
         #Q_ideals.append(Q_ideal)
-    return Q_in, Q_ins, Q_out, V_out, V_ins 
+    timer.stop()
+    print("Time compute_flow_rates - Compute V_in = ", timer.elapsed()[0])
+
+    return Q_ins, Q_outs, V_ins, V_outs
+    #return Q_in, Q_ins, Q_out, V_out, V_ins 
     #return Q_ideals, Q_in, Q_ins, Q_out, V_out, V_ins
 
 def EdgeLength(mesh):
