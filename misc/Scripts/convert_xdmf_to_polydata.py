@@ -8,7 +8,7 @@ paraview.simple._DisableFirstRenderCameraReset()
 def convert_to_polydata(model, nr, index):
     # create a new 'Xdmf3ReaderS'
     rRTxdmf = Xdmf3ReaderS(registrationName='{}.xdmf'.format(index), FileName=[
-        '/Users/henriakj/PhD/OasisMove/results_moving_atrium/{}/data/{}/Solutions/{}.xdmf'.format(model, nr, index)])
+        '/Users/henriakj/PhD/Oasis/results_moving_atrium/{}/data/{}/Solutions/{}.xdmf'.format(model, nr, index)])
     rRTxdmf.PointArrays = ['{}'.format(index)]
 
     # get active view
@@ -120,7 +120,7 @@ def convert_to_polydata(model, nr, index):
     # save data
     # Hide orientation axes
     renderView1.OrientationAxesVisibility = 0
-    SaveData('/Users/henriakj/PhD/OasisMove/results_moving_atrium/{}/data/{}/Solutions/{}.vtp'.format(model, nr, index),
+    SaveData('/Users/henriakj/PhD/Oasis/results_moving_atrium/{}/data/{}/Solutions/{}.vtp'.format(model, nr, index),
              proxy=extractSurface1, PointDataArrays=['{}'.format(index)])
 
     # ================================================================

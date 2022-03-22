@@ -319,7 +319,8 @@ def extract_LAA(input_path, laa_point):
     dAdX = dAdX[half_dAdX:]
 
     # Stopping criteria
-    stop_id = np.nonzero(dAdX < -500)[0][-1] + half_dAdX + 3
+    tolerance = 3  # FIXME: Input parameter?
+    stop_id = np.nonzero(dAdX < -500)[0][-1] + half_dAdX + tolerance
     normal = n[stop_id]
     center = area.GetPoint(stop_id)
 
