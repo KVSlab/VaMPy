@@ -11,7 +11,7 @@ try:
 except NameError:
     pass
 
-def compute_hemodynamic_indices(case_path, nu, rho, dt, velocity_degree):
+def compute_hemodynamic_indices(case_path, nu, rheology_model, rho, dt, velocity_degree):
     """
     Loads velocity fields from completed CFD simulation,
     and computes and saves the following hemodynamic quantities:
@@ -28,6 +28,7 @@ def compute_hemodynamic_indices(case_path, nu, rho, dt, velocity_degree):
     Args:
         velocity_degree (int): Finite element degree of velocity
         case_path (Path): Path to results from simulation
+        rheology_model (str): "Newtonian" is the default case, while "non-Newtonian" is set for non-Newtonian simulations
         nu (float): Kinematic viscosity
         rho (float): Fluid density
         dt (float): Time step of simulation
@@ -36,6 +37,8 @@ def compute_hemodynamic_indices(case_path, nu, rho, dt, velocity_degree):
     case_path = Path(case_path)
     file_path_u = case_path / "u.h5"
     mesh_path = case_path / "mesh.h5"
+    if (rheology_model != "Newtonian"):
+        file_path_nunn = case_path / "nu.h5"
 
     # Start post-processing from 2nd cycle using every 10th time step, or 2000 time steps per cycle
     start = 0  # save_data = 5 -> 10000 / 5 = 2000
@@ -53,11 +56,15 @@ def compute_hemodynamic_indices(case_path, nu, rho, dt, velocity_degree):
         print("Define function spaces")
     V_b1 = VectorFunctionSpace(bm, "CG", 1)
     U_b1 = FunctionSpace(bm, "CG", 1)
+    if (rheology_model != "Newtonian"):
+        FunctionSpace_nunn = FunctionSpace(mesh, "CG", 1)
     V = VectorFunctionSpace(mesh, "CG", velocity_degree)
 
     if MPI.rank(MPI.comm_world) == 0:
         print("Define functions")
     u = Function(V)
+    if (rheology_model != "Newtonian"):
+        nunn = Function(FunctionSpace_nunn)
 
     # RRT
     RRT = Function(U_b1)
@@ -82,7 +89,10 @@ def compute_hemodynamic_indices(case_path, nu, rho, dt, velocity_degree):
     twssg = Function(V_b1)
     tau_prev = Function(V_b1)
 
-    stress = STRESS(u, 0.0, nu, mesh)
+    if (rheology_model == "Newtonian"):
+        stress = STRESS(u, 0.0,   nu, rheology_model, mesh)
+    else:
+        stress = STRESS(u, 0.0, nunn, rheology_model, mesh)
     dabla = get_dabla_function()
 
     # Create writer for WSS
@@ -98,13 +108,17 @@ def compute_hemodynamic_indices(case_path, nu, rho, dt, velocity_degree):
 
     file_counter = start
     while True:
-        # Read in velocity solution to vector function u
+        # Read in velocity solution to vector function u and scalar function nunn
         try:
             f = HDF5File(MPI.comm_world, file_path_u.__str__(), "r")
             vec_name = "/velocity/vector_%d" % file_counter
             timestamp = f.attributes(vec_name)["timestamp"]
             print("=" * 10, "Timestep: {}".format(timestamp), "=" * 10)
             f.read(u, vec_name)
+            if(rheology_model != "Newtonian"):
+                g = HDF5File(MPI.comm_world, file_path_nunn.__str__(), "r")
+                vec_name_nunn = "/viscosity/vector_%d" % file_counter
+                g.read(nunn, vec_name_nunn)
         except:
             print("=" * 10, "Finished reading solutions", "=" * 10)
             break
@@ -137,10 +151,11 @@ def compute_hemodynamic_indices(case_path, nu, rho, dt, velocity_degree):
 
         # Save instantaneous WSS
         tau.rename("WSS", "WSS")
-        wss_writer.write(tau, dt * file_counter)
+        wss_writer.write(tau, timestamp*dt)#dt * file_counter)
 
         # Update file_counter
         file_counter += step
+        print("file_counter=", file_counter)
 
     print("=" * 10, "Saving hemodynamic indices", "=" * 10)
     n = (file_counter - start) // step
@@ -246,5 +261,5 @@ def get_dabla_function():
 
 
 if __name__ == '__main__':
-    folder, nu, rho, dt, velocity_degree, _ = read_command_line()
-    compute_hemodynamic_indices(folder, nu, rho, dt, velocity_degree)
+    folder, nu, rheology_model, rho, dt, velocity_degree, _ = read_command_line()
+    compute_hemodynamic_indices(folder, nu, rheology_model, rho, dt, velocity_degree)
