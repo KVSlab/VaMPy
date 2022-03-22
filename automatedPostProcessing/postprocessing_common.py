@@ -19,6 +19,8 @@ def read_command_line():
                         help="Path to simulation results", metavar="PATH")
     parser.add_argument('--nu', type=float, default=3.3018e-3,
                         help="Kinematic viscosity used in simulation, measured in [mm^2/ms]")
+    parser.add_argument('--rheology_model', type=str, default="Newtonian",
+                        help="Set the rheology model used in the simulation and computation of WSS")
     parser.add_argument('--rho', type=float, default=1060,
                         help="Fluid density used in simulation, measured in [kg/m^3]")
     parser.add_argument('--dt', type=float, default=0.0951, help="Time step of simulation, measured in [ms]")
@@ -27,7 +29,7 @@ def read_command_line():
 
     args = parser.parse_args()
 
-    return args.case, args.nu, args.rho, args.dt, args.velocity_degree, args.probe_frequency
+    return args.case, args.nu, args.rheology_model, args.rho, args.dt, args.velocity_degree, args.probe_frequency
 
 
 def epsilon(u):
@@ -44,20 +46,27 @@ def epsilon(u):
 
 
 class STRESS:
-    def __init__(self, u, p, nu, mesh):
+    def __init__(self, u, p, nu, rheology_model, mesh):
         boundary_mesh = BoundaryMesh(mesh, 'exterior')
         self.bmV = VectorFunctionSpace(boundary_mesh, 'CG', 1)
 
+        print("STRESS computation based on the rheology_model={}!".format(rheology_model))
+
         # Compute stress tensor
         sigma = (2 * nu * epsilon(u)) - (p * Identity(len(u)))
-
+        print("sigma=", sigma)
+        print("pass")
         # Compute stress on surface
         n = FacetNormal(mesh)
         F = -(sigma * n)
 
+        print("pass 2")
+
         # Compute normal and tangential components
         Fn = inner(F, n)  # scalar-valued
         Ft = F - (Fn * n)  # vector-valued
+
+        print("pass 3")
 
         # Integrate against piecewise constants on the boundary
         scalar = FunctionSpace(mesh, 'DG', 0)
@@ -67,14 +76,21 @@ class STRESS:
         v = TestFunction(scalar)
         w = TestFunction(vector)
 
+        print("pass 4")
+
         # Create functions
         self.Fn = Function(scalar)
         self.Ftv = Function(vector)
         self.Ft = Function(scalar)
 
+
+        print("pass 5")
+
         self.Ln = 1 / scaling * v * Fn * ds
         self.Ltv = 1 / (2 * scaling) * inner(w, Ft) * ds
         self.Lt = 1 / scaling * inner(v, self.norm_l2(self.Ftv)) * ds
+
+        print("pass 6")
 
     def __call__(self):
         """
