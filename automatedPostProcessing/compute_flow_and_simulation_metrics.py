@@ -149,7 +149,7 @@ def compute_flow_and_simulation_metrics(folder, nu, dt, velocity_degree):
 
         # Compute t+
         t0 = Timer("t plus")
-        t_plus.vector().set_local(nu / u_star ** 2)
+        t_plus.vector().set_local(u_star ** 2 * dt / nu)
         t_plus.vector().apply("insert")
         t_plus_avg.vector().axpy(1, t_plus.vector())
         t0.stop()
