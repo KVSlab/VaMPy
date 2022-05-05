@@ -28,7 +28,7 @@ def problem_parameters(commandline_kwargs, NS_parameters, NS_expressions, **NS_n
         # Override some problem specific parameters
         # Parameters are in mm and ms
         cardiac_cycle = 1000
-        number_of_cycles = 1
+        number_of_cycles = 2
         NS_parameters.update(
             # Fluid parameters
             nu=3.3018868e-3,  # Viscosity [nu_inf: 0.0035 Pa-s / 1060 kg/m^3 = 3.3018868E-6 m^2/s == 3.3018868E-3 mm^2/ms]
