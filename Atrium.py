@@ -515,8 +515,6 @@ def compute_flow_rates(NS_expressions, area_ratio, boundary, id_in, id_out, mesh
     print("Time compute_flow_rates - Compute V_in = ", timer.elapsed()[0])
 
     return Q_ins, Q_outs, V_ins, V_outs
-    #return Q_in, Q_ins, Q_out, V_out, V_ins 
-    #return Q_ideals, Q_in, Q_ins, Q_out, V_out, V_ins
 
 def EdgeLength(mesh):
     # Compute edge length
