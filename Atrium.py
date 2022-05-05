@@ -27,7 +27,7 @@ def problem_parameters(commandline_kwargs, NS_parameters, NS_expressions, **NS_n
     else:
         # Override some problem specific parameters
         # Parameters are in mm and ms
-        cardiac_cycle = 20
+        cardiac_cycle = 1000
         number_of_cycles = 1
         NS_parameters.update(
             # Fluid parameters
@@ -40,17 +40,16 @@ def problem_parameters(commandline_kwargs, NS_parameters, NS_expressions, **NS_n
             cardiac_cycle=cardiac_cycle,
             T=cardiac_cycle * number_of_cycles,  # Simulation end time [ms]# Run simulation for 1 cardiac cycles [ms]
             dt= 0.1,  # 10 000 steps per cycle [ms]
-            no_of_cycles=1,
             dump_stats=100,
             store_data=5e6,
             store_data_tstep=50,  # Start storing data at 1st cycle
-            save_step=50000000000,
-            save_step_problem=1,
+            save_step=50e8,
+            save_step_problem=10,
             save_solution_frequency = 5,
             save_solution_after_cycle=1,  # Store solution after 1 cardiac cycle
             checkpoint=20000,
-            print_intermediate_info=100,
-            tstep_print = 100,
+            print_intermediate_info=1000,
+            tstep_print = 10e5,
             folder="results_atrium",
             mesh_path=commandline_kwargs["mesh_path"],
             # Solver parameters
@@ -172,8 +171,7 @@ def create_bcs(t, NS_expressions, V, Q, area_ratio, mesh, mesh_path, nu, backflo
     id_in[:] = info['outlet_ids']
     if backflow:
         backflow_facets[:] = id_out
-    #Q_mean = float(id_info[3])
-    #area_ratio[:] = [0.3, 0.3, 0.2, 0.2] #info['area_ratio'] Take care about Q_ideal! #[float(p) for p in info['areaRatioLine'].split()[-1].split(",")]
+        
     area_ratio = info['area_ratio']
 
     # Find corresponding areas
@@ -227,16 +225,21 @@ def create_bcs(t, NS_expressions, V, Q, area_ratio, mesh, mesh_path, nu, backflo
         bc_p.append(bc)
         NS_expressions['P'] = bc
    
-    # No slip condition at wall
-    wall = Constant(0.0)
-    # Create Boundary conditions for the wall
-    bc_wall = DirichletBC(V, wall, boundary, id_wall)
 
+    # Create lists with all boundary conditions
+    bc_u0 = []
+    bc_u1 = []
+    bc_u2 = []
+    for ID in id_in:
+        bc_u0.append(bc_inlets[ID][0])
+        bc_u1.append(bc_inlets[ID][1])
+        bc_u2.append(bc_inlets[ID][2])
+    bc_u0.append(bc_wall)
+    bc_u1.append(bc_wall)
+    bc_u2.append(bc_wall)
     
-    return dict(u0=[bc_inlets[id_in[0]][0], bc_inlets[id_in[1]][0], bc_inlets[id_in[2]][0], bc_inlets[id_in[3]][0], bc_wall],
-                u1=[bc_inlets[id_in[0]][1], bc_inlets[id_in[1]][1], bc_inlets[id_in[2]][1], bc_inlets[id_in[3]][1], bc_wall],
-                u2=[bc_inlets[id_in[0]][2], bc_inlets[id_in[1]][2], bc_inlets[id_in[2]][2], bc_inlets[id_in[3]][2], bc_wall],
-                p=bc_p)
+    t0.stop()
+    return dict(u0=bc_u0, u1=bc_u1, u2=bc_u2, p=bc_p)
 
 def get_file_paths(folder):
     # Create folder where data and solutions (velocity, mesh, pressure) is stored
@@ -386,7 +389,7 @@ def temporal_hook(h, u_, q_, p_, mesh, tstep, save_step_problem,dump_stats, newf
         assign(u_vec.sub(2), u_[2])
 
         viz_uu.write(u_vec, t)
-        # viz_pp.write(p_, t)
+        viz_pp.write(p_, t)
         
     # # Sample velocity in points
     # eval_dict["centerline_u_x_probes"](u_[0])
