@@ -345,14 +345,11 @@ def temporal_hook(h, u_, q_, p_, mesh, tstep, save_step_problem,dump_stats, newf
                 
     # Compute flux and update pressure condition
     if tstep >=1 and tstep %tstep_print == 0:
-        #Q_in, Q_ins, Q_out, V_out, V_ins = compute_flow_rates(NS_expressions, area_ratio, boundary, id_in, id_out, mesh, n, tstep, u_, newfolder, t)
         Q_ins, Q_outs, V_ins, V_outs = compute_flow_rates(NS_expressions, area_ratio, boundary, id_in, id_out, mesh, n, tstep, u_, newfolder, t)
 
     if MPI.rank(MPI.comm_world) == 0 and tstep >=1 and tstep %tstep_print == 0:
         velocity_path = path.join(newfolder, "Solutions", "velocity.txt")
         flowrate_path = path.join(newfolder, "Solutions", "flowrate.txt")
-        # if not path.isdir(path.join(newfolder, "Solutions")):
-        #     os.mkdir(path.join(newfolder, "Solutions"))
         s = "{:2.4e} "
         for i in range(len(V_outs) + len(V_ins)):
             s = s + "{:.4f} "
@@ -360,9 +357,7 @@ def temporal_hook(h, u_, q_, p_, mesh, tstep, save_step_problem,dump_stats, newf
 
         with open(velocity_path, 'a') as filename:
             filename.write(s.format(*[t, *V_outs, *V_ins]))
-            #filename.write("{:2.4e}, {:.4f}, {:.4f}, {:.4f}, {:.4f}, {:.4f} \n".format(t, V_out, V_ins[0], V_ins[1], V_ins[2], V_ins[3]))
         with open(flowrate_path, 'a') as filename:
-            #fname.write("{:2.4e}, {:.4f}, {:.4f}, {:.4f}, {:.4f}, {:.4f}, {:.4f} \n".format(t, Q_out, Q_ins[0], Q_ins[1], Q_ins[2], Q_ins[3], sum(Q_ins)))  
             filename.write(s.format(*[t, *Q_outs, *Q_ins]))
 
     if tstep % tstep_print == 0:
