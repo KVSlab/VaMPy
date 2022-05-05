@@ -200,7 +200,7 @@ def create_bcs(t, NS_expressions, V, Q, area_ratio, mesh, mesh_path, nu, backflo
     except ValueError:
         raise"""
     
-    flow_rate = 1.089*8.1 * 50/3 #4.1 #8.1 #3.5  #mm3/ms  # 1 [l/min] = 50 / 3 [mm3/ms]
+    flow_rate = 5.5 * 50/3  #mm3/ms  # 1 [l/min] = 50 / 3 [mm3/ms]
     mean_velocity = 0.3 #m/s
     bc_inlets = {}
     for i, ID in enumerate(id_in):
