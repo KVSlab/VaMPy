@@ -11,7 +11,6 @@ from simulation.Womersley import make_womersley_bcs, compute_boundary_geometry_a
 from oasis.problems.NSfracStep import *
 from scipy.interpolate import UnivariateSpline
 from scipy.integrate import simps, romberg
-from IPython import embed
 from ufl.measure import measure_names
 
 set_log_level(50)
