@@ -178,6 +178,11 @@ def create_bcs(t, NS_expressions, V, Q, area_ratio, mesh, mesh_path, nu, backflo
     area_total = 0
     for ID in id_in:
         area_total += assemble(Constant(1.0) * ds_new(ID))
+        
+    # No slip condition at wall
+    wall = Constant(0.0)
+    # Create Boundary conditions for the wall
+    bc_wall = DirichletBC(V, wall, boundary, id_wall)
 
     # Get inlet and outlet areas from json file
     area_in = [info[key] for key in info.keys() if (key.startswith('inlet') and key.endswith('area'))]
