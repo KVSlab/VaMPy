@@ -48,7 +48,7 @@ def problem_parameters(commandline_kwargs, NS_parameters, NS_expressions, **NS_n
             save_solution_frequency = 5,
             save_solution_after_cycle=1,  # Store solution after 1 cardiac cycle
             checkpoint=20000,
-            print_intermediate_info=1000,
+            print_intermediate_info=100,
             tstep_print = 10e5,
             folder="results_atrium",
             mesh_path=commandline_kwargs["mesh_path"],
