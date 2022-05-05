@@ -243,7 +243,6 @@ def create_bcs(t, NS_expressions, V, Q, area_ratio, mesh, mesh_path, nu, backflo
     bc_u1.append(bc_wall)
     bc_u2.append(bc_wall)
     
-    t0.stop()
     return dict(u0=bc_u0, u1=bc_u1, u2=bc_u2, p=bc_p)
 
 def get_file_paths(folder):
