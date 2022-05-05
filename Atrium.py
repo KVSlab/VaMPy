@@ -167,8 +167,8 @@ def create_bcs(t, NS_expressions, V, Q, area_ratio, mesh, mesh_path, nu, backflo
         info = json.load(f)
 
     id_wall = 1
-    id_out[:] = info['inlet_id']
-    id_in[:] = info['outlet_ids']
+    id_out[:] = info['outlet_id']
+    id_in[:] = info['inlet_ids']
     if backflow:
         backflow_facets[:] = id_out
         
