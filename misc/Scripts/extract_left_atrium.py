@@ -244,7 +244,7 @@ def extract_LA_and_LAA(input_path):
     write_polydata(surface, la_and_laa_path)
 
 
-def extract_LAA(input_path, laa_point):
+def extract_LA_or_LAA(input_path, laa_point, extract_la=False):
     """Algorithm for detecting the left atrial appendage and isolate it from the atrium lumen
      based on the cross-sectional area along enterlines.
 
@@ -257,12 +257,19 @@ def extract_LAA(input_path, laa_point):
     """
     # File paths
     base_path = get_path_names(input_path)
+    if extract_la:
+        input_path = input_path.replace(".vtp", "_la_and_laa.vtp")
+        base_path += "_la"
+        print(input_path,base_path)
+        laa_model_path = base_path + "_la.vtp"
+    else:
+        laa_model_path = base_path + "_laa.vtp"
+
     model_name = base_path.split("/")[-1]
     if "_" in model_name:
         model_name = model_name.split("_")[0]
-        base_path = '/'.join(base_path.split("/")[:-1] + [model_name])
+        #base_path = '/'.join(base_path.split("/")[:-1] + [model_name])
 
-    laa_model_path = base_path + "_laa.vtp"
     laa_centerline_path = base_path + "_laa_centerline.vtp"
 
     # Open the surface file.
@@ -342,8 +349,14 @@ def extract_LAA(input_path, laa_point):
     dist_surface = np.linalg.norm(p_surface - p_boundary)
     dist_clipped = np.linalg.norm(p_clipped - p_boundary)
 
-    if dist_surface > dist_clipped:
-        surface, clipped = clipped, surface
+    if extract_la:
+        if dist_surface < dist_clipped:
+            surface, clipped = clipped, surface
+
+        surface = attach_clipped_regions_to_surface(surface, clipped, center)
+    else:
+        if dist_surface > dist_clipped:
+            surface, clipped = clipped, surface
 
     surface = get_surface_closest_to_point(surface, center)
 
@@ -364,13 +377,19 @@ if __name__ == "__main__":
 
     scale = 1  # Get seconds
     t0 = time.time()
-    extract_LA_and_LAA(case_path)
+    #extract_LA_and_LAA(case_path)
     t1 = time.time()
     print("--- LA Extraction complete")
     print("--- Time spent extracting LA & LAA: {:.3f} s".format((t1 - t0) / scale))
 
     if args.includes_laa:
-        extract_LAA(case_path, laa_point)
+        #extract_LA_or_LAA(case_path, laa_point)
         t2 = time.time()
         print("--- LAA Extraction complete")
         print("--- Time spent extracting LAA: {:.3f} s".format((t2 - t1) / scale))
+
+    extract_LA_or_LAA(case_path, laa_point, extract_la=True)
+    t3 = time.time()
+    print("--- LA Extraction complete")
+    print("--- Time spent extracting LA: {:.3f} s".format((t3 - t2) / scale))
+
