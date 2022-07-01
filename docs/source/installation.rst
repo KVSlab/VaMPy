@@ -50,8 +50,8 @@ Installing Oasis
 The next step is to download and install `Oasis <https://github.com/mikaem/Oasis>`_ on your machine.
 Inside your conda environment run the following commands to clone and install Oasis, and the minor dependency to `cppimport`::
 
-    git clone https://github.com/mikaem/Oasis
-    pip install cppimport && pip install --editable Oasis
+    $ git clone https://github.com/mikaem/Oasis
+    $ pip install cppimport && pip install --editable Oasis
 
 The ``--editable`` flag installs the project in editable mode meaning that any changes to the original package will be reflected directly in your environment.
 
@@ -59,7 +59,7 @@ Downloading VaMPy
 =================
 All that is left is to clone the `VaMPy` repository::
 
-    git clone https://github.com/KVSLab/VaMPy.git
-    cd VaMPy
+    $ git clone https://github.com/KVSLab/VaMPy.git
+    $ cd VaMPy
 
 Now you are all set, and can start using the Vascular Modeling Pypeline.
