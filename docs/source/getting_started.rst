@@ -11,9 +11,9 @@ Finally, there are a variety of post-processing scripts, which computes wall she
 Pre-processing: Meshing and boundary conditions
 ===============================================
 The first step of using the Vascular Modeling Pypeline is pre-processing. The pre-processing scripts are located inside the ``automatedPreProcessing`` folder, and we will be executing the ``automatedPreProcessing.py`` script to generate a mesh, boundary conditions, and probes for velocity and pressure sampling. Here we will perform pre-processing for the artery case located in the ``test`` folder.
-Start by entering the ``morphman`` conda environment::
+Start by entering the conda environment you created::
 
-    conda deactivate && conda activate morphman
+    conda activate your_environment
 
 Then, to perform meshing, execute the following command::
 
@@ -25,9 +25,9 @@ The pre-processing script will also produce an info file and a probe file, named
 Computational fluid dynamics simulations in Oasis
 =================================================
 The next step of using the Vascular Modeling Pypeline is performing the CFD simulations with `Oasis`.
-First, activate the ``fenics`` conda environment::
+For convenience, change directory to the ``simulation`` folder::
 
-    conda deactivate && conda activate fenics && cd simulation
+    cd simulation
 
 Then, to run a CFD simulation for two cycles with 10 000 time steps per cycle and default parameters with Oasis, execute the following command::
 
