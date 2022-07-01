@@ -19,7 +19,7 @@ The main dependencies of VaMPy are
 * Scipy
 
 You can choose how to install the dependencies, but the fastest way to get started is to install the dependencies through `conda`.
-The fastest way to obtain conda is to install  You can chose installing either `Anaconda <https://www.anaconda.com/products/distribution>`_ or `Miniconda <https://conda.io/projects/conda/en/latest/user-guide/install/index.html>`_ on your computer.
+Conda can be installed by either downloading and installing `Anaconda <https://www.anaconda.com/products/distribution>`_ or `Miniconda <https://conda.io/projects/conda/en/latest/user-guide/install/index.html>`_ on your computer.
 
 Installing morphMan and FEniCS
 ==============================
