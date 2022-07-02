@@ -28,7 +28,7 @@ def compute_flow_and_simulation_metrics(folder, nu, dt, velocity_degree):
     # Get names of data to extract
     start = 0
     if MPI.rank(MPI.comm_world) == 0:
-        print("The post processing starts from", start)
+        print("Reading dataset names")
 
     dataset_names = get_dataset_names(f, start=start)
 
@@ -36,6 +36,9 @@ def compute_flow_and_simulation_metrics(folder, nu, dt, velocity_degree):
     mesh = Mesh()
     with HDF5File(MPI.comm_world, mesh_path, "r") as mesh_file:
         mesh_file.read(mesh, "mesh", False)
+
+    if MPI.rank(MPI.comm_world) == 0:
+        print("Define function spaces")
 
     # Function space
     DG = FunctionSpace(mesh, 'DG', 0)
@@ -101,8 +104,6 @@ def compute_flow_and_simulation_metrics(folder, nu, dt, velocity_degree):
 
     metrics = {}
     for vn in var_name:
-        if MPI.rank(MPI.comm_world) == 0:
-            print(fullname % vn)
         metrics[vn] = XDMFFile(MPI.comm_world, fullname % vn)
         metrics[vn].parameters["rewrite_function_mesh"] = False
         metrics[vn].parameters["flush_output"] = True
@@ -114,16 +115,20 @@ def compute_flow_and_simulation_metrics(folder, nu, dt, velocity_degree):
     tmp_file.close()
     assign(u_mean, u)
 
+    if MPI.rank(MPI.comm_world) == 0:
+        print("=" * 10, "Start post processing", "=" * 10)
+
     counter = 0
     for data in dataset_names:
 
         counter += 1
 
-        if MPI.rank(MPI.comm_world) == 0:
-            print(data)
-
         # Time step and velocity
         f.read(u, data)
+
+        if MPI.rank(MPI.comm_world) == 0:
+            timestamp = f.attributes(data)["timestamp"]
+            print("=" * 10, "Timestep: {}".format(timestamp), "=" * 10)
 
         # Compute CFL
         t0 = Timer("CFL")
@@ -241,6 +246,9 @@ def compute_flow_and_simulation_metrics(folder, nu, dt, velocity_degree):
     turbulent_dissipation_avg.vector()[:] = turbulent_dissipation_avg.vector()[:] / N
 
     # Store average data
+    if MPI.rank(MPI.comm_world) == 0:
+        print("=" * 10, "Saving flow and simulation metrics", "=" * 10)
+
     metrics["CFL"].write_checkpoint(CFL_avg, "CFL")
     metrics["l_plus"].write_checkpoint(l_plus_avg, "l_plus")
     metrics["t_plus"].write_checkpoint(t_plus_avg, "t_plus")
@@ -262,6 +270,9 @@ def compute_flow_and_simulation_metrics(folder, nu, dt, velocity_degree):
                     ("Dissipation", dissipation), ("Turbulent dissipation", turbulent_dissipation),
                     ("Turbulent kinetic energy", turbulent_kinetic_energy), ("Kinetic energy", kinetic_energy)]
 
+    if MPI.rank(MPI.comm_world) == 0:
+        print("=" * 10, "Flow and simulation metrics summary", "=" * 10)
+
     for metric_name, metric_value in flow_metrics:
         sum_ = MPI.sum(MPI.comm_world, np.sum(metric_value.vector().get_local()))
         num = MPI.sum(MPI.comm_world, metric_value.vector().get_local().shape[0])
@@ -273,6 +284,9 @@ def compute_flow_and_simulation_metrics(folder, nu, dt, velocity_degree):
             print(metric_name, "mean:", mean)
             print(metric_name, "max:", max_)
             print(metric_name, "min:", min_)
+
+    print("========== Post processing finished ==========")
+    print("Results saved to: {}".format(folder))
 
 
 def get_dataset_names(data_file, num_files=3000000, step=1, start=1, print_info=True,

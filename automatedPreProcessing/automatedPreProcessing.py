@@ -110,7 +110,7 @@ def run_pre_processing(filename_model, verbose_print, smoothing_method, smoothin
     target = inlet if is_atrium else outlets
 
     centerlines, _, _ = compute_centerlines(source, target, file_name_centerlines, capped_surface, resampling=0.1)
-    tol = get_centerline_tolerance(centerlines)
+    tol = get_centerline_tolerance(centerlines,35)
 
     # Get 'center' and 'radius' of the regions(s)
     region_center = []

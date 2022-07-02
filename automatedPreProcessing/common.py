@@ -429,6 +429,7 @@ def dist_sphere_diam(surface, centerlines, region_center, misr_max, save_path, f
     distToCenterlines = vmtkscripts.vmtkDistanceToCenterlines()
     distToCenterlines.Surface = surface
     distToCenterlines.Centerlines = centerlines
+    distToCenterlines.UseRadiusThreshold = False
     distToCenterlines.Execute()
     distance_to_sphere = distToCenterlines.Surface
 
