@@ -31,7 +31,7 @@ jobs:
             conda config --add channels morphman
 
             # Set up environment
-            conda create -n testenv morphman pytest paramiko matplotlib
+            conda create -n testenv morphman fenics pytest paramiko matplotlib
 
             # Activate environment
             source activate testenv
