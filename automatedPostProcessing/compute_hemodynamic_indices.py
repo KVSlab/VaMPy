@@ -27,7 +27,7 @@ def compute_hemodynamic_indices(case_path, nu, rho, dt, velocity_degree):
 
     Args:
         velocity_degree (int): Finite element degree of velocity
-        case_path (Path): Path to results from simulation
+        case_path (str): Path to results from simulation
         nu (float): Kinematic viscosity
         rho (float): Fluid density
         dt (float): Time step of simulation
