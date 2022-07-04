@@ -30,7 +30,7 @@ jobs:
             conda config --set channel_priority strict
 
             # Set up environment
-            conda create -n testenv morphman fenics pytest paramiko matplotlib
+            conda create -n testenv morphman fenics paramiko matplotlib
 
             # Activate environment
             source activate testenv
@@ -43,7 +43,6 @@ jobs:
 
             # Run tests
             cd test
-            pip install pytest
             pytest --cov=./
 
       # store artifacts (for example logs, binaries, etc)
