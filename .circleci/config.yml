@@ -30,7 +30,8 @@ jobs:
             conda config --set channel_priority strict
 
             # Set up environment
-            conda create -n testenv morphman fenics paramiko matplotlib
+            conda install mamba
+            mamba create -n testenv morphman fenics paramiko matplotlib
 
             # Activate environment
             source activate testenv
