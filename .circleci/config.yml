@@ -27,6 +27,7 @@ jobs:
             # Set conda parameters
             conda config --set always_yes yes --set changeps1 no
             conda config --add channels conda-forge
+            conda config --set channel_priority strict
 
             # Set up environment
             conda create -n testenv morphman fenics pytest paramiko matplotlib
