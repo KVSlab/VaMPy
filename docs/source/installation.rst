@@ -16,7 +16,6 @@ The main dependencies of VaMPy are
 * morphMan
 * Oasis (FEniCS)
 * Paramiko
-* Scipy
 
 You can choose how to install the dependencies, but the fastest way to get started is to install the dependencies through `conda-forge`.
 Start by installing `conda`, by downloading and installing `Anaconda <https://www.anaconda.com/products/distribution>`_ or `Miniconda <https://conda.io/projects/conda/en/latest/user-guide/install/index.html>`_ on your computer.
