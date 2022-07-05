@@ -36,17 +36,22 @@ For detailed installation notes and an introduction to VaMPy, please refer to th
 
 Installation
 ------------
-For reference, VaMPy requires the following dependencies: morphMan, FEniCS, Scipy, and Paramiko. 
+For reference, VaMPy requires the following dependencies: morphMan, FEniCS, and Paramiko. 
 If you are on Windows, macOS or Linux you can install all the general dependencies through [Anaconda](https://docs.conda.io/projects/conda/en/latest/user-guide/install/index.html).
-First install Anaconda or Miniconda on your computer.
+First install Anaconda or Miniconda on your computer, and add the `conda-forge` channel with:
+
+    conda config --add channels conda-forge
+    conda config --set channel_priority strict
+
 Then create a conda environment for `morphMan` and `FEniCS` by executing the following command in a terminal
 
-    conda create -n your_environment -c conda-forge -c morphman morphman fenics paramiko scipy
+    conda create -n your_environment morphman fenics paramiko 
 
 Next, you need to install [`Oasis`](https://github.com/mikaem/Oasis). You can do so with the following commands:
 
     git clone https://github.com/mikaem/Oasis
-    pip install cppimport && pip install --editable Oasis
+    pip install cppimport
+    pip install --editable Oasis
 
 Finally, you are ready to clone and use the Vascular Modeling Pypeline:
 

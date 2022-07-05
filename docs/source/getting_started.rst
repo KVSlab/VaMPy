@@ -6,6 +6,7 @@
 Using the Vascular Modeling Pypeline
 ====================================
 .. highlight:: console
+
 The Vascular Modeling Pypeline is a collection of scripts to prepare, run, and analyze vascular morphologies. This includes pre-processing scripts for generating a volumetric mesh, defining physiological boundary conditions, and inserting probes for sampling velocity and pressure. For the computational fluid dynamics (CFD) simulation, we have included an artery problem file used for running the simulation with `Oasis <https://github.com/mikaem/Oasis>`_.
 Finally, there are a variety of post-processing scripts, which computes wall shear stress-based metrics, more advanced turbulence metrics, and a variety of morphological parameters. In this walkthrough, we exemplify the usage by preparing, simulating, and post-processing the `internal carotid artery <https://en.wikipedia.org/wiki/Internal_carotid_artery>`_, although the software may be readily used for other tubular or vascular shapes.
 
