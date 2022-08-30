@@ -1,10 +1,10 @@
 {
-    "hostname": "host.name.com",
-    "username": "username",
-    "password": "password",
+  "hostname": "host.name.com",
+  "username": "username",
+  "password": "password",
 
-    "remoteDataDir": "REMOVE_OASIS_FOLDER",
-    "localDataDir": "LOCAL_MESH_FOLDER",
+  "remoteDataDir": "REMOVE_OASIS_FOLDER",
+  "localDataDir": "LOCAL_MESH_FOLDER",
 
-    "job_script": "artery_job.sh"
+  "job_script": "artery_job.sh"
 }
