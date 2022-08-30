@@ -603,7 +603,7 @@ def find_boundaries(model_path, mean_inflow_rate, network, mesh, verbose_print, 
     refSystem.GetPointData().AddArray(cellEntityIdsArray)
 
     # Extract the surface mesh of the end caps
-    boundarySurface = vtk_compute_threshold(mesh, "CellEntityIds", upper=1.5, threshold_type="upper")
+    boundarySurface = vtk_compute_threshold(mesh, "CellEntityIds", lower=1.5, threshold_type="lower")
     pointCells = vtk.vtkIdList()
     surfaceCellEntityIdsArray = vtk.vtkIntArray()
     surfaceCellEntityIdsArray.DeepCopy(boundarySurface.GetCellData().GetArray('CellEntityIds'))
