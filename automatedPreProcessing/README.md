@@ -1,5 +1,5 @@
 # automatedPreProcessing
-Describes a pipeline for automated pre processing of surfaces using vmtk.
+Describes a pipeline for automated pre-processing of surfaces using vmtk.
 
 
 ## Running remote jobs
