@@ -2,6 +2,7 @@ import argparse
 import os
 import shutil
 
+from IPython import embed
 from morphman.common import *
 from vtk.numpy_interface import dataset_adapter as dsa
 
@@ -140,6 +141,36 @@ def IdealVolume(t):
     return volume
 
 
+def load_TracedVolume():
+    file_path = "/Users/henriakj/PhD/VaMPy/automatedPreProcessing/lavolume_trace.csv"
+    import pandas as pd
+    data = pd.read_csv(file_path, header=None)
+    t_values = data[0].to_numpy()[::5]
+    v_values = data[1].to_numpy()[::5]
+
+    volume_interpolated = [0.03602171, 0.13117973, 0.2157329, 0.28962546, 0.35428491,
+                           0.40871338, 0.45542574, 0.49385761, 0.52551548, 0.54890781,
+                           0.56570701, 0.57673827, 0.58204528, 0.58229414, 0.57825752,
+                           0.57049878, 0.55948618, 0.54557879, 0.52933903, 0.51159416,
+                           0.4929637, 0.47390737, 0.4548839, 0.43660475, 0.41967116,
+                           0.40445127, 0.39159366, 0.38177469, 0.37535619, 0.37227125,
+                           0.37163679, 0.37266276, 0.37487384, 0.37781135, 0.38098747,
+                           0.38366105, 0.3849525, 0.38432435, 0.38136173, 0.37541752,
+                           0.36581854, 0.35205306, 0.33357253, 0.30951685, 0.27812288,
+                           0.24064392, 0.19655671, 0.14287592, 0.08137769, 0.01206309]
+    time_interpolated = np.linspace(0.0, 1, len(volume_interpolated))
+
+    return t_values, v_values, time_interpolated, volume_interpolated
+
+
+def TracedVolume(t, v_values):
+    time = np.linspace(0, 1, len(v_values))
+    LA_smooth = splrep(time, v_values, s=1e-6, per=True)
+    volume = (splev(t, LA_smooth))
+
+    return volume
+
+
 def move_atrium_real(case_path, mapped_path, moved_path, case):
     surface = read_polydata(case_path)
     surface = dsa.WrapDataObject(surface)
@@ -209,7 +240,9 @@ def move_atrium_generic(remeshed_path, origin, moved_path, case, centerlines, cy
         return np.sin(np.pi * t)
 
     def get_scale(p):
-        return 0.5
+        return 2.2
+
+    t_, v_, t2, v2 = load_TracedVolume()
 
     is_af = True
     for i, t in enumerate(t_array):
@@ -223,7 +256,8 @@ def move_atrium_generic(remeshed_path, origin, moved_path, case, centerlines, cy
             # Get displacement profile
             # displacement = IdealVolume(t)
             scale_all = 0.45
-            d = scale_all * GaussianVolume(t, is_af)
+            # d = scale_all * GaussianVolume(t, is_af)
+            d = TracedVolume(t, v2)
 
             d_z = d * get_scale(p)
 
