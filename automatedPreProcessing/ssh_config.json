@@ -6,5 +6,5 @@
   "remoteDataDir": "REMOVE_OASIS_FOLDER",
   "localDataDir": "LOCAL_MESH_FOLDER",
 
-  "job_script": "artery_job.sh"
+  "job_script": "job_script.sh"
 }

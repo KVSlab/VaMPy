@@ -18,7 +18,7 @@ Create a configuration file following the format below.
 
     /* After the files are copied this script is run. On Saga
       this script should create a job script and add to the queue */
-    "script": "example/example_script.sh"
+    "script": "job_script.sh"
 }
 ```
 
