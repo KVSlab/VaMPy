@@ -20,13 +20,14 @@ def compute_hemodynamic_indices(case_path, nu, rho, dt, velocity_degree):
     (3) TWSSG - Temporal wall shear stress gradient
     (4) OSI - Oscillatory shear index
     (5) RRT - Relative residence time
+    (6) ECAP - Endothelial cell activation potential
 
     The resulting wall shear stress will be in units Pascal [Pa], given that the provided
     density (rho) is in [kg/m^3], the time step (dt) is in [ms], and viscosity (nu) is in [mm^2/ms].
 
     Args:
         velocity_degree (int): Finite element degree of velocity
-        case_path (Path): Path to results from simulation
+        case_path (str): Path to results from simulation
         nu (float): Kinematic viscosity
         rho (float): Fluid density
         dt (float): Time step of simulation

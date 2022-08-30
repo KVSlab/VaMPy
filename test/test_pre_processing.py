@@ -8,21 +8,25 @@ from automatedPreProcessing.automatedPreProcessing import read_command_line, run
 
 
 def test_pre_processing():
-    model_path = "Case_test_artery/artery.vtp"
+    model_path = "Case_test_tiny_artery/tiny_artery.stl"
     # Get default input parameters
     common_input = read_command_line()
     common_input.update(dict(meshing_method="diameter",
+                             smoothing_method="taubin",
                              filename_model=model_path,
                              refine_region=False,
                              coarsening_factor=1.3,
                              viz=False,
-                             compress_mesh=False))
+                             compress_mesh=False,
+                             outlet_flow_extension_length=1,
+                             inlet_flow_extension_length=1
+                             ))
 
     # Run pre processing
     run_pre_processing(**common_input)
 
     # Check that mesh is created
-    mesh_path = model_path.replace("vtp", "vtu")
+    mesh_path = model_path.replace("stl", "vtu")
 
     assert path.isfile(mesh_path)
 

@@ -28,7 +28,7 @@ Licence
 VaMPy is licensed under the GNU GPL, version 3 or (at your option) any
 later version.
 
-VaMPy is Copyright (2018-2021) by the authors.
+VaMPy is Copyright (2018-2022) by the authors.
 
 Documentation
 -------------
@@ -38,20 +38,20 @@ Installation
 ------------
 For reference, VaMPy requires the following dependencies: morphMan, FEniCS, and Paramiko. 
 If you are on Windows, macOS or Linux you can install all the general dependencies through [Anaconda](https://docs.conda.io/projects/conda/en/latest/user-guide/install/index.html).
-First install Anaconda or Miniconda (preferably the Python 3.6 version).
-Then create two environments, one for `morphMan` and one for `FEniCS` by executing the following in a terminal
+First install Anaconda or Miniconda on your computer, and add the `conda-forge` channel with:
 
-    conda create -n morphman -c vmtk -c morphman morphman python=3.6 paramiko
-    conda create -n fenics -c conda-forge fenics
+    conda config --add channels conda-forge
+    conda config --set channel_priority strict
 
-You might run into a problem with the `morphMan` dependency `VMTK` 1.4 if using Python 3, or if you are a Linux user, and we have therefore provided a set of temporary fixes for these known issues [here](https://vampy.readthedocs.io/en/latest/installation.html#known-issues).
+Then create a conda environment for `morphMan` and `FEniCS` by executing the following command in a terminal
+
+    conda create -n your_environment morphman fenics paramiko 
 
 Next, you need to install [`Oasis`](https://github.com/mikaem/Oasis). You can do so with the following commands:
 
-    conda activate fenics
     git clone https://github.com/mikaem/Oasis
-    cd Oasis
-    pip install . && pip install cppimport 
+    pip install cppimport
+    pip install --editable Oasis
 
 Finally, you are ready to clone and use the Vascular Modeling Pypeline:
 

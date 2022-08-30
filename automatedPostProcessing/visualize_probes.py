@@ -34,8 +34,6 @@ def visualize_probes(case_path, probe_saving_frequency, show_figure=True, save_f
     counter = 0
     while True:
         tstep = probe_saving_frequency * (counter + 1)
-        time_interval = np.linspace(probe_saving_frequency * counter, probe_saving_frequency * (counter + 1),
-                                    probe_saving_frequency)
 
         # Load velocity component and pressure probes
         u = path.join(case_path, "u_x_{}.probes".format(tstep))

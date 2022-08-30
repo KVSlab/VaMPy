@@ -28,7 +28,7 @@ def compute_flow_and_simulation_metrics(folder, nu, dt, velocity_degree):
     # Get names of data to extract
     start = 0
     if MPI.rank(MPI.comm_world) == 0:
-        print("The post processing starts from", start)
+        print("Reading dataset names")
 
     dataset_names = get_dataset_names(f, start=start)
 
@@ -36,6 +36,9 @@ def compute_flow_and_simulation_metrics(folder, nu, dt, velocity_degree):
     mesh = Mesh()
     with HDF5File(MPI.comm_world, mesh_path, "r") as mesh_file:
         mesh_file.read(mesh, "mesh", False)
+
+    if MPI.rank(MPI.comm_world) == 0:
+        print("Define function spaces")
 
     # Function space
     DG = FunctionSpace(mesh, 'DG', 0)
@@ -69,8 +72,8 @@ def compute_flow_and_simulation_metrics(folder, nu, dt, velocity_degree):
     # Inner grad(u), grad(u)
     turbulent_dissipation = Function(DG)
     turbulent_dissipation_avg = Function(DG)
-    ssv = Function(DG)
-    ssv_avg = Function(DG)
+    strain = Function(DG)
+    strain_avg = Function(DG)
     dissipation = Function(DG)
     dissipation_avg = Function(DG)
 
@@ -95,19 +98,15 @@ def compute_flow_and_simulation_metrics(folder, nu, dt, velocity_degree):
     # Create XDMF files for saving metrics
     fullname = file_path_u.replace("u.h5", "%s.xdmf")
     fullname = fullname.replace("Solutions", "flow_metrics")
-    var_name = ["u_mean", "l_plus", "t_plus", "CFL", "ssv", "length_scale", "time_scale", "velocity_scale", "u_mag",
+    var_name = ["u_mean", "l_plus", "t_plus", "CFL", "strain", "length_scale", "time_scale", "velocity_scale", "u_mag",
                 "characteristic_edge_length", "dissipation", "kinetic_energy", "turbulent_kinetic_energy",
-                "turbulent_dissipation", "u_prime", "u_viz"]
+                "turbulent_dissipation", "u_prime"]
 
     metrics = {}
     for vn in var_name:
-        if MPI.rank(MPI.comm_world) == 0:
-            print(fullname % vn)
         metrics[vn] = XDMFFile(MPI.comm_world, fullname % vn)
         metrics[vn].parameters["rewrite_function_mesh"] = False
         metrics[vn].parameters["flush_output"] = True
-
-    metrics["characteristic_edge_length"].write_checkpoint(characteristic_edge_length, "characteristic_edge_length")
 
     # Get u mean
     u_mean_file_path = file_path_u.replace("u.h5", "u_mean.h5")
@@ -116,16 +115,20 @@ def compute_flow_and_simulation_metrics(folder, nu, dt, velocity_degree):
     tmp_file.close()
     assign(u_mean, u)
 
+    if MPI.rank(MPI.comm_world) == 0:
+        print("=" * 10, "Start post processing", "=" * 10)
+
     counter = 0
     for data in dataset_names:
 
         counter += 1
 
-        if MPI.rank(MPI.comm_world) == 0:
-            print(data)
-
         # Time step and velocity
         f.read(u, data)
+
+        if MPI.rank(MPI.comm_world) == 0:
+            timestamp = f.attributes(data)["timestamp"]
+            print("=" * 10, "Timestep: {}".format(timestamp), "=" * 10)
 
         # Compute CFL
         t0 = Timer("CFL")
@@ -137,13 +140,13 @@ def compute_flow_and_simulation_metrics(folder, nu, dt, velocity_degree):
 
         # Compute rate-of-strain
         t0 = Timer("rate of strain")
-        rate_of_strain(ssv, u, v, mesh, h)
-        ssv_avg.vector().axpy(1, ssv.vector())
+        rate_of_strain(strain, u, v, mesh, h)
+        strain_avg.vector().axpy(1, strain.vector())
         t0.stop()
 
         # Compute l+
         t0 = Timer("l plus")
-        u_star = np.sqrt(ssv.vector().get_local() * nu)
+        u_star = np.sqrt(strain.vector().get_local() * nu)
         l_plus.vector().set_local(u_star * characteristic_edge_length.vector().get_local() / nu)
         l_plus.vector().apply("insert")
         l_plus_avg.vector().axpy(1, l_plus.vector())
@@ -151,7 +154,7 @@ def compute_flow_and_simulation_metrics(folder, nu, dt, velocity_degree):
 
         # Compute t+
         t0 = Timer("t plus")
-        t_plus.vector().set_local(nu / u_star ** 2)
+        t_plus.vector().set_local(u_star ** 2 * dt / nu)
         t_plus.vector().apply("insert")
         t_plus_avg.vector().axpy(1, t_plus.vector())
         t0.stop()
@@ -159,7 +162,6 @@ def compute_flow_and_simulation_metrics(folder, nu, dt, velocity_degree):
         # Compute Kolmogorov
         t0 = Timer("dissipation")
         rate_of_dissipation(dissipation, u, v, mesh, h, nu)
-        ssv_ = dissipation.vector().get_local()
         dissipation_avg.vector().axpy(1, dissipation.vector())
         t0.stop()
 
@@ -173,25 +175,26 @@ def compute_flow_and_simulation_metrics(folder, nu, dt, velocity_degree):
         t0 = Timer("turbulent dissipation")
         rate_of_dissipation(turbulent_dissipation, u_prime, v, mesh, h, nu)
         turbulent_dissipation_avg.vector().axpy(1, turbulent_dissipation.vector())
+        eps = turbulent_dissipation.vector().get_local()
         t0.stop()
 
         # Compute length scale
         t0 = Timer("length scale")
-        length_scale.vector().set_local((nu ** 3 / ssv_) ** (1. / 4))
+        length_scale.vector().set_local((nu ** 3 / eps) ** (1. / 4))
         length_scale.vector().apply("insert")
         length_scale_avg.vector().axpy(1, length_scale.vector())
         t0.stop()
 
         # Compute time scale
         t0 = Timer("time scale")
-        time_scale.vector().set_local((nu / ssv_) ** 0.5)
+        time_scale.vector().set_local((nu / eps) ** 0.5)
         time_scale.vector().apply("insert")
         time_scale_avg.vector().axpy(1, time_scale.vector())
         t0.stop()
 
         # Compute velocity scale
         t0 = Timer("velocity scale")
-        velocity_scale.vector().set_local((ssv_ * nu) ** (1. / 4))
+        velocity_scale.vector().set_local((eps * nu) ** (1. / 4))
         velocity_scale.vector().apply("insert")
         velocity_scale_avg.vector().axpy(1, velocity_scale.vector())
         t0.stop()
@@ -243,6 +246,9 @@ def compute_flow_and_simulation_metrics(folder, nu, dt, velocity_degree):
     turbulent_dissipation_avg.vector()[:] = turbulent_dissipation_avg.vector()[:] / N
 
     # Store average data
+    if MPI.rank(MPI.comm_world) == 0:
+        print("=" * 10, "Saving flow and simulation metrics", "=" * 10)
+
     metrics["CFL"].write_checkpoint(CFL_avg, "CFL")
     metrics["l_plus"].write_checkpoint(l_plus_avg, "l_plus")
     metrics["t_plus"].write_checkpoint(t_plus_avg, "t_plus")
@@ -253,26 +259,34 @@ def compute_flow_and_simulation_metrics(folder, nu, dt, velocity_degree):
     metrics["kinetic_energy"].write_checkpoint(kinetic_energy_avg, "kinetic_energy")
     metrics["turbulent_kinetic_energy"].write_checkpoint(turbulent_kinetic_energy_avg, "turbulent_kinetic_energy")
     metrics["turbulent_dissipation"].write_checkpoint(turbulent_dissipation_avg, "turbulent_dissipation")
+    metrics["characteristic_edge_length"].write_checkpoint(characteristic_edge_length, "characteristic_edge_length")
+    metrics["strain"].write_checkpoint(strain_avg, "strain_avg")
     metrics["u_mean"].write_checkpoint(u_mean, "u_mean")
 
     # Print info
     flow_metrics = [("dx", characteristic_edge_length), ("l+", l_plus_avg), ("t+", t_plus_avg),
                     ("Length scale", length_scale_avg), ("Time scale", time_scale_avg),
-                    ("Velocity scale", velocity_scale), ("CFL", CFL_avg), ("SSV", ssv_avg),
-                    ("dissipation", dissipation), ("turbulent dissipation", turbulent_dissipation),
-                    ("turbulent_kinetic_energy", turbulent_kinetic_energy), ("kinetic_energy", kinetic_energy)]
+                    ("Velocity scale", velocity_scale), ("CFL", CFL_avg), ("Strain", strain_avg),
+                    ("Dissipation", dissipation), ("Turbulent dissipation", turbulent_dissipation),
+                    ("Turbulent kinetic energy", turbulent_kinetic_energy), ("Kinetic energy", kinetic_energy)]
 
-    for metric in flow_metrics:
-        sum_ = MPI.sum(MPI.comm_world, np.sum(metric[1].vector().get_local()))
-        num = MPI.sum(MPI.comm_world, metric[1].vector().get_local().shape[0])
+    if MPI.rank(MPI.comm_world) == 0:
+        print("=" * 10, "Flow and simulation metrics summary", "=" * 10)
+
+    for metric_name, metric_value in flow_metrics:
+        sum_ = MPI.sum(MPI.comm_world, np.sum(metric_value.vector().get_local()))
+        num = MPI.sum(MPI.comm_world, metric_value.vector().get_local().shape[0])
         mean = sum_ / num
-        max_ = MPI.max(MPI.comm_world, metric[1].vector().get_local().max())
-        min_ = MPI.min(MPI.comm_world, metric[1].vector().get_local().min())
+        max_ = MPI.max(MPI.comm_world, metric_value.vector().get_local().max())
+        min_ = MPI.min(MPI.comm_world, metric_value.vector().get_local().min())
 
         if MPI.rank(MPI.comm_world) == 0:
-            print(metric[0], "mean:", mean)
-            print(metric[0], "max:", max_)
-            print(metric[0], "min:", min_)
+            print(metric_name, "mean:", mean)
+            print(metric_name, "max:", max_)
+            print(metric_name, "min:", min_)
+
+    print("========== Post processing finished ==========")
+    print("Results saved to: {}".format(folder))
 
 
 def get_dataset_names(data_file, num_files=3000000, step=1, start=1, print_info=True,
@@ -326,51 +340,41 @@ def get_dataset_names(data_file, num_files=3000000, step=1, start=1, print_info=
     return names
 
 
-def rate_of_strain(ssv, u, v, mesh, h):
+def rate_of_strain(strain, u, v, mesh, h):
     """
     Computes rate of strain
 
     Args:
-        ssv (Function): Function to save rate of strain to
+        strain (Function): Function to save rate of strain to
         u (Function): Function for velocity field
         v (Function): Test function for velocity
         mesh: Mesh to compute strain rate on
         h (float): Cell diameter of mesh
-
-    Returns:
-        ssv (Function): Rate of strain
     """
     eps = epsilon(u)
     f = sqrt(inner(eps, eps))
     x = assemble(inner(f, v) / h * dx(mesh))
-    ssv.vector().set_local(x.get_local())
-    ssv.vector().apply("insert")
-
-    return ssv
+    strain.vector().set_local(x.get_local())
+    strain.vector().apply("insert")
 
 
-def rate_of_dissipation(ssv, u, v, mesh, h, nu):
+def rate_of_dissipation(dissipation, u, v, mesh, h, nu):
     """
     Computes rate of dissipation
 
     Args:
-        ssv (Function): Function to save rate of dissipation to
+        dissipation (Function): Function to save rate of dissipation to
         u (Function): Function for velocity field
         v (Function): Test function for velocity
         mesh: Mesh to compute dissipation rate on
         h (float): Cell diameter of mesh
         nu (float): Viscosity
-
-    Returns:
-        ssv (Function): Rate of dissipation
     """
     eps = epsilon(u)
     f = 2 * nu * inner(eps, eps)
     x = assemble(inner(f, v) / h * dx(mesh))
-    ssv.vector().set_local(x.get_local())
-    ssv.vector().apply("insert")
-
-    return ssv
+    dissipation.vector().set_local(x.get_local())
+    dissipation.vector().apply("insert")
 
 
 if __name__ == '__main__':
