@@ -38,7 +38,3 @@ srun oasis NSfracStep problem=Artery mesh_path=$mesh_path
 ## Run post-processing
 srun python automatedPostProcessing/compute_hemodynamic_indices.py --case simulation/results_artery/artery/data/1/Solutions
 srun python automatedPostProcessing/compute_flow_and_simulation_metrics.py --case simulation/results_artery/artery/data/1/Solutions
-
-
-
-
