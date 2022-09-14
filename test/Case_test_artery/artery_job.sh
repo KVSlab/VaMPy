@@ -34,7 +34,7 @@ mv compute_flow_and_simulation_metrics.py compute_hemodynamic_indices.py postpro
 module --quiet purge
 
 #### EDIT NEXT LINES TO LOAD FENICS ####
-source /cluster/shared/fenics/conf/fenics-2019.1.0.saga.intel.conf
+source PATH_TO_FENICS_CONFIGURATION.conf
 
 # Install Oasis
 export OASIS_PREFIX=/cluster/home/$USERNAME/Oasis
