@@ -2,11 +2,13 @@ import json
 import pickle
 from os import makedirs
 from pprint import pprint
+import numpy as np
 
 from oasis.problems.NSfracStep import *
 
-from Probe import *
+from Probe import Probes
 from Womersley import make_womersley_bcs, compute_boundary_geometry_acrn
+from common import store_u_mean, get_file_paths, print_mesh_information
 
 """
 Problem file for running CFD simulation in left atrial models consisting of arbitrary number of pulmonary veins (PV) 
@@ -34,8 +36,8 @@ def problem_parameters(commandline_kwargs, NS_parameters, scalar_components, Sch
     else:
         # Override some problem specific parameters
         # Parameters are in mm and ms
-        cardiac_cycle = 951
-        number_of_cycles = 2
+        cardiac_cycle = float(commandline_kwargs.get("cardiac_cycle", 951))
+        number_of_cycles = float(commandline_kwargs.get("number_of_cycles", 2))
 
         NS_parameters.update(
             # Fluid parameters
@@ -46,7 +48,7 @@ def problem_parameters(commandline_kwargs, NS_parameters, scalar_components, Sch
             # Simulation parameters
             cardiac_cycle=cardiac_cycle,  # Run simulation for 1 cardiac cycles [ms]
             T=number_of_cycles * cardiac_cycle,  # Number of cycles
-            dt=0.1,  # dt=0.1 <=> 10 000 steps per cycle [ms]
+            dt=0.0951,  # # Time step size [ms]
             # Frequencies to save data
             dump_probe_frequency=100,  # Dump frequency for sampling velocity & pressure at probes along the centerline
             save_solution_frequency=5,  # Save frequency for velocity and pressure field
@@ -81,7 +83,7 @@ def mesh(mesh_path, **NS_namespace):
     return atrium_mesh
 
 
-def pre_boundary_condition(mesh, mesh_path, id_out, id_in, V, nu, **NS_namespace):
+def create_bcs(NS_expressions, mesh, mesh_path, nu, t, V, Q, id_in, id_out, **NS_namespace):
     # Variables needed during the simulation
     boundary = MeshFunction("size_t", mesh, mesh.geometry().dim() - 1, mesh.domains())
 
@@ -90,20 +92,17 @@ def pre_boundary_condition(mesh, mesh_path, id_out, id_in, V, nu, **NS_namespace
     with open(info_path) as f:
         info = json.load(f)
 
-    id_wall = 0
     id_in[:] = info['inlet_ids']
     id_out[:] = info['outlet_id']
+    id_wall = min(id_in + id_out) - 1
 
     Q_mean = info['mean_flow_rate']
 
     # Find corresponding areas
     ds_new = Measure("ds", domain=mesh, subdomain_data=boundary)
-    outlet_area = info['outlet_area']
     area_total = 0
     for ID in id_in:
         area_total += assemble(Constant(1.0) * ds_new(ID))
-
-    D_mitral = np.sqrt(4 * outlet_area / np.pi)
 
     # Load normalized time and flow rate values
     t_values, Q_ = np.loadtxt(path.join(path.dirname(path.abspath(__file__)), "PV_values")).T
@@ -119,11 +118,6 @@ def pre_boundary_condition(mesh, mesh_path, id_out, id_in, V, nu, **NS_namespace
                                    V.ufl_element())
         NS_expressions["inlet_{}".format(ID)] = inlet
 
-    return dict(D_mitral=D_mitral, boundary=boundary, ds_new=ds_new, area_total=area_total, id_wall=id_wall,
-                outlet_area=outlet_area)
-
-
-def create_bcs(NS_expressions, boundary, t, V, Q, id_in, id_out, id_wall, **NS_namespace):
     # Initial condition
     for ID in id_in:
         for i in [0, 1, 2]:
@@ -150,7 +144,15 @@ def create_bcs(NS_expressions, boundary, t, V, Q, id_in, id_out, id_wall, **NS_n
 
 
 def pre_solve_hook(V, Q, cardiac_cycle, dt, save_solution_after_cycle, mesh_path, mesh, newfolder, velocity_degree,
-                   boundary, restart_folder, **NS_namespace):
+                   restart_folder, **NS_namespace):
+    # Extract diameter at mitral valve
+    info_path = mesh_path.split(".xml")[0] + "_info.json"
+    with open(info_path) as f:
+        info = json.load(f)
+
+    outlet_area = info['outlet_area']
+    D_mitral = np.sqrt(4 * outlet_area / np.pi)
+
     # Create point for evaluation
     n = FacetNormal(mesh)
     eval_dict = {}
@@ -173,7 +175,7 @@ def pre_solve_hook(V, Q, cardiac_cycle, dt, save_solution_after_cycle, mesh_path
     else:
         files = NS_namespace["files"]
 
-    # Save mesh as HDF5 file for post processing
+    # Save mesh as HDF5 file for post-processing
     with HDF5File(MPI.comm_world, files["mesh"], "w") as mesh_file:
         mesh_file.write(mesh, "mesh")
 
@@ -185,11 +187,11 @@ def pre_solve_hook(V, Q, cardiac_cycle, dt, save_solution_after_cycle, mesh_path
     u_mean1 = Function(V)
     u_mean2 = Function(V)
 
-    # Tstep when solutions for post processing should start being saved
+    # Time step when solutions for post-processing should start being saved
     save_solution_at_tstep = int(cardiac_cycle * save_solution_after_cycle / dt)
 
-    return dict(n=n, eval_dict=eval_dict, U=U, u_mean=u_mean, u_mean0=u_mean0,
-                u_mean1=u_mean1, u_mean2=u_mean2, save_solution_at_tstep=save_solution_at_tstep)
+    return dict(D_mitral=D_mitral, n=n, eval_dict=eval_dict, U=U, u_mean=u_mean, u_mean0=u_mean0, u_mean1=u_mean1,
+                u_mean2=u_mean2, save_solution_at_tstep=save_solution_at_tstep)
 
 
 def temporal_hook(mesh, dt, t, save_solution_frequency, u_, NS_expressions, id_in, tstep, newfolder,
@@ -230,7 +232,7 @@ def temporal_hook(mesh, dt, t, save_solution_frequency, u_, NS_expressions, id_i
     # Store sampled velocity and pressure
     if tstep % dump_probe_frequency == 0:
         # Save variables along the centerline for CFD simulation
-        # diagnostics and light-weight post processing
+        # diagnostics and light-weight post-processing
         filepath = path.join(newfolder, "Probes")
         if MPI.rank(MPI.comm_world) == 0:
             if not path.exists(filepath):
@@ -255,7 +257,7 @@ def temporal_hook(mesh, dt, t, save_solution_frequency, u_, NS_expressions, id_i
         eval_dict["centerline_u_z_probes"].clear()
         eval_dict["centerline_p_probes"].clear()
 
-    # Save velocity and pressure for post processing
+    # Save velocity and pressure for post-processing
     if tstep % save_solution_frequency == 0 and tstep >= save_solution_at_tstep:
         # Assign velocity components to vector solution
         assign(U.sub(0), u_[0])
@@ -287,36 +289,5 @@ def temporal_hook(mesh, dt, t, save_solution_frequency, u_, NS_expressions, id_i
 # Oasis hook called after the simulation has finished
 def theend_hook(u_mean, u_mean0, u_mean1, u_mean2, T, dt, save_solution_at_tstep, save_solution_frequency,
                 **NS_namespace):
-    # get the file path
-    files = NS_parameters['files']
-    u_mean_path = files["u_mean"]
-
-    # divide the accumlated veloicty by the number of steps
-    NumTStepForAverage = (T / dt - save_solution_at_tstep) / save_solution_frequency + 1
-    u_mean0.vector()[:] = u_mean0.vector()[:] / NumTStepForAverage
-    u_mean1.vector()[:] = u_mean1.vector()[:] / NumTStepForAverage
-    u_mean2.vector()[:] = u_mean2.vector()[:] / NumTStepForAverage
-
-    assign(u_mean.sub(0), u_mean0)
-    assign(u_mean.sub(1), u_mean1)
-    assign(u_mean.sub(2), u_mean2)
-
-    # Save u_mean
-    with HDF5File(MPI.comm_world, u_mean_path, "w") as u_mean_file:
-        u_mean_file.write(u_mean, "u_mean")
-
-
-def get_file_paths(folder):
-    # Create folder where data and solutions (velocity, mesh, pressure) is stored
-    common_path = path.join(folder, "Solutions")
-    if MPI.rank(MPI.comm_world) == 0:
-        if not path.exists(common_path):
-            makedirs(common_path)
-
-    file_p = path.join(common_path, "p.h5")
-    file_u = path.join(common_path, "u.h5")
-    file_u_mean = path.join(common_path, "u_mean.h5")
-    file_mesh = path.join(common_path, "mesh.h5")
-    files = {"u": file_u, "u_mean": file_u_mean, "p": file_p, "mesh": file_mesh}
-
-    return files
+    store_u_mean(T, dt, save_solution_at_tstep, save_solution_frequency, u_mean, u_mean0, u_mean1, u_mean2,
+                 NS_parameters)
