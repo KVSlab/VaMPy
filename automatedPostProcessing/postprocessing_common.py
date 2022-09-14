@@ -23,11 +23,12 @@ def read_command_line():
                         help="Fluid density used in simulation, measured in [kg/m^3]")
     parser.add_argument('--dt', type=float, default=0.0951, help="Time step of simulation, measured in [ms]")
     parser.add_argument('--velocity-degree', type=int, default=1, help="Degree of velocity element")
+    parser.add_argument('--pressure-degree', type=int, default=1, help="Degree of pressure element")
     parser.add_argument('--probe-frequency', type=int, default=100, help="Frequency of saving probes to file")
 
     args = parser.parse_args()
 
-    return args.case, args.nu, args.rho, args.dt, args.velocity_degree, args.probe_frequency
+    return args.case, args.nu, args.rho, args.dt, args.velocity_degree, args.pressure_degree, args.probe_frequency
 
 
 def epsilon(u):
