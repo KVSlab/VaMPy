@@ -37,9 +37,11 @@ Then, to run a CFD simulation for two cycles with 10 000 time steps per cycle an
 
 Running the simulations will create the result folder ``results_artery`` (specific to the artery problem), with the results and corresponding mesh saved compactly in HDF5 format.
 
-Post-processing: Hemodynamic indices, flow and simulation metrics, and probes
-=============================================================================
-Following the CFD simulations, the last usage of the Vascular Modeling Pypeline is the post-processing part.
+Post-processing: Hemodynamic indices, flow and simulation metrics, velocity and pressure, and probes
+====================================================================================================
+Following the CFD simulations, the last step of the Vascular Modeling Pypeline is post-processing of the results.
+For reference, the quantities computed by the scripts ``compute_hemodynamic_indices.py`` and ``compute_flow_and_simulation_metrics.py`` can be viewed `here <https://github.com/KVSlab/VaMPy/blob/master/automatedPostProcessing/vampy_formula_sheet.pdf>`_.
+
 You can start by computing the wall shear stress, oscillatory shear index and other hemodynamic indices by executing the following command::
 
     $ python automatedPostProcessing/compute_hemodynamic_indices.py --case simulation/results_artery/artery/data/[RUN_NUMBER]/Solutions
@@ -47,6 +49,13 @@ You can start by computing the wall shear stress, oscillatory shear index and ot
 To compute fluid dynamic quantities and simulation metrics, you may execute the following command::
 
     $ python automatedPostProcessing/compute_flow_and_simulation_metrics.py --case simulation/results_artery/artery/data/[RUN_NUMBER]/Solutions
+
+Furthermore, because the velocity and pressure results are currently saved in the compressed ``.h5`` format, they are not viewable in a software such as `ParaView <https://www.paraview.org/>`_.
+If it is desired to convert the compressed velocity and pressure results to viewable ``.xdmf`` format, you may execute the following command::
+
+    $ python automatedPostProcessing/compute_velocity_and_pressure.py --case simulation/results_artery/artery/data/[RUN_NUMBER]/Solutions
+
+which will store the velocity and pressure into ``velocity.xdmf`` and ``pressure.xdmf``, respectively.
 
 Finally, to visualize velocity and pressure at the probes created by ``Artery.py``, you can run the ``visualize_probes.py`` script, by executing the following command::
 
