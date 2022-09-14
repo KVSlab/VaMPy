@@ -328,6 +328,7 @@ def run_pre_processing(filename_model, verbose_print, smoothing_method, smoothin
 
     # Start simulation though ssh, without password
     if config_path is not None:
+        print("--- Uploading mesh and simulation files to cluster. Queueing simulation and post-processing.")
         run_simulation(config_path, dir_path, case_name)
 
     print("--- Removing unused pre-processing files")
@@ -452,7 +453,7 @@ def read_command_line():
                         type=str2bool,
                         help="Visualize surface, inlet, outlet and probes after meshing.")
 
-    parser.add_argument('--simulationConfig',
+    parser.add_argument('-sc', '--simulation-config',
                         type=str,
                         dest="config",
                         default=None,

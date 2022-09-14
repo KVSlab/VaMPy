@@ -1,9 +1,9 @@
 #!/bin/bash
 
 # Job name:
-#SBATCH --job-name=YourJobname
+#SBATCH --job-name=YOUR_JOB_NAME
 #
-# Project:
+#### EDIT NEXT LINE TO YOUR PROJECT ACCOUNT ####
 #SBATCH --account=nnXXXXk
 #
 # Wall time limit (DD-HH:MM:SS):
@@ -13,28 +13,49 @@
 #SBATCH --mem-per-cpu=4G
 #SBATCH --ntasks=2
 #
-# Output file:
-#SBATCH --output=/cluster/home/YourUsername/%x-%j.txt
+#### EDIT NEXT LINES TO YOUR USERNAME ####
+# Set output log location
+#SBATCH --output=/cluster/home/USERNAME/Oasis/%x-%j.txt
+
+# Set username on cluster
+USERNAME=USERNAME
 
 ## Set up job environment:
-set -o errexit  # Exit the script on any error
-set -o nounset  # Treat any unset variables as an error
+set -o errexit # Exit the script on any error
+set -o nounset # Treat any unset variables as an error
 
-module --quiet purge  # Reset the modules to the system default
-module load SomeProgram/SomeVersion # E.g. FEniCS
+# Move simulation files
+mv probe Artery.py ICA_values Probe.py Womersley.py $SCRATCH
+
+# Move post-processing files
+mv compute_flow_and_simulation_metrics.py compute_hemodynamic_indices.py postprocessing_common.py visualize_probes.py $SCRATCH
+
+# Reset the modules to the system default
+module --quiet purge
+
+#### EDIT NEXT LINES TO LOAD FENICS ####
+source /cluster/shared/fenics/conf/fenics-2019.1.0.saga.intel.conf
+
+# Install Oasis
+export OASIS_PREFIX=/cluster/home/$USERNAME/Oasis
+export PATH=$OASIS_PREFIX/bin:$PATH
+export PYTHONPATH=$OASIS_PREFIX/lib/python3.6/site-packages:$PYTHONPATH
+cd $OASIS_PREFIX
+pip3 install --prefix=$OASIS_PREFIX .
+
 module list
 
-
 ## Move results after simulation
-cleanup "cp -r $SCRATCH/results_artery $USERWORK/results_artery"
+cleanup "cp -r $SCRATCH/results_artery $USERWORK/"
 cd $SCRATCH
 
-
-mesh_path=/cluster/home/YourUserame/Case_test_artery/artery.xml.gz
+# Define mesh path
+mesh_path=/cluster/home/$USERNAME/Oasis/oasis/mesh/artery.xml.gz
 
 ## Run Oasis
 srun oasis NSfracStep problem=Artery mesh_path=$mesh_path
 
 ## Run post-processing
-srun python automatedPostProcessing/compute_hemodynamic_indices.py --case simulation/results_artery/artery/data/1/Solutions
-srun python automatedPostProcessing/compute_flow_and_simulation_metrics.py --case simulation/results_artery/artery/data/1/Solutions
+python compute_hemodynamic_indices.py --case $SCRATCH/results_artery/artery/data/1/Solutions
+python compute_flow_and_simulation_metrics.py --case $SCRATCH/results_artery/artery/data/1/Solutions
+python visualize_probes.py --case $SCRATCH/results_artery/artery/data/1/Probes
