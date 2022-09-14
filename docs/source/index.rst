@@ -11,5 +11,7 @@ Documentation for the `Vascular Modeling Pypeline <https://github.com/KVSlab/VaM
 
    installation
    getting_started
+   tutorials
+   cluster
    scripts
 
