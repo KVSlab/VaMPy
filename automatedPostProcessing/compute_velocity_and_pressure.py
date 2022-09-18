@@ -1,6 +1,5 @@
 from __future__ import print_function
 
-from os import path
 from pathlib import Path
 
 from dolfin import *
@@ -19,15 +18,16 @@ def compute_velocity_and_pressure(case_path, dt, velocity_degree, pressure_degre
     converts and saves to .xdmf format for visualization (in e.g. ParaView).
 
     Args:
-        case_path (Path): Path to results from simulation
+        case_path (str): Path to results from simulation
         dt (float): Time step of simulation
         velocity_degree (int): Finite element degree of velocity
+        pressure_degree (int): Finite element degree of pressure
     """
     # File paths
     case_path = Path(case_path)
     file_path_u = case_path / "u.h5"
     file_path_p = case_path / "p.h5"
-    mesh_path = path.join(folder, "mesh.h5")
+    mesh_path = case_path / "mesh.h5"
 
     # Read mesh saved as HDF5 format
     mesh = Mesh()

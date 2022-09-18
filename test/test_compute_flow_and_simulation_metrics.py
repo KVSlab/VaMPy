@@ -29,6 +29,9 @@ def test_compute_flow_and_simulation_metrics():
         xdmf_path = path.join(flow_metrics_path, "{}.xdmf".format(name))
         h5_path = path.join(flow_metrics_path, "{}.h5".format(name))
         assert path.exists(xdmf_path) and path.exists(h5_path)
+        assert path.getsize(xdmf_path) > 0
+        assert path.getsize(h5_path) > 0
+
 
 
 if __name__ == "__main__":
