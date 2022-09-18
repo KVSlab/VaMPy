@@ -53,7 +53,7 @@ cd $SCRATCH
 mesh_path=/cluster/home/$USERNAME/Oasis/oasis/mesh/artery.xml.gz
 
 ## Run Oasis
-srun oasis NSfracStep problem=Artery mesh_path=$mesh_path
+mpirun -np $SLURM_NTASKS oasis NSfracStep problem=Artery mesh_path=$mesh_path
 
 ## Run post-processing
 python compute_hemodynamic_indices.py --case $SCRATCH/results_artery/artery/data/1/Solutions
