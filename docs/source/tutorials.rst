@@ -7,8 +7,8 @@ Tutorials
 =========
 .. highlight:: console
 
-This tutorial is meant to guide through the basic steps of performing a computational fluid dynamic (CFD) simulation in a vascular body.
-The tutorial is divided into two main sections where we will first consider a model of the `internal carotid artery <https://en.wikipedia.org/wiki/Internal_carotid_artery>`_ (ICA) with an aneurysm, followed by a model of the left atrium.
+This tutorial is meant to guide the user through the basic steps of performing a computational fluid dynamic (CFD) simulation in a vascular body.
+The tutorial is divided into two main sections where we will first consider a model of the `internal carotid artery <https://en.wikipedia.org/wiki/Internal_carotid_artery>`_ (ICA) with an aneurysm, followed by a model of the `left atrium <https://en.wikipedia.org/wiki/Atrium_(heart)>`_.
 For the ICA, we will demonstrate different approaches for meshing and pre-processing of the model, followed by a CFD simulation using the Oasis software, before post-processing the results.
 For the left atrium model, we will investigate local refinement in a user-defined region, also followed by CFD simulation and post-processing of the results.
 
