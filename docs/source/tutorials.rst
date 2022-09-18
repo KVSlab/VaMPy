@@ -93,11 +93,11 @@ Running the command results in a volumetric mesh consisting of ~20M tetrahedral 
 
 The mesh is used as input to the CFD simulations, followed by computation of the hemodynamic indices, which are initiated as described in :ref:`getting_started`.
 The simulation was run for one cardiac cycle, corresponding to 0.951 s, with :math:`\Delta t =` 0.0951 ms resulting in a total of 10 000 time steps per cycle.
-In Figure 6 we present the volumetric rendering of velocity during peak systole, the Q-criterion, and four hemodynamic indices; temporal wall shear stress gradient (TWSSG), time averaged wall shear stress (TAWSS), oscillatory shear index (OSI), and relative residence time (RRT).
+In Figure 6 we present the volumetric rendering of velocity, the pressure field, and four hemodynamic indices; temporal wall shear stress gradient (TWSSG), time averaged wall shear stress (TAWSS), oscillatory shear index (OSI), and relative residence time (RRT).
 
 .. figure:: artery_results.png
 
-  Figure 6: From left to right: the volumetric rendering of velocity, the Q-criterion, TWSSG, TAWSS, OSI, and RRT.
+  Figure 6: From left to right: the volumetric rendering of velocity, the pressure field, TWSSG, TAWSS, OSI, and RRT.
 
 
 Tutorial 2: Hemodynamics simulation on a left atrium
