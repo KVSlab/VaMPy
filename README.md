@@ -7,13 +7,12 @@
     <img src=test/artery_pipeline.png width="830 height="370" alt="Output pre processing"/>
 </p>
 <p align="center">
-    Meshed and processed artery model. From left to right: A variable density volumetric mesh, zoomed in view of an outlet showing the boundary layers, corresponding inlet flow rate, outlet flow splits, and probes for velocity and pressure sampling. From the simulation results, we have shown the velocity field represented by vectors, and the temporal wall shear stress gradient as one of the hemodynamic indices computed by the post-processing scripts.
+    Pre-processed and simulated artery model. From left to right: A variable density volumetric mesh, zoomed in view of an outlet showing the four boundary layers, corresponding inlet flow rate, outlet flow split, and probes for velocity and pressure sampling. From the simulation results, we have shown the velocity field represented by vectors, and the time averaged wall shear stress (TAWSS) as one of the many hemodynamic indices computed by the post-processing scripts.
 </p>
 
 Description
 -----------
-The Vascular Modeling Pypeline (VaMPy) is a collection of scripts used to prepare, run, and analyze cardiac and atrial morphologies.  This includes pre-processing scripts for meshing and probe sampling, two [Oasis](https://github.com/mikaem/Oasis) problem files for simulating flow in the [internal carotid artery](https://en.wikipedia.org/wiki/Internal_carotid_artery) and the [left atrium](https://en.wikipedia.org/wiki/Atrium_(heart)), and a variety of post-processing scripts for computing WSS-based metrics, more advanced turbulence metrics, and a variety of morphological parameters in patient-specific geometries. 
-
+The Vascular Modeling Pypeline (VaMPy) is a collection of fully automated scripts used to prepare, run, and analyze cardiac and atrial morphologies.  This includes pre-processing scripts for meshing and probe sampling, two [Oasis](https://github.com/mikaem/Oasis) problem files for simulating flow in the [internal carotid artery](https://en.wikipedia.org/wiki/Internal_carotid_artery) and the [left atrium](https://en.wikipedia.org/wiki/Atrium_(heart)), and a variety of post-processing scripts for computing WSS-based metrics, more advanced turbulence metrics, and a variety of morphological parameters in patient-specific geometries. 
 
 Authors
 -------
