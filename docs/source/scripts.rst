@@ -1,7 +1,5 @@
 .. title:: API documentation
 
-.. _api_documentation:
-
 =================
 API documentation
 =================
