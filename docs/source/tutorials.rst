@@ -117,7 +117,7 @@ Hence, this region of the left atrium is of interest, similar to aneurysms as pr
 
 .. figure:: la.png
 
-  Figure 6: The surface model considered in this tutorial, where we have marked two of the four pulmonary veins, the left atrial appendage, and the mitral valve.
+  Figure 6: The surface model considered in this tutorial, where we have pointed out two of the four pulmonary veins, the left atrial appendage, and the mitral valve.
 
 Therefore, to ensure that the hemodynamics are captured sufficiently inside the left atrial appendage, we will perform mesh generation with refinement of this particular region.
 To manually refine a region on the geometry, the user may provide the ``--refine-region True`` flag, or ``-r True`` for short.
@@ -152,7 +152,7 @@ The resulting mesh from the previous section is now used as input to the CFD sim
 The only real difference from the artery problem from eariler is that instead of running the ``Artery.py`` problem file, we here will be solving the problem defined in ``Atrium.py``, also located in the ``simulation`` folder.
 Assuming the user has navigated to the ``simulation`` folder, running a left atrial CFD simulation can performed by executing the following command::
 
-       $ oasis NSfracStep problem=Atrium mesh_path=../LA_Endo/5/LA_5_Endo.xml.gz T=951 save_solution_after_cycle=0
+       $ oasis NSfracStep problem=Atrium mesh_path=../LA_Endo/5/LA_5_Endo.xml.gz T=951 dt=0.951 save_solution_after_cycle=0
 
 Running the simulations will create the result folder ``results_atrium``, with the results and corresponding mesh saved compactly in HDF5 format.
 For this particular model, the simulation was run for one cardiac cycle, corresponding to 0.951 s, with :math:`\Delta t =` 0.951 ms resulting in a total of 1000 time steps per cycle.

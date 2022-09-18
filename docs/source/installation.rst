@@ -54,6 +54,16 @@ or::
 
     $ conda config --set channel_priority flexible
 
+.. WARNING:: After installing `morphMan`, you may experience an error during pre-processing, when the ``.vtu`` mesh is converted and compressed into ``.xml.gz`` format using the ``vmtkMeshWriter`` method.
+    As a temporary fix you will need to update the ``vmtkMeshWriter`` script manually to avoid this error, located at ``/Users/[USERNAME]/miniconda3/envs/your_environment/lib/python3.10/site-packages/vmtk/vmtkmeshwriter.py``.
+    To apply the fix, open the ``vmtkmeshwriter.py`` file, navigate to `line 264`, and change::
+
+        file = open(self.OutputFileName,'r')
+
+    to::
+
+        file = open(self.OutputFileName,'rb').
+
 
 Installing Oasis
 ================
