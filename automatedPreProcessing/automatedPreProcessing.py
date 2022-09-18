@@ -328,24 +328,7 @@ def run_pre_processing(filename_model, verbose_print, smoothing_method, smoothin
 
     # Start simulation though ssh, without password
     if config_path is not None:
-
-        # Set up simulation script
-        if not path.exists(file_name_run_script):
-            run_script_sample = open(path.join(abs_path, "run_script.sh"), "r").read()
-            config = json.load(open(config_path))
-            run_dict = dict(mesh_name=case_name,
-                            num_nodes=1,
-                            hours=120,
-                            account="nn9249k",
-                            remoteFolder=config["remoteFolder"],
-                            results_folder="results")
-            run_script = run_script_sample.format(**run_dict)
-
-            # Write script
-            script_file = open(file_name_run_script, "w")
-            script_file.write(run_script)
-            script_file.close()
-
+        print("--- Uploading mesh and simulation files to cluster. Queueing simulation and post-processing.")
         run_simulation(config_path, dir_path, case_name)
 
     print("--- Removing unused pre-processing files")
@@ -470,7 +453,7 @@ def read_command_line():
                         type=str2bool,
                         help="Visualize surface, inlet, outlet and probes after meshing.")
 
-    parser.add_argument('--simulationConfig',
+    parser.add_argument('-sc', '--simulation-config',
                         type=str,
                         dest="config",
                         default=None,
