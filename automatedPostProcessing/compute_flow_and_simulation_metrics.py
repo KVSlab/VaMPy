@@ -42,7 +42,7 @@ def compute_flow_and_simulation_metrics(folder, nu, dt, velocity_degree, T, time
         saved_time_steps_per_cycle = int(T / dt / save_frequency)
         N_tmp = int(len(dataset_names) / saved_time_steps_per_cycle)
         dataset_dict = {}
-        N = N_tmp
+
         # Iterate over selected times to average over
         for t in times_to_average:
             time_step_to_average = int(t / dt / save_frequency)
@@ -51,7 +51,7 @@ def compute_flow_and_simulation_metrics(folder, nu, dt, velocity_degree, T, time
             dataset_names_t = [dataset_names[i] for i in time_steps_to_average]
             dataset_dict["_{}".format(t)] = dataset_names_t
 
-        #N = len(dataset_dict["_{}".format(t)])
+        N = len(dataset_dict["_{}".format(t)])
 
     else:
         dataset_dict = {"": dataset_names}

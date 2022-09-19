@@ -246,5 +246,5 @@ def get_dabla_function():
 
 
 if __name__ == '__main__':
-    folder, nu, rho, dt, velocity_degree, _, _ = read_command_line()
+    folder, nu, rho, dt, velocity_degree, _, _, _, _, _, _ = read_command_line()
     compute_hemodynamic_indices(folder, nu, rho, dt, velocity_degree)
