@@ -56,7 +56,7 @@ def compute_flow_and_simulation_metrics(folder, nu, dt, velocity_degree, T, time
     else:
         id_start = (start_cycle - 1) * saved_time_steps_per_cycle
         dataset_dict = {"": dataset_names[id_start:]}
-        N = len(dataset_names)
+        N = len(dataset_names[id_start:])
 
     # Get mesh information
     mesh = Mesh()
