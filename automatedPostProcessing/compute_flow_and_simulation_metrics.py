@@ -83,8 +83,8 @@ def compute_flow_and_simulation_metrics(folder, nu, dt, velocity_degree, T, time
                                              velocity_degree, N, DG, V, Vv, h, characteristic_edge_length)
 
 
-def define_functions_and_iterate_dataset(time_to_average, dataset, dt, f, file_path_u, folder, mesh, nu,
-                                         velocity_degree, N, DG, V, Vv, h, characteristic_edge_length):
+def define_functions_and_iterate_dataset(time_to_average, dataset, dt, f, file_path_u, folder, mesh, nu, N, DG, V, Vv,
+                                         h, characteristic_edge_length):
     # Functions for storing values
     v = TestFunction(DG)
     u = Function(V)
