@@ -10,7 +10,7 @@ from automatedPostProcessing.compute_flow_and_simulation_metrics import compute_
 def test_compute_flow_and_simulation_metrics():
     # Path to test results and params
     results_path = "test_results/1/Solutions"
-    flow_metrics_path = "test_results/1/flow_metrics"
+    flow_metrics_path = "test_results/1/FlowMetrics"
     nu = 3.3018e-3
     dt = 0.0951
 

@@ -7,17 +7,22 @@ from dolfin import *
 from postprocessing_common import read_command_line, epsilon
 
 
-def compute_flow_and_simulation_metrics(folder, nu, dt, velocity_degree):
+def compute_flow_and_simulation_metrics(folder, nu, dt, velocity_degree, T, times_to_average, save_frequency,
+                                        start_cycle):
     """
     Computes several flow field characteristics
     for velocity field stored at 'folder' location
     for flow_metrics given viscosity and time step
 
     Args:
-        velocity_degree (int): Finite element degree of velocity
         folder (str): Path to simulation results
         nu (float): Viscosity
-        dt (float): Time step
+        dt (float): Time step in [ms]
+        velocity_degree (int): Finite element degree of velocity
+        T (float): One cardiac cycle, in [ms]
+        times_to_average (list): Times during cardiac cycle to average, in interval [0,T)
+        save_frequency (int): Frequency that velocity has been stored
+        start_cycle (int): Determines which cardiac cycle to start from for post-processing
     """
     # File paths
     file_path_u = path.join(folder, "u.h5")
@@ -31,6 +36,26 @@ def compute_flow_and_simulation_metrics(folder, nu, dt, velocity_degree):
         print("Reading dataset names")
 
     dataset_names = get_dataset_names(f, start=start)
+
+    # Extract specific time steps if phase averaging
+    if len(times_to_average) != 0:
+        saved_time_steps_per_cycle = int(T / dt / save_frequency)
+        N_tmp = int(len(dataset_names) / saved_time_steps_per_cycle)
+        dataset_dict = {}
+        N = N_tmp
+        # Iterate over selected times to average over
+        for t in times_to_average:
+            time_step_to_average = int(t / dt / save_frequency)
+            time_steps_to_average = [time_step_to_average + saved_time_steps_per_cycle * i for i in range(N_tmp)][
+                                    start_cycle - 1:]
+            dataset_names_t = [dataset_names[i] for i in time_steps_to_average]
+            dataset_dict["_{}".format(t)] = dataset_names_t
+
+        #N = len(dataset_dict["_{}".format(t)])
+
+    else:
+        dataset_dict = {"": dataset_names}
+        N = len(dataset_names)
 
     # Get mesh information
     mesh = Mesh()
@@ -49,6 +74,16 @@ def compute_flow_and_simulation_metrics(folder, nu, dt, velocity_degree):
     h = CellDiameter(mesh)
     characteristic_edge_length = project(h, DG)
 
+    for time_to_average, dataset in dataset_dict.items():
+        if len(times_to_average) != 0 and MPI.rank(MPI.comm_world) == 0:
+            print("Phase averaging results over {} cycles at t={} ms".format(N, time_to_average))
+
+        define_functions_and_iterate_dataset(time_to_average, dataset, dt, f, file_path_u, folder, mesh, nu,
+                                             velocity_degree, N, DG, V, Vv, h, characteristic_edge_length)
+
+
+def define_functions_and_iterate_dataset(time_to_average, dataset, dt, f, file_path_u, folder, mesh, nu,
+                                         velocity_degree, N, DG, V, Vv, h, characteristic_edge_length):
     # Functions for storing values
     v = TestFunction(DG)
     u = Function(V)
@@ -96,10 +131,10 @@ def compute_flow_and_simulation_metrics(folder, nu, dt, velocity_degree):
     CFL_avg = Function(DG)
 
     # Create XDMF files for saving metrics
-    fullname = file_path_u.replace("u.h5", "%s.xdmf")
-    fullname = fullname.replace("Solutions", "flow_metrics")
-    var_name = ["u_mean", "l_plus", "t_plus", "CFL", "strain", "length_scale", "time_scale", "velocity_scale", "u_mag",
-                "characteristic_edge_length", "dissipation", "kinetic_energy", "turbulent_kinetic_energy",
+    fullname = file_path_u.replace("u.h5", "%s{}.xdmf".format(time_to_average))
+    fullname = fullname.replace("Solutions", "FlowMetrics")
+    var_name = ["u_mean", "l_plus", "t_plus", "CFL", "strain", "length_scale", "time_scale", "velocity_scale",
+                "u_mag", "characteristic_edge_length", "dissipation", "kinetic_energy", "turbulent_kinetic_energy",
                 "turbulent_dissipation", "u_prime"]
 
     metrics = {}
@@ -119,7 +154,7 @@ def compute_flow_and_simulation_metrics(folder, nu, dt, velocity_degree):
         print("=" * 10, "Start post processing", "=" * 10)
 
     counter = 0
-    for data in dataset_names:
+    for data in dataset:
 
         counter += 1
 
@@ -233,7 +268,6 @@ def compute_flow_and_simulation_metrics(folder, nu, dt, velocity_degree):
             list_timings(TimingClear.clear, [TimingType.wall])
 
     # Get avg
-    N = len(dataset_names)
     l_plus_avg.vector()[:] = l_plus_avg.vector()[:] / N
     t_plus_avg.vector()[:] = t_plus_avg.vector()[:] / N
     length_scale_avg.vector()[:] = length_scale_avg.vector()[:] / N
@@ -378,5 +412,6 @@ def rate_of_dissipation(dissipation, u, v, mesh, h, nu):
 
 
 if __name__ == '__main__':
-    folder, nu, _, dt, velocity_degree, _, _ = read_command_line()
-    compute_flow_and_simulation_metrics(folder, nu, dt, velocity_degree)
+    folder, nu, _, dt, velocity_degree, _, _, T, save_frequency, times_to_average, start_cycle = read_command_line()
+    compute_flow_and_simulation_metrics(folder, nu, dt, velocity_degree, T, times_to_average, save_frequency,
+                                        start_cycle)
