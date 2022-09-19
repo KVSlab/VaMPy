@@ -79,8 +79,8 @@ def compute_flow_and_simulation_metrics(folder, nu, dt, velocity_degree, T, time
         if len(times_to_average) != 0 and MPI.rank(MPI.comm_world) == 0:
             print("Phase averaging results over {} cycles at t={} ms".format(N, time_to_average))
 
-        define_functions_and_iterate_dataset(time_to_average, dataset, dt, f, file_path_u, folder, mesh, nu,
-                                             velocity_degree, N, DG, V, Vv, h, characteristic_edge_length)
+        define_functions_and_iterate_dataset(time_to_average, dataset, dt, f, file_path_u, folder, mesh, nu, N, DG, V,
+                                             Vv, h, characteristic_edge_length)
 
 
 def define_functions_and_iterate_dataset(time_to_average, dataset, dt, f, file_path_u, folder, mesh, nu, N, DG, V, Vv,
