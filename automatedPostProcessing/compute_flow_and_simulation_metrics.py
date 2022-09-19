@@ -38,8 +38,8 @@ def compute_flow_and_simulation_metrics(folder, nu, dt, velocity_degree, T, time
     dataset_names = get_dataset_names(f, start=start)
 
     # Extract specific time steps if phase averaging
+    saved_time_steps_per_cycle = int(T / dt / save_frequency)
     if len(times_to_average) != 0:
-        saved_time_steps_per_cycle = int(T / dt / save_frequency)
         N_tmp = int(len(dataset_names) / saved_time_steps_per_cycle)
         dataset_dict = {}
 
@@ -54,7 +54,8 @@ def compute_flow_and_simulation_metrics(folder, nu, dt, velocity_degree, T, time
         N = len(dataset_dict["_{}".format(t)])
 
     else:
-        dataset_dict = {"": dataset_names}
+        id_start = (start_cycle - 1) * saved_time_steps_per_cycle
+        dataset_dict = {"": dataset_names[id_start:]}
         N = len(dataset_names)
 
     # Get mesh information
