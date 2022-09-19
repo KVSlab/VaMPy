@@ -33,7 +33,7 @@ For convenience, change directory to the ``simulation`` folder::
 
 Then, to run a CFD simulation for two cycles with 10 000 time steps per cycle and default parameters with Oasis, execute the following command::
 
-    $ oasis NSfracStep problem=Artery mesh_path=../test/Case_test_artery/artery.xml.gz T=9.61 save_solution_after_cycle=0 && cd ..
+    $ oasis NSfracStep problem=Artery mesh_path=../test/Case_test_artery/artery.xml.gz T=9.61 save_solution_after_cycle=0
 
 Running the simulations will create the result folder ``results_artery`` (specific to the artery problem), with the results and corresponding mesh saved compactly in HDF5 format.
 
@@ -42,7 +42,7 @@ Post-processing: Hemodynamic indices, flow and simulation metrics, velocity and 
 Following the CFD simulations, the last step of the Vascular Modeling Pypeline is post-processing of the results.
 For reference, the quantities computed by the scripts ``compute_hemodynamic_indices.py`` and ``compute_flow_and_simulation_metrics.py`` can be viewed `here <https://github.com/KVSlab/VaMPy/blob/master/automatedPostProcessing/vampy_formula_sheet.pdf>`_.
 
-You can start by computing the wall shear stress, oscillatory shear index and other hemodynamic indices by executing the following command::
+You can start by computing the wall shear stress, oscillatory shear index and other hemodynamic indices by executing the following command, executed from the root directory::
 
     $ python automatedPostProcessing/compute_hemodynamic_indices.py --case simulation/results_artery/artery/data/[RUN_NUMBER]/Solutions
 
@@ -50,7 +50,19 @@ To compute fluid dynamic quantities and simulation metrics, you may execute the 
 
     $ python automatedPostProcessing/compute_flow_and_simulation_metrics.py --case simulation/results_artery/artery/data/[RUN_NUMBER]/Solutions
 
-Furthermore, because the velocity and pressure results are currently saved in the compressed ``.h5`` format, they are not viewable in a software such as `ParaView <https://www.paraview.org/>`_.
+As default, ``compute_flow_and_simulation_metrics.py`` computes the average values over full cycle, for a desired number of cycles, determined by the ``--start-cycle`` flag. Setting ``--start-cycle 2`` would correspond to computing the averaged values from the second cardiac cycle and onward.
+Alternatively, the user may supply the specific times :math:`t` during the cardiac cycle :math:`T`, such that :math:`t \in [0,T]`, to the ``--times-to-average`` flag. Thus, to compute the metrics at :math:`t=0.951`, and skip the first cycle, the user may run the following command::
+
+    $ python automatedPostProcessing/compute_flow_and_simulation_metrics.py --case simulation/results_artery/artery/data/[RUN_NUMBER]/Solutions --start-cycle 2 --times-to-average 951
+
+Note that the specified time is in milliseconds. A comparison between phase averaged turbulent kinetic energy for the artery model is shown in Figure 1. The two leftmost panels show average values over a full cycle, whereas the two rightmost panels display averages at :math:`t=0.951`.
+For this illustration, the simulation was ran over 10 cycles, and the metrics were computed over the two first and last cycles.
+
+.. figure:: phase_avg.png
+
+  Figure 1: Phase average turbulent kinetic energy. The two leftmost panels show average values over a full cycle, whereas the two rightmost panels display averages at :math:`t=0.951`.
+
+Because velocity and pressure results are currently saved in the compressed ``.h5`` format, they are not viewable in a software such as `ParaView <https://www.paraview.org/>`_.
 If it is desired to convert the compressed velocity and pressure results to viewable ``.xdmf`` format, you may execute the following command::
 
     $ python automatedPostProcessing/compute_velocity_and_pressure.py --case simulation/results_artery/artery/data/[RUN_NUMBER]/Solutions
