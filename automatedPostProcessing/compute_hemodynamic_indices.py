@@ -11,6 +11,7 @@ try:
 except NameError:
     pass
 
+
 def compute_hemodynamic_indices(case_path, nu, rho, dt, velocity_degree):
     """
     Loads velocity fields from completed CFD simulation,
@@ -164,7 +165,7 @@ def compute_hemodynamic_indices(case_path, nu, rho, dt, velocity_degree):
         OSI.vector().set_local(0.5 * (1 - wss_mean_vec / tawss_vec))
         OSI.vector().apply("insert")
         OSI.rename("OSI", "OSI")
-        
+
         # Compute ECAP based on OSI and TAWSS
         ECAP.vector().set_local(OSI.vector().get_local() / tawss_vec)
         ECAP.vector().apply("insert")
@@ -180,7 +181,6 @@ def compute_hemodynamic_indices(case_path, nu, rho, dt, velocity_degree):
         rrt_path = (case_path / "RRT.xdmf").__str__()
         osi_path = (case_path / "OSI.xdmf").__str__()
         ecap_path = (case_path / "ECAP.xdmf").__str__()
-
 
         rrt = XDMFFile(MPI.comm_world, rrt_path)
         osi = XDMFFile(MPI.comm_world, osi_path)
@@ -246,5 +246,5 @@ def get_dabla_function():
 
 
 if __name__ == '__main__':
-    folder, nu, rho, dt, velocity_degree, _ = read_command_line()
+    folder, nu, rho, dt, velocity_degree, _, _, _, _, _, _ = read_command_line()
     compute_hemodynamic_indices(folder, nu, rho, dt, velocity_degree)

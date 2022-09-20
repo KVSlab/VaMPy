@@ -120,5 +120,5 @@ def visualize_probes(case_path, probe_saving_frequency, show_figure=True, save_f
 
 
 if __name__ == '__main__':
-    folder, _, _, dt, _, probe_freq = read_command_line()
+    folder, _, _, dt, _, _, probe_freq, _, _, _, _ = read_command_line()
     visualize_probes(folder, probe_freq, save_figure=True)

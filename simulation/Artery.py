@@ -1,12 +1,14 @@
 import json
 import pickle
-from os import path, makedirs
+from os import makedirs
 from pprint import pprint
-
 import numpy as np
+
+from oasis.problems.NSfracStep import *
+
 from Probe import Probes
 from Womersley import make_womersley_bcs, compute_boundary_geometry_acrn
-from oasis.problems.NSfracStep import *
+from common import get_file_paths, store_u_mean, print_mesh_information
 
 """
 Problem file for running CFD simulation in arterial models consisting of one inlet, and two or more outlets.
@@ -34,8 +36,8 @@ def problem_parameters(commandline_kwargs, NS_parameters, NS_expressions, **NS_n
         NS_parameters['restart_folder'] = restart_folder
     else:
         # Parameters are in mm and ms
-        cardiac_cycle = 951
-        number_of_cycles = 2
+        cardiac_cycle = float(commandline_kwargs.get("cardiac_cycle", 951))
+        number_of_cycles = float(commandline_kwargs.get("number_of_cycles", 2))
 
         NS_parameters.update(
             # Fluid parameters
@@ -176,7 +178,7 @@ def pre_solve_hook(mesh, V, Q, newfolder, mesh_path, restart_folder, velocity_de
     else:
         files = NS_namespace["files"]
 
-    # Save mesh as HDF5 file for post processing
+    # Save mesh as HDF5 file for post-processing
     with HDF5File(MPI.comm_world, files["mesh"], "w") as mesh_file:
         mesh_file.write(mesh, "mesh")
 
@@ -188,7 +190,7 @@ def pre_solve_hook(mesh, V, Q, newfolder, mesh_path, restart_folder, velocity_de
     u_mean1 = Function(V)
     u_mean2 = Function(V)
 
-    # Tstep when solutions for post processing should start being saved
+    # Time step when solutions for post-processing should start being saved
     save_solution_at_tstep = int(cardiac_cycle * save_solution_after_cycle / dt)
 
     return dict(eval_dict=eval_dict, boundary=boundary, n=n, U=U, u_mean=u_mean, u_mean0=u_mean0, u_mean1=u_mean1,
@@ -231,7 +233,7 @@ def temporal_hook(u_, p_, mesh, tstep, dump_probe_frequency, eval_dict, newfolde
     # Store sampled velocity and pressure
     if tstep % dump_probe_frequency == 0:
         # Save variables along the centerline for CFD simulation
-        # diagnostics and light-weight post processing
+        # diagnostics and light-weight post-processing
         filepath = path.join(newfolder, "Probes")
         if MPI.rank(MPI.comm_world) == 0:
             if not path.exists(filepath):
@@ -256,7 +258,7 @@ def temporal_hook(u_, p_, mesh, tstep, dump_probe_frequency, eval_dict, newfolde
         eval_dict["centerline_u_z_probes"].clear()
         eval_dict["centerline_p_probes"].clear()
 
-    # Save velocity and pressure for post processing
+    # Save velocity and pressure for post-processing
     if tstep % save_solution_frequency == 0 and tstep >= save_solution_at_tstep:
         # Assign velocity components to vector solution
         assign(U.sub(0), u_[0])
@@ -288,23 +290,8 @@ def temporal_hook(u_, p_, mesh, tstep, dump_probe_frequency, eval_dict, newfolde
 # Oasis hook called after the simulation has finished
 def theend_hook(u_mean, u_mean0, u_mean1, u_mean2, T, dt, save_solution_at_tstep, save_solution_frequency,
                 **NS_namespace):
-    # get the file path
-    files = NS_parameters['files']
-    u_mean_path = files["u_mean"]
-
-    # divide the accumlated veloicty by the number of steps
-    NumTStepForAverage = (T / dt - save_solution_at_tstep) / save_solution_frequency + 1
-    u_mean0.vector()[:] = u_mean0.vector()[:] / NumTStepForAverage
-    u_mean1.vector()[:] = u_mean1.vector()[:] / NumTStepForAverage
-    u_mean2.vector()[:] = u_mean2.vector()[:] / NumTStepForAverage
-
-    assign(u_mean.sub(0), u_mean0)
-    assign(u_mean.sub(1), u_mean1)
-    assign(u_mean.sub(2), u_mean2)
-
-    # Save u_mean
-    with HDF5File(MPI.comm_world, u_mean_path, "w") as u_mean_file:
-        u_mean_file.write(u_mean, "u_mean")
+    store_u_mean(T, dt, save_solution_at_tstep, save_solution_frequency, u_mean, u_mean0, u_mean1, u_mean2,
+                 NS_parameters)
 
 
 def beta(err, p):
@@ -358,7 +345,7 @@ def update_pressure_condition(NS_expressions, area_ratio, boundary, id_in, id_ou
         else:
             E = -1 * (1 + R_err / R_optimal)
 
-        # 1) Linear update to converge first 100 tsteps of first cycle
+        # 1) Linear update to converge first 100 time steps of first cycle
         delta = (R_optimal - R_actual) / R_optimal
         if tstep < 100:
             h = 0.1
@@ -375,61 +362,3 @@ def update_pressure_condition(NS_expressions, area_ratio, boundary, id_in, id_ou
                 NS_expressions[out_id].p = p_old * beta(R_err, p_old) * M_err ** E
 
     return Q_ideals, Q_in, Q_outs
-
-
-def print_mesh_information(mesh):
-    comm = MPI.comm_world
-    local_xmin = mesh.coordinates()[:, 0].min()
-    local_xmax = mesh.coordinates()[:, 0].max()
-    local_ymin = mesh.coordinates()[:, 1].min()
-    local_ymax = mesh.coordinates()[:, 1].max()
-    local_zmin = mesh.coordinates()[:, 2].min()
-    local_zmax = mesh.coordinates()[:, 2].max()
-    xmin = comm.gather(local_xmin, 0)
-    xmax = comm.gather(local_xmax, 0)
-    ymin = comm.gather(local_ymin, 0)
-    ymax = comm.gather(local_ymax, 0)
-    zmin = comm.gather(local_zmin, 0)
-    zmax = comm.gather(local_zmax, 0)
-
-    local_num_cells = mesh.num_cells()
-    local_num_edges = mesh.num_edges()
-    local_num_faces = mesh.num_faces()
-    local_num_facets = mesh.num_facets()
-    local_num_vertices = mesh.num_vertices()
-    num_cells = comm.gather(local_num_cells, 0)
-    num_edges = comm.gather(local_num_edges, 0)
-    num_faces = comm.gather(local_num_faces, 0)
-    num_facets = comm.gather(local_num_facets, 0)
-    num_vertices = comm.gather(local_num_vertices, 0)
-    volume = assemble(Constant(1) * dx(mesh))
-
-    if MPI.rank(MPI.comm_world) == 0:
-        print("=== Mesh information ===")
-        print("X range: {} to {} (delta: {:.4f})".format(min(xmin), max(xmax), max(xmax) - min(xmin)))
-        print("Y range: {} to {} (delta: {:.4f})".format(min(ymin), max(ymax), max(ymax) - min(ymin)))
-        print("Z range: {} to {} (delta: {:.4f})".format(min(zmin), max(zmax), max(zmax) - min(zmin)))
-        print("Number of cells: {}".format(sum(num_cells)))
-        print("Number of cells per processor: {}".format(int(np.mean(num_cells))))
-        print("Number of edges: {}".format(sum(num_edges)))
-        print("Number of faces: {}".format(sum(num_faces)))
-        print("Number of facets: {}".format(sum(num_facets)))
-        print("Number of vertices: {}".format(sum(num_vertices)))
-        print("Volume: {:.4f}".format(volume))
-        print("Number of cells per volume: {:.4f}".format(sum(num_cells) / volume))
-
-
-def get_file_paths(folder):
-    # Create folder where data and solutions (velocity, mesh, pressure) is stored
-    common_path = path.join(folder, "Solutions")
-    if MPI.rank(MPI.comm_world) == 0:
-        if not path.exists(common_path):
-            makedirs(common_path)
-
-    file_p = path.join(common_path, "p.h5")
-    file_u = path.join(common_path, "u.h5")
-    file_u_mean = path.join(common_path, "u_mean.h5")
-    file_mesh = path.join(common_path, "mesh.h5")
-    files = {"u": file_u, "u_mean": file_u_mean, "p": file_p, "mesh": file_mesh}
-
-    return files

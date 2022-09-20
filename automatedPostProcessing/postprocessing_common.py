@@ -21,13 +21,21 @@ def read_command_line():
                         help="Kinematic viscosity used in simulation, measured in [mm^2/ms]")
     parser.add_argument('--rho', type=float, default=1060,
                         help="Fluid density used in simulation, measured in [kg/m^3]")
+    parser.add_argument('--T', type=float, default=951, help="One cardiac cycle, in [ms]")
     parser.add_argument('--dt', type=float, default=0.0951, help="Time step of simulation, measured in [ms]")
     parser.add_argument('--velocity-degree', type=int, default=1, help="Degree of velocity element")
+    parser.add_argument('--pressure-degree', type=int, default=1, help="Degree of pressure element")
+    parser.add_argument('--save-frequency', type=int, default=5, help="Frequency of saving velocity to file")
     parser.add_argument('--probe-frequency', type=int, default=100, help="Frequency of saving probes to file")
+    parser.add_argument('--times-to-average', type=float, default=[], nargs="+",
+                        help="Time during cardiac cycle to average, in [0,T)")
+    parser.add_argument('--start-cycle', type=int, default=2,
+                        help="Start post-processing from this cardiac cycle. Default is 2")
 
     args = parser.parse_args()
 
-    return args.case, args.nu, args.rho, args.dt, args.velocity_degree, args.probe_frequency
+    return args.case, args.nu, args.rho, args.dt, args.velocity_degree, args.pressure_degree, args.probe_frequency, \
+           args.T, args.save_frequency, args.times_to_average, args.start_cycle
 
 
 def epsilon(u):

@@ -32,9 +32,9 @@ copyright = '2022, Aslak W. Bergersen & Christophe Chnafa & Henrik A. Kjeldsberg
 author = 'Aslak W. Bergersen & Christophe Chnafa & Henrik A. Kjeldsberg'
 
 # The short X.Y version.
-version = '0.2'
+version = '1.0'
 # The full version, including alpha/beta/rc tags
-release = '0.2'
+release = '1.0'
 
 # -- General configuration ---------------------------------------------------
 
