@@ -51,16 +51,18 @@ To compute fluid dynamic quantities and simulation metrics, you may execute the 
     $ python automatedPostProcessing/compute_flow_and_simulation_metrics.py --case simulation/results_artery/artery/data/[RUN_NUMBER]/Solutions
 
 As default, ``compute_flow_and_simulation_metrics.py`` computes the average values over full cycle, for a desired number of cycles, determined by the ``--start-cycle`` flag. Setting ``--start-cycle 2`` would correspond to computing the averaged values from the second cardiac cycle and onward.
-Alternatively, the user may supply the specific times :math:`t` during the cardiac cycle :math:`T`, such that :math:`t \in [0,T]`, to the ``--times-to-average`` flag. Thus, to compute the metrics at :math:`t=0.951`, and skip the first cycle, the user may run the following command::
+Alternatively, the user may supply the specific times :math:`t` during the cardiac cycle :math:`T` to the ``--times-to-average`` flag, to compute phase averaged quantities, where :math:`t \in [0,T)`. Thus, to compute the metrics at :math:`t=0.2` s representing peak systole, and to skip the first cycle, the user may run the following command::
 
     $ python automatedPostProcessing/compute_flow_and_simulation_metrics.py --case simulation/results_artery/artery/data/[RUN_NUMBER]/Solutions --start-cycle 2 --times-to-average 951
 
-Note that the specified time is in milliseconds. A comparison between phase averaged turbulent kinetic energy for the artery model is shown in Figure 1. The two leftmost panels show average values over a full cycle, whereas the two rightmost panels display averages at :math:`t=0.951`.
-For this illustration, the simulation was ran over 10 cycles, and the metrics were computed over the two first and last cycles.
+Note that the specified time is in milliseconds. A comparison between cycle averaged and phase averaged kinetic energy (KE) and turbulent kinetic energy (TKE) for a representative artery model is shown in Figure 1. The leftmost panels displays the model, specifically case C0097 from the Aneurisk database.
+The top middle panel displays the cycle averaged KE over the last four cycles, whereas the bottom middle panel displays the phase averaged KE at :math:`t=0.2` s.
+Similarly, the top right panel displays the cycle averaged TKE over the last four cycles, and bottom right panel displays the phase averaged TKE at :math:`t=0.2` s.
+For this illustration, the simulation was ran over 5 cycles, and the metrics were computed over the last four cycles.
 
-.. figure:: phase_avg.png
+.. figure:: phase_avgeraged.png
 
-  Figure 1: Phase average turbulent kinetic energy. The two leftmost panels show average values over a full cycle, whereas the two rightmost panels display averages at :math:`t=0.951`.
+  Figure 1: Cycle and phase average kinetic energy and turbulent kinetic energy. The leftmost panel disaply the model, the middle panels display kinetic energy, and the rightmost panel display turbulent kinetic energy.
 
 Because velocity and pressure results are currently saved in the compressed ``.h5`` format, they are not viewable in a software such as `ParaView <https://www.paraview.org/>`_.
 If it is desired to convert the compressed velocity and pressure results to viewable ``.xdmf`` format, you may execute the following command::
