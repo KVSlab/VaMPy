@@ -60,7 +60,7 @@ The top middle panel displays the cycle averaged KE over the last four cycles, w
 Similarly, the top right panel displays the cycle averaged TKE over the last four cycles, and bottom right panel displays the phase averaged TKE at :math:`t=0.2` s.
 For this illustration, the simulation was ran over 5 cycles, and the metrics were computed over the last four cycles.
 
-.. figure:: phase_avgeraged.png
+.. figure:: phase_averaged.png
 
   Figure 1: Cycle and phase average kinetic energy and turbulent kinetic energy. The leftmost panel disaply the model, the middle panels display kinetic energy, and the rightmost panel display turbulent kinetic energy.
 
