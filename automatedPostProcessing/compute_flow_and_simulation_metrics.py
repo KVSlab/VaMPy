@@ -62,7 +62,7 @@ def compute_flow_and_simulation_metrics(folder, nu, dt, velocity_degree, T, time
     else:
         id_start = (start_cycle - 1) * saved_time_steps_per_cycle
         dataset_dict = {"": dataset_names[id_start:]}
-        dataset_dict_avg = {"": dataset_names[:saved_time_steps_per_cycle] * (n_cycles - start_cycle + 1)}
+        dataset_dict_avg = {"": dataset_names[:saved_time_steps_per_cycle + 1] * (n_cycles - start_cycle + 1)}
         N = len(dataset_names[id_start:])
 
     # Get mesh information
@@ -89,7 +89,7 @@ def compute_flow_and_simulation_metrics(folder, nu, dt, velocity_degree, T, time
     # Read velocity and compute cycle averaged velocity
     if not path.exists(file_path_u_avg):
         compute_u_avg(dataset_names, file_path_u_avg, file_u, n_cycles, saved_time_steps_per_cycle,
-                      start_cycle, u, u_avg, folder)
+                      start_cycle, u, u_avg)
 
     for time_to_average, dataset in dataset_dict.items():
         if len(times_to_average) != 0 and MPI.rank(MPI.comm_world) == 0:
@@ -103,7 +103,7 @@ def compute_flow_and_simulation_metrics(folder, nu, dt, velocity_degree, T, time
 def compute_u_avg(dataset_names, file_path_u_avg, file_u, n_cycles, saved_time_steps_per_cycle,
                   start_cycle, u, u_avg):
     # Iterate over saved time steps and compute average velocity
-    for save_step in range(saved_time_steps_per_cycle):
+    for save_step in range(saved_time_steps_per_cycle + 1):
         tstep = -1
         for cycle in range(start_cycle - 1, n_cycles):
             data = dataset_names[save_step + cycle * saved_time_steps_per_cycle]
@@ -126,6 +126,9 @@ def compute_u_avg(dataset_names, file_path_u_avg, file_u, n_cycles, saved_time_s
         viz_u_avg = HDF5File(MPI.comm_world, file_path_u_avg, file_mode=file_mode)
         viz_u_avg.write(u_avg, "/velocity", tstep)
         viz_u_avg.close()
+
+        # Reset u_avg vector
+        u_avg.vector().zero()
 
 
 def define_functions_and_iterate_dataset(time_to_average, dataset, dataset_avg, dt, file_u, file_path_u_avg,
@@ -197,7 +200,6 @@ def define_functions_and_iterate_dataset(time_to_average, dataset, dataset_avg, 
         print("=" * 10, "Start post processing", "=" * 10)
 
     counter = 0
-
     for data, data_avg in zip(dataset, dataset_avg):
         counter += 1
 
@@ -329,6 +331,7 @@ def define_functions_and_iterate_dataset(time_to_average, dataset, dataset_avg, 
     kinetic_energy_avg.vector()[:] = kinetic_energy_avg.vector()[:] / N
     turbulent_kinetic_energy_avg.vector()[:] = turbulent_kinetic_energy_avg.vector()[:] / N
     turbulent_dissipation_avg.vector()[:] = turbulent_dissipation_avg.vector()[:] / N
+    time_averaged_u.vector()[:] = time_averaged_u.vector()[:] / N
 
     # Store average data
     if MPI.rank(MPI.comm_world) == 0:
