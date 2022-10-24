@@ -37,7 +37,7 @@ def get_surface_closest_to_point(clipped, point, volume=False):
     Returns:
         surface (vtkPolyData): The surface where only one segment has been removed.
     """
-    connectivity = vtk_compute_connectivity(clipped, mode="All", volume=volume)
+    connectivity = vtk_compute_connectivity(clipped, mode="All")  # , volume=volume)
     if connectivity.GetNumberOfPoints() == 0:
         return clipped
 
@@ -46,7 +46,8 @@ def get_surface_closest_to_point(clipped, point, volume=False):
     regions = []
     for i in range(int(region_id.max() + 1)):
         regions.append(
-            vtk_compute_threshold(connectivity, "RegionId", lower=i - 0.1, upper=i + 0.1, source=0, volume=volume))
+            vtk_compute_threshold(connectivity, "RegionId", lower=i - 0.1, upper=i + 0.1,
+                                  source=0))  # , volume=volume))
         locator = get_vtk_point_locator(regions[-1])
         region_point = regions[-1].GetPoint(locator.FindClosestPoint(point))
         distances.append(get_distance(region_point, point))
@@ -271,14 +272,17 @@ def extract_LA_or_LAA(input_path, laa_point, extract_la=False):
         laa_model_path = base_path + "_laa.vtp"
         laa_volume_path = base_path + "_laa.vtu"
         laa_volume_xml_path = base_path + "_laa.xml"
+    clipped_model = base_path + "_la_and_laa.vtp"
+    laa_model_path = base_path + "_laa.vtp"
+    la_model_path = base_path + "_la.vtp"
 
     laa_centerline_path = base_path + "_laa_centerline.vtp"
     volume_path = base_path + ".vtu"
 
     # Open the surface file.
     print("--- Load model file\n")
-    surface = read_polydata(input_path)
-    volume = read_polydata(volume_path)
+    surface = read_polydata(clipped_model)
+    # volume = read_polydata(volume_path)
 
     if is_surface_capped(surface)[0]:
         capped_surface = surface
@@ -339,7 +343,7 @@ def extract_LA_or_LAA(input_path, laa_point, extract_la=False):
     # Clip the model
     plane = vtk_plane(center, normal)
     surface, clipped = vtk_clip_polydata(surface, plane)
-    volume, clipped_volume = vtk_clip_polydata(volume, plane, volume=True)
+    # volume, clipped_volume = vtk_clip_polydata(volume, plane, volume=True)
 
     # Find part to keep
     surface = vtk_clean_polydata(surface)
@@ -355,26 +359,28 @@ def extract_LA_or_LAA(input_path, laa_point, extract_la=False):
     dist_surface = np.linalg.norm(p_surface - p_boundary)
     dist_clipped = np.linalg.norm(p_clipped - p_boundary)
 
-    if extract_la:
-        if dist_surface < dist_clipped:
-            surface, clipped = clipped, surface
-            volume, clipped_volume = clipped_volume, volume
+    # Extract LAA:
+    if dist_surface > dist_clipped:
+        surface, clipped = clipped, surface
 
-        surface = attach_clipped_regions_to_surface(surface, clipped, center)
-        volume = attach_clipped_regions_to_surface(volume, clipped_volume, center, volume=True)
-    else:
-        if dist_surface > dist_clipped:
-            surface, clipped = clipped, surface
-            volume, clipped_volume = clipped_volume, volume
+    laa_surface = get_surface_closest_to_point(surface, center)
 
-    surface = get_surface_closest_to_point(surface, center)
-    volume = get_surface_closest_to_point(volume, center, volume=True)
+    # Extract LA:
+    if dist_surface < dist_clipped:
+        surface, clipped = clipped, surface
+        # volume, clipped_volume = clipped_volume, volume
+
+    surface_whole = attach_clipped_regions_to_surface(surface, clipped, center)
+    la_surface = get_surface_closest_to_point(surface_whole, center)
 
     print("--- Saving LAA to: {}".format(laa_model_path))
-    write_polydata(surface, laa_model_path)
+    write_polydata(laa_surface, laa_model_path)
 
-    print("--- Saving LAA (volume) to: {}".format(laa_volume_path))
-    write_polydata(volume, laa_volume_path)
+    print("--- Saving LA to: {}".format(la_model_path))
+    write_polydata(la_surface, la_model_path)
+
+    # print("--- Saving LAA (volume) to: {}".format(laa_volume_path))
+    # write_polydata(volume, laa_volume_path)
 
 
 if __name__ == "__main__":
@@ -395,13 +401,18 @@ if __name__ == "__main__":
     print("--- LA Extraction complete")
     print("--- Time spent extracting LA & LAA: {:.3f} s".format((t1 - t0) / scale))
 
-    if args.includes_laa:
-        extract_LA_or_LAA(case_path, laa_point)
-        t2 = time.time()
-        print("--- LAA Extraction complete")
-        print("--- Time spent extracting LAA: {:.3f} s".format((t2 - t1) / scale))
+    extract_LA_or_LAA(case_path, laa_point)
+    t2 = time.time()
+    print("--- LAA Extraction complete")
+    print("--- Time spent extracting LAA: {:.3f} s".format((t2 - t1) / scale))
 
-    extract_LA_or_LAA(case_path, laa_point, extract_la=True)
-    t3 = time.time()
-    print("--- LA Extraction complete")
-    print("--- Time spent extracting LA: {:.3f} s".format((t3 - t2) / scale))
+    # extract_LA_or_LAA(case_path, laa_point, extract_la=True)
+    # t3 = time.time()
+    # print("--- LA Extraction complete")
+    # print("--- Time spent extracting LA: {:.3f} s".format((t3 - t2) / scale))
+
+    # case_path = case_path.replace(".vtp", "_la_and_laa.vtp")
+    # extract_LA_or_LAA(case_path, laa_point, extract_la=True)
+    # t3 = time.time()
+    # print("--- LA Extraction complete")
+    # print("--- Time spent extracting LA: {:.3f} s".format((t3 - t2) / scale))
