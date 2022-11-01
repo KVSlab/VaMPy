@@ -122,7 +122,8 @@ def create_bcs(NS_expressions, flow_rate_type, dynamic_mesh, x_, cardiac_cycle, 
         area_total += assemble(Constant(1.0) * ds_new(ID))
 
     # Load normalized time and flow rate values
-    t_values, Q_ = np.loadtxt(path.join(path.dirname(path.abspath(__file__)), "AF_MOVING_22.txt")).T
+    flow_rate_path = mesh_path.split(".xml")[0] + "_flowrate.txt"
+    t_values, Q_ = np.loadtxt(flow_rate_path).T
     t_values *= 1000  # Scale time in normalised flow wave form to [ms]
 
     for ID in id_in:
