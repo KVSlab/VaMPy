@@ -107,7 +107,14 @@ venv.bak/
 .idea/
 .DS_Store
 
-/cohort_jordi/
-/misc/
-/models/
-/docs/source/tutorials.rst
+# mesh files
+*.vtu
+*.xml.gz
+*_probe_point
+*.json
+
+# result files
+*.h5
+*.xdmf
+points
+params.dat

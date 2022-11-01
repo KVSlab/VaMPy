@@ -95,7 +95,7 @@ The mesh is used as input to the CFD simulations, followed by computation of the
 The simulation was run for one cardiac cycle, corresponding to 0.951 s, with :math:`\Delta t =` 0.0951 ms resulting in a total of 10 000 time steps per cycle.
 In Figure 6 we present the volumetric rendering of velocity, the pressure field, the Q-criterion displaying vortical structures, and three hemodynamic indices; the time averaged wall shear stress (TAWSS), the oscillatory shear index (OSI), and the relative residence time (RRT).
 
-.. figure:: artery_results.png
+.. figure:: artery.png
 
   Figure 6: From left to right: the volumetric rendering of velocity, the pressure field, volumetric rendering of the Q-criterion, TAWSS, OSI, and RRT.
 
