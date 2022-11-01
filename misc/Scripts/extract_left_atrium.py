@@ -37,7 +37,7 @@ def get_surface_closest_to_point(clipped, point, volume=False):
     Returns:
         surface (vtkPolyData): The surface where only one segment has been removed.
     """
-    connectivity = vtk_compute_connectivity(clipped, mode="All")  # , volume=volume)
+    connectivity = vtk_compute_connectivity(clipped, mode="All", volume=volume)
     if connectivity.GetNumberOfPoints() == 0:
         return clipped
 
@@ -47,7 +47,7 @@ def get_surface_closest_to_point(clipped, point, volume=False):
     for i in range(int(region_id.max() + 1)):
         regions.append(
             vtk_compute_threshold(connectivity, "RegionId", lower=i - 0.1, upper=i + 0.1,
-                                  source=0))  # , volume=volume))
+                                  source=0, volume=volume))
         locator = get_vtk_point_locator(regions[-1])
         region_point = regions[-1].GetPoint(locator.FindClosestPoint(point))
         distances.append(get_distance(region_point, point))
@@ -139,8 +139,7 @@ def extract_LA_and_LAA(input_path):
     # Make centerlines
     # Check if voronoi and pole_ids exists
     centerlines, _, _ = compute_centerlines(inlet, outlets, centerline_path, capped_surface,
-                                            resampling=0.1, smooth=False,
-                                            base_path=base_path)
+                                            resampling=0.1, smooth=False, base_path=base_path)
 
     # Clip PVs
     print("--- Clipping PVs")
@@ -168,7 +167,7 @@ def extract_LA_and_LAA(input_path):
         half_dAdX = int(len(dAdX) / 2)
         dAdX = dAdX[half_dAdX:]
 
-        stop_id = np.nonzero(dAdX < -100)[0][-1] + half_dAdX + 3
+        stop_id = np.nonzero(dAdX < -100)[0][-1] + half_dAdX + 3# 10
 
         normal = n[stop_id]
         center = area.GetPoint(stop_id)
@@ -192,13 +191,16 @@ def extract_LA_and_LAA(input_path):
         dist_clipped = np.linalg.norm(p_clipped - p_boundary)
         if dist_surface < dist_clipped:
             surface, clipped = clipped, surface
-
+        # if i == 3:
+        #     surface, clipped = clipped, surface
         surface = attach_clipped_regions_to_surface(surface, clipped, center)
 
     # Clip MV
+    # No clip 007
+
     print("--- Clipping MV")
     line = extract_single_line(centerlines, 0)
-    line = extract_single_line(line, 0, start_id=100, end_id=line.GetNumberOfPoints() - 40)
+    line = extract_single_line(line, 0, start_id=0, end_id=line.GetNumberOfPoints() - 40)
     line = compute_splined_centerline(line, nknots=10, isline=True)
 
     l = get_curvilinear_coordinate(line)
@@ -214,7 +216,7 @@ def extract_LA_and_LAA(input_path):
 
     # Compute 'derivative' of the area
     dAdX = (a[1:, 0] - a[:-1, 0]) / (l[1:] - l[:-1])
-    stop_id = np.nonzero(dAdX > 20)[0][0]
+    stop_id = 15  # 10 #np.nonzero(dAdX > 20)[0][0]
 
     normal = -n[stop_id]
     center = area.GetPoint(stop_id)
@@ -282,7 +284,7 @@ def extract_LA_or_LAA(input_path, laa_point, extract_la=False):
     # Open the surface file.
     print("--- Load model file\n")
     surface = read_polydata(clipped_model)
-    # volume = read_polydata(volume_path)
+    #volume = read_polydata(volume_path)
 
     if is_surface_capped(surface)[0]:
         capped_surface = surface
@@ -301,8 +303,16 @@ def extract_LA_or_LAA(input_path, laa_point, extract_la=False):
     if "region_0" in parameters.keys():
         appendage_point = parameters["region_0"]
     else:
-        p_laa = provide_region_points(capped_surface, laa_point, None)
-        appendage_point = p_laa[0]
+        if laa_point is None:
+            model = base_path.split("/")[-1]
+            print("Loading LAA points for model {}".format(model))
+            laa_points_path = base_path.rsplit("/", 2)[0] + "/LA20_LAA_POINTS.json"
+            with open(laa_points_path, "r") as f:
+                laa_points = json.load(f)
+            appendage_point = laa_points[model]
+        else:
+            p_laa = provide_region_points(capped_surface, laa_point, None)
+            appendage_point = p_laa[0]
 
     print("--- LAA defined at point: {:.6f} {:.6f} {:.6f}"
           .format(appendage_point[0], appendage_point[1], appendage_point[2]))
@@ -310,14 +320,14 @@ def extract_LA_or_LAA(input_path, laa_point, extract_la=False):
     # Compute centerline to orifice from MV to get tangent
     laa_centerlines, _, _ = compute_centerlines(p_outlet, appendage_point, laa_centerline_path, capped_surface,
                                                 resampling=0.1, smooth=False, base_path=base_path)
-
-    id_start = int(laa_centerlines.GetNumberOfPoints() * 0.2)
-    id_stop = int(laa_centerlines.GetNumberOfPoints() * 0.8)
+    id_start = int(laa_centerlines.GetNumberOfPoints() * 0.25)
+    id_stop = int(laa_centerlines.GetNumberOfPoints() * 0.9)
+    # for la013 id_stop = int(laa_centerlines.GetNumberOfPoints() * 0.6)
     line = extract_single_line(laa_centerlines, 0, start_id=id_start, end_id=id_stop)
     write_polydata(line, base_path + "_cl_to_check.vtp")
     write_polydata(laa_centerlines, base_path + "_laa_centerline.vtp")
     laa_l = get_curvilinear_coordinate(line)
-    step = 10 * np.mean(laa_l[1:] - laa_l[:-1])
+    step = 2.5 * np.mean(laa_l[1:] - laa_l[:-1])
     line = vmtk_resample_centerline(line, step)
     line = compute_splined_centerline(line, nknots=10, isline=True)
     area, sections = vmtk_compute_centerline_sections(surface, line)
@@ -327,23 +337,18 @@ def extract_LA_or_LAA(input_path, laa_point, extract_la=False):
     n = get_point_data_array("FrenetTangent", area, k=3)
     l = get_curvilinear_coordinate(area)
 
-    # Compute 'derivative' of the area
-    dAdX = (a[1:, 0] - a[:-1, 0]) / (l[1:] - l[:-1])
-
-    # Check only from "middle" of lumen and towards PV
-    half_dAdX = int(len(dAdX) / 4)
-    dAdX = dAdX[half_dAdX:]
-
     # Stopping criteria
-    tolerance = 3  # FIXME: Input parameter?
-    stop_id = np.nonzero(dAdX < -500)[0][-1] + half_dAdX + tolerance
+    # tolerance = int(0.025 * len(laa_l))  # FIXME: Input parameter?
+
+    dAdX = np.gradient(a.T[0], np.mean(l[1:] - l[:-1]))
+    stop_id = np.nonzero(dAdX < -50)[0][-1] + 2  # + tolerance
     normal = n[stop_id]
     center = area.GetPoint(stop_id)
 
     # Clip the model
     plane = vtk_plane(center, normal)
     surface, clipped = vtk_clip_polydata(surface, plane)
-    # volume, clipped_volume = vtk_clip_polydata(volume, plane, volume=True)
+    #volume, clipped_volume = vtk_clip_polydata(volume, plane, volume=True)
 
     # Find part to keep
     surface = vtk_clean_polydata(surface)
@@ -362,13 +367,14 @@ def extract_LA_or_LAA(input_path, laa_point, extract_la=False):
     # Extract LAA:
     if dist_surface > dist_clipped:
         surface, clipped = clipped, surface
+        #volume, clipped_volume = clipped_volume, volume
 
     laa_surface = get_surface_closest_to_point(surface, center)
+    #laa_volume = get_surface_closest_to_point(volume, center, volume=True)
 
     # Extract LA:
     if dist_surface < dist_clipped:
         surface, clipped = clipped, surface
-        # volume, clipped_volume = clipped_volume, volume
 
     surface_whole = attach_clipped_regions_to_surface(surface, clipped, center)
     la_surface = get_surface_closest_to_point(surface_whole, center)
@@ -380,7 +386,7 @@ def extract_LA_or_LAA(input_path, laa_point, extract_la=False):
     write_polydata(la_surface, la_model_path)
 
     # print("--- Saving LAA (volume) to: {}".format(laa_volume_path))
-    # write_polydata(volume, laa_volume_path)
+    # write_polydata(laa_volume, laa_volume_path)
 
 
 if __name__ == "__main__":
@@ -416,3 +422,4 @@ if __name__ == "__main__":
     # t3 = time.time()
     # print("--- LA Extraction complete")
     # print("--- Time spent extracting LA: {:.3f} s".format((t3 - t2) / scale))
+
