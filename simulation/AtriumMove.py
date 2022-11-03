@@ -3,6 +3,7 @@ import pickle
 from os import makedirs
 from pprint import pprint
 
+from IPython import embed
 from oasis.problems.NSfracStep import *
 from oasis.problems.NSfracStep.MovingAtriumCommon import Surface_counter, Wall_motion
 from oasis.problems.NSfracStep.MovingCommon import get_visualization_writers
@@ -43,7 +44,7 @@ def problem_parameters(commandline_kwargs, NS_parameters, scalar_components, Sch
         NS_parameters.update(
             # Moving atrium parameters
             flow_rate_type=None,
-            dynamic_mesh=True,  # Run moving mesh simulation
+            dynamic_mesh=False,  # Run moving mesh simulation
             compute_velocity_and_pressure=True,  # Only solve mesh equations
             # Backflow parameters
             backflow_beta=1.0,
@@ -63,7 +64,7 @@ def problem_parameters(commandline_kwargs, NS_parameters, scalar_components, Sch
             save_solution_frequency_xdmf=5,  # Save frequency for velocity and pressure field
             save_solution_after_cycle=0,  # Store solution after 1 cardiac cycle
             save_volume_frequency=5e10,  # Save frequency for storing volume
-            save_flow_metrics_frequency=20,  # Frequency for storing flow metrics
+            save_flow_metrics_frequency=100,  # Frequency for storing flow metrics
             # Oasis specific parameters
             checkpoint=500,  # Overwrite solution in Checkpoint folder each checkpoint
             print_intermediate_info=200,
