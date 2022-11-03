@@ -39,13 +39,13 @@ def problem_parameters(commandline_kwargs, NS_parameters, scalar_components, Sch
         # Override some problem specific parameters
         # Parameters are in mm and ms
         cardiac_cycle = float(commandline_kwargs.get("cardiac_cycle", 1000))
-        number_of_cycles = float(commandline_kwargs.get("number_of_cycles", 2))
+        number_of_cycles = float(commandline_kwargs.get("number_of_cycles", 1))
 
         NS_parameters.update(
             # Moving atrium parameters
             flow_rate_type=None,
-            dynamic_mesh=False,  # Run moving mesh simulation
-            compute_velocity_and_pressure=True,  # Only solve mesh equations
+            dynamic_mesh=True,  # Run moving mesh simulation
+            compute_velocity_and_pressure=False,  # Only solve mesh equations
             # Backflow parameters
             backflow_beta=1.0,
             backflow_facets=[],
@@ -57,21 +57,21 @@ def problem_parameters(commandline_kwargs, NS_parameters, scalar_components, Sch
             # Simulation parameters
             cardiac_cycle=cardiac_cycle,  # Run simulation for 1 cardiac cycles [ms]
             T=number_of_cycles * cardiac_cycle,  # Number of cycles
-            dt=0.2,  # # Time step size [ms]
+            dt=1,  # # Time step size [ms]
             # Frequencies to save data
-            dump_probe_frequency=500,  # Dump frequency for sampling velocity & pressure at probes along the centerline
-            save_solution_frequency=5,  # Save frequency for velocity and pressure field
+            dump_probe_frequency=5e10,  # Dump frequency for sampling velocity & pressure at probes along the centerline
+            save_solution_frequency=5e10,  # Save frequency for velocity and pressure field
             save_solution_frequency_xdmf=5,  # Save frequency for velocity and pressure field
             save_solution_after_cycle=0,  # Store solution after 1 cardiac cycle
-            save_volume_frequency=5e10,  # Save frequency for storing volume
-            save_flow_metrics_frequency=100,  # Frequency for storing flow metrics
+            save_volume_frequency=5,  # Save frequency for storing volume
+            save_flow_metrics_frequency=20,  # Frequency for storing flow metrics
             # Oasis specific parameters
             checkpoint=500,  # Overwrite solution in Checkpoint folder each checkpoint
             print_intermediate_info=200,
             folder="results_moving_atrium",
             mesh_path=commandline_kwargs["mesh_path"],
             # Solver parameters
-            max_iter=2,
+            max_iter=1,
             velocity_degree=1,
             pressure_degree=1,
             use_krylov_solvers=True,
@@ -114,7 +114,7 @@ def create_bcs(NS_expressions, flow_rate_type, dynamic_mesh, x_, cardiac_cycle, 
     id_in[:] = info['inlet_ids']
     id_out[:] = info['outlet_id']
     id_wall = min(id_in + id_out) - 1
-    backflow_facets[:] = info['outlet_id']
+    #backflow_facets[:] = info['outlet_id']
 
     # Find corresponding areas
     ds_new = Measure("ds", domain=mesh, subdomain_data=boundary)
