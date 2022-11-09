@@ -3,7 +3,6 @@ import pickle
 from os import makedirs
 from pprint import pprint
 
-from IPython import embed
 from oasis.problems.NSfracStep import *
 from oasis.problems.NSfracStep.MovingAtriumCommon import Surface_counter, Wall_motion
 from oasis.problems.NSfracStep.MovingCommon import get_visualization_writers
@@ -45,7 +44,7 @@ def problem_parameters(commandline_kwargs, NS_parameters, scalar_components, Sch
             # Moving atrium parameters
             flow_rate_type=None,
             dynamic_mesh=True,  # Run moving mesh simulation
-            compute_velocity_and_pressure=False,  # Only solve mesh equations
+            compute_velocity_and_pressure=True,  # Only solve mesh equations
             # Backflow parameters
             backflow_beta=1.0,
             backflow_facets=[],
@@ -82,6 +81,13 @@ def problem_parameters(commandline_kwargs, NS_parameters, scalar_components, Sch
     case_name = mesh_file.split(".")[0]
     NS_parameters["folder"] = path.join(NS_parameters["folder"], case_name)
 
+    point_path = NS_parameters['mesh_path'].split(".xml")[0] + "_flowext_points.npy"
+    points = np.load(point_path)
+    p_MV = points[0]
+    p_FE = points[1]
+    NS_parameters["p_MV"] = p_MV
+    NS_parameters["p_FE"] = p_FE
+
     if MPI.rank(MPI.comm_world) == 0:
         print("=== Starting simulation for MovingAtrium.py ===")
         print("Running with the following parameters:")
@@ -114,7 +120,7 @@ def create_bcs(NS_expressions, flow_rate_type, dynamic_mesh, x_, cardiac_cycle, 
     id_in[:] = info['inlet_ids']
     id_out[:] = info['outlet_id']
     id_wall = min(id_in + id_out) - 1
-    #backflow_facets[:] = info['outlet_id']
+    backflow_facets[:] = info['outlet_id']
 
     # Find corresponding areas
     ds_new = Measure("ds", domain=mesh, subdomain_data=boundary)
