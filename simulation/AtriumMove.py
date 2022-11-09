@@ -38,7 +38,7 @@ def problem_parameters(commandline_kwargs, NS_parameters, scalar_components, Sch
         # Override some problem specific parameters
         # Parameters are in mm and ms
         cardiac_cycle = float(commandline_kwargs.get("cardiac_cycle", 1000))
-        number_of_cycles = float(commandline_kwargs.get("number_of_cycles", 1))
+        number_of_cycles = float(commandline_kwargs.get("number_of_cycles", 5))
 
         NS_parameters.update(
             # Moving atrium parameters
