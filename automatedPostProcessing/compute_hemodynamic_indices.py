@@ -84,7 +84,6 @@ def compute_hemodynamic_indices(case_path, nu, rho, dt, velocity_degree):
     tau_prev = Function(V_b1)
 
     stress = STRESS(u, 0.0, nu, mesh)
-    dabla = get_dabla_function()
 
     # Create writer for WSS
     wss_path = (case_path / "WSS.xdmf").__str__()
@@ -119,7 +118,7 @@ def compute_hemodynamic_indices(case_path, nu, rho, dt, velocity_degree):
 
         if MPI.rank(MPI.comm_world) == 0:
             print("Compute WSS (absolute value)")
-        dabla(tau.vector(), tawss.vector())
+        tawss = project(inner(tau,tau)**(1/2),U_b1) 
         TAWSS.vector().axpy(1, tawss.vector())
 
         # Compute TWSSG
@@ -127,7 +126,7 @@ def compute_hemodynamic_indices(case_path, nu, rho, dt, velocity_degree):
             print("Compute TWSSG")
         twssg.vector().set_local((tau.vector().get_local() - tau_prev.vector().get_local()) / dt)
         twssg.vector().apply("insert")
-        dabla(twssg.vector(), twssg_.vector())
+        twssg_ = project(inner(twssg,twssg)**(1/2),U_b1)
         TWSSG.vector().axpy(1, twssg_.vector())
 
         # Update tau
@@ -153,7 +152,7 @@ def compute_hemodynamic_indices(case_path, nu, rho, dt, velocity_degree):
     TWSSG.rename("TWSSG", "TWSSG")
 
     try:
-        dabla(WSS_mean.vector(), wss_mean.vector())
+        wss_mean = project(inner(WSS_mean,WSS_mean)**(1/2),U_b1)
         wss_mean_vec = wss_mean.vector().get_local()
         tawss_vec = TAWSS.vector().get_local()
 
@@ -212,37 +211,6 @@ def compute_hemodynamic_indices(case_path, nu, rho, dt, velocity_degree):
 
     print("========== Post processing finished ==========")
     print("Results saved to: {}".format(case_path))
-
-
-def get_dabla_function():
-    """
-    Compiles a string in C++ and expose as a Python object (dabla),
-    used to compute several hemodynamic quantities.
-
-    Returns:
-        dabla: C++ compiled function
-    """
-
-    cpp_code = """
-    #include <pybind11/pybind11.h>
-    #include <dolfin.h>
-    namespace dolfin
-    {
-        void dabla(dolfin::GenericVector& a, dolfin::GenericVector& b) {
-            for (unsigned int i=0; i < b.size(); i++) {
-                b.setitem(i, pow((pow(a[i], 2) + pow(a[b.size() + i], 2) + pow(a[2 * b.size() + i], 2) ), 0.5));
-            }
-        }
-    }
-    PYBIND11_MODULE(SIGNATURE, m)
-    {
-        m.def("dabla", &dolfin::dabla);
-    }
-    """
-
-    dabla = compile_cpp_code(cpp_code).dabla
-
-    return dabla
 
 
 if __name__ == '__main__':
