@@ -49,7 +49,7 @@ def test_compute_flow_and_simulation_metrics_at_one_instance():
     save_frequency = 5
     start_cycle = 1
     T = 10 * dt
-    time = 0.4755
+    time = dt
     times_to_average = [time]
 
     # Run post-processing
