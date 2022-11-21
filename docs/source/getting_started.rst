@@ -53,7 +53,7 @@ To compute fluid dynamic quantities and simulation metrics, you may execute the 
 As default, ``compute_flow_and_simulation_metrics.py`` computes the average values over full cycle, for a desired number of cycles, determined by the ``--start-cycle`` flag. Setting ``--start-cycle 2`` would correspond to computing the averaged values from the second cardiac cycle and onward.
 Alternatively, the user may supply the specific times :math:`t` during the cardiac cycle :math:`T` to the ``--times-to-average`` flag, to compute phase averaged quantities, where :math:`t \in [0,T)`. Thus, to compute the metrics at :math:`t=0.2` s representing peak systole, and to skip the first cycle, the user may run the following command::
 
-    $ python automatedPostProcessing/compute_flow_and_simulation_metrics.py --case simulation/results_artery/artery/data/[RUN_NUMBER]/Solutions --start-cycle 2 --times-to-average 951
+    $ python automatedPostProcessing/compute_flow_and_simulation_metrics.py --case simulation/results_artery/artery/data/[RUN_NUMBER]/Solutions --start-cycle 2 --times-to-average 200 --T 1000 --dt 0.1
 
 Note that the specified time is in milliseconds. A comparison between cycle averaged and phase averaged kinetic energy (KE) and turbulent kinetic energy (TKE) for a representative artery model is shown in Figure 1. The leftmost panels displays the model, specifically case C0097 from the Aneurisk database.
 The top middle panel displays the cycle averaged KE over the last four cycles, whereas the bottom middle panel displays the phase averaged KE at :math:`t=0.2` s.
