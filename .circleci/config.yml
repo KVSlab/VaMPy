@@ -31,10 +31,10 @@ jobs:
 
             # Set up environment
             conda install mamba
-            mamba create -n testenv morphman fenics paramiko matplotlib
+            mamba create -n vampy morphman fenics paramiko matplotlib
 
             # Activate environment
-            source activate testenv
+            source activate vampy 
 
             # Useful for debugging any issues with conda
             conda info -a
