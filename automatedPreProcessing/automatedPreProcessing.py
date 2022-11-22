@@ -3,7 +3,6 @@ from __future__ import print_function
 
 import argparse
 from os import remove
-from time import time
 
 import ToolRepairSTL
 # Local imports
