@@ -12,10 +12,10 @@ def test_pre_processing():
     # Get default input parameters
     common_input = read_command_line()
     common_input.update(dict(meshing_method="diameter",
-                             smoothing_method="taubin",
+                             smoothing_method="no_smooth",
                              filename_model=model_path,
                              refine_region=False,
-                             coarsening_factor=1.3,
+                             coarsening_factor=1.1,
                              viz=False,
                              compress_mesh=False,
                              outlet_flow_extension_length=1,
