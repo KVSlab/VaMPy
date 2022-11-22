@@ -33,7 +33,7 @@ jobs:
             conda create -n vampy morphman fenics paramiko matplotlib
 
             # Activate environment
-            conda activate vampy 
+            source activate vampy 
 
             # Useful for debugging any issues with conda
             conda info -a
