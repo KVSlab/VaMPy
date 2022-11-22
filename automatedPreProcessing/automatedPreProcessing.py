@@ -394,7 +394,8 @@ def read_command_line():
 
     parser.add_argument('-i', '--inputModel',
                         type=str,
-                        required=True,
+                        required=False,
+                        default="models/model.vtp",
                         dest='fileNameModel',
                         help="Path to input file containing the 3D model.")
 
@@ -427,7 +428,7 @@ def read_command_line():
                         required=False,
                         dest='smoothingFactor',
                         default=0.25,
-                        help="smoothingFactor for VoronoiSmoothing, removes all spheres which" +
+                        help="Smoothing factor for VoronoiSmoothing, removes all spheres which" +
                              " has a radius < MISR*(1-0.25), where MISR varying along the centerline.")
 
     parser.add_argument('-m', '--meshingMethod',
