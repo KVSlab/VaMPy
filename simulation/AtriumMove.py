@@ -155,7 +155,7 @@ def create_bcs(NS_expressions, dynamic_mesh, x_, cardiac_cycle, backflow_facets,
         points = np.load(mesh_path.split(".")[0] + "_points.np", allow_pickle=True)
 
         # Define wall movement
-        wall_counter = Surface_counter(points, cardiac_cycle,  element=V.ufl_element())
+        wall_counter = Surface_counter(points, cardiac_cycle, element=V.ufl_element())
         bc_tmp = DirichletBC(V, wall_counter, boundary, id_wall)
         bc_tmp.apply(x_["u0"])
         x_["u0"].zero()
