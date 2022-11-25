@@ -81,10 +81,10 @@ The ``--editable`` flag installs the project in editable mode meaning that any c
 
 Docker
 ======
-A `Dockerfile` is supplied at the root of the repository, which can build a docker-image with all dependencies installed.
-The Docker-image can be built with the following command::
+A `Dockerfile` is supplied in the `docker`-folder in the repository, which can build a docker-image with all dependencies installed.
+The Docker-image can be built from the root of the repository with the following command::
 
-    $ docker build -t name_of_image .
+    $ docker build -t name_of_image -f docker/Dockerfile .
 
 A Docker-container can then be started with the following command::
 
