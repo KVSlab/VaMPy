@@ -362,12 +362,12 @@ def read_command_line():
                         dest='fileNameModel',
                         default='example/surface.vtp',
                         help="Input file containing the 3D model.")
-    cm = parser.add_mutually_exclusive_group(required=False)
-    cm.add_argument('-ncM', '--no-compress-mesh',
-                    default=True,
-                    dest='compressMesh',
-                    action='store_false',
-                    help="Do not compress output mesh after generation.")
+    parser.add_argument('-cM', '--compress-mesh',
+                        type=str2bool,
+                        required=False,
+                        dest='compressMesh',
+                        default=True,
+                        help="Compress output mesh after generation.")
 
     parser.add_argument('-sM', '--smoothingMethod',
                         type=str,
@@ -431,12 +431,11 @@ def read_command_line():
                         default=False,
                         help="Determine whether or not the model is an Atrium model.")
 
-    flowext = parser.add_mutually_exclusive_group(required=False)
-    flowext.add_argument('-nf', '--no-flowext',
-                         dest="flowExtension",
-                         default=True,
-                         action="store_false",
-                         help="Remove flow extensions from the model.")
+    parser.add_argument('-f', '--flowext',
+                        dest="flowExtension",
+                        default=True,
+                        type=str2bool,
+                        help="Add flow extensions to to the model.")
 
     parser.add_argument('-fli', '--inletFlowext',
                         dest="inletFlowExtLen",
@@ -450,12 +449,11 @@ def read_command_line():
                         type=float,
                         help="Length of flow extensions at outlet(s).")
 
-    visualize = parser.add_mutually_exclusive_group(required=False)
-    visualize.add_argument('-nvz', '--no-visualize',
+    parser.add_argument('-vz', '--visualize',
                         dest="viz",
                         default=True,
-                        action="store_false",
-                        help="Skip visualizing surface, inlet, outlet and probes after meshing.")
+                        type=str2bool,
+                        help="Visualize surface, inlet, outlet and probes after meshing.")
 
     parser.add_argument('-sc', '--simulation-config',
                         type=str,
