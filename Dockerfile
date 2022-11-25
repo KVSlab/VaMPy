@@ -5,7 +5,6 @@ ENV DEBIAN_FRONTEND=noninteractive
 # Install ssh (missing dependency to run conda envs)
 RUN apt-get update && \
     apt-get install -y ssh build-essential libgl1-mesa-glx mesa-utils
-RUN python -m pip install pyvista vtk
 
 # Upgrade mamba
 RUN mamba upgrade -y mamba
