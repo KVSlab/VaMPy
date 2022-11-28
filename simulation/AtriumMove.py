@@ -41,9 +41,12 @@ def problem_parameters(commandline_kwargs, NS_parameters, scalar_components, Sch
         number_of_cycles = float(commandline_kwargs.get("number_of_cycles", 3))
 
         NS_parameters.update(
+            # TODO: Generalize
+            p_MV=np.array([23.178390502929688, 82.28312683105469, - 197.3264923095703]),
+            p_FE=np.array([31.815282821655273, 73.34798431396484, - 201.0563201904297]),
             # Moving atrium parameters
-            dynamic_mesh=True,  # Run moving mesh simulation
-            compute_velocity_and_pressure=False,  # Only solve mesh equations
+            dynamic_mesh=False,  # Run moving mesh simulation
+            compute_velocity_and_pressure=True,  # Only solve mesh equations
             # Backflow parameters
             backflow_beta=1.0,
             backflow_facets=[],
@@ -152,7 +155,7 @@ def create_bcs(NS_expressions, dynamic_mesh, x_, cardiac_cycle, backflow_facets,
     if dynamic_mesh:
         # Moving walls
         print("Loading displacement points")
-        points = np.load(mesh_path.split(".")[0] + "_points.np", allow_pickle=True)
+        points = np.load(mesh_path.split(".xml")[0] + "_points.np", allow_pickle=True)
 
         # Define wall movement
         wall_counter = Surface_counter(points, cardiac_cycle, element=V.ufl_element())
