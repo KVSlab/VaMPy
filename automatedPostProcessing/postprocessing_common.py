@@ -28,9 +28,9 @@ def read_command_line():
     parser.add_argument('--save-frequency', type=int, default=5, help="Frequency of saving velocity to file")
     parser.add_argument('--probe-frequency', type=int, default=100, help="Frequency of saving probes to file")
     parser.add_argument('--times-to-average', type=float, default=[], nargs="+",
-                        help="Time during cardiac cycle to average, in [0,T)")
+                        help="Time(s) during cardiac cycle to average, in the interval [0,T). Measured in [ms].")
     parser.add_argument('--start-cycle', type=int, default=2,
-                        help="Start post-processing from this cardiac cycle. Default is 2")
+                        help="Start post-processing from this cardiac cycle. Default is starting from the second cycle")
 
     args = parser.parse_args()
 
