@@ -596,13 +596,13 @@ def generate_mesh_fsi(surface):
     # Parameters
     #TODO: It should be possible to change parameters from commmad line
     #FIXEM: low TargetEdgeLength results in an error
-    TargetEdgeLength = 1.0
-    Solid_thickness = 0.3
+    TargetEdgeLength = 0.3
+    Solid_thickness = 0.2
     meshGenerator = vmtkMeshGeneratorFsi()
     meshGenerator.Surface = surface
     meshGenerator.ElementSizeMode = 'edgelength'
     meshGenerator.TargetEdgeLength = TargetEdgeLength
-    meshGenerator.MaxEdgeLength = 20*meshGenerator.TargetEdgeLength
+    meshGenerator.MaxEdgeLength = 15*meshGenerator.TargetEdgeLength
     meshGenerator.MinEdgeLength = 0.4*meshGenerator.TargetEdgeLength
     meshGenerator.BoundaryLayer = 1
     meshGenerator.NumberOfSubLayers = 2

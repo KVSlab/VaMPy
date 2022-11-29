@@ -181,7 +181,7 @@ def run_pre_processing(filename_model, verbose_print, smoothing_method, smoothin
 
             # Check if there has been added new outlets
             num_outlets = centerlines.GetNumberOfLines()
-            num_outlets_after = compute_centers(surface_uncapped, is_atrium, test_capped=True)[1]
+            num_outlets_after = compute_centers_for_meshing(surface_uncapped, None, test_capped=True)[1]
 
             if num_outlets != num_outlets_after:
                 surface = vmtk_smooth_surface(surface, "laplace", iterations=200)
@@ -207,7 +207,7 @@ def run_pre_processing(filename_model, verbose_print, smoothing_method, smoothin
     elif smoothing_method in ["laplace", "taubin"]:
         print("--- Smooth surface: {} smoothing\n".format(smoothing_method.capitalize()))
         if not path.isfile(file_name_surface_smooth):
-            surface = vmtk_smooth_surface(surface, smoothing_method, iterations=400)
+            surface = vmtk_smooth_surface(surface, smoothing_method, iterations=400, passband=0.5)
 
             # Save the smoothed surface
             write_polydata(surface, file_name_surface_smooth)
@@ -357,7 +357,7 @@ def read_command_line():
                         type=str,
                         required=False,
                         dest='smoothingMethod',
-                        default="taubin",
+                        default="laplace",
                         choices=["voronoi", "no_smooth", "laplace", "taubin"],
                         help="Smoothing method, for now only Voronoi smoothing is available." +
                              " For Voronoi smoothing you can also control smoothingFactor" +
@@ -382,7 +382,7 @@ def read_command_line():
                         dest="meshingMethod",
                         type=str,
                         choices=["diameter", "curvature", "constant"],
-                        default="diameter")
+                        default="curvature")
 
     parser.add_argument('-el', '--edge-length',
                         dest="edgeLength",
@@ -430,6 +430,8 @@ def read_command_line():
                         default=True,
                         type=str2bool,
                         help="Visualize surface, inlet, outlet and probes after meshing.")
+
+    # parser.add_argument('-st', '--solidthickness',
 
 
     args, _ = parser.parse_known_args()
