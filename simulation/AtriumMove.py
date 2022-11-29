@@ -41,9 +41,6 @@ def problem_parameters(commandline_kwargs, NS_parameters, scalar_components, Sch
         number_of_cycles = float(commandline_kwargs.get("number_of_cycles", 3))
 
         NS_parameters.update(
-            # TODO: Generalize
-            p_MV=np.array([23.178390502929688, 82.28312683105469, - 197.3264923095703]),
-            p_FE=np.array([31.815282821655273, 73.34798431396484, - 201.0563201904297]),
             # Moving atrium parameters
             dynamic_mesh=False,  # Run moving mesh simulation
             compute_velocity_and_pressure=True,  # Only solve mesh equations
@@ -82,6 +79,13 @@ def problem_parameters(commandline_kwargs, NS_parameters, scalar_components, Sch
     mesh_file = NS_parameters["mesh_path"].split("/")[-1]
     case_name = mesh_file.split(".")[0]
     NS_parameters["folder"] = path.join(NS_parameters["folder"], case_name)
+
+    point_path = NS_parameters["mesh_path"].split(".xml")[0] + "_flowext_points.npy"
+    points = np.load(point_path)
+    p_MV = points[0]
+    p_FE = points[1]
+    NS_parameters["p_MV"] = p_MV
+    NS_parameters["p_FE"] = p_FE
 
     if MPI.rank(MPI.comm_world) == 0:
         print("=== Starting simulation for MovingAtrium.py ===")
@@ -124,7 +128,10 @@ def create_bcs(NS_expressions, dynamic_mesh, x_, cardiac_cycle, backflow_facets,
         area_total += assemble(Constant(1.0) * ds_new(ID))
 
     # Load normalized time and flow rate values
-    flow_rate_path = mesh_path.split(".xml")[0] + "_flowrate.txt"
+    if dynamic_mesh:
+        flow_rate_path = mesh_path.split(".xml")[0] + "_flowrate_moving.txt"
+    else:
+        flow_rate_path = mesh_path.split(".xml")[0] + "_flowrate_rigid.txt"
     t_values, Q_ = np.loadtxt(flow_rate_path).T
     t_values *= 1000  # Scale time in normalised flow wave form to [ms]
 
