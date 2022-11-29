@@ -78,10 +78,6 @@ def compute_flow_and_simulation_metrics(folder, nu, dt, velocity_degree, T, time
     V = VectorFunctionSpace(mesh, "CG", velocity_degree)
     Vv = FunctionSpace(mesh, "CG", velocity_degree)
 
-    # Mesh info
-    h = CellDiameter(mesh)
-    characteristic_edge_length = project(h, DG)
-
     # Define u_avg(x,t)
     u = Function(V)
     u_avg = Function(V)
@@ -96,8 +92,7 @@ def compute_flow_and_simulation_metrics(folder, nu, dt, velocity_degree, T, time
             print("Phase averaging results over {} cycles at t={} ms".format(N, time_to_average))
 
         define_functions_and_iterate_dataset(time_to_average, dataset, dataset_dict_avg[time_to_average], dt, file_u,
-                                             file_path_u_avg, file_path_u, folder, mesh, nu, N, DG, V, Vv, h,
-                                             characteristic_edge_length)
+                                             file_path_u_avg, file_path_u, folder, mesh, nu, N, DG, V, Vv)
 
 
 def compute_u_avg(dataset_names, file_path_u_avg, file_u, n_cycles, saved_time_steps_per_cycle,
@@ -132,7 +127,7 @@ def compute_u_avg(dataset_names, file_path_u_avg, file_u, n_cycles, saved_time_s
 
 
 def define_functions_and_iterate_dataset(time_to_average, dataset, dataset_avg, dt, file_u, file_path_u_avg,
-                                         file_path_u, folder, mesh, nu, N, DG, V, Vv, h, characteristic_edge_length):
+                                         file_path_u, folder, mesh, nu, N, DG, V, Vv):
     # Functions for storing values
     v = TestFunction(DG)
     u = Function(V)
@@ -179,6 +174,10 @@ def define_functions_and_iterate_dataset(time_to_average, dataset, dataset_avg, 
     # CFL
     CFL = Function(DG)
     CFL_avg = Function(DG)
+
+    # Characteristic edge length
+    h = CellDiameter(mesh)
+    characteristic_edge_length = project(h, DG)
 
     # Create XDMF files for saving metrics
     fullname = file_path_u.replace("u.h5", "%s{}.xdmf".format(time_to_average))
