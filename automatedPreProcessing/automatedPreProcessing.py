@@ -362,6 +362,7 @@ def read_command_line():
                         dest='fileNameModel',
                         default='example/surface.vtp',
                         help="Input file containing the 3D model.")
+
     parser.add_argument('-cM', '--compress-mesh',
                         type=str2bool,
                         required=False,
@@ -479,10 +480,10 @@ def read_command_line():
 
     return dict(filename_model=args.fileNameModel, verbose_print=verbose_print, smoothing_method=args.smoothingMethod,
                 smoothing_factor=args.smoothingFactor, meshing_method=args.meshingMethod,
-                refine_region=args.refineRegion, is_atrium=args.isAtrium,
-                create_flow_extensions=args.flowExtension, viz=args.viz, config_path=args.config,
-                coarsening_factor=args.coarseningFactor, inlet_flow_extension_length=args.inletFlowExtLen,
-                edge_length=args.edgeLength, region_points=args.regionPoints, compress_mesh=args.compressMesh,
+                refine_region=args.refineRegion, is_atrium=args.isAtrium, create_flow_extensions=args.flowExtension,
+                viz=args.viz, config_path=args.config, coarsening_factor=args.coarseningFactor,
+                inlet_flow_extension_length=args.inletFlowExtLen, edge_length=args.edgeLength,
+                region_points=args.regionPoints, compress_mesh=args.compressMesh,
                 outlet_flow_extension_length=args.outletFlowExtLen)
 
 
