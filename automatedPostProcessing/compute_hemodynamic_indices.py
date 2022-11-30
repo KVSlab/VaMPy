@@ -43,7 +43,7 @@ def compute_hemodynamic_indices(case_path, nu, rho, dt, T, velocity_degree, save
     mesh_path = case_path / "mesh.h5"
 
     # Start post-processing from 2nd cycle using every 10th time step, or 2000 time steps per cycle
-    start = T / dt / save_frequency * (start_cycle - 1)
+    start = int(T / dt / save_frequency * (start_cycle - 1))
 
     # Read mesh saved as HDF5 format
     mesh = Mesh()
