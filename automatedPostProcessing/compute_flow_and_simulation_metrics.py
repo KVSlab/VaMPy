@@ -8,7 +8,7 @@ from postprocessing_common import read_command_line, epsilon
 
 
 def compute_flow_and_simulation_metrics(folder, nu, dt, velocity_degree, T, times_to_average, save_frequency,
-                                        start_cycle):
+                                        start_cycle, step):
     """
     Computes several flow field characteristics
     for velocity field stored at 'folder' location
@@ -23,6 +23,7 @@ def compute_flow_and_simulation_metrics(folder, nu, dt, velocity_degree, T, time
         times_to_average (list): Times during cardiac cycle to average, in interval [0,T)
         save_frequency (int): Frequency that velocity has been stored
         start_cycle (int): Determines which cardiac cycle to start from for post-processing
+        step (int): Step size determining number of times data is sampled
     """
     # File paths
     file_path_u = path.join(folder, "u.h5")
@@ -36,7 +37,7 @@ def compute_flow_and_simulation_metrics(folder, nu, dt, velocity_degree, T, time
     if MPI.rank(MPI.comm_world) == 0:
         print("Reading dataset names")
 
-    dataset_names = get_dataset_names(file_u, start=start)
+    dataset_names = get_dataset_names(file_u, start=start, step=step)
 
     # Extract specific time steps if phase averaging
     saved_time_steps_per_cycle = int(T / dt / save_frequency)
@@ -466,6 +467,6 @@ def rate_of_dissipation(dissipation, u, v, mesh, h, nu):
 
 
 if __name__ == '__main__':
-    folder, nu, _, dt, velocity_degree, _, _, T, save_frequency, times_to_average, start_cycle = read_command_line()
+    folder, nu, _, dt, velocity_degree, _, _, T, save_frequency, times_to_average, start_cycle,step= read_command_line()
     compute_flow_and_simulation_metrics(folder, nu, dt, velocity_degree, T, times_to_average, save_frequency,
                                         start_cycle)

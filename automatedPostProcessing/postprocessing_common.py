@@ -32,10 +32,15 @@ def read_command_line():
     parser.add_argument('--start-cycle', type=int, default=2,
                         help="Start post-processing from this cardiac cycle. Default is starting from the second cycle")
 
+    parser.add_argument('-ss', '--sample-step-',
+                        type=int,
+                        default=1,
+                        help="Step size that determines how many times data is sampled.")
+
     args = parser.parse_args()
 
     return args.case, args.nu, args.rho, args.dt, args.velocity_degree, args.pressure_degree, args.probe_frequency, \
-           args.T, args.save_frequency, args.times_to_average, args.start_cycle
+           args.T, args.save_frequency, args.times_to_average, args.start_cycle, args.sample_step
 
 
 def epsilon(u):

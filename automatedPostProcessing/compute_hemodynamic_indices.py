@@ -12,7 +12,7 @@ except NameError:
     pass
 
 
-def compute_hemodynamic_indices(case_path, nu, rho, dt, velocity_degree):
+def compute_hemodynamic_indices(case_path, nu, rho, dt, T, velocity_degree, save_frequency, start_cycle, step):
     """
     Loads velocity fields from completed CFD simulation,
     and computes and saves the following hemodynamic quantities:
@@ -32,6 +32,10 @@ def compute_hemodynamic_indices(case_path, nu, rho, dt, velocity_degree):
         nu (float): Kinematic viscosity
         rho (float): Fluid density
         dt (float): Time step of simulation
+        T (float): One cardiac cycle, in [ms]
+        save_frequency (int): Frequency that velocity has been stored
+        start_cycle (int): Determines which cardiac cycle to start from for post-processing
+        step (int): Step size determining number of times data is sampled
     """
     # File paths
     case_path = Path(case_path)
@@ -39,8 +43,7 @@ def compute_hemodynamic_indices(case_path, nu, rho, dt, velocity_degree):
     mesh_path = case_path / "mesh.h5"
 
     # Start post-processing from 2nd cycle using every 10th time step, or 2000 time steps per cycle
-    start = 0  # save_data = 5 -> 10000 / 5 = 2000
-    step = 2  # save_data = 5 ->    10 / 5 = 2
+    start = T / dt / save_frequency * (start_cycle - 1)
 
     # Read mesh saved as HDF5 format
     mesh = Mesh()
@@ -118,7 +121,7 @@ def compute_hemodynamic_indices(case_path, nu, rho, dt, velocity_degree):
 
         if MPI.rank(MPI.comm_world) == 0:
             print("Compute WSS (absolute value)")
-        tawss = project(inner(tau,tau)**(1/2),U_b1) 
+        tawss = project(inner(tau, tau) ** (1 / 2), U_b1)
         TAWSS.vector().axpy(1, tawss.vector())
 
         # Compute TWSSG
@@ -126,7 +129,7 @@ def compute_hemodynamic_indices(case_path, nu, rho, dt, velocity_degree):
             print("Compute TWSSG")
         twssg.vector().set_local((tau.vector().get_local() - tau_prev.vector().get_local()) / dt)
         twssg.vector().apply("insert")
-        twssg_ = project(inner(twssg,twssg)**(1/2),U_b1)
+        twssg_ = project(inner(twssg, twssg) ** (1 / 2), U_b1)
         TWSSG.vector().axpy(1, twssg_.vector())
 
         # Update tau
@@ -152,7 +155,7 @@ def compute_hemodynamic_indices(case_path, nu, rho, dt, velocity_degree):
     TWSSG.rename("TWSSG", "TWSSG")
 
     try:
-        wss_mean = project(inner(WSS_mean,WSS_mean)**(1/2),U_b1)
+        wss_mean = project(inner(WSS_mean, WSS_mean) ** (1 / 2), U_b1)
         wss_mean_vec = wss_mean.vector().get_local()
         tawss_vec = TAWSS.vector().get_local()
 
@@ -214,5 +217,5 @@ def compute_hemodynamic_indices(case_path, nu, rho, dt, velocity_degree):
 
 
 if __name__ == '__main__':
-    folder, nu, rho, dt, velocity_degree, _, _, _, _, _, _ = read_command_line()
-    compute_hemodynamic_indices(folder, nu, rho, dt, velocity_degree)
+    folder, nu, rho, dt, velocity_degree, _, _, T, save_frequency, _, start_cycle, step = read_command_line()
+    compute_hemodynamic_indices(folder, nu, rho, T, dt, velocity_degree, save_frequency, start_cycle, step)
