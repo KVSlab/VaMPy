@@ -346,14 +346,15 @@ def read_command_line():
     """
     Read arguments from commandline and return all values in a dictionary.
     """
-    parser = argparse.ArgumentParser(
-        description="Automated pre-processing for vascular modeling.")
+    parser = argparse.ArgumentParser(formatter_class=argparse.ArgumentDefaultsHelpFormatter,
+                                     description="Automated pre-processing for vascular modeling.")
 
-    parser.add_argument('-v', '--verbosity',
-                        dest='verbosity',
-                        type=str2bool,
-                        default=False,
-                        help="Activates the verbose mode.")
+    v = parser.add_mutually_exclusive_group(required=False)
+    v.add_argument('-v', '--verbosity',
+                   dest='verbosity',
+                   action='store_true',
+                   default=False,
+                   help="Activates the verbose mode.")
 
     parser.add_argument('-i', '--inputModel',
                         type=str,
@@ -361,7 +362,6 @@ def read_command_line():
                         dest='fileNameModel',
                         default='example/surface.vtp',
                         help="Input file containing the 3D model.")
-
     parser.add_argument('-cM', '--compress-mesh',
                         type=str2bool,
                         required=False,
@@ -406,12 +406,13 @@ def read_command_line():
                         type=float,
                         help="Characteristic edge length used for meshing.")
 
-    parser.add_argument('-r', '--refine-region',
-                        dest="refineRegion",
-                        type=str2bool,
-                        default=False,
-                        help="Determine weather or not to refine a specific region of " +
-                             "the input model. Default is False.")
+    refine_region = parser.add_mutually_exclusive_group(required=False)
+    refine_region.add_argument('-r', '--refine-region',
+                               action='store_true',
+                               dest="refineRegion",
+                               default=False,
+                               help="Determine whether or not to refine a specific region of " +
+                                    "the input model")
 
     parser.add_argument('-rp', '--region-points',
                         dest="regionPoints",
@@ -423,11 +424,12 @@ def read_command_line():
                              "Example providing the points (0.1, 5.0, -1) and (1, -5.2, 3.21):" +
                              " --region-points 0.1 5 -1 1 5.24 3.21")
 
-    parser.add_argument('-at', '--atrium',
+    atrium = parser.add_mutually_exclusive_group(required=False)
+    atrium.add_argument('-at', '--atrium',
                         dest="isAtrium",
-                        type=str2bool,
+                        action="store_true",
                         default=False,
-                        help="Determine weather or not the model is an Atrium model. Default is False.")
+                        help="Determine whether or not the model is an Atrium model.")
 
     parser.add_argument('-f', '--flowext',
                         dest="flowExtension",
