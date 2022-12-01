@@ -408,7 +408,7 @@ def get_dataset_names(data_file, num_files=3000000, step=1, start=1, print_info=
     # Get names
     names = []
     for i in range(num_files):
-        step = 1
+        
         index = start + i * step
         if data_file.has_dataset(vector_filename % index):
             names.append(vector_filename % index)
