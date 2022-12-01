@@ -29,13 +29,15 @@ def read_command_line():
     parser.add_argument('--probe-frequency', type=int, default=100, help="Frequency of saving probes to file")
     parser.add_argument('--times-to-average', type=float, default=[], nargs="+",
                         help="Time(s) during cardiac cycle to average, in the interval [0,T). Measured in [ms].")
+    parser.add_argument('--cycles-to-average', type=int, default=[], nargs="+",
+                        help="Determines which cardiac cycles to average. Default computes average of all cycles.")
     parser.add_argument('--start-cycle', type=int, default=2,
                         help="Start post-processing from this cardiac cycle. Default is starting from the second cycle")
 
     args = parser.parse_args()
 
     return args.case, args.nu, args.rho, args.dt, args.velocity_degree, args.pressure_degree, args.probe_frequency, \
-           args.T, args.save_frequency, args.times_to_average, args.start_cycle
+           args.T, args.save_frequency, args.times_to_average, args.start_cycle, args.cycles_to_average
 
 
 def epsilon(u):
