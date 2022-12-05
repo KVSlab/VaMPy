@@ -13,9 +13,10 @@ def test_compute_velocity_and_pressure():
     dt = 0.951
     velocity_degree = 1
     pressure_degree = 1
+    step = 1
 
     # Run post-processing
-    compute_velocity_and_pressure(results_path, dt, velocity_degree, pressure_degree)
+    compute_velocity_and_pressure(results_path, dt, velocity_degree, pressure_degree, step)
 
     # Check that output files exist
     metric_names = ["velocity", "pressure"]

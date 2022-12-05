@@ -12,11 +12,15 @@ def test_compute_hemodynamic_indices():
     results_path = "test_results/1/Solutions"
     nu = 3.3018e-3
     rho = 1060
-    dt = 0.951
+    T = 951
+    dt = 0.0951
     velocity_degree = 1
+    save_frequency = 5
+    start_cycle = 1
+    step = 1
 
     # Run post-processing
-    compute_hemodynamic_indices(results_path, nu, rho, dt, velocity_degree)
+    compute_hemodynamic_indices(results_path, nu, rho, T, dt, velocity_degree, save_frequency, start_cycle, step)
 
     # Check that output files exist
     metric_names = ["ECAP", "OSI", "RRT", "TAWSS", "TWSSG", "WSS"]

@@ -12,7 +12,7 @@ except NameError:
     pass
 
 
-def compute_velocity_and_pressure(case_path, dt, velocity_degree, pressure_degree):
+def compute_velocity_and_pressure(case_path, dt, velocity_degree, pressure_degree, step):
     """
     Loads velocity and pressure from compressed .h5 CFD solution and
     converts and saves to .xdmf format for visualization (in e.g. ParaView).
@@ -22,6 +22,7 @@ def compute_velocity_and_pressure(case_path, dt, velocity_degree, pressure_degre
         dt (float): Time step of simulation
         velocity_degree (int): Finite element degree of velocity
         pressure_degree (int): Finite element degree of pressure
+        step (int): Step size determining number of times data is sampled
     """
     # File paths
     case_path = Path(case_path)
@@ -86,12 +87,12 @@ def compute_velocity_and_pressure(case_path, dt, velocity_degree, pressure_degre
         p_writer.write(p, dt * file_counter)
 
         # Update file_counter
-        file_counter += 1
+        file_counter += step
 
     print("========== Post processing finished ==========")
     print("Results saved to: {}".format(case_path))
 
 
 if __name__ == '__main__':
-    folder, _, _, dt, velocity_degree, pressure_degree, _, _, _, _, _, _ = read_command_line()
-    compute_velocity_and_pressure(folder, dt, velocity_degree, pressure_degree)
+    folder, _, _, dt, velocity_degree, pressure_degree, _, _, _, _, _, step, _ = read_command_line()
+    compute_velocity_and_pressure(folder, dt, velocity_degree, pressure_degree, step)
