@@ -94,6 +94,7 @@ def compute_flow_and_simulation_metrics(folder, nu, dt, velocity_degree, T, time
         compute_u_avg(dataset_names, file_path_u_avg, file_u, n_cycles, saved_time_steps_per_cycle,
                       start_cycle, u, u_avg)
 
+    # Compute flow and simulation metrics
     for time_to_average, dataset in dataset_dict.items():
         if len(times_to_average) != 0 and MPI.rank(MPI.comm_world) == 0:
             print("Phase averaging results over {} cycles at t={} ms".format(N, time_to_average))
@@ -207,6 +208,7 @@ def define_functions_and_iterate_dataset(time_to_average, dataset, dataset_avg, 
     else:
         fullname = file_path_u.replace("u.h5", "%s%s.xdmf")
         N = len(cycles_to_average)
+
     fullname = fullname.replace("Solutions", "FlowMetrics")
     metric_names = ["characteristic_edge_length", "u_time_avg", "l_plus", "t_plus", "CFL", "strain", "length_scale",
                     "time_scale", "velocity_scale", "dissipation", "kinetic_energy", "turbulent_kinetic_energy",
@@ -387,7 +389,7 @@ def define_functions_and_iterate_dataset(time_to_average, dataset, dataset_avg, 
             counters_to_save.pop(0)
 
     # Get average over sampled time steps
-    metrics_dict_to_save = metric_dict if len(cycles_to_average) == 0 else metric_dict_cycle
+    metrics_dict_to_save = metric_dict if len(cycles_to_average) != 0 else metric_dict_cycle
     N = N if len(cycles_to_average) == 0 else len(cycles_to_average)
     for metric in metrics_dict_to_save.values():
         metric.vector()[:] = metric.vector()[:] / N
@@ -515,8 +517,8 @@ def rate_of_dissipation(dissipation, u, v, mesh, h, nu):
 
 
 if __name__ == '__main__':
-    folder, nu, _, dt, velocity_degree, _, _, T, save_frequency, times_to_average, start_cycle, cycles_to_average \
+    folder, nu, _, dt, velocity_degree, _, _, T, save_frequency, times_to_average, start_cycle, average_over_cycles \
         = read_command_line()
 
     compute_flow_and_simulation_metrics(folder, nu, dt, velocity_degree, T, times_to_average, save_frequency,
-                                        start_cycle, False)
+                                        start_cycle, average_over_cycles)
