@@ -12,7 +12,7 @@ except NameError:
     pass
 
 
-def compute_hemodynamic_indices(case_path, nu, rho, dt, velocity_degree):
+def compute_hemodynamic_indices(case_path, nu, rho, dt, T, velocity_degree, save_frequency, start_cycle, step):
     """
     Loads velocity fields from completed CFD simulation,
     and computes and saves the following hemodynamic quantities:
@@ -32,6 +32,10 @@ def compute_hemodynamic_indices(case_path, nu, rho, dt, velocity_degree):
         nu (float): Kinematic viscosity
         rho (float): Fluid density
         dt (float): Time step of simulation
+        T (float): One cardiac cycle, in [ms]
+        save_frequency (int): Frequency that velocity has been stored
+        start_cycle (int): Determines which cardiac cycle to start from for post-processing
+        step (int): Step size determining number of times data is sampled
     """
     # File paths
     case_path = Path(case_path)
@@ -39,8 +43,7 @@ def compute_hemodynamic_indices(case_path, nu, rho, dt, velocity_degree):
     mesh_path = case_path / "mesh.h5"
 
     # Start post-processing from 2nd cycle using every 10th time step, or 2000 time steps per cycle
-    start = 0  # save_data = 5 -> 10000 / 5 = 2000
-    step = 2  # save_data = 5 ->    10 / 5 = 2
+    start = int(T / dt / save_frequency * (start_cycle - 1))
 
     # Read mesh saved as HDF5 format
     mesh = Mesh()
@@ -84,7 +87,6 @@ def compute_hemodynamic_indices(case_path, nu, rho, dt, velocity_degree):
     tau_prev = Function(V_b1)
 
     stress = STRESS(u, 0.0, nu, mesh)
-    dabla = get_dabla_function()
 
     # Create writer for WSS
     wss_path = (case_path / "WSS.xdmf").__str__()
@@ -119,7 +121,7 @@ def compute_hemodynamic_indices(case_path, nu, rho, dt, velocity_degree):
 
         if MPI.rank(MPI.comm_world) == 0:
             print("Compute WSS (absolute value)")
-        dabla(tau.vector(), tawss.vector())
+        tawss = project(inner(tau, tau) ** (1 / 2), U_b1)
         TAWSS.vector().axpy(1, tawss.vector())
 
         # Compute TWSSG
@@ -127,7 +129,7 @@ def compute_hemodynamic_indices(case_path, nu, rho, dt, velocity_degree):
             print("Compute TWSSG")
         twssg.vector().set_local((tau.vector().get_local() - tau_prev.vector().get_local()) / dt)
         twssg.vector().apply("insert")
-        dabla(twssg.vector(), twssg_.vector())
+        twssg_ = project(inner(twssg, twssg) ** (1 / 2), U_b1)
         TWSSG.vector().axpy(1, twssg_.vector())
 
         # Update tau
@@ -153,7 +155,7 @@ def compute_hemodynamic_indices(case_path, nu, rho, dt, velocity_degree):
     TWSSG.rename("TWSSG", "TWSSG")
 
     try:
-        dabla(WSS_mean.vector(), wss_mean.vector())
+        wss_mean = project(inner(WSS_mean, WSS_mean) ** (1 / 2), U_b1)
         wss_mean_vec = wss_mean.vector().get_local()
         tawss_vec = TAWSS.vector().get_local()
 
@@ -214,37 +216,6 @@ def compute_hemodynamic_indices(case_path, nu, rho, dt, velocity_degree):
     print("Results saved to: {}".format(case_path))
 
 
-def get_dabla_function():
-    """
-    Compiles a string in C++ and expose as a Python object (dabla),
-    used to compute several hemodynamic quantities.
-
-    Returns:
-        dabla: C++ compiled function
-    """
-
-    cpp_code = """
-    #include <pybind11/pybind11.h>
-    #include <dolfin.h>
-    namespace dolfin
-    {
-        void dabla(dolfin::GenericVector& a, dolfin::GenericVector& b) {
-            for (unsigned int i=0; i < b.size(); i++) {
-                b.setitem(i, pow((pow(a[i], 2) + pow(a[b.size() + i], 2) + pow(a[2 * b.size() + i], 2) ), 0.5));
-            }
-        }
-    }
-    PYBIND11_MODULE(SIGNATURE, m)
-    {
-        m.def("dabla", &dolfin::dabla);
-    }
-    """
-
-    dabla = compile_cpp_code(cpp_code).dabla
-
-    return dabla
-
-
 if __name__ == '__main__':
-    folder, nu, rho, dt, velocity_degree, _, _, _, _, _, _ = read_command_line()
-    compute_hemodynamic_indices(folder, nu, rho, dt, velocity_degree)
+    folder, nu, rho, dt, velocity_degree, _, _, T, save_frequency, _, start_cycle, step = read_command_line()
+    compute_hemodynamic_indices(folder, nu, rho, T, dt, velocity_degree, save_frequency, start_cycle, step)

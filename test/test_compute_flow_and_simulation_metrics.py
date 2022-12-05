@@ -18,18 +18,19 @@ def test_compute_flow_and_simulation_metrics_for_full_cycle():
     save_frequency = 5
     start_cycle = 1
     times_to_average = []
+    step = 1
 
     # Run post-processing
     compute_flow_and_simulation_metrics(results_path, nu, dt, velocity_degree, T, times_to_average, save_frequency,
-                                        start_cycle)
+                                        start_cycle, step)
 
     # Check that output folder exists
     assert path.exists(flow_metrics_path) and path.isdir(flow_metrics_path)
 
     # Check that output files exist
-    metric_names = ["u_mean", "l_plus", "t_plus", "CFL", "strain", "length_scale", "time_scale", "velocity_scale",
-                    "characteristic_edge_length", "dissipation", "kinetic_energy", "turbulent_kinetic_energy",
-                    "turbulent_dissipation"]
+    metric_names = ["time_averaged_u", "l_plus", "t_plus", "CFL", "strain", "length_scale", "time_scale",
+                    "velocity_scale", "characteristic_edge_length", "dissipation", "kinetic_energy",
+                    "turbulent_kinetic_energy", "turbulent_dissipation"]
 
     for name in metric_names:
         xdmf_path = path.join(flow_metrics_path, "{}.xdmf".format(name))
@@ -51,18 +52,19 @@ def test_compute_flow_and_simulation_metrics_at_one_instance():
     T = 10 * dt
     time = 0.4755
     times_to_average = [time]
+    step = 1
 
     # Run post-processing
     compute_flow_and_simulation_metrics(results_path, nu, dt, velocity_degree, T, times_to_average, save_frequency,
-                                        start_cycle)
+                                        start_cycle, step)
 
     # Check that output folder exists
     assert path.exists(flow_metrics_path) and path.isdir(flow_metrics_path)
 
     # Check that output files exist
-    metric_names = ["u_mean", "l_plus", "t_plus", "CFL", "strain", "length_scale", "time_scale", "velocity_scale",
-                    "characteristic_edge_length", "dissipation", "kinetic_energy", "turbulent_kinetic_energy",
-                    "turbulent_dissipation"]
+    metric_names = ["time_averaged_u", "l_plus", "t_plus", "CFL", "strain", "length_scale", "time_scale",
+                    "velocity_scale", "characteristic_edge_length", "dissipation", "kinetic_energy",
+                    "turbulent_kinetic_energy", "turbulent_dissipation"]
 
     for name in metric_names:
         xdmf_path = path.join(flow_metrics_path, "{}_{}.xdmf".format(name, time))
