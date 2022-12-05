@@ -8,7 +8,7 @@ from postprocessing_common import read_command_line, epsilon
 
 
 def compute_flow_and_simulation_metrics(folder, nu, dt, velocity_degree, T, times_to_average, save_frequency,
-                                        start_cycle, average_over_cycles=True):
+                                        start_cycle, average_over_cycles):
     """
     Computes several flow field characteristics
     for velocity field stored at 'folder' location
