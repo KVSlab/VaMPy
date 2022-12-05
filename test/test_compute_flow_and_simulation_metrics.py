@@ -90,13 +90,14 @@ def test_compute_flow_and_simulation_metrics_averaged_over_one_cycle():
     average_over_cycles = True
     T = 951
     times_to_average = []
+    step = 1
 
     # Average over cycle 1
     cycle = 1
 
     # Run post-processing
     compute_flow_and_simulation_metrics(results_path, nu, dt, velocity_degree, T, times_to_average, save_frequency,
-                                        start_cycle, average_over_cycles)
+                                        start_cycle, step, average_over_cycles)
 
     # Check that output folder exists
     assert path.exists(flow_metrics_path) and path.isdir(flow_metrics_path)
