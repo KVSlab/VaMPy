@@ -40,7 +40,7 @@ def compute_flow_and_simulation_metrics(folder, nu, dt, velocity_degree, T, time
     dataset_names = get_dataset_names(file_u, start=start, step=step)
 
     # Extract specific time steps if phase averaging
-    saved_time_steps_per_cycle = int(T / dt / save_frequency)
+    saved_time_steps_per_cycle = int(T / dt / save_frequency / step)
     n_cycles = int(len(dataset_names) / saved_time_steps_per_cycle)
 
     if len(times_to_average) != 0:
