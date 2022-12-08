@@ -18,10 +18,11 @@ def test_compute_flow_and_simulation_metrics_for_full_cycle():
     save_frequency = 5
     start_cycle = 1
     times_to_average = []
+    step = 1
 
     # Run post-processing
     compute_flow_and_simulation_metrics(results_path, nu, dt, velocity_degree, T, times_to_average, save_frequency,
-                                        start_cycle)
+                                        start_cycle, step)
 
     # Check that output folder exists
     assert path.exists(flow_metrics_path) and path.isdir(flow_metrics_path)
@@ -51,10 +52,11 @@ def test_compute_flow_and_simulation_metrics_at_one_instance():
     T = 10 * dt
     time = 0.4755
     times_to_average = [time]
+    step = 1
 
     # Run post-processing
     compute_flow_and_simulation_metrics(results_path, nu, dt, velocity_degree, T, times_to_average, save_frequency,
-                                        start_cycle)
+                                        start_cycle, step)
 
     # Check that output folder exists
     assert path.exists(flow_metrics_path) and path.isdir(flow_metrics_path)
