@@ -63,7 +63,7 @@ def compute_flow_and_simulation_metrics(folder, nu, dt, velocity_degree, T, time
     else:
         id_start = (start_cycle - 1) * saved_time_steps_per_cycle
         dataset_dict = {"": dataset_names[id_start:]}
-        dataset_dict_avg = {"": dataset_names[:saved_time_steps_per_cycle + 1] * (n_cycles - start_cycle + 1)}
+        dataset_dict_avg = {"": dataset_names[:saved_time_steps_per_cycle] * (n_cycles - start_cycle + 1)}
         N = len(dataset_names[id_start:])
 
     # Get mesh information
@@ -99,7 +99,7 @@ def compute_flow_and_simulation_metrics(folder, nu, dt, velocity_degree, T, time
 def compute_u_avg(dataset_names, file_path_u_avg, file_u, n_cycles, saved_time_steps_per_cycle,
                   start_cycle, u, u_avg):
     # Iterate over saved time steps and compute average velocity
-    for save_step in range(saved_time_steps_per_cycle + 1):
+    for save_step in range(saved_time_steps_per_cycle):
         tstep = -1
         for cycle in range(start_cycle - 1, n_cycles):
             data = dataset_names[save_step + cycle * saved_time_steps_per_cycle]
