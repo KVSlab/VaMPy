@@ -408,7 +408,7 @@ def get_dataset_names(data_file, num_files=3000000, step=1, start=1, print_info=
     # Get names
     names = []
     for i in range(num_files):
-        
+
         index = start + i * step
         if data_file.has_dataset(vector_filename % index):
             names.append(vector_filename % index)
@@ -467,6 +467,7 @@ def rate_of_dissipation(dissipation, u, v, mesh, h, nu):
 
 
 if __name__ == '__main__':
-    folder, nu, _, dt, velocity_degree, _, _, T, save_frequency, times_to_average, start_cycle,step= read_command_line()
+    folder, nu, _, dt, velocity_degree, _, _, T, save_frequency, times_to_average, start_cycle, step \
+        = read_command_line()
     compute_flow_and_simulation_metrics(folder, nu, dt, velocity_degree, T, times_to_average, save_frequency,
-                                        start_cycle)
+                                        start_cycle, step)
