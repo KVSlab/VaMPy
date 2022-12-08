@@ -63,7 +63,9 @@ def compute_flow_and_simulation_metrics(folder, nu, dt, velocity_degree, T, time
     else:
         id_start = (start_cycle - 1) * saved_time_steps_per_cycle
         dataset_dict = {"": dataset_names[id_start:]}
-        dataset_dict_avg = {"": dataset_names[:saved_time_steps_per_cycle] * (n_cycles - start_cycle + 1)}
+        file_u_avg = HDF5File(MPI.comm_world, file_path_u_avg, "r")
+        dataset_avg = get_dataset_names(file_u_avg, start=0, step=step) * (n_cycles - start_cycle + 1)
+        dataset_dict_avg = {"": dataset_avg}
         N = len(dataset_names[id_start:])
 
     # Get mesh information
@@ -120,7 +122,7 @@ def compute_u_avg(dataset_names, file_path_u_avg, file_u, n_cycles, saved_time_s
         # Save average velocity to HDF5 format
         file_mode = "w" if save_step == 0 else "a"
         viz_u_avg = HDF5File(MPI.comm_world, file_path_u_avg, file_mode=file_mode)
-        viz_u_avg.write(u_avg, "/velocity", tstep * step)
+        viz_u_avg.write(u_avg, "/velocity", tstep)
         viz_u_avg.close()
 
         # Reset u_avg vector
