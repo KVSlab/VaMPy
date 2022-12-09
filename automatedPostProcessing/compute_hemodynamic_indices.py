@@ -1,10 +1,10 @@
 from __future__ import print_function
 
-from pathlib import Path
+from os import path
 
 from dolfin import *
 
-from postprocessing_common import STRESS, read_command_line
+from postprocessing_common import STRESS, read_command_line, get_dataset_names
 
 try:
     parameters["reorder_dofs_serial"] = False
@@ -38,12 +38,18 @@ def compute_hemodynamic_indices(case_path, nu, rho, dt, T, velocity_degree, save
         step (int): Step size determining number of times data is sampled
     """
     # File paths
-    case_path = Path(case_path)
-    file_path_u = case_path / "u.h5"
-    mesh_path = case_path / "mesh.h5"
+    file_path_u = path.join(case_path, "u.h5")
+    mesh_path = path.join(case_path, "mesh.h5")
+    file_u = HDF5File(MPI.comm_world, file_path_u, "r")
 
     # Start post-processing from 2nd cycle using every 10th time step, or 2000 time steps per cycle
     start = int(T / dt / save_frequency * (start_cycle - 1))
+
+    # Get names of data to extract
+    if MPI.rank(MPI.comm_world) == 0:
+        print("Reading dataset names")
+
+    dataset = get_dataset_names(file_u, start=start, step=step)
 
     # Read mesh saved as HDF5 format
     mesh = Mesh()
@@ -88,29 +94,29 @@ def compute_hemodynamic_indices(case_path, nu, rho, dt, T, velocity_degree, save
 
     stress = STRESS(u, 0.0, nu, mesh)
 
-    # Create writer for WSS
-    wss_path = (case_path / "WSS.xdmf").__str__()
+    # Create XDMF files for saving indices
+    fullname = file_path_u.replace("u.h5", "%s.xdmf")
+    fullname = fullname.replace("Solutions", "Hemodynamics")
+    index_names = ["WSS", "RRT", "OSI", "ECAP", "TAWSS", "TWSSG"]
+    index_variables = [RRT, OSI, ECAP, TAWSS, TWSSG]
 
-    wss_writer = XDMFFile(MPI.comm_world, wss_path)
-    wss_writer.parameters["flush_output"] = True
-    wss_writer.parameters["functions_share_mesh"] = True
-    wss_writer.parameters["rewrite_function_mesh"] = False
+    indices = {}
+    for index in index_names:
+        indices[index] = XDMFFile(MPI.comm_world, fullname % index)
+        indices[index].parameters["rewrite_function_mesh"] = False
+        indices[index].parameters["flush_output"] = True
+        indices[index].parameters["functions_share_mesh"] = True
 
     if MPI.rank(MPI.comm_world) == 0:
         print("=" * 10, "Start post processing", "=" * 10)
 
-    file_counter = start
-    while True:
-        # Read in velocity solution to vector function u
-        try:
-            f = HDF5File(MPI.comm_world, file_path_u.__str__(), "r")
-            vec_name = "/velocity/vector_%d" % file_counter
-            timestamp = f.attributes(vec_name)["timestamp"]
+    counter = start
+    for data in dataset:
+        file_u.read(u, data)
+
+        if MPI.rank(MPI.comm_world) == 0:
+            timestamp = file_u.attributes(data)["timestamp"]
             print("=" * 10, "Timestep: {}".format(timestamp), "=" * 10)
-            f.read(u, vec_name)
-        except:
-            print("=" * 10, "Finished reading solutions", "=" * 10)
-            break
 
         # Compute WSS
         if MPI.rank(MPI.comm_world) == 0:
@@ -140,13 +146,13 @@ def compute_hemodynamic_indices(case_path, nu, rho, dt, T, velocity_degree, save
 
         # Save instantaneous WSS
         tau.rename("WSS", "WSS")
-        wss_writer.write(tau, dt * file_counter)
+        indices["WSS"].write(tau, dt * counter)
 
         # Update file_counter
-        file_counter += step
+        counter += step
 
     print("=" * 10, "Saving hemodynamic indices", "=" * 10)
-    n = (file_counter - start) // step
+    n = (counter - start) // step
     TWSSG.vector()[:] = TWSSG.vector()[:] / n
     TAWSS.vector()[:] = TAWSS.vector()[:] / n
     WSS_mean.vector()[:] = WSS_mean.vector()[:] / n
@@ -154,63 +160,26 @@ def compute_hemodynamic_indices(case_path, nu, rho, dt, T, velocity_degree, save
     TAWSS.rename("TAWSS", "TAWSS")
     TWSSG.rename("TWSSG", "TWSSG")
 
-    try:
-        wss_mean = project(inner(WSS_mean, WSS_mean) ** (1 / 2), U_b1)
-        wss_mean_vec = wss_mean.vector().get_local()
-        tawss_vec = TAWSS.vector().get_local()
+    wss_mean = project(inner(WSS_mean, WSS_mean) ** (1 / 2), U_b1)
+    wss_mean_vec = wss_mean.vector().get_local()
+    tawss_vec = TAWSS.vector().get_local()
 
-        # Compute RRT and OSI based on mean and absolute WSS
-        RRT.vector().set_local(1 / wss_mean_vec)
-        RRT.vector().apply("insert")
-        RRT.rename("RRT", "RRT")
+    # Compute RRT and OSI based on mean and absolute WSS
+    RRT.vector().set_local(1 / wss_mean_vec)
+    RRT.vector().apply("insert")
+    RRT.rename("RRT", "RRT")
 
-        OSI.vector().set_local(0.5 * (1 - wss_mean_vec / tawss_vec))
-        OSI.vector().apply("insert")
-        OSI.rename("OSI", "OSI")
+    OSI.vector().set_local(0.5 * (1 - wss_mean_vec / tawss_vec))
+    OSI.vector().apply("insert")
+    OSI.rename("OSI", "OSI")
 
-        # Compute ECAP based on OSI and TAWSS
-        ECAP.vector().set_local(OSI.vector().get_local() / tawss_vec)
-        ECAP.vector().apply("insert")
-        ECAP.rename("ECAP", "ECAP")
+    # Compute ECAP based on OSI and TAWSS
+    ECAP.vector().set_local(OSI.vector().get_local() / tawss_vec)
+    ECAP.vector().apply("insert")
+    ECAP.rename("ECAP", "ECAP")
 
-        save = True
-    except:
-        print("Failed to compute OSI and RRT")
-        save = False
-
-    if save:
-        # Save OSI and RRT
-        rrt_path = (case_path / "RRT.xdmf").__str__()
-        osi_path = (case_path / "OSI.xdmf").__str__()
-        ecap_path = (case_path / "ECAP.xdmf").__str__()
-
-        rrt = XDMFFile(MPI.comm_world, rrt_path)
-        osi = XDMFFile(MPI.comm_world, osi_path)
-        ecap = XDMFFile(MPI.comm_world, ecap_path)
-
-        for f in [rrt, osi, ecap]:
-            f.parameters["flush_output"] = True
-            f.parameters["functions_share_mesh"] = True
-            f.parameters["rewrite_function_mesh"] = False
-
-        rrt.write(RRT)
-        osi.write(OSI)
-        ecap.write(ECAP)
-
-    # Save WSS and TWSSG
-    tawss_path = (case_path / "TAWSS.xdmf").__str__()
-    twssg_path = (case_path / "TWSSG.xdmf").__str__()
-
-    tawss = XDMFFile(MPI.comm_world, tawss_path)
-    twssg = XDMFFile(MPI.comm_world, twssg_path)
-
-    for f in [tawss, twssg]:
-        f.parameters["flush_output"] = True
-        f.parameters["functions_share_mesh"] = True
-        f.parameters["rewrite_function_mesh"] = False
-
-    tawss.write(TAWSS)
-    twssg.write(TWSSG)
+    for writer, value in zip(list(indices.values())[1:], index_variables):
+        writer.write(value)
 
     print("========== Post processing finished ==========")
     print("Results saved to: {}".format(case_path))

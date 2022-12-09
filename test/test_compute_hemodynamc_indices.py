@@ -10,6 +10,7 @@ from automatedPostProcessing.compute_hemodynamic_indices import compute_hemodyna
 def test_compute_hemodynamic_indices():
     # Path to test results and params
     results_path = "test_results/1/Solutions"
+    indices_path = "test_results/1/Hemodynamics"
     nu = 3.3018e-3
     rho = 1060
     T = 951
@@ -26,8 +27,8 @@ def test_compute_hemodynamic_indices():
     metric_names = ["ECAP", "OSI", "RRT", "TAWSS", "TWSSG", "WSS"]
 
     for name in metric_names:
-        xdmf_path = path.join(results_path, "{}.xdmf".format(name))
-        h5_path = path.join(results_path, "{}.h5".format(name))
+        xdmf_path = path.join(indices_path, "{}.xdmf".format(name))
+        h5_path = path.join(indices_path, "{}.h5".format(name))
         assert path.exists(xdmf_path) and path.exists(h5_path)
         assert path.getsize(xdmf_path) > 0
         assert path.getsize(h5_path) > 0

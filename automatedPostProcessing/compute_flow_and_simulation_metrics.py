@@ -1,10 +1,9 @@
 from os import path
-from time import time
 
 import numpy as np
 from dolfin import *
 
-from postprocessing_common import read_command_line, epsilon
+from postprocessing_common import read_command_line, epsilon, get_dataset_names
 
 
 def compute_flow_and_simulation_metrics(folder, nu, dt, velocity_degree, T, times_to_average, save_frequency,
@@ -376,57 +375,6 @@ def define_functions_and_iterate_dataset(time_to_average, dataset, dataset_avg, 
     if MPI.rank(MPI.comm_world) == 0:
         print("========== Post processing finished ==========")
         print("Results saved to: {}".format(folder))
-
-
-def get_dataset_names(data_file, num_files=3000000, step=1, start=1, print_info=True,
-                      vector_filename="/velocity/vector_%d"):
-    """
-    Read velocity fields datasets and extract names of files
-
-    Args:
-        data_file (HDF5File): File object of velocity
-        num_files (int): Number of files
-        step (int): Step between each data dump
-        start (int): Step to start on
-        print_info (bool): Prints info about data if true
-        vector_filename (str): Name of velocity files
-
-    Returns:
-        names (list): List of data file names
-    """
-    check = True
-
-    # Find start file
-    t0 = time()
-    while check:
-        if data_file.has_dataset(vector_filename % start):
-            check = False
-            start -= step
-
-        start += step
-
-    # Get names
-    names = []
-    for i in range(num_files):
-
-        index = start + i * step
-        if data_file.has_dataset(vector_filename % index):
-            names.append(vector_filename % index)
-
-    t1 = time()
-
-    # Print info
-    if MPI.rank(MPI.comm_world) == 0 and print_info:
-        print()
-        print("=" * 6 + " Timesteps to average over " + "=" * 6)
-        print("Length on data set names:", len(names))
-        print("Start index:", start)
-        print("Wanted num files:", num_files)
-        print("Step between files:", step)
-        print("Time used:", t1 - t0, "s")
-        print()
-
-    return names
 
 
 def rate_of_strain(strain, u, v, mesh, h):
