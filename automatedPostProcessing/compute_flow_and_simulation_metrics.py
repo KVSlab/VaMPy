@@ -415,7 +415,8 @@ def rate_of_dissipation(dissipation, u, v, mesh, h, nu):
 
 
 if __name__ == '__main__':
-    folder, nu, _, dt, velocity_degree, _, _, T, save_frequency, times_to_average, start_cycle, step \
+    folder, nu, _, dt, velocity_degree, _, _, T, save_frequency, times_to_average, start_cycle, step, _ \
         = read_command_line()
+
     compute_flow_and_simulation_metrics(folder, nu, dt, velocity_degree, T, times_to_average, save_frequency,
                                         start_cycle, step)
