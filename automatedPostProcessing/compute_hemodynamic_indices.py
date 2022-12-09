@@ -2,6 +2,7 @@ from __future__ import print_function
 
 from os import path
 
+from IPython import embed
 from dolfin import *
 
 from postprocessing_common import STRESS, read_command_line, get_dataset_names
