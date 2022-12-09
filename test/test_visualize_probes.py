@@ -10,7 +10,7 @@ from automatedPostProcessing.visualize_probes import visualize_probes
 def test_visualize_probes():
     # Path to test results and params
     probe_path = "test_results/1/Probes"
-    probe_frequency = 10
+    probe_frequency = 100
     file_path = path.join(probe_path, "Probes.png")
 
     # Run post-processing
