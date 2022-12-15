@@ -105,7 +105,7 @@ def compute_hemodynamic_indices(case_path, nu, rho, dt, T, velocity_degree, save
     # Set number of cycles to average over
     cycles = list(range(1, n_cycles + 1)) if average_over_cycles else []
     counters_to_save = [saved_time_steps_per_cycle * cycle for cycle in cycles]
-    cycle_names = [""] + ["_cycle_{}".format(cycle) for cycle in cycles]
+    cycle_names = [""] + ["_cycle_{:02d}".format(cycle) for cycle in cycles]
 
     # Create XDMF files for saving indices
     fullname = file_path_u.replace("u.h5", "%s%s.xdmf")
