@@ -1,8 +1,6 @@
 import argparse
 from time import time
 
-from morphman import str2bool
-
 try:
     from dolfin import *
 
@@ -12,6 +10,23 @@ try:
         pass
 except ImportError:
     pass
+
+
+def str2bool(boolean):
+    """Convert a string to boolean.
+
+    Args:
+        boolean (str): Input string.
+
+    Returns:
+        return (bool): Converted string.
+    """
+    if boolean.lower() in ('yes', 'true', 't', 'y', '1'):
+        return True
+    elif boolean.lower() in ('no', 'false', 'f', 'n', '0'):
+        return False
+    else:
+        raise ValueError('Boolean value expected.')
 
 
 def read_command_line():
