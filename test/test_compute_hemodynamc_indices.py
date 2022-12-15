@@ -67,8 +67,8 @@ def test_compute_hemodynamic_indices_averaged_over_one_cycle():
     metric_names = ["ECAP", "OSI", "RRT", "TAWSS", "TWSSG"]
 
     for name in metric_names:
-        xdmf_path = path.join(indices_path, "{}_cycle_{}.xdmf".format(name, cycle))
-        h5_path = path.join(indices_path, "{}_cycle_{}.h5".format(name, cycle))
+        xdmf_path = path.join(indices_path, "{}_cycle_{:02d}.xdmf".format(name, cycle))
+        h5_path = path.join(indices_path, "{}_cycle_{:02d}.h5".format(name, cycle))
         assert path.exists(xdmf_path) and path.exists(h5_path)
         assert path.getsize(xdmf_path) > 0
         assert path.getsize(h5_path) > 0
