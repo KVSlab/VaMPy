@@ -228,7 +228,7 @@ def define_functions_and_iterate_dataset(time_to_average, dataset, dataset_avg, 
     metric_dict = dict(zip(metric_names, metric_variables_avg))
 
     counters_to_save = [saved_time_steps_per_cycle * cycle for cycle in cycles_to_average]
-    cycle_names = [""] + ["_cycle_{}".format(cycle) for cycle in cycles_to_average]
+    cycle_names = [""] + ["_cycle_{:02d}".format(cycle) for cycle in cycles_to_average]
     metrics = {}
     for cycle_name in cycle_names:
         for vn in metric_dict.keys():
