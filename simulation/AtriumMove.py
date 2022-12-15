@@ -93,9 +93,6 @@ def problem_parameters(commandline_kwargs, NS_parameters, scalar_components, Sch
         pprint(NS_parameters)
 
 
-def scalar_source(**NS_namespace):
-    return dict(blood=Constant(1.0))
-
 
 def mesh(mesh_path, **NS_namespace):
     # Read mesh and print mesh information
