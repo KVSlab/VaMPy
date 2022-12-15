@@ -12,23 +12,6 @@ except ImportError:
     pass
 
 
-def str2bool(boolean):
-    """Convert a string to boolean.
-
-    Args:
-        boolean (str): Input string.
-
-    Returns:
-        return (bool): Converted string.
-    """
-    if boolean.lower() in ('yes', 'true', 't', 'y', '1'):
-        return True
-    elif boolean.lower() in ('no', 'false', 'f', 'n', '0'):
-        return False
-    else:
-        raise ValueError('Boolean value expected.')
-
-
 def read_command_line():
     """Read arguments from commandline"""
     parser = argparse.ArgumentParser(formatter_class=argparse.ArgumentDefaultsHelpFormatter,
@@ -178,6 +161,23 @@ class STRESS:
             norm (Power): Norm as expression
         """
         return pow(inner(u, u), 0.5)
+
+
+def str2bool(boolean):
+    """Convert a string to boolean.
+
+    Args:
+        boolean (str): Input string.
+
+    Returns:
+        return (bool): Converted string.
+    """
+    if boolean.lower() in ('yes', 'true', 't', 'y', '1'):
+        return True
+    elif boolean.lower() in ('no', 'false', 'f', 'n', '0'):
+        return False
+    else:
+        raise ValueError('Boolean value expected.')
 
 
 def get_dataset_names(data_file, num_files=100000, step=1, start=1, print_info=True,
