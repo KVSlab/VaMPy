@@ -198,7 +198,7 @@ def compute_hemodynamic_indices(case_path, nu, rho, dt, T, velocity_degree, save
 
             # Store solution
             for name, index in index_dict_cycle.items():
-                indices[name + "_cycle_{}".format(cycle)].write(index)
+                indices[name + "_cycle_{:02d}".format(cycle)].write(index)
 
             # Append solution to total solution
             for index, index_avg in zip(index_dict.values(), index_dict_cycle.values()):
