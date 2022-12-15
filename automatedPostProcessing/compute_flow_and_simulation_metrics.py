@@ -375,7 +375,7 @@ def define_functions_and_iterate_dataset(time_to_average, dataset, dataset_avg, 
 
             # Store solution
             for name, metric in metric_dict_cycle.items():
-                metrics[name + "_cycle_{}".format(cycle)].write_checkpoint(metric, name)
+                metrics[name + "_cycle_{:02d}".format(cycle)].write_checkpoint(metric, name)
 
             # Append solution to total solution
             for metric_avg, metric_cycle_avg in zip(list(metric_dict.values())[1:],

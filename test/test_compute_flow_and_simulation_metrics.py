@@ -108,8 +108,8 @@ def test_compute_flow_and_simulation_metrics_averaged_over_one_cycle():
                     "turbulent_kinetic_energy", "turbulent_dissipation"]
 
     for name in metric_names:
-        xdmf_path = path.join(flow_metrics_path, "{}_cycle_{}.xdmf".format(name, cycle))
-        h5_path = path.join(flow_metrics_path, "{}_cycle_{}.h5".format(name, cycle))
+        xdmf_path = path.join(flow_metrics_path, "{}_cycle_{:02d}.xdmf".format(name, cycle))
+        h5_path = path.join(flow_metrics_path, "{}_cycle_{:02d}.h5".format(name, cycle))
         assert path.exists(xdmf_path) and path.exists(h5_path)
         assert path.getsize(xdmf_path) > 0
         assert path.getsize(h5_path) > 0
