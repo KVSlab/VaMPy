@@ -1,7 +1,5 @@
 import argparse
 
-from morphman import str2bool
-
 try:
     from dolfin import *
 
@@ -85,12 +83,26 @@ def read_command_line():
                         default=False,
                         help="Computes average over all cycles if True.")
 
-
     args = parser.parse_args()
 
     return args.case, args.nu, args.rho, args.dt, args.velocity_degree, args.pressure_degree, args.probe_frequency, \
            args.T, args.save_frequency, args.times_to_average, args.start_cycle, args.sample_step, \
            args.average_over_cycles
+
+
+def str2bool(boolean):
+    """Convert a string to boolean.
+    Args:
+        boolean (str): Input string.
+    Returns:
+        return (bool): Converted string.
+    """
+    if boolean.lower() in ('yes', 'true', 't', 'y', '1'):
+        return True
+    elif boolean.lower() in ('no', 'false', 'f', 'n', '0'):
+        return False
+    else:
+        raise ValueError('Boolean value expected.')
 
 
 def epsilon(u):
