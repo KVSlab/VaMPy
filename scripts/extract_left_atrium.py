@@ -39,7 +39,7 @@ def get_surface_closest_to_point(clipped, point, volume=False):
     Returns:
         surface (vtkPolyData): The surface where only one segment has been removed.
     """
-    connectivity = vtk_compute_connectivity(clipped, mode="All", volume=volume)
+    connectivity = vtk_compute_connectivity(clipped, mode="All")  # , volume=volume)
     if connectivity.GetNumberOfPoints() == 0:
         return clipped
 
@@ -49,7 +49,7 @@ def get_surface_closest_to_point(clipped, point, volume=False):
     for i in range(int(region_id.max() + 1)):
         regions.append(
             vtk_compute_threshold(connectivity, "RegionId", lower=i - 0.1, upper=i + 0.1,
-                                  source=0, volume=volume))
+                                  source=0))  # , volume=volume))
         locator = get_vtk_point_locator(regions[-1])
         region_point = regions[-1].GetPoint(locator.FindClosestPoint(point))
         distances.append(get_distance(region_point, point))
@@ -219,7 +219,7 @@ def extract_LA_and_LAA(folder, index, cycle):
 
     # Compute 'derivative' of the area
     dAdX = (a[1:, 0] - a[:-1, 0]) / (l[1:] - l[:-1])
-    stop_id = 15  # 10 #np.nonzero(dAdX > 20)[0][0]
+    stop_id = 30  # np.nonzero(dAdX > 200)[0][0]
 
     normal = -n[stop_id]
     center = area.GetPoint(stop_id)
@@ -249,8 +249,6 @@ def extract_LA_and_LAA(folder, index, cycle):
 
     print("--- Saving LA and LAA to: {}".format(la_and_laa_path))
     write_polydata(surface, la_and_laa_path)
-
-    exit()
 
 
 def extract_LA_or_LAA(folder, laa_point, index, cycle, extract_la=False):
@@ -334,7 +332,7 @@ def extract_LA_or_LAA(folder, laa_point, index, cycle, extract_la=False):
     # tolerance = int(0.025 * len(laa_l))  # FIXME: Input parameter?
 
     dAdX = np.gradient(a.T[0], np.mean(l[1:] - l[:-1]))
-    stop_id = np.nonzero(dAdX < -50)[0][-1] + 2  # + tolerance
+    stop_id = np.nonzero(dAdX < -50)[0][-1] + 10  # + tolerance
     normal = n[stop_id]
     center = area.GetPoint(stop_id)
 
@@ -388,7 +386,6 @@ if __name__ == "__main__":
     parser.add_argument("--index")
     parser.add_argument("--cycle", default=None)
     parser.add_argument("--laa", default=None, type=float, nargs="+")
-    parser.add_argument("--includes-laa", default=0)
     args = parser.parse_args()
     folder = args.folder
     laa_point = args.laa
