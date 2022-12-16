@@ -73,7 +73,7 @@ def read_command_line():
                         default=2,
                         help="Start post-processing from this cardiac cycle.")
 
-    parser.add_argument('-ss', '--sample-step-',
+    parser.add_argument('-ss', '--sample-step',
                         type=int,
                         default=1,
                         help="Step size that determines how many times data is sampled.")
