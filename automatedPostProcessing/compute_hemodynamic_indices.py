@@ -187,7 +187,7 @@ def compute_hemodynamic_indices(case_path, nu, rho, dt, T, velocity_degree, save
             # Compute RRT, OSI, and ECAP based on mean and absolute WSS
             RRT_avg.vector().set_local(1 / wss_mean_vec)
             OSI_avg.vector().set_local(0.5 * (1 - wss_mean_vec / tawss_vec))
-            ECAP_avg.vector().set_local(OSI.vector().get_local() / tawss_vec)
+            ECAP_avg.vector().set_local(OSI_avg.vector().get_local() / tawss_vec)
 
             for index in [RRT_avg, OSI_avg, ECAP_avg]:
                 index.vector().apply("insert")
