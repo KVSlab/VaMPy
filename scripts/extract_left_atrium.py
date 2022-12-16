@@ -12,6 +12,8 @@
 
 import argparse
 import time
+from os import mkdir
+from os.path import isdir
 
 try:
     from morphman.common import *
@@ -101,7 +103,7 @@ def provide_region_points(surface, provided_points, dir_path=None):
     return points
 
 
-def extract_LA_and_LAA(input_path):
+def extract_LA_and_LAA(folder, index, cycle):
     """Algorithm for detecting the left atrial appendage and isolate it from the atrium lumen
      based on the cross-sectional area along enterlines.
 
@@ -113,14 +115,15 @@ def extract_LA_and_LAA(input_path):
         surface (vtkPolyData): A landmarked surface
     """
     # File paths
-    base_path = get_path_names(input_path)
-    model_name = base_path.split("/")[-1]
-    if "_" in model_name:
-        model_name = model_name.split("_")[0]
-        base_path = '/'.join(base_path.split("/")[:-1] + [model_name])
+    cyclename = "_cycle_{}".format(cycle) if cycle is not None else ""
+    filename = "{}{}".format(index, cyclename)
+    input_path = path.join(folder, "VTP", filename + ".vtp")
+    save_path = path.join(folder, "CLIPPED")
+    if not isdir(save_path):
+        mkdir(save_path)
 
-    centerline_path = base_path + "_centerline.vtp"
-    la_and_laa_path = base_path + "_la_and_laa.vtp"
+    centerline_path = path.join(save_path, filename + "_centerline.vtp")
+    la_and_laa_path = path.join(save_path, filename + "_la_and_laa.vtp")
 
     # Open the surface file.
     print("--- Load model file\n")
@@ -128,18 +131,18 @@ def extract_LA_and_LAA(input_path):
 
     if is_surface_capped(surface)[0]:
         capped_surface = surface
-        surface = get_uncapped_surface(surface, gradients_limit=0.01, area_limit=20, circleness_limit=5)
+        surface = get_uncapped_surface(capped_surface, gradients_limit=0.035, area_limit=15, circleness_limit=4)
     else:
         capped_surface = vmtk_cap_polydata(surface)
 
     # Centers
-    inlet, outlets = compute_centers(surface, base_path)
+    inlet, outlets = compute_centers(surface, save_path)
     p_outlet = np.array(inlet)
 
     # Make centerlines
     # Check if voronoi and pole_ids exists
     centerlines, _, _ = compute_centerlines(inlet, outlets, centerline_path, capped_surface,
-                                            resampling=0.1, smooth=False, base_path=base_path)
+                                            resampling=0.1, smooth=False, base_path=save_path)
 
     # Clip PVs
     print("--- Clipping PVs")
@@ -167,7 +170,7 @@ def extract_LA_and_LAA(input_path):
         half_dAdX = int(len(dAdX) / 2)
         dAdX = dAdX[half_dAdX:]
 
-        stop_id = np.nonzero(dAdX < -100)[0][-1] + half_dAdX + 3# 10
+        stop_id = np.nonzero(dAdX < -100)[0][-1] + half_dAdX + 3  # 10
 
         normal = n[stop_id]
         center = area.GetPoint(stop_id)
@@ -247,8 +250,10 @@ def extract_LA_and_LAA(input_path):
     print("--- Saving LA and LAA to: {}".format(la_and_laa_path))
     write_polydata(surface, la_and_laa_path)
 
+    exit()
 
-def extract_LA_or_LAA(input_path, laa_point, extract_la=False):
+
+def extract_LA_or_LAA(folder, laa_point, index, cycle, extract_la=False):
     """Algorithm for detecting the left atrial appendage and isolate it from the atrium lumen
      based on the cross-sectional area along enterlines.
 
@@ -260,31 +265,21 @@ def extract_LA_or_LAA(input_path, laa_point, extract_la=False):
         surface (vtkPolyData): A landmarked surface
     """
     # File paths
-    base_path = get_path_names(input_path)
-    model_name = base_path.split("/")[-1]
-    if "_" in model_name:
-        model_name = model_name.split("_")[0]
-        base_path = '/'.join(base_path.split("/")[:-1] + [model_name])
+    cyclename = "_cycle_{}".format(cycle) if cycle is not None else ""
+    filename = "{}{}".format(index, cyclename)
+    base_path = save_path = path.join(folder, "CLIPPED")
+    if not isdir(save_path):
+        mkdir(save_path)
 
-    if extract_la:
-        laa_model_path = base_path + "_la.vtp"
-        laa_volume_path = base_path + "_la.vtu"
-        laa_volume_xml_path = base_path + "_la.xml"
-    else:
-        laa_model_path = base_path + "_laa.vtp"
-        laa_volume_path = base_path + "_laa.vtu"
-        laa_volume_xml_path = base_path + "_laa.xml"
-    clipped_model = base_path + "_la_and_laa.vtp"
-    laa_model_path = base_path + "_laa.vtp"
-    la_model_path = base_path + "_la.vtp"
-
-    laa_centerline_path = base_path + "_laa_centerline.vtp"
-    volume_path = base_path + ".vtu"
+    laa_centerline_path = path.join(save_path, filename + "_laa_centerline.vtp")
+    clipped_model = path.join(save_path, filename + "_la_and_laa.vtp")
+    la_model_path = path.join(save_path, filename + "_la.vtp")
+    laa_model_path = path.join(save_path, filename + "_laa.vtp")
 
     # Open the surface file.
     print("--- Load model file\n")
     surface = read_polydata(clipped_model)
-    #volume = read_polydata(volume_path)
+    # volume = read_polydata(volume_path)
 
     if is_surface_capped(surface)[0]:
         capped_surface = surface
@@ -324,8 +319,6 @@ def extract_LA_or_LAA(input_path, laa_point, extract_la=False):
     id_stop = int(laa_centerlines.GetNumberOfPoints() * 0.9)
     # for la013 id_stop = int(laa_centerlines.GetNumberOfPoints() * 0.6)
     line = extract_single_line(laa_centerlines, 0, start_id=id_start, end_id=id_stop)
-    write_polydata(line, base_path + "_cl_to_check.vtp")
-    write_polydata(laa_centerlines, base_path + "_laa_centerline.vtp")
     laa_l = get_curvilinear_coordinate(line)
     step = 2.5 * np.mean(laa_l[1:] - laa_l[:-1])
     line = vmtk_resample_centerline(line, step)
@@ -348,7 +341,7 @@ def extract_LA_or_LAA(input_path, laa_point, extract_la=False):
     # Clip the model
     plane = vtk_plane(center, normal)
     surface, clipped = vtk_clip_polydata(surface, plane)
-    #volume, clipped_volume = vtk_clip_polydata(volume, plane, volume=True)
+    # volume, clipped_volume = vtk_clip_polydata(volume, plane, volume=True)
 
     # Find part to keep
     surface = vtk_clean_polydata(surface)
@@ -367,10 +360,10 @@ def extract_LA_or_LAA(input_path, laa_point, extract_la=False):
     # Extract LAA:
     if dist_surface > dist_clipped:
         surface, clipped = clipped, surface
-        #volume, clipped_volume = clipped_volume, volume
+        # volume, clipped_volume = clipped_volume, volume
 
     laa_surface = get_surface_closest_to_point(surface, center)
-    #laa_volume = get_surface_closest_to_point(volume, center, volume=True)
+    # laa_volume = get_surface_closest_to_point(volume, center, volume=True)
 
     # Extract LA:
     if dist_surface < dist_clipped:
@@ -391,23 +384,27 @@ def extract_LA_or_LAA(input_path, laa_point, extract_la=False):
 
 if __name__ == "__main__":
     parser = argparse.ArgumentParser()
-    parser.add_argument("--case")
+    parser.add_argument("--folder")
+    parser.add_argument("--index")
+    parser.add_argument("--cycle", default=None)
     parser.add_argument("--laa", default=None, type=float, nargs="+")
     parser.add_argument("--includes-laa", default=0)
     args = parser.parse_args()
-    case_path = args.case
+    folder = args.folder
     laa_point = args.laa
+    index = args.index
+    cycle = args.cycle
 
-    print("--- Extracting from: {}".format(case_path))
+    print("--- Extracting from: {}".format(folder))
 
     scale = 1  # Get seconds
     t0 = time.time()
-    extract_LA_and_LAA(case_path)
+    extract_LA_and_LAA(folder, index, cycle)
     t1 = time.time()
     print("--- LA Extraction complete")
     print("--- Time spent extracting LA & LAA: {:.3f} s".format((t1 - t0) / scale))
 
-    extract_LA_or_LAA(case_path, laa_point)
+    extract_LA_or_LAA(folder, laa_point, index, cycle)
     t2 = time.time()
     print("--- LAA Extraction complete")
     print("--- Time spent extracting LAA: {:.3f} s".format((t2 - t1) / scale))
@@ -422,4 +419,3 @@ if __name__ == "__main__":
     # t3 = time.time()
     # print("--- LA Extraction complete")
     # print("--- Time spent extracting LA: {:.3f} s".format((t3 - t2) / scale))
-
