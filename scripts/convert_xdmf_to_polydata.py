@@ -1,16 +1,16 @@
 import argparse
+import os
+from os import path
+from os.path import isdir
 
 from paraview.simple import *
 
 paraview.simple._DisableFirstRenderCameraReset()
 
 
-def convert_to_polydata(model, nr, index):
-    # create a new 'Xdmf3ReaderS'
-    # rRTxdmf = Xdmf3ReaderS(registrationName='{}.xdmf'.format(index), FileName=[
-    #     '/Users/henriakj/PhD/Oasis/results_moving_atrium/{}/data/{}/Solutions/{}.xdmf'.format(model, nr, index)])
-    rRTxdmf = Xdmf3ReaderS(registrationName='{}.xdmf'.format(index), FileName=[
-        '/Users/henriakj/PhD/OasisMove/results_moving_atrium/LA{}/5cycle/{}.xdmf'.format(nr, index)])
+def convert_to_polydata(folder, nr, index, cycle):
+    rRTxdmf = Xdmf3ReaderS(registrationName='{}.xdmf'.format(index),
+                           FileName=[path.join(folder, '{}_cycle_{}.xdmf'.format(index, cycle))])
     rRTxdmf.PointArrays = ['{}'.format(index)]
 
     # get active view
@@ -124,7 +124,11 @@ def convert_to_polydata(model, nr, index):
     renderView1.OrientationAxesVisibility = 0
     # SaveData('/Users/henriakj/PhD/Oasis/results_moving_atrium/{}/data/{}/Solutions/{}.vtp'.format(model, nr, index),
     #         proxy=extractSurface1, PointDataArrays=['{}'.format(index)])
-    SaveData('/Users/henriakj/PhD/OasisMove/results_moving_atrium/LA{}/5cycle/{}.vtp'.format(nr, index),
+    xdmf_path = path.join(folder, "XDMF")
+    if not isdir(xdmf_path):
+        os.mkdir(xdmf_path)
+
+    SaveData(os.path.join(xdmf_path, '{}_cycle_{}.vtp'.format(index, cycle)),
              proxy=extractSurface1, PointDataArrays=['{}'.format(index)])
 
     # ================================================================
@@ -167,13 +171,15 @@ def ResetSession():
 
 if __name__ == '__main__':
     parser = argparse.ArgumentParser()
-    parser.add_argument("--case")
+    parser.add_argument("--folder")
     parser.add_argument("--nr")
-    parser.add_argument("--id")
+    parser.add_argument("--index")
+    parser.add_argument("--cycle")
     args = parser.parse_args()
-    case = args.case
+    folder = args.folder
     number = args.nr
-    index = args.id
-    print("--- Converting case: {}, number: {}, index: {}".format(case, number, index))
+    index = args.index
+    cycle = args.cycle
+    print("--- Converting cases in: {}, number: {}, index: {}, cycle: {}".format(folder, number, index, cycle))
 
-    convert_to_polydata(case, number, index)
+    convert_to_polydata(folder, number, index, cycle)
