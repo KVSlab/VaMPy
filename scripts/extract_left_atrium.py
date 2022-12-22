@@ -573,7 +573,7 @@ if __name__ == "__main__":
 
     scale = 1  # Get seconds
     t0 = time.time()
-    # extract_LA_and_LAA(folder, index, cycle, clip_volume)
+    extract_LA_and_LAA(folder, index, cycle, clip_volume)
     t1 = time.time()
     print("--- LA Extraction complete")
     print("--- Time spent extracting LA & LAA: {:.3f} s".format((t1 - t0) / scale))
