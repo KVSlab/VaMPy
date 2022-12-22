@@ -1,10 +1,10 @@
 from __future__ import print_function
 
-from pathlib import Path
+from os import path
 
 from dolfin import *
 
-from postprocessing_common import STRESS, read_command_line
+from postprocessing_common import STRESS, read_command_line, get_dataset_names
 
 try:
     parameters["reorder_dofs_serial"] = False
@@ -12,7 +12,8 @@ except NameError:
     pass
 
 
-def compute_hemodynamic_indices(case_path, nu, rho, dt, T, velocity_degree, save_frequency, start_cycle, step):
+def compute_hemodynamic_indices(case_path, nu, rho, dt, T, velocity_degree, save_frequency, start_cycle, step,
+                                average_over_cycles):
     """
     Loads velocity fields from completed CFD simulation,
     and computes and saves the following hemodynamic quantities:
@@ -36,14 +37,21 @@ def compute_hemodynamic_indices(case_path, nu, rho, dt, T, velocity_degree, save
         save_frequency (int): Frequency that velocity has been stored
         start_cycle (int): Determines which cardiac cycle to start from for post-processing
         step (int): Step size determining number of times data is sampled
+        average_over_cycles (bool): Averages over cardiac cycles if True
     """
     # File paths
-    case_path = Path(case_path)
-    file_path_u = case_path / "u.h5"
-    mesh_path = case_path / "mesh.h5"
+    file_path_u = path.join(case_path, "u.h5")
+    mesh_path = path.join(case_path, "mesh.h5")
+    file_u = HDF5File(MPI.comm_world, file_path_u, "r")
 
     # Start post-processing from 2nd cycle using every 10th time step, or 2000 time steps per cycle
     start = int(T / dt / save_frequency * (start_cycle - 1))
+
+    # Get names of data to extract
+    if MPI.rank(MPI.comm_world) == 0:
+        print("Reading dataset names")
+
+    dataset = get_dataset_names(file_u, start=start, step=step)
 
     # Read mesh saved as HDF5 format
     mesh = Mesh()
@@ -65,64 +73,83 @@ def compute_hemodynamic_indices(case_path, nu, rho, dt, T, velocity_degree, save
 
     # RRT
     RRT = Function(U_b1)
+    RRT_avg = Function(U_b1)
 
     # OSI
     OSI = Function(U_b1)
+    OSI_avg = Function(U_b1)
 
     # ECAP
     ECAP = Function(U_b1)
+    ECAP_avg = Function(U_b1)
 
     # WSS_mean
     WSS_mean = Function(V_b1)
-    wss_mean = Function(U_b1)
+    WSS_mean_avg = Function(V_b1)
 
     # TAWSS
     TAWSS = Function(U_b1)
-    tawss = Function(U_b1)
+    TAWSS_avg = Function(U_b1)
 
     # TWSSG
     TWSSG = Function(U_b1)
-    twssg_ = Function(U_b1)
+    TWSSG_avg = Function(U_b1)
     twssg = Function(V_b1)
     tau_prev = Function(V_b1)
 
     stress = STRESS(u, 0.0, nu, mesh)
 
-    # Create writer for WSS
-    wss_path = (case_path / "WSS.xdmf").__str__()
+    # Get number of saved steps and cycles
+    saved_time_steps_per_cycle = int(T / dt / save_frequency / step)
+    n_cycles = int(len(dataset) / saved_time_steps_per_cycle)
+    # Set number of cycles to average over
+    cycles = list(range(1, n_cycles + 1)) if average_over_cycles else []
+    counters_to_save = [saved_time_steps_per_cycle * cycle for cycle in cycles]
+    cycle_names = [""] + ["_cycle_{:02d}".format(cycle) for cycle in cycles]
 
-    wss_writer = XDMFFile(MPI.comm_world, wss_path)
-    wss_writer.parameters["flush_output"] = True
-    wss_writer.parameters["functions_share_mesh"] = True
-    wss_writer.parameters["rewrite_function_mesh"] = False
+    # Create XDMF files for saving indices
+    fullname = file_path_u.replace("u.h5", "%s%s.xdmf")
+    fullname = fullname.replace("Solutions", "Hemodynamics")
+    index_names = ["RRT", "OSI", "ECAP", "TAWSS", "TWSSG"]
+    index_variables = [RRT, OSI, ECAP, TAWSS, TWSSG]
+    index_variables_avg = [RRT_avg, OSI_avg, ECAP_avg, TAWSS_avg, TWSSG_avg]
+
+    index_dict = dict(zip(index_names, index_variables))
+    index_dict_cycle = dict(zip(index_names, index_variables_avg))
+
+    indices = {}
+    for cycle_name in cycle_names:
+        for index in index_names + ["WSS"]:
+            indices[index + cycle_name] = XDMFFile(MPI.comm_world, fullname % (index, cycle_name))
+            indices[index + cycle_name].parameters["rewrite_function_mesh"] = False
+            indices[index + cycle_name].parameters["flush_output"] = True
+            indices[index + cycle_name].parameters["functions_share_mesh"] = True
 
     if MPI.rank(MPI.comm_world) == 0:
         print("=" * 10, "Start post processing", "=" * 10)
 
-    file_counter = start
-    while True:
-        # Read in velocity solution to vector function u
-        try:
-            f = HDF5File(MPI.comm_world, file_path_u.__str__(), "r")
-            vec_name = "/velocity/vector_%d" % file_counter
-            timestamp = f.attributes(vec_name)["timestamp"]
+    counter = start
+    for data in dataset:
+        # Update file_counter
+        counter += step
+
+        file_u.read(u, data)
+
+        if MPI.rank(MPI.comm_world) == 0:
+            timestamp = file_u.attributes(data)["timestamp"]
             print("=" * 10, "Timestep: {}".format(timestamp), "=" * 10)
-            f.read(u, vec_name)
-        except:
-            print("=" * 10, "Finished reading solutions", "=" * 10)
-            break
 
         # Compute WSS
         if MPI.rank(MPI.comm_world) == 0:
             print("Compute WSS (mean)")
         tau = stress()
         tau.vector()[:] = tau.vector()[:] * rho
-        WSS_mean.vector().axpy(1, tau.vector())
+        WSS_mean_avg.vector().axpy(1, tau.vector())
 
         if MPI.rank(MPI.comm_world) == 0:
             print("Compute WSS (absolute value)")
         tawss = project(inner(tau, tau) ** (1 / 2), U_b1)
-        TAWSS.vector().axpy(1, tawss.vector())
+        TAWSS_avg.vector().axpy(1, tawss.vector())
 
         # Compute TWSSG
         if MPI.rank(MPI.comm_world) == 0:
@@ -130,7 +157,7 @@ def compute_hemodynamic_indices(case_path, nu, rho, dt, T, velocity_degree, save
         twssg.vector().set_local((tau.vector().get_local() - tau_prev.vector().get_local()) / dt)
         twssg.vector().apply("insert")
         twssg_ = project(inner(twssg, twssg) ** (1 / 2), U_b1)
-        TWSSG.vector().axpy(1, twssg_.vector())
+        TWSSG_avg.vector().axpy(1, twssg_.vector())
 
         # Update tau
         if MPI.rank(MPI.comm_world) == 0:
@@ -140,82 +167,88 @@ def compute_hemodynamic_indices(case_path, nu, rho, dt, T, velocity_degree, save
 
         # Save instantaneous WSS
         tau.rename("WSS", "WSS")
-        wss_writer.write(tau, dt * file_counter)
+        indices["WSS"].write(tau, dt * counter)
 
-        # Update file_counter
-        file_counter += step
+        if len(cycles) != 0 and counter == counters_to_save[0]:
+            # Get cycle number
+            cycle = int(counters_to_save[0] / saved_time_steps_per_cycle)
+            if MPI.rank(MPI.comm_world) == 0:
+                print("========== Storing cardiac cycle {} ==========".format(cycle))
+
+            # Get average over sampled time steps
+            for index in [TWSSG_avg, TAWSS_avg, WSS_mean_avg]:
+                index.vector()[:] = index.vector()[:] / saved_time_steps_per_cycle
+
+            # Compute OSI, RRT and ECAP
+            wss_mean = project(inner(WSS_mean_avg, WSS_mean_avg) ** (1 / 2), U_b1)
+            wss_mean_vec = wss_mean.vector().get_local()
+            tawss_vec = TAWSS_avg.vector().get_local()
+
+            # Compute RRT, OSI, and ECAP based on mean and absolute WSS
+            RRT_avg.vector().set_local(1 / wss_mean_vec)
+            OSI_avg.vector().set_local(0.5 * (1 - wss_mean_vec / tawss_vec))
+            ECAP_avg.vector().set_local(OSI_avg.vector().get_local() / tawss_vec)
+
+            for index in [RRT_avg, OSI_avg, ECAP_avg]:
+                index.vector().apply("insert")
+
+            # Rename displayed variable names
+            for var, name in zip(index_variables_avg, index_names):
+                var.rename(name, name)
+
+            # Store solution
+            for name, index in index_dict_cycle.items():
+                indices[name + "_cycle_{:02d}".format(cycle)].write(index)
+
+            # Append solution to total solution
+            for index, index_avg in zip(index_dict.values(), index_dict_cycle.values()):
+                index_avg.vector().apply("insert")
+                index.vector().axpy(1, index_avg.vector())
+
+            WSS_mean_avg.vector().apply("insert")
+            WSS_mean.vector().axpy(1, WSS_mean_avg.vector())
+
+            # Reset tmp solutions
+            for index_avg in index_dict_cycle.values():
+                index_avg.vector().zero()
+
+            WSS_mean_avg.vector().zero()
+
+            counters_to_save.pop(0)
 
     print("=" * 10, "Saving hemodynamic indices", "=" * 10)
-    n = (file_counter - start) // step
+    n = n_cycles if average_over_cycles else (counter - start) // step
     TWSSG.vector()[:] = TWSSG.vector()[:] / n
     TAWSS.vector()[:] = TAWSS.vector()[:] / n
     WSS_mean.vector()[:] = WSS_mean.vector()[:] / n
 
-    TAWSS.rename("TAWSS", "TAWSS")
-    TWSSG.rename("TWSSG", "TWSSG")
+    wss_mean = project(inner(WSS_mean, WSS_mean) ** (1 / 2), U_b1)
+    wss_mean_vec = wss_mean.vector().get_local()
+    tawss_vec = TAWSS.vector().get_local()
 
-    try:
-        wss_mean = project(inner(WSS_mean, WSS_mean) ** (1 / 2), U_b1)
-        wss_mean_vec = wss_mean.vector().get_local()
-        tawss_vec = TAWSS.vector().get_local()
+    # Compute RRT, OSI, and ECAP based on mean and absolute WSS
+    RRT.vector().set_local(1 / wss_mean_vec)
+    OSI.vector().set_local(0.5 * (1 - wss_mean_vec / tawss_vec))
+    ECAP.vector().set_local(OSI.vector().get_local() / tawss_vec)
 
-        # Compute RRT and OSI based on mean and absolute WSS
-        RRT.vector().set_local(1 / wss_mean_vec)
-        RRT.vector().apply("insert")
-        RRT.rename("RRT", "RRT")
+    for index in [RRT, OSI, ECAP]:
+        index.vector().apply("insert")
 
-        OSI.vector().set_local(0.5 * (1 - wss_mean_vec / tawss_vec))
-        OSI.vector().apply("insert")
-        OSI.rename("OSI", "OSI")
+    # Rename displayed variable names
+    for name, var in index_dict.items():
+        var.rename(name, name)
 
-        # Compute ECAP based on OSI and TAWSS
-        ECAP.vector().set_local(OSI.vector().get_local() / tawss_vec)
-        ECAP.vector().apply("insert")
-        ECAP.rename("ECAP", "ECAP")
-
-        save = True
-    except:
-        print("Failed to compute OSI and RRT")
-        save = False
-
-    if save:
-        # Save OSI and RRT
-        rrt_path = (case_path / "RRT.xdmf").__str__()
-        osi_path = (case_path / "OSI.xdmf").__str__()
-        ecap_path = (case_path / "ECAP.xdmf").__str__()
-
-        rrt = XDMFFile(MPI.comm_world, rrt_path)
-        osi = XDMFFile(MPI.comm_world, osi_path)
-        ecap = XDMFFile(MPI.comm_world, ecap_path)
-
-        for f in [rrt, osi, ecap]:
-            f.parameters["flush_output"] = True
-            f.parameters["functions_share_mesh"] = True
-            f.parameters["rewrite_function_mesh"] = False
-
-        rrt.write(RRT)
-        osi.write(OSI)
-        ecap.write(ECAP)
-
-    # Save WSS and TWSSG
-    tawss_path = (case_path / "TAWSS.xdmf").__str__()
-    twssg_path = (case_path / "TWSSG.xdmf").__str__()
-
-    tawss = XDMFFile(MPI.comm_world, tawss_path)
-    twssg = XDMFFile(MPI.comm_world, twssg_path)
-
-    for f in [tawss, twssg]:
-        f.parameters["flush_output"] = True
-        f.parameters["functions_share_mesh"] = True
-        f.parameters["rewrite_function_mesh"] = False
-
-    tawss.write(TAWSS)
-    twssg.write(TWSSG)
+    # Write indices to file
+    for name, index in index_dict.items():
+        indices[name].write(index)
 
     print("========== Post processing finished ==========")
     print("Results saved to: {}".format(case_path))
 
 
 if __name__ == '__main__':
-    folder, nu, rho, dt, velocity_degree, _, _, T, save_frequency, _, start_cycle, step = read_command_line()
-    compute_hemodynamic_indices(folder, nu, rho, T, dt, velocity_degree, save_frequency, start_cycle, step)
+    folder, nu, rho, dt, velocity_degree, _, _, T, save_frequency, _, start_cycle, step, average_over_cycles \
+        = read_command_line()
+
+    compute_hemodynamic_indices(folder, nu, rho, dt, T, velocity_degree, save_frequency, start_cycle,
+                                step, average_over_cycles)
