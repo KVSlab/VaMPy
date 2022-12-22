@@ -115,7 +115,9 @@ def extract_LA_and_LAA(folder, index, cycle, clip_volume=False):
         # Clip the model
         plane = vtk_plane(center, normal)
         if clip_volume:
-            volume, clipped_volume = vtk_clip_polydata(surface, plane, clip_volume=True)
+            plane_inv = vtk_plane(center, -normal)
+            clipped_volume, _ = vtk_clip_polydata(volume, plane_inv, clip_volume=True)
+            volume, _ = vtk_clip_polydata(volume, plane, clip_volume=True)
 
         surface, clipped = vtk_clip_polydata(surface, plane, clip_volume=False)
 
@@ -170,7 +172,9 @@ def extract_LA_and_LAA(folder, index, cycle, clip_volume=False):
     plane = vtk_plane(center, normal)
     surface, clipped = vtk_clip_polydata(surface, plane)
     if clip_volume:
-        volume, clipped_volume = vtk_clip_polydata(volume, plane, clip_volume=True)
+        plane_inv = vtk_plane(center, -normal)
+        clipped_volume, _ = vtk_clip_polydata(volume, plane_inv, clip_volume=True)
+        volume, _ = vtk_clip_polydata(volume, plane, clip_volume=True)
 
     # Find part to keep
     surface = vtk_clean_polydata(surface)
@@ -295,7 +299,9 @@ def extract_LA_or_LAA(folder, laa_point, index, cycle, clip_volume=False):
     plane = vtk_plane(center, normal)
     surface, clipped = vtk_clip_polydata(surface, plane)
     if clip_volume:
-        volume, clipped_volume = vtk_clip_polydata(volume, plane, clip_volume=True)
+        plane_inv = vtk_plane(center, -normal)
+        clipped_volume, _ = vtk_clip_polydata(volume, plane_inv, clip_volume=True)
+        volume, _ = vtk_clip_polydata(volume, plane, clip_volume=True)
 
     # Find part to keep
     surface = vtk_clean_polydata(surface)
@@ -330,8 +336,7 @@ def extract_LA_or_LAA(folder, laa_point, index, cycle, clip_volume=False):
     surface_whole = attach_clipped_regions_to_surface(surface, clipped, center)
     la_surface = get_surface_closest_to_point(surface_whole, center)
     if clip_volume:
-        volume_whole = attach_clipped_regions_to_surface(volume, clipped_volume, center, clip_volume=True)
-        la_volume = get_surface_closest_to_point(volume_whole, center, is_volume=True)
+        la_volume = attach_clipped_regions_to_surface(volume, clipped_volume, center, clip_volume=True)
 
     print("--- Saving LAA to: {}".format(laa_model_path))
     if clip_volume:
@@ -398,7 +403,8 @@ def attach_clipped_regions_to_surface(surface, clipped, center, clip_volume=Fals
     distances = []
     regions = []
     for i in range(int(region_id.max() + 1)):
-        regions.append(vtk_compute_threshold(connectivity, "RegionId", lower=i - 0.1, upper=i + 0.1, source=0))
+        regions.append(
+            vtk_compute_threshold(connectivity, "RegionId", lower=i - 0.1, upper=i + 0.1, source=0, volume=clip_volume))
         locator = get_vtk_point_locator(regions[-1])
         region_point = regions[-1].GetPoint(locator.FindClosestPoint(center))
         distances.append(get_distance(region_point, center))
@@ -567,7 +573,7 @@ if __name__ == "__main__":
 
     scale = 1  # Get seconds
     t0 = time.time()
-    extract_LA_and_LAA(folder, index, cycle, clip_volume)
+    # extract_LA_and_LAA(folder, index, cycle, clip_volume)
     t1 = time.time()
     print("--- LA Extraction complete")
     print("--- Time spent extracting LA & LAA: {:.3f} s".format((t1 - t0) / scale))
