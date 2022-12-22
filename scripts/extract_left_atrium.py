@@ -103,7 +103,7 @@ def provide_region_points(surface, provided_points, dir_path=None):
     return points
 
 
-def extract_LA_and_LAA(folder, index, cycle):
+def extract_LA_and_LAA(folder, index, cycle, clip_volume=True):
     """Algorithm for detecting the left atrial appendage and isolate it from the atrium lumen
      based on the cross-sectional area along enterlines.
 
@@ -117,17 +117,28 @@ def extract_LA_and_LAA(folder, index, cycle):
     # File paths
     cyclename = "_cycle_{}".format(cycle) if cycle is not None else ""
     filename = "{}{}".format(index, cyclename)
-    input_path = path.join(folder, "VTP", filename + ".vtp")
+    if clip_volume:
+        filetype = ".vtu"
+        input_path = path.join(folder, "VTU", filename + filetype)
+    else:
+        filetype = "vtp"
+        input_path = path.join(folder, "VTP", filename + filetype)
     save_path = path.join(folder, "CLIPPED")
     if not isdir(save_path):
         mkdir(save_path)
 
     centerline_path = path.join(save_path, filename + "_centerline.vtp")
-    la_and_laa_path = path.join(save_path, filename + "_la_and_laa.vtp")
+    la_and_laa_path = path.join(save_path, filename + "_la_and_laa" + filetype)
 
     # Open the surface file.
     print("--- Load model file\n")
-    surface = read_polydata(input_path)
+    if clip_volume:
+        # TODO: Add as input parameter
+        surface = read_polydata(
+            "/Users/henriakj/PhD/Code/VaMPy/models/models_for_convergence_study_upf_af_n_1/LA_20CYCLE_3M/LA_remeshed_surface.vtp")
+        volume = read_polydata(input_path)
+    else:
+        surface = read_polydata(input_path)
 
     if is_surface_capped(surface)[0]:
         capped_surface = surface
@@ -177,7 +188,10 @@ def extract_LA_and_LAA(folder, index, cycle):
 
         # Clip the model
         plane = vtk_plane(center, normal)
-        surface, clipped = vtk_clip_polydata(surface, plane)
+        if clip_volume:
+            volume, clipped_volume = vtk_clip_polydata(surface, plane, clip_volume=True)
+
+        surface, clipped = vtk_clip_polydata(surface, plane, clip_volume=False)
 
         # Find part to keep
         surface = vtk_clean_polydata(surface)
@@ -194,13 +208,14 @@ def extract_LA_and_LAA(folder, index, cycle):
         dist_clipped = np.linalg.norm(p_clipped - p_boundary)
         if dist_surface < dist_clipped:
             surface, clipped = clipped, surface
-        # if i == 3:
-        #     surface, clipped = clipped, surface
+            if clip_volume:
+                volume, clipped_volume = clipped_volume, volume
+
         surface = attach_clipped_regions_to_surface(surface, clipped, center)
+        if clip_volume:
+            volume = attach_clipped_regions_to_surface(volume, clipped_volume, center, clip_volume=True)
 
     # Clip MV
-    # No clip 007
-
     print("--- Clipping MV")
     line = extract_single_line(centerlines, 0)
     line = extract_single_line(line, 0, start_id=0, end_id=line.GetNumberOfPoints() - 40)
@@ -219,7 +234,7 @@ def extract_LA_and_LAA(folder, index, cycle):
 
     # Compute 'derivative' of the area
     dAdX = (a[1:, 0] - a[:-1, 0]) / (l[1:] - l[:-1])
-    stop_id = 30  # np.nonzero(dAdX > 200)[0][0]
+    stop_id = np.nonzero(dAdX > 200)[0][0]
 
     normal = -n[stop_id]
     center = area.GetPoint(stop_id)
@@ -227,6 +242,8 @@ def extract_LA_and_LAA(folder, index, cycle):
     # Clip the model
     plane = vtk_plane(center, normal)
     surface, clipped = vtk_clip_polydata(surface, plane)
+    if clip_volume:
+        volume, clipped_volume = vtk_clip_polydata(volume, plane, clip_volume=True)
 
     # Find part to keep
     surface = vtk_clean_polydata(surface)
@@ -244,11 +261,17 @@ def extract_LA_and_LAA(folder, index, cycle):
 
     if dist_surface < dist_clipped:
         surface, clipped = clipped, surface
-
-    surface = attach_clipped_regions_to_surface(surface, clipped, center)
+        if clip_volume:
+            volumee, clipped_volume = clipped_volume, volume
 
     print("--- Saving LA and LAA to: {}".format(la_and_laa_path))
-    write_polydata(surface, la_and_laa_path)
+    if clip_volume:
+        volume = attach_clipped_regions_to_surface(volume, clipped_volume, center, clip_volume=True)
+        write_polydata(volume, la_and_laa_path)
+    else:
+        surface = attach_clipped_regions_to_surface(surface, clipped, center)
+        write_polydata(surface, la_and_laa_path)
+    exit()
 
 
 def extract_LA_or_LAA(folder, laa_point, index, cycle, extract_la=False):
@@ -266,8 +289,11 @@ def extract_LA_or_LAA(folder, laa_point, index, cycle, extract_la=False):
     cyclename = "_cycle_{}".format(cycle) if cycle is not None else ""
     filename = "{}{}".format(index, cyclename)
     base_path = save_path = path.join(folder, "CLIPPED")
-    if not isdir(save_path):
-        mkdir(save_path)
+    # if not isdir(save_path):
+    #     mkdir(save_path)
+
+    base_path = save_path = folder.rsplit("/", 1)[0]
+    filename = folder.rsplit("/", 1)[1].split("_")[0]
 
     laa_centerline_path = path.join(save_path, filename + "_laa_centerline.vtp")
     clipped_model = path.join(save_path, filename + "_la_and_laa.vtp")
@@ -299,7 +325,7 @@ def extract_LA_or_LAA(folder, laa_point, index, cycle, extract_la=False):
         if laa_point is None:
             model = base_path.split("/")[-1]
             print("Loading LAA points for model {}".format(model))
-            laa_points_path = base_path.rsplit("/", 2)[0] + "/LA20_LAA_POINTS.json"
+            laa_points_path = base_path.rsplit("/", 1)[0] + "/LA20_LAA_POINTS.json"
             with open(laa_points_path, "r") as f:
                 laa_points = json.load(f)
             appendage_point = laa_points[model]
@@ -380,6 +406,134 @@ def extract_LA_or_LAA(folder, laa_point, index, cycle, extract_la=False):
     # write_polydata(laa_volume, laa_volume_path)
 
 
+def vtk_clip_polydata(surface, cutter=None, value=0, get_inside_out=False, generate_clip_scalars=False,
+                      clip_volume=False):
+    """Clip the input vtkPolyData object with a cutter function (plane, box, etc)
+
+    Args:
+        generate_clip_scalars (bool): If True, output scalar values will be interpolated from implicit function values.
+        get_inside_out (bool): Get inside out, default is False
+        surface (vtkPolyData): Input vtkPolyData for clipping
+        cutter (vtkBox, vtkPlane): Function for cutting the polydata (default None).
+        value (float): Distance to the ImplicteFunction or scalar value to clip.
+        clip_volume (bool): Clips volumetric surface if true.
+
+    Returns:
+        clipper (vtkPolyData): The clipped surface
+    """
+    clipper = vtk.vtkClipDataSet() if clip_volume else vtk.vtkClipPolyData()
+    clipper.SetInputData(surface)
+    if cutter is None:
+        clipper.GenerateClipScalarsOff()
+    else:
+        clipper.SetClipFunction(cutter)
+    if get_inside_out:
+        clipper.InsideOutOn()
+    if generate_clip_scalars and cutter is not None:
+        clipper.GenerateClipScalarsOn()
+    clipper.GenerateClippedOutputOn()
+    clipper.SetValue(value)
+    clipper.Update()
+
+    return clipper.GetOutput(), clipper.GetClippedOutput()
+
+
+def attach_clipped_regions_to_surface(surface, clipped, center, clip_volume=False):
+    """Check the connectivity of a clipped surface, and attach all sections which are not
+    closest to the center of the clipping plane.
+
+    Args:
+        surface (vtkPolyData):
+        clipped (vtkPolyData): The clipped segments of the surface.
+        center (list): The center of the clipping point
+        clip_volume (bool): Clips volumetric surface if True
+
+    Returns:
+        surface (vtkPolyData): The surface where only one segment has been removed.
+    """
+    connectivity = vtk_compute_connectivity(clipped, mode="All", is_volume=clip_volume)
+    if connectivity.GetNumberOfPoints() == 0:
+        return surface
+    region_id = get_point_data_array("RegionId", connectivity)
+    distances = []
+    regions = []
+    for i in range(int(region_id.max() + 1)):
+        regions.append(vtk_compute_threshold(connectivity, "RegionId", lower=i - 0.1, upper=i + 0.1, source=0))
+        locator = get_vtk_point_locator(regions[-1])
+        region_point = regions[-1].GetPoint(locator.FindClosestPoint(center))
+        distances.append(get_distance(region_point, center))
+
+    # Remove the region with the closest distance
+    regions.pop(distances.index(min(distances)))
+
+    # Add the other regions back to the surface
+    surface = vtk_merge_polydata(regions + [surface], is_volume=clip_volume)
+    if not clip_volume:
+        surface = vtk_clean_polydata(surface)
+        surface = vtk_triangulate_surface(surface)
+
+    return surface
+
+
+def vtk_merge_polydata(inputs, is_volume=False):
+    """
+    Appends one or more polygonal
+    datasets together into a single
+    polygonal dataset.
+
+    Args:
+        inputs (list): List of vtkPolyData objects.
+
+    Returns:
+        merged_data (vtkPolyData): Single polygonal dataset.
+    """
+    append_filter = vtk.vtkAppendFilter() if is_volume else vtk.vtkAppendPolyData()
+    for input_ in inputs:
+        append_filter.AddInputData(input_)
+    append_filter.Update()
+    merged_data = append_filter.GetOutput()
+
+    return merged_data
+
+
+def vtk_compute_connectivity(surface, mode="All", closest_point=None, show_color_regions=True,
+                             mark_visited_points=False, is_volume=False):
+    """Wrapper of vtkPolyDataConnectivityFilter. Compute connectivity.
+
+    Args:
+        show_color_regions (bool): Turn on/off the coloring of connected regions.
+        mark_visited_points (bool): Specify whether to record input point ids that appear in the output.
+        surface (vtkPolyData): Input surface data.
+        mode (str): Type of connectivity filter.
+        closest_point (list): Point to be used for mode='Closest'
+    """
+    connectivity = vtk.vtkConnectivityFilter() if is_volume else vtk.vtkPolyDataConnectivityFilter()
+    connectivity.SetInputData(surface)
+
+    # Mark each region with "RegionId"
+    if mode == "All":
+        connectivity.SetExtractionModeToAllRegions()
+    elif mode == "Largest":
+        connectivity.SetExtractionModeToLargestRegion()
+    elif mode == "Closest":
+        if closest_point is None:
+            print("ERROR: point not set for extracting closest region")
+            sys.exit(0)
+        connectivity.SetExtractionModeToClosestPointRegion()
+        connectivity.SetClosestPoint(closest_point)
+
+    if show_color_regions:
+        connectivity.ColorRegionsOn()
+
+    if mark_visited_points:
+        connectivity.MarkVisitedPointIdsOn()
+
+    connectivity.Update()
+    output = connectivity.GetOutput()
+
+    return output
+
+
 if __name__ == "__main__":
     parser = argparse.ArgumentParser()
     parser.add_argument("--folder")
@@ -405,14 +559,3 @@ if __name__ == "__main__":
     t2 = time.time()
     print("--- LAA Extraction complete")
     print("--- Time spent extracting LAA: {:.3f} s".format((t2 - t1) / scale))
-
-    # extract_LA_or_LAA(case_path, laa_point, extract_la=True)
-    # t3 = time.time()
-    # print("--- LA Extraction complete")
-    # print("--- Time spent extracting LA: {:.3f} s".format((t3 - t2) / scale))
-
-    # case_path = case_path.replace(".vtp", "_la_and_laa.vtp")
-    # extract_LA_or_LAA(case_path, laa_point, extract_la=True)
-    # t3 = time.time()
-    # print("--- LA Extraction complete")
-    # print("--- Time spent extracting LA: {:.3f} s".format((t3 - t2) / scale))
