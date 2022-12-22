@@ -28,81 +28,6 @@ except ImportError:
     pass
 
 
-def get_surface_closest_to_point(clipped, point, volume=False):
-    """Check the connectivty of a clipped surface, and attach all sections which are not
-    closest to the center of the clipping plane.
-
-    Args:
-        clipped (vtkPolyData): The clipped segments of the surface.
-        point (list): The point of interest. Keep region closest to this point
-
-    Returns:
-        surface (vtkPolyData): The surface where only one segment has been removed.
-    """
-    connectivity = vtk_compute_connectivity(clipped, mode="All")  # , volume=volume)
-    if connectivity.GetNumberOfPoints() == 0:
-        return clipped
-
-    region_id = get_point_data_array("RegionId", connectivity)
-    distances = []
-    regions = []
-    for i in range(int(region_id.max() + 1)):
-        regions.append(
-            vtk_compute_threshold(connectivity, "RegionId", lower=i - 0.1, upper=i + 0.1,
-                                  source=0))  # , volume=volume))
-        locator = get_vtk_point_locator(regions[-1])
-        region_point = regions[-1].GetPoint(locator.FindClosestPoint(point))
-        distances.append(get_distance(region_point, point))
-
-    # Remove the region with the closest distance
-    region_of_interest = regions[distances.index(min(distances))]
-
-    return region_of_interest
-
-
-def provide_region_points(surface, provided_points, dir_path=None):
-    """
-    Get relevant region points from user selected points on a input surface.
-
-    Args:
-        provided_points (ndarray): Point(s) representing area to refine
-        surface (vtkPolyData): Surface model.
-        dir_path (str): Location of info.json file
-
-    Returns:
-        points (list): List of relevant outlet IDs
-    """
-    # Fix surface
-    cleaned_surface = vtk_clean_polydata(surface)
-    triangulated_surface = vtk_triangulate_surface(cleaned_surface)
-
-    if provided_points is None:
-        # Select seeds
-        print("--- Please select regions to refine in rendered window")
-        SeedSelector = vmtkPickPointSeedSelector()
-        SeedSelector.SetSurface(triangulated_surface)
-        SeedSelector.Execute()
-
-        regionSeedIds = SeedSelector.GetTargetSeedIds()
-        get_point = triangulated_surface.GetPoints().GetPoint
-        points = [list(get_point(regionSeedIds.GetId(i))) for i in range(regionSeedIds.GetNumberOfIds())]
-    else:
-        surface_locator = get_vtk_point_locator(surface)
-        provided_points = [[provided_points[3 * i], provided_points[3 * i + 1], provided_points[3 * i + 2]]
-                           for i in range(len(provided_points) // 3)]
-
-        points = [list(surface.GetPoint(surface_locator.FindClosestPoint(p))) for p in provided_points]
-
-    if dir_path is not None:
-        info = {"number_of_regions": len(points)}
-
-        for i in range(len(points)):
-            info["region_%d" % i] = points[i]
-            write_parameters(info, dir_path)
-
-    return points
-
-
 def extract_LA_and_LAA(folder, index, cycle, clip_volume=True):
     """Algorithm for detecting the left atrial appendage and isolate it from the atrium lumen
      based on the cross-sectional area along enterlines.
@@ -532,6 +457,81 @@ def vtk_compute_connectivity(surface, mode="All", closest_point=None, show_color
     output = connectivity.GetOutput()
 
     return output
+
+
+def get_surface_closest_to_point(clipped, point, volume=False):
+    """Check the connectivty of a clipped surface, and attach all sections which are not
+    closest to the center of the clipping plane.
+
+    Args:
+        clipped (vtkPolyData): The clipped segments of the surface.
+        point (list): The point of interest. Keep region closest to this point
+
+    Returns:
+        surface (vtkPolyData): The surface where only one segment has been removed.
+    """
+    connectivity = vtk_compute_connectivity(clipped, mode="All")  # , volume=volume)
+    if connectivity.GetNumberOfPoints() == 0:
+        return clipped
+
+    region_id = get_point_data_array("RegionId", connectivity)
+    distances = []
+    regions = []
+    for i in range(int(region_id.max() + 1)):
+        regions.append(
+            vtk_compute_threshold(connectivity, "RegionId", lower=i - 0.1, upper=i + 0.1,
+                                  source=0))  # , volume=volume))
+        locator = get_vtk_point_locator(regions[-1])
+        region_point = regions[-1].GetPoint(locator.FindClosestPoint(point))
+        distances.append(get_distance(region_point, point))
+
+    # Remove the region with the closest distance
+    region_of_interest = regions[distances.index(min(distances))]
+
+    return region_of_interest
+
+
+def provide_region_points(surface, provided_points, dir_path=None):
+    """
+    Get relevant region points from user selected points on a input surface.
+
+    Args:
+        provided_points (ndarray): Point(s) representing area to refine
+        surface (vtkPolyData): Surface model.
+        dir_path (str): Location of info.json file
+
+    Returns:
+        points (list): List of relevant outlet IDs
+    """
+    # Fix surface
+    cleaned_surface = vtk_clean_polydata(surface)
+    triangulated_surface = vtk_triangulate_surface(cleaned_surface)
+
+    if provided_points is None:
+        # Select seeds
+        print("--- Please select regions to refine in rendered window")
+        SeedSelector = vmtkPickPointSeedSelector()
+        SeedSelector.SetSurface(triangulated_surface)
+        SeedSelector.Execute()
+
+        regionSeedIds = SeedSelector.GetTargetSeedIds()
+        get_point = triangulated_surface.GetPoints().GetPoint
+        points = [list(get_point(regionSeedIds.GetId(i))) for i in range(regionSeedIds.GetNumberOfIds())]
+    else:
+        surface_locator = get_vtk_point_locator(surface)
+        provided_points = [[provided_points[3 * i], provided_points[3 * i + 1], provided_points[3 * i + 2]]
+                           for i in range(len(provided_points) // 3)]
+
+        points = [list(surface.GetPoint(surface_locator.FindClosestPoint(p))) for p in provided_points]
+
+    if dir_path is not None:
+        info = {"number_of_regions": len(points)}
+
+        for i in range(len(points)):
+            info["region_%d" % i] = points[i]
+            write_parameters(info, dir_path)
+
+    return points
 
 
 if __name__ == "__main__":
