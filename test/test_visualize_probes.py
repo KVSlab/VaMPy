@@ -1,5 +1,5 @@
 import sys
-from os import path
+from os import path, remove
 
 sys.path.append("..")
 sys.path.append("../automatedPostProcessing")
@@ -10,7 +10,7 @@ from automatedPostProcessing.visualize_probes import visualize_probes
 def test_visualize_probes():
     # Path to test results and params
     probe_path = "test_results/1/Probes"
-    probe_frequency = 10
+    probe_frequency = 100
     file_path = path.join(probe_path, "Probes.png")
 
     # Run post-processing
@@ -19,6 +19,9 @@ def test_visualize_probes():
     # Check that output image exists
     assert path.exists(file_path)
     assert path.getsize(file_path) > 0
+
+    # Remove generatedoutput
+    remove(file_path)
 
 
 if __name__ == "__main__":
