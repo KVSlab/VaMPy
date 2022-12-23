@@ -44,6 +44,28 @@ def compute_flow_and_simulation_metrics(folder, nu, dt, velocity_degree, T, time
     n_cycles = int(len(dataset_names) / saved_time_steps_per_cycle)
     cycles_to_average = None
 
+    # Get mesh information
+    mesh = Mesh()
+    with HDF5File(MPI.comm_world, mesh_path, "r") as mesh_file:
+        mesh_file.read(mesh, "mesh", False)
+
+    if MPI.rank(MPI.comm_world) == 0:
+        print("Defining function spaces")
+
+    # Function space
+    DG = FunctionSpace(mesh, 'DG', 0)
+    V = VectorFunctionSpace(mesh, "CG", velocity_degree)
+    Vv = FunctionSpace(mesh, "CG", velocity_degree)
+
+    # Define u_avg(x,t)
+    u = Function(V)
+    u_avg = Function(V)
+
+    # Read velocity and compute cycle averaged velocity
+    if not path.exists(file_path_u_avg):
+        compute_u_avg(dataset_names, file_path_u_avg, file_u, n_cycles, saved_time_steps_per_cycle, start_cycle, u,
+                      u_avg)
+
     # Perform phase averaging (Average over cycles at specified time point(s))
     if len(times_to_average) != 0:
         N_tmp = int(len(dataset_names) / saved_time_steps_per_cycle)
@@ -73,28 +95,6 @@ def compute_flow_and_simulation_metrics(folder, nu, dt, velocity_degree, T, time
         dataset_avg = get_dataset_names(file_u_avg, start=0, step=1) * (n_cycles - start_cycle + 1)
         dataset_dict_avg = {"": dataset_avg}
         N = len(dataset_names[id_start:])
-
-    # Get mesh information
-    mesh = Mesh()
-    with HDF5File(MPI.comm_world, mesh_path, "r") as mesh_file:
-        mesh_file.read(mesh, "mesh", False)
-
-    if MPI.rank(MPI.comm_world) == 0:
-        print("Defining function spaces")
-
-    # Function space
-    DG = FunctionSpace(mesh, 'DG', 0)
-    V = VectorFunctionSpace(mesh, "CG", velocity_degree)
-    Vv = FunctionSpace(mesh, "CG", velocity_degree)
-
-    # Define u_avg(x,t)
-    u = Function(V)
-    u_avg = Function(V)
-
-    # Read velocity and compute cycle averaged velocity
-    if not path.exists(file_path_u_avg):
-        compute_u_avg(dataset_names, file_path_u_avg, file_u, n_cycles, saved_time_steps_per_cycle,
-                      start_cycle, u, u_avg)
 
     # Compute flow and simulation metrics
     for time_to_average, dataset in dataset_dict.items():
@@ -403,23 +403,16 @@ def define_functions_and_iterate_dataset(time_to_average, dataset, dataset_avg, 
     for name, metric in metrics_dict_to_save.items():
         metrics[name].write_checkpoint(metric, name)
 
-    # Print info
-    flow_metrics = [("dx", characteristic_edge_length), ("l+", l_plus_cycle_avg), ("t+", t_plus_cycle_avg),
-                    ("Length scale", length_scale_cycle_avg), ("Time scale", time_scale_cycle_avg),
-                    ("Velocity scale", velocity_scale_avg), ("CFL", CFL_cycle_avg), ("Strain", strain_cycle_avg),
-                    ("Dissipation", dissipation_avg), ("Turbulent dissipation", turbulent_dissipation_avg),
-                    ("Turbulent kinetic energy", turbulent_kinetic_energy_avg), ("Kinetic energy", kinetic_energy_avg)]
-
+    # Print summary info
     if MPI.rank(MPI.comm_world) == 0:
         print("=" * 10, "Flow and simulation metrics summary", "=" * 10)
 
-    for metric_name, metric_value in flow_metrics:
+    for metric_name, metric_value in metrics_dict_to_save.items():
         sum_ = MPI.sum(MPI.comm_world, np.sum(metric_value.vector().get_local()))
         num = MPI.sum(MPI.comm_world, metric_value.vector().get_local().shape[0])
         mean = sum_ / num
         max_ = MPI.max(MPI.comm_world, metric_value.vector().get_local().max())
         min_ = MPI.min(MPI.comm_world, metric_value.vector().get_local().min())
-
         if MPI.rank(MPI.comm_world) == 0:
             print(metric_name, "mean:", mean)
             print(metric_name, "max:", max_)

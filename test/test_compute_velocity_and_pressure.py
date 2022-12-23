@@ -1,5 +1,5 @@
 import sys
-from os import path
+from os import path, remove
 
 sys.path.append("..")
 sys.path.append("../automatedPostProcessing")
@@ -27,6 +27,10 @@ def test_compute_velocity_and_pressure():
         assert path.exists(xdmf_path) and path.exists(h5_path)
         assert path.getsize(xdmf_path) > 0
         assert path.getsize(h5_path) > 0
+
+        # Remove generated output
+        remove(xdmf_path)
+        remove(h5_path)
 
 
 if __name__ == "__main__":

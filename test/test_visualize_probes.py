@@ -1,5 +1,5 @@
 import sys
-from os import path
+from os import path, remove
 
 sys.path.append("..")
 sys.path.append("../automatedPostProcessing")
@@ -19,6 +19,9 @@ def test_visualize_probes():
     # Check that output image exists
     assert path.exists(file_path)
     assert path.getsize(file_path) > 0
+
+    # Remove generatedoutput
+    remove(file_path)
 
 
 if __name__ == "__main__":

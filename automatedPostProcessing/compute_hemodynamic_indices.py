@@ -103,9 +103,9 @@ def compute_hemodynamic_indices(folder, nu, rho, dt, T, velocity_degree, save_fr
     n_cycles = int(len(dataset) / saved_time_steps_per_cycle)
 
     # Set number of cycles to average over
-    cycles = list(range(1, n_cycles + 1)) if average_over_cycles else []
-    counters_to_save = [saved_time_steps_per_cycle * cycle for cycle in cycles]
-    cycle_names = [""] + ["_cycle_{:02d}".format(cycle) for cycle in cycles]
+    cycles_to_average = list(range(1, n_cycles + 1)) if average_over_cycles else []
+    counters_to_save = [saved_time_steps_per_cycle * cycle for cycle in cycles_to_average]
+    cycle_names = [""] + ["_cycle_{:02d}".format(cycle) for cycle in cycles_to_average]
 
     # Create XDMF files for saving indices
     fullname = file_path_u.replace("u.h5", "%s%s.xdmf")
@@ -169,7 +169,7 @@ def compute_hemodynamic_indices(folder, nu, rho, dt, T, velocity_degree, save_fr
         tau.rename("WSS", "WSS")
         indices["WSS"].write(tau, dt * counter)
 
-        if len(cycles) != 0 and counter == counters_to_save[0]:
+        if len(cycles_to_average) != 0 and counter == counters_to_save[0]:
             # Get cycle number
             cycle = int(counters_to_save[0] / saved_time_steps_per_cycle)
             if MPI.rank(MPI.comm_world) == 0:
@@ -221,22 +221,23 @@ def compute_hemodynamic_indices(folder, nu, rho, dt, T, velocity_degree, save_fr
 
     # Time average computed indices
     n = n_cycles if average_over_cycles else (counter - start) // step
+    index_dict = index_dict if len(cycles_to_average) != 0 else index_dict_cycle
+    WSS_mean = WSS_mean if len(cycles_to_average) != 0 else WSS_mean_avg
 
-    TWSSG.vector()[:] = TWSSG.vector()[:] / n
-    TAWSS.vector()[:] = TAWSS.vector()[:] / n
+    index_dict['TWSSG'].vector()[:] = index_dict['TWSSG'].vector()[:] / n
+    index_dict['TAWSS'].vector()[:] = index_dict['TAWSS'].vector()[:] / n
     WSS_mean.vector()[:] = WSS_mean.vector()[:] / n
-
     wss_mean = project(inner(WSS_mean, WSS_mean) ** (1 / 2), U_b1)
     wss_mean_vec = wss_mean.vector().get_local()
-    tawss_vec = TAWSS.vector().get_local()
+    tawss_vec = index_dict['TAWSS'].vector().get_local()
 
     # Compute RRT, OSI, and ECAP based on mean and absolute WSS
-    RRT.vector().set_local(1 / wss_mean_vec)
-    OSI.vector().set_local(0.5 * (1 - wss_mean_vec / tawss_vec))
-    ECAP.vector().set_local(OSI.vector().get_local() / tawss_vec)
+    index_dict['RRT'].vector().set_local(1 / wss_mean_vec)
+    index_dict['OSI'].vector().set_local(0.5 * (1 - wss_mean_vec / tawss_vec))
+    index_dict['ECAP'].vector().set_local(index_dict['OSI'].vector().get_local() / tawss_vec)
 
-    for index in [RRT, OSI, ECAP]:
-        index.vector().apply("insert")
+    for index in ['RRT', 'OSI', 'ECAP']:
+        index_dict[index].vector().apply("insert")
 
     # Rename displayed variable names
     for name, var in index_dict.items():
