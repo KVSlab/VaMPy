@@ -69,7 +69,9 @@ def compute_flow_and_simulation_metrics(folder, nu, dt, velocity_degree, T, time
 
         id_start = (start_cycle - 1) * saved_time_steps_per_cycle
         dataset_dict = {"": dataset_names[id_start:]}
-        dataset_dict_avg = {"": dataset_names[:saved_time_steps_per_cycle] * (n_cycles - start_cycle + 1)}
+        file_u_avg = HDF5File(MPI.comm_world, file_path_u_avg, "r")
+        dataset_avg = get_dataset_names(file_u_avg, start=0, step=1) * (n_cycles - start_cycle + 1)
+        dataset_dict_avg = {"": dataset_avg}
         N = len(dataset_names[id_start:])
 
     # Get mesh information
@@ -78,7 +80,7 @@ def compute_flow_and_simulation_metrics(folder, nu, dt, velocity_degree, T, time
         mesh_file.read(mesh, "mesh", False)
 
     if MPI.rank(MPI.comm_world) == 0:
-        print("Define function spaces")
+        print("Defining function spaces")
 
     # Function space
     DG = FunctionSpace(mesh, 'DG', 0)
@@ -424,7 +426,7 @@ def define_functions_and_iterate_dataset(time_to_average, dataset, dataset_avg, 
             print(metric_name, "min:", min_)
 
     if MPI.rank(MPI.comm_world) == 0:
-        print("========== Post processing finished ==========")
+        print("=" * 10, "Post processing finished", "=" * 10)
         print("Results saved to: {}".format(folder))
 
 

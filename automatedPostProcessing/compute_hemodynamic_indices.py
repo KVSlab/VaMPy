@@ -1,5 +1,3 @@
-from __future__ import print_function
-
 from os import path
 
 from dolfin import *
@@ -12,7 +10,7 @@ except NameError:
     pass
 
 
-def compute_hemodynamic_indices(case_path, nu, rho, dt, T, velocity_degree, save_frequency, start_cycle, step,
+def compute_hemodynamic_indices(folder, nu, rho, dt, T, velocity_degree, save_frequency, start_cycle, step,
                                 average_over_cycles):
     """
     Loads velocity fields from completed CFD simulation,
@@ -29,7 +27,7 @@ def compute_hemodynamic_indices(case_path, nu, rho, dt, T, velocity_degree, save
 
     Args:
         velocity_degree (int): Finite element degree of velocity
-        case_path (str): Path to results from simulation
+        folder (str): Path to results from simulation
         nu (float): Kinematic viscosity
         rho (float): Fluid density
         dt (float): Time step of simulation
@@ -40,11 +38,11 @@ def compute_hemodynamic_indices(case_path, nu, rho, dt, T, velocity_degree, save
         average_over_cycles (bool): Averages over cardiac cycles if True
     """
     # File paths
-    file_path_u = path.join(case_path, "u.h5")
-    mesh_path = path.join(case_path, "mesh.h5")
+    file_path_u = path.join(folder, "u.h5")
+    mesh_path = path.join(folder, "mesh.h5")
     file_u = HDF5File(MPI.comm_world, file_path_u, "r")
 
-    # Start post-processing from 2nd cycle using every 10th time step, or 2000 time steps per cycle
+    # Determine what time step to start post-processing from
     start = int(T / dt / save_frequency * (start_cycle - 1))
 
     # Get names of data to extract
@@ -58,17 +56,18 @@ def compute_hemodynamic_indices(case_path, nu, rho, dt, T, velocity_degree, save
     with HDF5File(MPI.comm_world, mesh_path.__str__(), "r") as mesh_file:
         mesh_file.read(mesh, "mesh", False)
 
-    # Load mesh
     bm = BoundaryMesh(mesh, 'exterior')
 
     if MPI.rank(MPI.comm_world) == 0:
-        print("Define function spaces")
+        print("Defining function spaces")
+
     V_b1 = VectorFunctionSpace(bm, "CG", 1)
     U_b1 = FunctionSpace(bm, "CG", 1)
     V = VectorFunctionSpace(mesh, "CG", velocity_degree)
 
     if MPI.rank(MPI.comm_world) == 0:
-        print("Define functions")
+        print("Defining functions")
+
     u = Function(V)
 
     # RRT
@@ -102,6 +101,7 @@ def compute_hemodynamic_indices(case_path, nu, rho, dt, T, velocity_degree, save
     # Get number of saved steps and cycles
     saved_time_steps_per_cycle = int(T / dt / save_frequency / step)
     n_cycles = int(len(dataset) / saved_time_steps_per_cycle)
+
     # Set number of cycles to average over
     cycles = list(range(1, n_cycles + 1)) if average_over_cycles else []
     counters_to_save = [saved_time_steps_per_cycle * cycle for cycle in cycles]
@@ -173,7 +173,7 @@ def compute_hemodynamic_indices(case_path, nu, rho, dt, T, velocity_degree, save
             # Get cycle number
             cycle = int(counters_to_save[0] / saved_time_steps_per_cycle)
             if MPI.rank(MPI.comm_world) == 0:
-                print("========== Storing cardiac cycle {} ==========".format(cycle))
+                print("=" * 10, "Storing cardiac cycle {}".format(cycle), "=" * 10)
 
             # Get average over sampled time steps
             for index in [TWSSG_avg, TAWSS_avg, WSS_mean_avg]:
@@ -216,8 +216,12 @@ def compute_hemodynamic_indices(case_path, nu, rho, dt, T, velocity_degree, save
 
             counters_to_save.pop(0)
 
-    print("=" * 10, "Saving hemodynamic indices", "=" * 10)
+    if MPI.rank(MPI.comm_world) == 0:
+        print("=" * 10, "Saving hemodynamic indices", "=" * 10)
+
+    # Time average computed indices
     n = n_cycles if average_over_cycles else (counter - start) // step
+
     TWSSG.vector()[:] = TWSSG.vector()[:] / n
     TAWSS.vector()[:] = TAWSS.vector()[:] / n
     WSS_mean.vector()[:] = WSS_mean.vector()[:] / n
@@ -242,8 +246,9 @@ def compute_hemodynamic_indices(case_path, nu, rho, dt, T, velocity_degree, save
     for name, index in index_dict.items():
         indices[name].write(index)
 
-    print("========== Post processing finished ==========")
-    print("Results saved to: {}".format(case_path))
+    if MPI.rank(MPI.comm_world) == 0:
+        print("=" * 10, "Post processing finished", "=" * 10)
+        print("Results saved to: {}".format(folder))
 
 
 if __name__ == '__main__':
