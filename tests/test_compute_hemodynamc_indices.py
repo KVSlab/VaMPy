@@ -1,9 +1,5 @@
 import shutil
-import sys
 from os import path
-
-sys.path.append("..")
-sys.path.append("../automatedPostProcessing")
 
 from vampy.automatedPostProcessing.compute_hemodynamic_indices import compute_hemodynamic_indices
 

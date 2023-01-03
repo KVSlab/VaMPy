@@ -1,9 +1,5 @@
 import shutil
-import sys
 from os import path, remove
-
-sys.path.append("..")
-sys.path.append("../automatedPostProcessing")
 
 from vampy.automatedPostProcessing.compute_flow_and_simulation_metrics import compute_flow_and_simulation_metrics
 
