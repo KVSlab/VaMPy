@@ -85,8 +85,8 @@ def read_command_line():
     args = parser.parse_args()
 
     return args.case, args.nu, args.rho, args.dt, args.velocity_degree, args.pressure_degree, args.probe_frequency, \
-           args.T, args.save_frequency, args.times_to_average, args.start_cycle, args.sample_step, \
-           args.average_over_cycles
+        args.T, args.save_frequency, args.times_to_average, args.start_cycle, args.sample_step, \
+        args.average_over_cycles
 
 
 def epsilon(u):
