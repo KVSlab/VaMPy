@@ -14,7 +14,6 @@ vampy = "vampy.__main__:main"
 
 [project.optional-dependencies]
 test = [
-    "dolfin",
     "numpy",
     "pytest",
     "pytest-cov",
