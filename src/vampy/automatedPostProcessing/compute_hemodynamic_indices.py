@@ -1,6 +1,7 @@
 from os import path
 
-from dolfin import *
+from dolfin import Function, VectorFunctionSpace, FunctionSpace, parameters, MPI, HDF5File, Mesh, XDMFFile, \
+    BoundaryMesh, project, inner
 
 from vampy.automatedPostProcessing.postprocessing_common import STRESS, read_command_line, get_dataset_names
 

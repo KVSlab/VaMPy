@@ -1,14 +1,12 @@
 import argparse
 from time import time
 
-try:
-    from dolfin import *
+from dolfin import parameters, MPI, assemble, interpolate, ipow, Measure, FacetNormal, Identity, VectorFunctionSpace, \
+    BoundaryMesh, Function, FacetArea, TestFunction, FunctionSpace, grad, inner
 
-    try:
-        parameters["allow_extrapolation"] = True
-    except NameError:
-        pass
-except ImportError:
+try:
+    parameters["allow_extrapolation"] = True
+except NameError:
     pass
 
 
@@ -87,8 +85,8 @@ def read_command_line():
     args = parser.parse_args()
 
     return args.case, args.nu, args.rho, args.dt, args.velocity_degree, args.pressure_degree, args.probe_frequency, \
-           args.T, args.save_frequency, args.times_to_average, args.start_cycle, args.sample_step, \
-           args.average_over_cycles
+        args.T, args.save_frequency, args.times_to_average, args.start_cycle, args.sample_step, \
+        args.average_over_cycles
 
 
 def epsilon(u):
@@ -106,6 +104,7 @@ def epsilon(u):
 
 class STRESS:
     def __init__(self, u, p, nu, mesh):
+        ds = Measure("ds", domain=mesh)
         boundary_mesh = BoundaryMesh(mesh, 'exterior')
         self.bmV = VectorFunctionSpace(boundary_mesh, 'CG', 1)
 
@@ -160,7 +159,7 @@ class STRESS:
         Returns:
             norm (Power): Norm as expression
         """
-        return pow(inner(u, u), 0.5)
+        return ipow(inner(u, u), 0.5)
 
 
 def get_dataset_names(data_file, num_files=100000, step=1, start=1, print_info=True,

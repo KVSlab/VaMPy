@@ -1,6 +1,7 @@
 from os import path
 
-from vampy.automatedPreProcessing.automatedPreProcessing import read_command_line, run_pre_processing
+from vampy.automatedPreProcessing.automatedPreProcessing import read_command_line, \
+    run_pre_processing
 from vampy.automatedPreProcessing.common import read_polydata
 
 

@@ -1,7 +1,7 @@
 from os import path, makedirs
 
 import numpy as np
-from dolfin import *
+from dolfin import MPI, assemble, Constant, assign, HDF5File, Measure
 
 
 def get_file_paths(folder):
@@ -22,6 +22,7 @@ def get_file_paths(folder):
 
 def print_mesh_information(mesh):
     # Print geometric information about the volumetric mesh
+    dx = Measure("dx", domain=mesh)
     comm = MPI.comm_world
     local_xmin = mesh.coordinates()[:, 0].min()
     local_xmax = mesh.coordinates()[:, 0].max()
@@ -46,7 +47,7 @@ def print_mesh_information(mesh):
     num_faces = comm.gather(local_num_faces, 0)
     num_facets = comm.gather(local_num_facets, 0)
     num_vertices = comm.gather(local_num_vertices, 0)
-    volume = assemble(Constant(1) * dx(mesh))
+    volume = assemble(Constant(1) * dx)
 
     if MPI.rank(MPI.comm_world) == 0:
         print("=== Mesh information ===")

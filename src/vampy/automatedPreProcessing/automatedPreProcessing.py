@@ -1,9 +1,19 @@
 import argparse
-from os import remove
+import sys
+from os import remove, path
+
+import numpy as np
+from morphman import is_surface_capped, get_uncapped_surface, write_polydata, get_parameters, vtk_clean_polydata, \
+    vtk_triangulate_surface, write_parameters, vmtk_cap_polydata, compute_centerlines, get_centerline_tolerance, \
+    get_vtk_point_locator, extract_single_line, vtk_merge_polydata, get_point_data_array, smooth_voronoi_diagram, \
+    create_new_surface, compute_centers, vmtk_smooth_surface, str2bool
 
 # Local imports
 from vampy.automatedPreProcessing import ToolRepairSTL
-from vampy.automatedPreProcessing.common import *
+from vampy.automatedPreProcessing.common import read_polydata, get_centers_for_meshing, dist_sphere_diam, \
+    dist_sphere_curvature, dist_sphere_constant, get_regions_to_refine, radiusArrayName, make_voronoi_diagram, \
+    add_flow_extension, write_mesh, mesh_alternative, generate_mesh, find_boundaries, compute_flow_rate, \
+    setup_model_network
 from vampy.automatedPreProcessing.simulate import run_simulation
 from vampy.automatedPreProcessing.visualize import visualize
 
@@ -37,7 +47,6 @@ def run_pre_processing(filename_model, verbose_print, smoothing_method, smoothin
         compress_mesh (bool): Compresses finalized mesh if True
     """
     # Get paths
-    abs_path = path.abspath(path.dirname(__file__))
     case_name = filename_model.rsplit(path.sep, 1)[-1].rsplit('.')[0]
     dir_path = filename_model.rsplit(path.sep, 1)[0]
 
@@ -58,7 +67,6 @@ def run_pre_processing(filename_model, verbose_print, smoothing_method, smoothin
     file_name_surface_name = path.join(dir_path, case_name + "_remeshed_surface.vtp")
     file_name_xml_mesh = path.join(dir_path, case_name + ".xml")
     file_name_vtu_mesh = path.join(dir_path, case_name + ".vtu")
-    file_name_run_script = path.join(dir_path, case_name + ".sh")
 
     print("\n--- Working on case:", case_name, "\n")
 
@@ -294,7 +302,7 @@ def run_pre_processing(filename_model, verbose_print, smoothing_method, smoothin
                 "No points in surface mesh, try to remesh"
             assert mesh.GetNumberOfPoints() > 0, "No points in mesh, try to remesh"
 
-        except:
+        except Exception:
             distance_to_sphere = mesh_alternative(distance_to_sphere)
             mesh, remeshed_surface = generate_mesh(distance_to_sphere)
             assert mesh.GetNumberOfPoints() > 0, "No points in mesh, after remeshing"
@@ -471,7 +479,8 @@ def read_command_line():
                 print(arg, end=' ')
                 print()
     else:
-        verbose_print = lambda *a: None
+        def verbose_print(*args):
+            return None
 
     verbose_print(args)
 

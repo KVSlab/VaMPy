@@ -1,13 +1,13 @@
 #!/usr/bin/env python
 
-## Program:   AneuTools
-## Module:    DisplayData.py
-## Language:  Python
-## Date:      $Date: 2016/17/04 00:00:00 $
-## Version:   $Revision: 0.0.1 $
-## Author:    Christophe Chnafa
+# Program:   AneuTools
+# Module:    DisplayData.py
+# Language:  Python
+# Date:      $Date: 2016/17/04 00:00:00 $
+# Version:   $Revision: 0.0.1 $
+# Author:    Christophe Chnafa
 
-##   Copyright (c) Christophe Chnafa. All rights reserved.
+#   Copyright (c) Christophe Chnafa. All rights reserved.
 
 import vtk
 
@@ -80,7 +80,7 @@ class DisplayModel(object):
         # The function is called SetHeadLightWarmth starting from VTK 5.0
         try:
             lightKit.SetHeadLightWarmth(0.5)
-        except:
+        except Exception:
             lightKit.SetHeadlightWarmth(0.5)
 
         # intensity ratios

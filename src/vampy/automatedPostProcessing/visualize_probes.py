@@ -46,7 +46,7 @@ def visualize_probes(case_path, probe_saving_frequency, show_figure=True, save_f
             u_probe = np.load(u, allow_pickle=True)
             v_probe = np.load(v, allow_pickle=True)
             w_probe = np.load(w, allow_pickle=True)
-        except:
+        except Exception:
             print("-- Finished reading in probes")
             break
 

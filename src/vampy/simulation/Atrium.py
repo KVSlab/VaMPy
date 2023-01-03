@@ -1,33 +1,35 @@
 import json
 import pickle
-from os import makedirs
+from os import makedirs, path
 from pprint import pprint
-import numpy as np
 
-from oasis.problems.NSfracStep import *
+import numpy as np
+from oasis.problems.NSfracStep import set_log_level, MPI, Measure, Mesh, assemble, Constant, DirichletBC, FacetNormal, \
+    Function, VectorFunctionSpace, HDF5File, NS_parameters, MeshFunction, FunctionSpace, project, sqrt, inner, \
+    info_green, assign
 
 from Probe import Probes
 from Womersley import make_womersley_bcs, compute_boundary_geometry_acrn
 from common import store_u_mean, get_file_paths, print_mesh_information
-
-"""
-Problem file for running CFD simulation in left atrial models consisting of arbitrary number of pulmonary veins (PV) 
-(normally 3 to 7), and one outlet being the mitral valve. A Womersley velocity profile is applied at the inlets, where 
-the total flow rate is split between the area ratio of the PVs. The mitral valve is considered open with a constant 
-pressure of p=0. Flow rate and flow split values for the inlet condition are computed from the pre-processing script 
-automatedPreProcessing.py. The simulation is run for two cycles (adjustable), but only the results/solutions from the 
-second cycle are stored to avoid non-physiological effects from the first cycle. One cardiac cycle is set to 0.951 s 
-from [1], and scaled by a factor of 1000, hence all parameters are in [mm] or [ms].  
-
-[1] Hoi, Yiemeng, et al. "Characterization of volumetric flow rate waveforms at the carotid bifurcations of older 
-    adults." Physiological measurement 31.3 (2010): 291.
-"""
 
 # FEniCS specific command to control the desired level of logging, here set to critical errors
 set_log_level(50)
 
 
 def problem_parameters(commandline_kwargs, NS_parameters, scalar_components, Schmidt, NS_expressions, **NS_namespace):
+    """
+    Problem file for running CFD simulation in left atrial models consisting of arbitrary number of pulmonary veins (PV)
+    (normally 3 to 7), and one outlet being the mitral valve. A Womersley velocity profile is applied at the inlets,
+    where the total flow rate is split between the area ratio of the PVs. The mitral valve is considered open with a
+    constant pressure of p=0. Flow rate and flow split values for the inlet condition are computed from the
+    pre-processing script automatedPreProcessing.py. The simulation is run for two cycles (adjustable), but only the
+    results/solutions from the second cycle are stored to avoid non-physiological effects from the first cycle.
+    One cardiac cycle is set to 0.951 s from [1], and scaled by a factor of 1000, hence all parameters are in
+    [mm] or [ms].
+
+    [1] Hoi, Yiemeng, et al. "Characterization of volumetric flow rate waveforms at the carotid bifurcations of older
+        adults." Physiological measurement 31.3 (2010): 291.
+    """
     if "restart_folder" in commandline_kwargs.keys():
         restart_folder = commandline_kwargs["restart_folder"]
         f = open(path.join(restart_folder, 'params.dat'), 'rb')
@@ -99,10 +101,10 @@ def create_bcs(NS_expressions, mesh, mesh_path, nu, t, V, Q, id_in, id_out, **NS
     Q_mean = info['mean_flow_rate']
 
     # Find corresponding areas
-    ds_new = Measure("ds", domain=mesh, subdomain_data=boundary)
+    ds = Measure("ds", domain=mesh)
     area_total = 0
     for ID in id_in:
-        area_total += assemble(Constant(1.0) * ds_new(ID))
+        area_total += assemble(Constant(1.0) * ds(ID, subdomain_data=boundary))
 
     # Load normalized time and flow rate values
     t_values, Q_ = np.loadtxt(path.join(path.dirname(path.abspath(__file__)), "PV_values")).T
@@ -219,9 +221,9 @@ def temporal_hook(mesh, dt, t, save_solution_frequency, u_, NS_expressions, id_i
         CFL_max = U_max * dt / h
 
         if MPI.rank(MPI.comm_world) == 0:
-            info_green(
-                'Time = {0:2.4e}, timestep = {1:6d}, max Reynolds number={2:2.3f}, mean Reynolds number={3:2.3f}, max velocity={4:2.3f}, mean velocity={5:2.3f}, max CFL={6:2.3f}, mean CFL={7:2.3f}'
-                    .format(t, tstep, Re_max, Re_mean, U_max, U_mean, CFL_max, CFL_mean))
+            info = 'Time = {0:2.4e}, timestep = {1:6d}, max Reynolds number={2:2.3f}, mean Reynolds number={3:2.3f}' + \
+                   ', max velocity={4:2.3f}, mean velocity={5:2.3f}, max CFL={6:2.3f}, mean CFL={7:2.3f}'
+            info_green(info.format(t, tstep, Re_max, Re_mean, U_max, U_mean, CFL_max, CFL_mean))
 
     # Sample velocity and pressure in points/probes
     eval_dict["centerline_u_x_probes"](u_[0])

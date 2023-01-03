@@ -1,13 +1,13 @@
 #!/usr/bin/env python
 
-## Program:   AneuTool
-## Module:    NetworkBoundaryConditions.py
-## Language:  Python
-## Date:      $Date: 2016/17/04 00:00:00 $
-## Version:   $Revision: 0.0.1 $
-## Author:    Christophe Chnafa
+# Program:   AneuTool
+# Module:    NetworkBoundaryConditions.py
+# Language:  Python
+# Date:      $Date: 2016/17/04 00:00:00 $
+# Version:   $Revision: 0.0.1 $
+# Author:    Christophe Chnafa
 
-##   Copyright (c) Christophe Chnafa. All rights reserved.
+#   Copyright (c) Christophe Chnafa. All rights reserved.
 
 class FlowSplitting(object):
     """This class computes the flow splitting for a network according to
@@ -51,7 +51,8 @@ class FlowSplitting(object):
                     adjacentBranchFound = True
                     sumSurfaces += network.elements[
                         otherElement.GetFrontSegment()].GetMeanArea()
-            # At least one adjacent blanked branch should be found. 
+
+            # At least one adjacent blanked branch should be found.
             if not (adjacentBranchFound):
                 raise RuntimeError('Unexpected error, '
                                    'adjacent branch not found. Check the connectivity.')
@@ -84,7 +85,7 @@ class FlowSplitting(object):
             # ... gather alpha coefficients at each division by scanning
             # the network in direction of the flow inlet.
             while not (foundNetworkRoot):
-                if currentElement.GetBehindSegment() == None:
+                if currentElement.GetBehindSegment() is None:
                     raise RuntimeError('The network is constitued of one segment '
                                        'or the input centerlines have a hanging segment.')
                 behindElement = network.elements[currentElement.GetBehindSegment()]

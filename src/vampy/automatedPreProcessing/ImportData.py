@@ -1,13 +1,13 @@
 #!/usr/bin/env python
 
-## Program:   AneuTools
-## Module:    ImportData.py
-## Language:  Python
-## Date:      $Date: 2016/17/04 00:00:00 $
-## Version:   $Revision: 0.0.1 $
-## Author:    Christophe Chnafa
+# Program:   AneuTools
+# Module:    ImportData.py
+# Language:  Python
+# Date:      $Date: 2016/17/04 00:00:00 $
+# Version:   $Revision: 0.0.1 $
+# Author:    Christophe Chnafa
 
-##   Copyright (c) Christophe Chnafa. All rights reserved.
+#   Copyright (c) Christophe Chnafa. All rights reserved.
 
 import math
 
@@ -146,7 +146,6 @@ def ComputeGeometricTolerance(centerline):
     is used for merging the blanked segments.
 
     """
-    groupIdsArray = centerline.GetCellData().GetArray(GROUPIDSARRAYNAME)
     minLength = 10000.0
     maxLength = 0.0
     numberOfCells = centerline.GetNumberOfCells()
@@ -514,7 +513,7 @@ def GetIndexCenterlineForADefinedLength(centerline, branchId, desiredLength,
     if not (done):
         try:
             index = k
-        except:
+        except Exception:
             index = None
 
     return index

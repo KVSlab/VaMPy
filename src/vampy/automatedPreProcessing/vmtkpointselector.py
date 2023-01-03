@@ -81,7 +81,7 @@ class vmtkPickPointSeedSelector(vmtkSeedSelector):
         self.PickedSeeds.SetPoints(seedPoints)
 
     def Execute(self):
-        if (self._Surface == None):
+        if self._Surface is None:
             self.PrintError('vmtkPickPointSeedSelector Error: Surface not set.')
             return
 

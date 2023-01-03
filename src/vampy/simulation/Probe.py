@@ -31,7 +31,7 @@ class Probes(probe11.Probes):
     def __next__(self):
         try:
             p = self[self.i]
-        except:
+        except Exception:
             raise StopIteration
         self.i += 1
         return p
@@ -43,14 +43,14 @@ class Probes(probe11.Probes):
         is_root = comm.Get_rank() == root
         size = self.get_total_number_probes() if is_root else len(self)
         comp = self.value_size() if component is None else 1
-        if not N is None:
+        if N is not None:
             z = zeros((size, comp))
         else:
             z = zeros((size, comp, self.number_of_evaluations()))
 
         # Get all values
         if len(self) > 0:
-            if not N is None:
+            if N is not None:
                 for k in range(comp):
                     if is_root:
                         ids = self.get_probe_ids()
@@ -60,7 +60,7 @@ class Probes(probe11.Probes):
             else:
                 for i, (index, probe) in enumerate(self):
                     j = index if is_root else i
-                    if not N is None:
+                    if N is not None:
                         z[j, :] = probe.get_probe_at_snapshot(N)
                     else:
                         for k in range(self.value_size()):
@@ -81,7 +81,7 @@ class Probes(probe11.Probes):
 
         if is_root:
             if filename:
-                if not N is None:
+                if N is not None:
                     save(filename + "_snapshot_" + str(N), z)
                 else:
                     save(filename + "_all", z)

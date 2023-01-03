@@ -1,34 +1,35 @@
 import json
 import pickle
-from os import makedirs
+from os import makedirs, path
 from pprint import pprint
-import numpy as np
 
-from oasis.problems.NSfracStep import *
+import numpy as np
+from oasis.problems.NSfracStep import set_log_level, MPI, Measure, Mesh, assemble, Constant, DirichletBC, FacetNormal, \
+    Function, VectorFunctionSpace, HDF5File, NS_parameters, MeshFunction, assign, dot, Expression
 
 from Probe import Probes
 from Womersley import make_womersley_bcs, compute_boundary_geometry_acrn
 from common import get_file_paths, store_u_mean, print_mesh_information
-
-"""
-Problem file for running CFD simulation in arterial models consisting of one inlet, and two or more outlets.
-A Womersley velocity profile is applied at the inlet, and a flow split pressure condition is applied at the outlets,
-following [1]. Flow rate for the inlet condition, and flow split values for the outlets are computed from the 
-pre-processing script automatedPreProcessing.py. The simulation is run for two cycles (adjustable), but only the 
-results/solutions from the second cycle are stored to avoid non-physiological effects from the first cycle.
-One cardiac cycle is set to 0.951 s from [2], and scaled by a factor of 1000, hence all parameters are in [mm] or [ms].  
-
-[1] Gin, Ron, Anthony G. Straatman, and David A. Steinman. "A dual-pressure boundary condition for use in simulations 
-    of bifurcating conduits." J. Biomech. Eng. 124.5 (2002): 617-619. 
-[2] Hoi, Yiemeng, et al. "Characterization of volumetric flow rate waveforms at the carotid bifurcations of older 
-    adults." Physiological measurement 31.3 (2010): 291.
-"""
 
 # FEniCS specific command to control the desired level of logging, here set to critical errors
 set_log_level(50)
 
 
 def problem_parameters(commandline_kwargs, NS_parameters, NS_expressions, **NS_namespace):
+    """
+    Problem file for running CFD simulation in arterial models consisting of one inlet, and two or more outlets.
+    A Womersley velocity profile is applied at the inlet, and a flow split pressure condition is applied at the outlets,
+    following [1]. Flow rate for the inlet condition, and flow split values for the outlets are computed from the
+    pre-processing script automatedPreProcessing.py. The simulation is run for two cycles (adjustable), but only the
+    results/solutions from the second cycle are stored to avoid non-physiological effects from the first cycle.
+    One cardiac cycle is set to 0.951 s from [2], and scaled by a factor of 1000, hence all parameters are in [mm] or
+    [ms].
+
+    [1] Gin, Ron, Anthony G. Straatman, and David A. Steinman. "A dual-pressure boundary condition for use in
+        simulations of bifurcating conduits." J. Biomech. Eng. 124.5 (2002): 617-619.
+    [2] Hoi, Yiemeng, et al. "Characterization of volumetric flow rate waveforms at the carotid bifurcations of older
+        adults." Physiological measurement 31.3 (2010): 291.
+    """
     if "restart_folder" in commandline_kwargs.keys():
         restart_folder = commandline_kwargs["restart_folder"]
         f = open(path.join(restart_folder, 'params.dat'), 'rb')
@@ -120,8 +121,9 @@ def create_bcs(t, NS_expressions, V, Q, area_ratio, area_inlet, mesh, mesh_path,
 
     # Create pressure boundary condition
     area_out = []
+    ds = Measure("ds", domain=mesh)
     for i, ind in enumerate(id_out):
-        dsi = ds(ind, domain=mesh, subdomain_data=boundary)
+        dsi = ds(ind, subdomain_data=boundary)
         area_out.append(assemble(Constant(1.0, name="one") * dsi))
 
     bc_p = []
@@ -322,11 +324,12 @@ def update_pressure_condition(NS_expressions, area_ratio, boundary, id_in, id_ou
     """
     Use a dual-pressure boundary condition as pressure condition at outlet.
     """
-    Q_in = abs(assemble(dot(u_, n) * ds(id_in[0], domain=mesh, subdomain_data=boundary)))
+    ds = Measure("ds", domain=mesh)
+    Q_in = abs(assemble(dot(u_, n) * ds(id_in[0], subdomain_data=boundary)))
     Q_outs = []
     Q_ideals = []
     for i, out_id in enumerate(id_out):
-        Q_out = abs(assemble(dot(u_, n) * ds(out_id, domain=mesh, subdomain_data=boundary)))
+        Q_out = abs(assemble(dot(u_, n) * ds(out_id, subdomain_data=boundary)))
         Q_outs.append(Q_out)
 
         Q_ideal = area_ratio[i] * Q_in

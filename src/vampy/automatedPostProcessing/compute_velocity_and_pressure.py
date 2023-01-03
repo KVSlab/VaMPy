@@ -2,7 +2,7 @@ from __future__ import print_function
 
 from pathlib import Path
 
-from dolfin import *
+from dolfin import parameters, FunctionSpace, XDMFFile, MPI, VectorFunctionSpace, HDF5File, Mesh, Function
 
 from vampy.automatedPostProcessing.postprocessing_common import read_command_line
 
@@ -74,7 +74,7 @@ def compute_velocity_and_pressure(case_path, dt, velocity_degree, pressure_degre
             print("=" * 10, "Timestep: {}".format(timestamp), "=" * 10)
             u_h5.read(u, u_name)
             p_h5.read(p, p_name)
-        except:
+        except Exception:
             print("=" * 10, "Finished reading solutions", "=" * 10)
             break
 

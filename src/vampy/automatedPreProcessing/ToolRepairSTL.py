@@ -1,13 +1,13 @@
 #!/usr/bin/env python
 
-## Program:   AneuTool
-## Module:    ToolRepairSTL.py
-## Language:  Python
-## Date:      $Date: 2016/17/04 00:00:00 $
-## Version:   $Revision: 0.0.1 $
-## Author:    Christophe Chnafa
+# Program:   AneuTool
+# Module:    ToolRepairSTL.py
+# Language:  Python
+# Date:      $Date: 2016/17/04 00:00:00 $
+# Version:   $Revision: 0.0.1 $
+# Author:    Christophe Chnafa
 
-##   Copyright (c) Christophe Chnafa. All rights reserved.
+#   Copyright (c) Christophe Chnafa. All rights reserved.
 
 import argparse
 import math
@@ -74,7 +74,7 @@ def foundAndDeleteNaNTriangles(mesh):
             if isNaN(x[0]) | isNaN(x[1]) | isNaN(x[2]):
                 ctrNaN += 1
                 killThisTriangle = True
-        if killThisTriangle == True:
+        if killThisTriangle:
             mesh.DeleteCell(i)
     mesh.RemoveDeletedCells()
     print(("> Found %s NaN cells." % ctrNaN))
@@ -186,17 +186,10 @@ def repairSTL(inputFileName, outputFileName, closeHoles, checkHoles, checkQualit
     # Open file.
     mesh = loadFile(inputFileName)
 
-    if checkQuality == True:
+    if checkQuality:
         quality = computeQualityMesh(mesh, vtk.VTK_QUALITY_ASPECT_RATIO)
-        # q = qualityFilter.GetOutput().GetCellData().GetArray("Quality")
 
         print(DumpQualityStats(quality, 'Quality'))
-        # quality_min = quality.GetOutput().GetFieldData()\
-        # .GetArray('Mesh Tetrahedron Quality').GetComponent(0, 0)
-        # quality_max = quality.GetOutput().GetFieldData()\
-        # .GetArray('Mesh Tetrahedron Quality').GetComponent(0, 2)
-        # print quality_min
-        # print quality_max
 
     # Check the number of pts and cells.
     surfaceOverview(mesh)
@@ -216,16 +209,16 @@ def repairSTL(inputFileName, outputFileName, closeHoles, checkHoles, checkQualit
     # Re check the surface.
     foundNaN = foundAndDeleteNaNTriangles(outputPolyData)
 
-    if foundNaN == True:
+    if foundNaN:
         print("> ERROR: There is still an issue that cannot be fixed with this tool.")
     else:
-        if closeHoles == True:
+        if closeHoles:
             outputBisPolyData = closeAllTheHolesOnTheSurface(outputPolyData)
             surfaceOverview(outputBisPolyData)
         else:
             outputBisPolyData = outputPolyData
 
-        if checkHoles == True:
+        if checkHoles:
             checkIfThereIsHoles(outputBisPolyData)
 
         checkIfThereIsNonTriangleCells(outputBisPolyData)

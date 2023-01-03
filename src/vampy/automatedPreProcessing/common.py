@@ -1,14 +1,14 @@
-from morphman.common import *
+from os import path
 
+import numpy as np
+from morphman import vtk_clean_polydata, vtk_triangulate_surface, get_parameters, write_parameters, read_polydata, \
+    vmtkscripts, vtk, write_polydata, vtkvmtk, get_curvilinear_coordinate, vtk_compute_threshold, get_vtk_array, \
+    get_distance, get_number_of_arrays, vmtk_smooth_surface, get_point_data_array, create_vtk_array, \
+    get_vtk_point_locator, vtk_extract_feature_edges, get_uncapped_surface, vtk_compute_connectivity, \
+    vtk_compute_mass_properties, extract_single_line, get_centerline_tolerance
 from vampy.automatedPreProcessing import ImportData
 from vampy.automatedPreProcessing.NetworkBoundaryConditions import FlowSplitting
-
-try:
-    from vampy.automatedPreProcessing.vmtkpointselector import *
-except ImportError:
-    pass
-import numpy as np
-from os import path
+from vampy.automatedPreProcessing.vmtkpointselector import vmtkPickPointSeedSelector
 
 # Global array names
 radiusArrayName = 'MaximumInscribedSphereRadius'
@@ -304,7 +304,8 @@ def dist_sphere_curvature(surface, centerlines, region_center, misr_max, save_pa
     tol = get_centerline_tolerance(centerlines)
 
     for i in range(centerlines.GetNumberOfLines()):
-        if i == ind_longest: continue
+        if i == ind_longest:
+            continue
         comp_line = extract_single_line(centerlines, i)
         for j in range(comp_line.GetNumberOfPoints()):
             pnt1 = longest_line.GetPoints().GetPoint(j)
@@ -765,8 +766,10 @@ def add_flow_extension(surface, centerlines, include_outlet, extension_length=2.
         surface (vtkPolyData): Surface model to extend
         centerlines (vtkPolyData): Centerlines in model
         include_outlet (bool): Determines if outlet should be included or not
-        extension_length (float): Determines length of flow extensions. Factor is multiplied with MISR at relevant boundary
-        extension_mode (str): Determines how extensions are place, either normal to boundary or following centerline direction
+        extension_length (float): Determines length of flow extensions.
+                                Factor is multiplied with MISR at relevant boundary
+        extension_mode (str): Determines how extensions are place, either normal to boundary
+                                or following centerline direction
 
     Returns:
         surface_extended (vtkPolyData): Extended surface model

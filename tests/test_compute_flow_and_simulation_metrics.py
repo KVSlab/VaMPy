@@ -6,7 +6,8 @@ from vampy.automatedPostProcessing.compute_flow_and_simulation_metrics import co
 
 def test_compute_flow_and_simulation_metrics_for_full_cycle():
     # Path to test results and params
-    results_path, nu, dt, velocity_degree, T, save_frequency, start_cycle, step, flow_metrics_path = get_default_parameters()
+    results_path, nu, dt, velocity_degree, T, save_frequency, start_cycle, step, flow_metrics_path = \
+        get_default_parameters()
     average_over_cycles = False
     times_to_average = []
 
@@ -41,7 +42,8 @@ def test_compute_flow_and_simulation_metrics_for_full_cycle():
 
 def test_compute_flow_and_simulation_metrics_at_one_instance():
     # Path to test results and params
-    results_path, nu, dt, velocity_degree, T, save_frequency, start_cycle, step, flow_metrics_path = get_default_parameters()
+    results_path, nu, dt, velocity_degree, T, save_frequency, start_cycle, step, flow_metrics_path = \
+        get_default_parameters()
 
     average_over_cycles = False
 
@@ -80,7 +82,8 @@ def test_compute_flow_and_simulation_metrics_at_one_instance():
 
 def test_compute_flow_and_simulation_metrics_averaged_over_one_cycle():
     # Path to test results and params
-    results_path, nu, dt, velocity_degree, T, save_frequency, start_cycle, step, flow_metrics_path = get_default_parameters()
+    results_path, nu, dt, velocity_degree, T, save_frequency, start_cycle, step, flow_metrics_path = \
+        get_default_parameters()
     times_to_average = []
 
     # Average over cycle 1

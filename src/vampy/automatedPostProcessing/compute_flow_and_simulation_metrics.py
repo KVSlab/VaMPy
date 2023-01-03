@@ -1,7 +1,8 @@
 from os import path
 
 import numpy as np
-from dolfin import *
+from dolfin import FunctionSpace, Function, MPI, VectorFunctionSpace, Timer, project, sqrt, inner, HDF5File, XDMFFile, \
+    assign, CellDiameter, Mesh, TestFunction, list_timings, TimingClear, TimingType, Measure, assemble
 
 from vampy.automatedPostProcessing.postprocessing_common import read_command_line, epsilon, get_dataset_names
 
@@ -434,9 +435,10 @@ def rate_of_strain(strain, u, v, mesh, h):
         mesh: Mesh to compute strain rate on
         h (float): Cell diameter of mesh
     """
+    dx = Measure("dx", domain=mesh)
     eps = epsilon(u)
     f = sqrt(inner(eps, eps))
-    x = assemble(inner(f, v) / h * dx(mesh))
+    x = assemble(inner(f, v) / h * dx)
     strain.vector().set_local(x.get_local())
     strain.vector().apply("insert")
 
@@ -453,16 +455,17 @@ def rate_of_dissipation(dissipation, u, v, mesh, h, nu):
         h (float): Cell diameter of mesh
         nu (float): Viscosity
     """
+    dx = Measure("dx", domain=mesh)
     eps = epsilon(u)
     f = 2 * nu * inner(eps, eps)
-    x = assemble(inner(f, v) / h * dx(mesh))
+    x = assemble(inner(f, v) / h * dx)
     dissipation.vector().set_local(x.get_local())
     dissipation.vector().apply("insert")
 
 
 if __name__ == '__main__':
-    folder, nu, _, dt, velocity_degree, _, _, T, save_frequency, times_to_average, start_cycle, step, average_over_cycles \
-        = read_command_line()
+    folder, nu, _, dt, velocity_degree, _, _, T, save_frequency, times_to_average, start_cycle, step, \
+        average_over_cycles = read_command_line()
 
     compute_flow_and_simulation_metrics(folder, nu, dt, velocity_degree, T, times_to_average, save_frequency,
                                         start_cycle, step, average_over_cycles)
