@@ -1,0 +1,647 @@
+
+<!DOCTYPE html>
+
+<html>
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" /><meta name="generator" content="Docutils 0.17.1: http://docutils.sourceforge.net/" />
+
+    <title>High-resolution CFD simulation in the internal carotid artery &#8212; VaMPy</title>
+    
+  <!-- Loaded before other Sphinx assets -->
+  <link href="_static/styles/theme.css?digest=1999514e3f237ded88cf" rel="stylesheet">
+<link href="_static/styles/pydata-sphinx-theme.css?digest=1999514e3f237ded88cf" rel="stylesheet">
+
+    
+  <link rel="stylesheet"
+    href="_static/vendor/fontawesome/5.13.0/css/all.min.css">
+  <link rel="preload" as="font" type="font/woff2" crossorigin
+    href="_static/vendor/fontawesome/5.13.0/webfonts/fa-solid-900.woff2">
+  <link rel="preload" as="font" type="font/woff2" crossorigin
+    href="_static/vendor/fontawesome/5.13.0/webfonts/fa-brands-400.woff2">
+
+    <link rel="stylesheet" type="text/css" href="_static/pygments.css" />
+    <link rel="stylesheet" href="_static/styles/sphinx-book-theme.css?digest=5115cc725059bd94278eecd172e13a965bf8f5a9" type="text/css" />
+    <link rel="stylesheet" type="text/css" href="_static/togglebutton.css" />
+    <link rel="stylesheet" type="text/css" href="_static/copybutton.css" />
+    <link rel="stylesheet" type="text/css" href="_static/mystnb.css" />
+    <link rel="stylesheet" type="text/css" href="_static/sphinx-thebe.css" />
+    <link rel="stylesheet" type="text/css" href="_static/design-style.b7bb847fb20b106c3d81b95245e65545.min.css" />
+    
+  <!-- Pre-loaded scripts that we'll load fully later -->
+  <link rel="preload" as="script" href="_static/scripts/pydata-sphinx-theme.js?digest=1999514e3f237ded88cf">
+
+    <script data-url_root="./" id="documentation_options" src="_static/documentation_options.js"></script>
+    <script src="_static/jquery.js"></script>
+    <script src="_static/underscore.js"></script>
+    <script src="_static/doctools.js"></script>
+    <script src="_static/clipboard.min.js"></script>
+    <script src="_static/copybutton.js"></script>
+    <script src="_static/scripts/sphinx-book-theme.js?digest=9c920249402e914e316237a7dbc6769907cce411"></script>
+    <script>let toggleHintShow = 'Click to show';</script>
+    <script>let toggleHintHide = 'Click to hide';</script>
+    <script>let toggleOpenOnPrint = 'true';</script>
+    <script src="_static/togglebutton.js"></script>
+    <script>var togglebuttonSelector = '.toggle, .admonition.dropdown, .tag_hide_input div.cell_input, .tag_hide-input div.cell_input, .tag_hide_output div.cell_output, .tag_hide-output div.cell_output, .tag_hide_cell.cell, .tag_hide-cell.cell';</script>
+    <script src="_static/design-tabs.js"></script>
+    <script>const THEBE_JS_URL = "https://unpkg.com/thebe@0.8.2/lib/index.js"
+const thebe_selector = ".thebe,.cell"
+const thebe_selector_input = "pre"
+const thebe_selector_output = ".output, .cell_output"
+</script>
+    <script async="async" src="_static/sphinx-thebe.js"></script>
+    <script>window.MathJax = {"options": {"processHtmlClass": "tex2jax_process|mathjax_process|math|output_area"}}</script>
+    <script defer="defer" src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-mml-chtml.js"></script>
+    <link rel="index" title="Index" href="genindex.html" />
+    <link rel="search" title="Search" href="search.html" />
+    <link rel="next" title="Hemodynamics simulation on a left atrium" href="atrium.html" />
+    <link rel="prev" title="Tutorials" href="tutorials.html" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <meta name="docsearch:language" content="None">
+    
+
+    <!-- Google Analytics -->
+    
+  </head>
+  <body data-spy="scroll" data-target="#bd-toc-nav" data-offset="60">
+<!-- Checkboxes to toggle the left sidebar -->
+<input type="checkbox" class="sidebar-toggle" name="__navigation" id="__navigation" aria-label="Toggle navigation sidebar">
+<label class="overlay overlay-navbar" for="__navigation">
+    <div class="visually-hidden">Toggle navigation sidebar</div>
+</label>
+<!-- Checkboxes to toggle the in-page toc -->
+<input type="checkbox" class="sidebar-toggle" name="__page-toc" id="__page-toc" aria-label="Toggle in-page Table of Contents">
+<label class="overlay overlay-pagetoc" for="__page-toc">
+    <div class="visually-hidden">Toggle in-page Table of Contents</div>
+</label>
+<!-- Headers at the top -->
+<div class="announcement header-item noprint"></div>
+<div class="header header-item noprint"></div>
+
+    
+    <div class="container-fluid" id="banner"></div>
+
+    
+
+    <div class="container-xl">
+      <div class="row">
+          
+<!-- Sidebar -->
+<div class="bd-sidebar noprint" id="site-navigation">
+    <div class="bd-sidebar__content">
+        <div class="bd-sidebar__top"><div class="navbar-brand-box">
+    <a class="navbar-brand text-wrap" href="index.html">
+      
+        <!-- `logo` is deprecated in Sphinx 4.0, so remove this when we stop supporting 3 -->
+        
+      
+      
+      <img src="_static/logo.png" class="logo" alt="logo">
+      
+      
+      <h1 class="site-logo" id="site-title">VaMPy</h1>
+      
+    </a>
+</div><form class="bd-search d-flex align-items-center" action="search.html" method="get">
+  <i class="icon fas fa-search"></i>
+  <input type="search" class="form-control" name="q" id="search-input" placeholder="Search this book..." aria-label="Search this book..." autocomplete="off" >
+</form><nav class="bd-links" id="bd-docs-nav" aria-label="Main">
+    <div class="bd-toc-item active">
+        
+        <ul class="nav bd-sidenav bd-sidenav__home-link">
+            <li class="toctree-l1">
+                <a class="reference internal" href="index.html">
+                    The Vascular Modeling Pypeline
+                </a>
+            </li>
+        </ul>
+        <p aria-level="2" class="caption" role="heading">
+ <span class="caption-text">
+  Installation
+ </span>
+</p>
+<ul class="nav bd-sidenav">
+ <li class="toctree-l1">
+  <a class="reference internal" href="installation.html">
+   Installation
+  </a>
+ </li>
+ <li class="toctree-l1">
+  <a class="reference internal" href="issues.html">
+   Known issues
+  </a>
+ </li>
+</ul>
+<p aria-level="2" class="caption" role="heading">
+ <span class="caption-text">
+  Using VaMPy
+ </span>
+</p>
+<ul class="nav bd-sidenav">
+ <li class="toctree-l1">
+  <a class="reference internal" href="overview.html">
+   Overview
+  </a>
+ </li>
+ <li class="toctree-l1">
+  <a class="reference internal" href="quantities.html">
+   Computed quantities
+  </a>
+ </li>
+ <li class="toctree-l1">
+  <a class="reference internal" href="cluster.html">
+   Running a CFD simulation on an HPC cluster
+  </a>
+ </li>
+ <li class="toctree-l1">
+  <a class="reference internal" href="features.html">
+   Features and issues
+  </a>
+ </li>
+</ul>
+<p aria-level="2" class="caption" role="heading">
+ <span class="caption-text">
+  Tutorials
+ </span>
+</p>
+<ul class="current nav bd-sidenav">
+ <li class="toctree-l1">
+  <a class="reference internal" href="tutorials.html">
+   Tutorials
+  </a>
+ </li>
+ <li class="toctree-l1 current active">
+  <a class="current reference internal" href="#">
+   High-resolution CFD simulation in the internal carotid artery
+  </a>
+ </li>
+ <li class="toctree-l1">
+  <a class="reference internal" href="atrium.html">
+   Hemodynamics simulation on a left atrium
+  </a>
+ </li>
+</ul>
+<p aria-level="2" class="caption" role="heading">
+ <span class="caption-text">
+  Python API
+ </span>
+</p>
+<ul class="nav bd-sidenav">
+ <li class="toctree-l1">
+  <a class="reference internal" href="api.html">
+   API Reference
+  </a>
+ </li>
+</ul>
+
+    </div>
+</nav></div>
+        <div class="bd-sidebar__bottom">
+             <!-- To handle the deprecated key -->
+            
+            <div class="navbar_extra_footer">
+            See more at <a href="https://github.com/KVSlab">KVSLab</a>
+            </div>
+            
+        </div>
+    </div>
+    <div id="rtd-footer-container"></div>
+</div>
+
+
+          
+
+
+          
+<!-- A tiny helper pixel to detect if we've scrolled -->
+<div class="sbt-scroll-pixel-helper"></div>
+<!-- Main content -->
+<div class="col py-0 content-container">
+    
+    <div class="header-article row sticky-top noprint">
+        
+
+
+
+<div class="col py-1 d-flex header-article-main">
+    <div class="header-article__left">
+        
+        <label for="__navigation"
+  class="headerbtn"
+  data-toggle="tooltip"
+data-placement="right"
+title="Toggle navigation"
+>
+  
+
+<span class="headerbtn__icon-container">
+  <i class="fas fa-bars"></i>
+  </span>
+
+</label>
+
+        
+    </div>
+    <div class="header-article__right">
+<button onclick="toggleFullScreen()"
+  class="headerbtn"
+  data-toggle="tooltip"
+data-placement="bottom"
+title="Fullscreen mode"
+>
+  
+
+<span class="headerbtn__icon-container">
+  <i class="fas fa-expand"></i>
+  </span>
+
+</button>
+
+<div class="menu-dropdown menu-dropdown-repository-buttons">
+  <button class="headerbtn menu-dropdown__trigger"
+      aria-label="Source repositories">
+      <i class="fab fa-github"></i>
+  </button>
+  <div class="menu-dropdown__content">
+    <ul>
+      <li>
+        <a href="https://github.com/KVSlab/vampy"
+   class="headerbtn"
+   data-toggle="tooltip"
+data-placement="left"
+title="Source repository"
+>
+  
+
+<span class="headerbtn__icon-container">
+  <i class="fab fa-github"></i>
+  </span>
+<span class="headerbtn__text-container">repository</span>
+</a>
+
+      </li>
+      
+      <li>
+        <a href="https://github.com/KVSlab/vampy/issues/new?title=Issue%20on%20page%20%2Fartery.html&body=Your%20issue%20content%20here."
+   class="headerbtn"
+   data-toggle="tooltip"
+data-placement="left"
+title="Open an issue"
+>
+  
+
+<span class="headerbtn__icon-container">
+  <i class="fas fa-lightbulb"></i>
+  </span>
+<span class="headerbtn__text-container">open issue</span>
+</a>
+
+      </li>
+      
+    </ul>
+  </div>
+</div>
+
+<div class="menu-dropdown menu-dropdown-download-buttons">
+  <button class="headerbtn menu-dropdown__trigger"
+      aria-label="Download this page">
+      <i class="fas fa-download"></i>
+  </button>
+  <div class="menu-dropdown__content">
+    <ul>
+      <li>
+        <a href="_sources/artery.md"
+   class="headerbtn"
+   data-toggle="tooltip"
+data-placement="left"
+title="Download source file"
+>
+  
+
+<span class="headerbtn__icon-container">
+  <i class="fas fa-file"></i>
+  </span>
+<span class="headerbtn__text-container">.md</span>
+</a>
+
+      </li>
+      
+      <li>
+        
+<button onclick="printPdf(this)"
+  class="headerbtn"
+  data-toggle="tooltip"
+data-placement="left"
+title="Print to PDF"
+>
+  
+
+<span class="headerbtn__icon-container">
+  <i class="fas fa-file-pdf"></i>
+  </span>
+<span class="headerbtn__text-container">.pdf</span>
+</button>
+
+      </li>
+      
+    </ul>
+  </div>
+</div>
+<label for="__page-toc"
+  class="headerbtn headerbtn-page-toc"
+  
+>
+  
+
+<span class="headerbtn__icon-container">
+  <i class="fas fa-list"></i>
+  </span>
+
+</label>
+
+    </div>
+</div>
+
+<!-- Table of contents -->
+<div class="col-md-3 bd-toc show noprint">
+    <div class="tocsection onthispage pt-5 pb-3">
+        <i class="fas fa-list"></i> Contents
+    </div>
+    <nav id="bd-toc-nav" aria-label="Page">
+        <ul class="visible nav section-nav flex-column">
+ <li class="toc-h2 nav-item toc-entry">
+  <a class="reference internal nav-link" href="#meshing-with-a-constant-edge-length">
+   Meshing with a constant edge length
+  </a>
+ </li>
+ <li class="toc-h2 nav-item toc-entry">
+  <a class="reference internal nav-link" href="#meshing-based-on-the-surface-curvature">
+   Meshing based on the surface curvature
+  </a>
+ </li>
+ <li class="toc-h2 nav-item toc-entry">
+  <a class="reference internal nav-link" href="#meshing-based-on-the-centerline-diameter">
+   Meshing based on the centerline diameter
+  </a>
+ </li>
+ <li class="toc-h2 nav-item toc-entry">
+  <a class="reference internal nav-link" href="#high-resolution-simulation-of-the-ica">
+   High-resolution simulation of the ICA
+  </a>
+ </li>
+</ul>
+
+    </nav>
+</div>
+    </div>
+    <div class="article row">
+        <div class="col pl-md-3 pl-lg-5 content-container">
+            <!-- Table of contents that is only displayed when printing the page -->
+            <div id="jb-print-docs-body" class="onlyprint">
+                <h1>High-resolution CFD simulation in the internal carotid artery</h1>
+                <!-- Table of contents -->
+                <div id="print-main-content">
+                    <div id="jb-print-toc">
+                        
+                        <div>
+                            <h2> Contents </h2>
+                        </div>
+                        <nav aria-label="Page">
+                            <ul class="visible nav section-nav flex-column">
+ <li class="toc-h2 nav-item toc-entry">
+  <a class="reference internal nav-link" href="#meshing-with-a-constant-edge-length">
+   Meshing with a constant edge length
+  </a>
+ </li>
+ <li class="toc-h2 nav-item toc-entry">
+  <a class="reference internal nav-link" href="#meshing-based-on-the-surface-curvature">
+   Meshing based on the surface curvature
+  </a>
+ </li>
+ <li class="toc-h2 nav-item toc-entry">
+  <a class="reference internal nav-link" href="#meshing-based-on-the-centerline-diameter">
+   Meshing based on the centerline diameter
+  </a>
+ </li>
+ <li class="toc-h2 nav-item toc-entry">
+  <a class="reference internal nav-link" href="#high-resolution-simulation-of-the-ica">
+   High-resolution simulation of the ICA
+  </a>
+ </li>
+</ul>
+
+                        </nav>
+                    </div>
+                </div>
+            </div>
+            <main id="main-content" role="main">
+                
+              <div>
+                
+  <section class="tex2jax_ignore mathjax_ignore" id="high-resolution-cfd-simulation-in-the-internal-carotid-artery">
+<span id="tutorial-artery"></span><h1>High-resolution CFD simulation in the internal carotid artery<a class="headerlink" href="#high-resolution-cfd-simulation-in-the-internal-carotid-artery" title="Permalink to this headline">#</a></h1>
+<p>For this tutorial we consider an internal carotid artery model from the
+public dataset
+<a class="reference external" href="http://ecm2.mathcs.emory.edu/aneuriskweb/index">Aneurisk</a>, and have
+used the first model; case
+<a class="reference external" href="https://github.com/hkjeldsberg/AneuriskDatabase/tree/master/models/C0001">C0001</a>.</p>
+<section id="meshing-with-a-constant-edge-length">
+<h2>Meshing with a constant edge length<a class="headerlink" href="#meshing-with-a-constant-edge-length" title="Permalink to this headline">#</a></h2>
+<p>We start the tutorial by performing pre-processing using a constant edge
+length, resulting in a constant density mesh. This is performed by
+supplying the <code class="docutils literal notranslate"><span class="pre">-m</span> <span class="pre">constant</span></code> flag, and the <code class="docutils literal notranslate"><span class="pre">-el</span> <span class="pre">N</span></code> flag, where the latter
+determines the uniform edge length in N millimeters (mm), controlling
+the coarseness or fineness of the mesh. To generate a volumetric mesh
+with a edge length of 0.3 mm, run the following command after
+downloading the C0001 case:</p>
+<div class="highlight-console notranslate"><div class="highlight"><pre><span></span><span class="gp">$ </span>python<span class="w"> </span>automatedPreProcessing/automatedPreProcessing.py<span class="w"> </span>-m<span class="w"> </span>constant<span class="w"> </span>-el<span class="w"> </span><span class="m">0</span>.3<span class="w"> </span>-i<span class="w"> </span>C0001/model.vtp<span class="w"> </span>-bl<span class="w"> </span>False
+</pre></div>
+</div>
+<p>Note that we have also applied the <code class="docutils literal notranslate"><span class="pre">-bl</span> <span class="pre">False</span></code>, meaning we do not add
+boundary layers to the model. For this particular model, adding boundary
+layers would have required a smaller edge length because of the tiny
+arteries that the model harbours. The resulting volumetric mesh is shown
+in <a class="reference internal" href="#mesh-constant"><span class="std std-numref">Fig. 2</span></a>, with a zoomed in view on the aneurysm.</p>
+<figure class="align-default" id="mesh-constant">
+<img alt="_images/constant_vol.png" src="_images/constant_vol.png" />
+<figcaption>
+<p><span class="caption-number">Fig. 2 </span><span class="caption-text">A constant density mesh, with a zoomed in view of the
+aneurysm. Note that all tetrahedral cells are of equal
+size.</span><a class="headerlink" href="#mesh-constant" title="Permalink to this image">#</a></p>
+</figcaption>
+</figure>
+</section>
+<section id="meshing-based-on-the-surface-curvature">
+<h2>Meshing based on the surface curvature<a class="headerlink" href="#meshing-based-on-the-surface-curvature" title="Permalink to this headline">#</a></h2>
+<p>A more rigorous approach is to mesh the vascular model based on its
+surface curvature, which can be beneficial to use for models which
+harbour many regions of high curvature. An example of such models are
+complex geometries such as aneurysms or carotid siphons, where it is
+recommended to have a denser mesh in the vicinity of the complex
+morphology. Meshing based on the surface curvature is performed by
+supplying the <code class="docutils literal notranslate"><span class="pre">-m</span> <span class="pre">curvature</span></code> flag, and optionally the
+<code class="docutils literal notranslate"><span class="pre">--coarseningFactor</span></code> flag, or <code class="docutils literal notranslate"><span class="pre">-c</span></code> for short. The <code class="docutils literal notranslate"><span class="pre">--coarseningFactor</span></code>
+flag determines the coarseness or fineness of the mesh, where values &gt;
+1.0 will coarsen the mesh, and vice versa, with a default value of 1.0.
+To generate a variable density mesh based on the surface curvature, run
+the following command:</p>
+<div class="highlight-console notranslate"><div class="highlight"><pre><span></span><span class="gp">$ </span>python<span class="w"> </span>automatedPreProcessing/automatedPreProcessing.py<span class="w"> </span>-m<span class="w"> </span>curvature<span class="w"> </span>-c<span class="w"> </span><span class="m">1</span>.2<span class="w"> </span>-i<span class="w"> </span>C0001/model.vtp
+</pre></div>
+</div>
+<p>The resulting volumetric mesh is shown in <a class="reference internal" href="#mesh-variable"><span class="std std-numref">Fig. 3</span></a>, with a zoomed in
+view on the aneurysm.</p>
+<figure class="align-default" id="mesh-variable">
+<img alt="_images/curvature_vol.png" src="_images/curvature_vol.png" />
+<figcaption>
+<p><span class="caption-number">Fig. 3 </span><span class="caption-text">A variable density mesh based on the surface curvature, with
+a zoomed in view of the aneurysm. Note that the mesh is refined along
+the tiny, high-curvature artery, and coarser along the larger parent
+artery.</span><a class="headerlink" href="#mesh-variable" title="Permalink to this image">#</a></p>
+</figcaption>
+</figure>
+</section>
+<section id="meshing-based-on-the-centerline-diameter">
+<h2>Meshing based on the centerline diameter<a class="headerlink" href="#meshing-based-on-the-centerline-diameter" title="Permalink to this headline">#</a></h2>
+<p>As an alternative to the curvature method, as explained above, meshing
+based on the centerline diameter can be practical in tubular structures
+such as arteries. To get an intuition for what is meant by <em>centerline
+diameter</em>, we are in fact describing the diameter of a
+maximally inscribed sphere along the centerline located inside the
+object. This means that for tiny arteries, the diameter will be small,
+and vice versa for larger arteries, as shown in <a class="reference internal" href="#misr"><span class="std std-numref">Fig. 4</span></a>. Consequently,
+the mesh will be finer within tiny arteries, and coarser in larger
+arteries.</p>
+<figure class="align-default" id="misr">
+<img alt="_images/misr.png" src="_images/misr.png" />
+<figcaption>
+<p><span class="caption-number">Fig. 4 </span><span class="caption-text">The centerline inside the surface model, colored by it’s
+maximum inscribed sphere diameter.</span><a class="headerlink" href="#misr" title="Permalink to this image">#</a></p>
+</figcaption>
+</figure>
+<p>Meshing based on the centerline diameter is performed by supplying the
+<code class="docutils literal notranslate"><span class="pre">-m</span> <span class="pre">diameter</span></code> flag, and optionally the <code class="docutils literal notranslate"><span class="pre">--coarseningFactor</span></code> flag, as
+above. To generate a variable density mesh based on the centerline
+diameter, run the following command:</p>
+<div class="highlight-console notranslate"><div class="highlight"><pre><span></span><span class="gp">$ </span>python<span class="w"> </span>automatedPreProcessing/automatedPreProcessing.py<span class="w"> </span>-m<span class="w"> </span>diameter<span class="w"> </span>-c<span class="w"> </span><span class="m">1</span>.2<span class="w"> </span>-i<span class="w"> </span>C0001/model.vtp
+</pre></div>
+</div>
+<p>The resulting volumetric mesh is shown in <a class="reference internal" href="#mesh-diameter"><span class="std std-numref">Fig. 5</span></a>, with a zoomed in
+view on the aneurysm.</p>
+<figure class="align-default" id="mesh-diameter">
+<img alt="_images/diameter_vol.png" src="_images/diameter_vol.png" />
+<figcaption>
+<p><span class="caption-number">Fig. 5 </span><span class="caption-text">A variable density mesh based on the centerline diameter ,
+with a zoomed in view of the aneurysm. Note the difference in refinement
+between tiny and large arteries.</span><a class="headerlink" href="#mesh-diameter" title="Permalink to this image">#</a></p>
+</figcaption>
+</figure>
+<p>It should be noted that because the aneurysm in itself does not harbour
+any centerline, it becomes coarse. However, this is something we will
+investigate in Tutorial 2, where we will refine a pre-defined regions of
+the geometry.</p>
+</section>
+<section id="high-resolution-simulation-of-the-ica">
+<h2>High-resolution simulation of the ICA<a class="headerlink" href="#high-resolution-simulation-of-the-ica" title="Permalink to this headline">#</a></h2>
+<p>In the concluding part of this tutorial we will generate a
+high-resolution volumetric mesh of the ICA, perform CFD simulation, and
+present the hemodynamic forces based on the results. For simplicity, we
+chose to mesh the artery model using a constant density mesh using the
+following command:</p>
+<div class="highlight-console notranslate"><div class="highlight"><pre><span></span><span class="gp">$ </span>python<span class="w"> </span>automatedPreProcessing/automatedPreProcessing.py<span class="w"> </span>-m<span class="w"> </span>constant<span class="w"> </span>-el<span class="w"> </span><span class="m">0</span>.1<span class="w"> </span>-i<span class="w"> </span>C0001/model.vtp
+</pre></div>
+</div>
+<p>Running the command results in a volumetric mesh consisting of ~20M
+tetrahedral cells, as shown in <a class="reference internal" href="#mesh-20m"><span class="std std-numref">Fig. 6</span></a>.</p>
+<figure class="align-default" id="mesh-20m">
+<img alt="_images/mesh_20M.png" src="_images/mesh_20M.png" />
+<figcaption>
+<p><span class="caption-number">Fig. 6 </span><span class="caption-text">A constant density mesh consisting of approximately 20M
+tetrahedral cells, with a zoomed in view of the aneurysm.</span><a class="headerlink" href="#mesh-20m" title="Permalink to this image">#</a></p>
+</figcaption>
+</figure>
+<p>The mesh is used as input to the CFD simulations, followed by
+computation of the hemodynamic indices, which is initiated as described
+<a class="reference internal" href="overview.html#overview-post"><span class="std std-ref">here</span></a>. The simulation was
+run for one cardiac cycle, corresponding to 0.951 s, with <span class="math notranslate nohighlight">\(\Delta t =\)</span>
+0.0951 ms resulting in a total of 10 000 time steps per cycle. In <a class="reference internal" href="#artery"><span class="std std-numref">Fig. 7</span></a> we present the volumetric rendering of velocity, the pressure field,
+the Q-criterion displaying vortical structures, and three hemodynamic
+indices; the time averaged wall shear stress (TAWSS), the oscillatory
+shear index (OSI), and the relative residence time (RRT).</p>
+<figure class="align-default" id="artery">
+<img alt="_images/artery.png" src="_images/artery.png" />
+<figcaption>
+<p><span class="caption-number">Fig. 7 </span><span class="caption-text">From left to right: the volumetric rendering of velocity,
+the pressure field, volumetric rendering of the Q-criterion, TAWSS, OSI,
+and RRT.</span><a class="headerlink" href="#artery" title="Permalink to this image">#</a></p>
+</figcaption>
+</figure>
+</section>
+</section>
+
+    <script type="text/x-thebe-config">
+    {
+        requestKernel: true,
+        binderOptions: {
+            repo: "binder-examples/jupyter-stacks-datascience",
+            ref: "master",
+        },
+        codeMirrorConfig: {
+            theme: "abcdef",
+            mode: "python"
+        },
+        kernelOptions: {
+            kernelName: "python3",
+            path: "./."
+        },
+        predefinedOutput: true
+    }
+    </script>
+    <script>kernelName = 'python3'</script>
+
+              </div>
+              
+            </main>
+            <footer class="footer-article noprint">
+                
+    <!-- Previous / next buttons -->
+<div class='prev-next-area'>
+    <a class='left-prev' id="prev-link" href="tutorials.html" title="previous page">
+        <i class="fas fa-angle-left"></i>
+        <div class="prev-next-info">
+            <p class="prev-next-subtitle">previous</p>
+            <p class="prev-next-title">Tutorials</p>
+        </div>
+    </a>
+    <a class='right-next' id="next-link" href="atrium.html" title="next page">
+    <div class="prev-next-info">
+        <p class="prev-next-subtitle">next</p>
+        <p class="prev-next-title">Hemodynamics simulation on a left atrium</p>
+    </div>
+    <i class="fas fa-angle-right"></i>
+    </a>
+</div>
+            </footer>
+        </div>
+    </div>
+    <div class="footer-content row">
+        <footer class="col footer"><p>
+  
+    By Henrik A. Kjeldsberg<br/>
+  
+      &copy; Copyright 2023.<br/>
+</p>
+        </footer>
+    </div>
+    
+</div>
+
+
+      </div>
+    </div>
+  
+  <!-- Scripts loaded after <body> so the DOM is not blocked -->
+  <script src="_static/scripts/pydata-sphinx-theme.js?digest=1999514e3f237ded88cf"></script>
+
+
+  </body>
+</html>

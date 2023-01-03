@@ -1,0 +1,614 @@
+
+<!DOCTYPE html>
+
+<html>
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" /><meta name="generator" content="Docutils 0.17.1: http://docutils.sourceforge.net/" />
+
+    <title>Overview &#8212; VaMPy</title>
+    
+  <!-- Loaded before other Sphinx assets -->
+  <link href="_static/styles/theme.css?digest=1999514e3f237ded88cf" rel="stylesheet">
+<link href="_static/styles/pydata-sphinx-theme.css?digest=1999514e3f237ded88cf" rel="stylesheet">
+
+    
+  <link rel="stylesheet"
+    href="_static/vendor/fontawesome/5.13.0/css/all.min.css">
+  <link rel="preload" as="font" type="font/woff2" crossorigin
+    href="_static/vendor/fontawesome/5.13.0/webfonts/fa-solid-900.woff2">
+  <link rel="preload" as="font" type="font/woff2" crossorigin
+    href="_static/vendor/fontawesome/5.13.0/webfonts/fa-brands-400.woff2">
+
+    <link rel="stylesheet" type="text/css" href="_static/pygments.css" />
+    <link rel="stylesheet" href="_static/styles/sphinx-book-theme.css?digest=5115cc725059bd94278eecd172e13a965bf8f5a9" type="text/css" />
+    <link rel="stylesheet" type="text/css" href="_static/togglebutton.css" />
+    <link rel="stylesheet" type="text/css" href="_static/copybutton.css" />
+    <link rel="stylesheet" type="text/css" href="_static/mystnb.css" />
+    <link rel="stylesheet" type="text/css" href="_static/sphinx-thebe.css" />
+    <link rel="stylesheet" type="text/css" href="_static/design-style.b7bb847fb20b106c3d81b95245e65545.min.css" />
+    
+  <!-- Pre-loaded scripts that we'll load fully later -->
+  <link rel="preload" as="script" href="_static/scripts/pydata-sphinx-theme.js?digest=1999514e3f237ded88cf">
+
+    <script data-url_root="./" id="documentation_options" src="_static/documentation_options.js"></script>
+    <script src="_static/jquery.js"></script>
+    <script src="_static/underscore.js"></script>
+    <script src="_static/doctools.js"></script>
+    <script src="_static/clipboard.min.js"></script>
+    <script src="_static/copybutton.js"></script>
+    <script src="_static/scripts/sphinx-book-theme.js?digest=9c920249402e914e316237a7dbc6769907cce411"></script>
+    <script>let toggleHintShow = 'Click to show';</script>
+    <script>let toggleHintHide = 'Click to hide';</script>
+    <script>let toggleOpenOnPrint = 'true';</script>
+    <script src="_static/togglebutton.js"></script>
+    <script>var togglebuttonSelector = '.toggle, .admonition.dropdown, .tag_hide_input div.cell_input, .tag_hide-input div.cell_input, .tag_hide_output div.cell_output, .tag_hide-output div.cell_output, .tag_hide_cell.cell, .tag_hide-cell.cell';</script>
+    <script src="_static/design-tabs.js"></script>
+    <script>const THEBE_JS_URL = "https://unpkg.com/thebe@0.8.2/lib/index.js"
+const thebe_selector = ".thebe,.cell"
+const thebe_selector_input = "pre"
+const thebe_selector_output = ".output, .cell_output"
+</script>
+    <script async="async" src="_static/sphinx-thebe.js"></script>
+    <script>window.MathJax = {"options": {"processHtmlClass": "tex2jax_process|mathjax_process|math|output_area"}}</script>
+    <script defer="defer" src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-mml-chtml.js"></script>
+    <link rel="index" title="Index" href="genindex.html" />
+    <link rel="search" title="Search" href="search.html" />
+    <link rel="next" title="Computed quantities" href="quantities.html" />
+    <link rel="prev" title="Known issues" href="issues.html" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <meta name="docsearch:language" content="None">
+    
+
+    <!-- Google Analytics -->
+    
+  </head>
+  <body data-spy="scroll" data-target="#bd-toc-nav" data-offset="60">
+<!-- Checkboxes to toggle the left sidebar -->
+<input type="checkbox" class="sidebar-toggle" name="__navigation" id="__navigation" aria-label="Toggle navigation sidebar">
+<label class="overlay overlay-navbar" for="__navigation">
+    <div class="visually-hidden">Toggle navigation sidebar</div>
+</label>
+<!-- Checkboxes to toggle the in-page toc -->
+<input type="checkbox" class="sidebar-toggle" name="__page-toc" id="__page-toc" aria-label="Toggle in-page Table of Contents">
+<label class="overlay overlay-pagetoc" for="__page-toc">
+    <div class="visually-hidden">Toggle in-page Table of Contents</div>
+</label>
+<!-- Headers at the top -->
+<div class="announcement header-item noprint"></div>
+<div class="header header-item noprint"></div>
+
+    
+    <div class="container-fluid" id="banner"></div>
+
+    
+
+    <div class="container-xl">
+      <div class="row">
+          
+<!-- Sidebar -->
+<div class="bd-sidebar noprint" id="site-navigation">
+    <div class="bd-sidebar__content">
+        <div class="bd-sidebar__top"><div class="navbar-brand-box">
+    <a class="navbar-brand text-wrap" href="index.html">
+      
+        <!-- `logo` is deprecated in Sphinx 4.0, so remove this when we stop supporting 3 -->
+        
+      
+      
+      <img src="_static/logo.png" class="logo" alt="logo">
+      
+      
+      <h1 class="site-logo" id="site-title">VaMPy</h1>
+      
+    </a>
+</div><form class="bd-search d-flex align-items-center" action="search.html" method="get">
+  <i class="icon fas fa-search"></i>
+  <input type="search" class="form-control" name="q" id="search-input" placeholder="Search this book..." aria-label="Search this book..." autocomplete="off" >
+</form><nav class="bd-links" id="bd-docs-nav" aria-label="Main">
+    <div class="bd-toc-item active">
+        
+        <ul class="nav bd-sidenav bd-sidenav__home-link">
+            <li class="toctree-l1">
+                <a class="reference internal" href="index.html">
+                    The Vascular Modeling Pypeline
+                </a>
+            </li>
+        </ul>
+        <p aria-level="2" class="caption" role="heading">
+ <span class="caption-text">
+  Installation
+ </span>
+</p>
+<ul class="nav bd-sidenav">
+ <li class="toctree-l1">
+  <a class="reference internal" href="installation.html">
+   Installation
+  </a>
+ </li>
+ <li class="toctree-l1">
+  <a class="reference internal" href="issues.html">
+   Known issues
+  </a>
+ </li>
+</ul>
+<p aria-level="2" class="caption" role="heading">
+ <span class="caption-text">
+  Using VaMPy
+ </span>
+</p>
+<ul class="current nav bd-sidenav">
+ <li class="toctree-l1 current active">
+  <a class="current reference internal" href="#">
+   Overview
+  </a>
+ </li>
+ <li class="toctree-l1">
+  <a class="reference internal" href="quantities.html">
+   Computed quantities
+  </a>
+ </li>
+ <li class="toctree-l1">
+  <a class="reference internal" href="cluster.html">
+   Running a CFD simulation on an HPC cluster
+  </a>
+ </li>
+ <li class="toctree-l1">
+  <a class="reference internal" href="features.html">
+   Features and issues
+  </a>
+ </li>
+</ul>
+<p aria-level="2" class="caption" role="heading">
+ <span class="caption-text">
+  Tutorials
+ </span>
+</p>
+<ul class="nav bd-sidenav">
+ <li class="toctree-l1">
+  <a class="reference internal" href="tutorials.html">
+   Tutorials
+  </a>
+ </li>
+ <li class="toctree-l1">
+  <a class="reference internal" href="artery.html">
+   High-resolution CFD simulation in the internal carotid artery
+  </a>
+ </li>
+ <li class="toctree-l1">
+  <a class="reference internal" href="atrium.html">
+   Hemodynamics simulation on a left atrium
+  </a>
+ </li>
+</ul>
+<p aria-level="2" class="caption" role="heading">
+ <span class="caption-text">
+  Python API
+ </span>
+</p>
+<ul class="nav bd-sidenav">
+ <li class="toctree-l1">
+  <a class="reference internal" href="api.html">
+   API Reference
+  </a>
+ </li>
+</ul>
+
+    </div>
+</nav></div>
+        <div class="bd-sidebar__bottom">
+             <!-- To handle the deprecated key -->
+            
+            <div class="navbar_extra_footer">
+            See more at <a href="https://github.com/KVSlab">KVSLab</a>
+            </div>
+            
+        </div>
+    </div>
+    <div id="rtd-footer-container"></div>
+</div>
+
+
+          
+
+
+          
+<!-- A tiny helper pixel to detect if we've scrolled -->
+<div class="sbt-scroll-pixel-helper"></div>
+<!-- Main content -->
+<div class="col py-0 content-container">
+    
+    <div class="header-article row sticky-top noprint">
+        
+
+
+
+<div class="col py-1 d-flex header-article-main">
+    <div class="header-article__left">
+        
+        <label for="__navigation"
+  class="headerbtn"
+  data-toggle="tooltip"
+data-placement="right"
+title="Toggle navigation"
+>
+  
+
+<span class="headerbtn__icon-container">
+  <i class="fas fa-bars"></i>
+  </span>
+
+</label>
+
+        
+    </div>
+    <div class="header-article__right">
+<button onclick="toggleFullScreen()"
+  class="headerbtn"
+  data-toggle="tooltip"
+data-placement="bottom"
+title="Fullscreen mode"
+>
+  
+
+<span class="headerbtn__icon-container">
+  <i class="fas fa-expand"></i>
+  </span>
+
+</button>
+
+<div class="menu-dropdown menu-dropdown-repository-buttons">
+  <button class="headerbtn menu-dropdown__trigger"
+      aria-label="Source repositories">
+      <i class="fab fa-github"></i>
+  </button>
+  <div class="menu-dropdown__content">
+    <ul>
+      <li>
+        <a href="https://github.com/KVSlab/vampy"
+   class="headerbtn"
+   data-toggle="tooltip"
+data-placement="left"
+title="Source repository"
+>
+  
+
+<span class="headerbtn__icon-container">
+  <i class="fab fa-github"></i>
+  </span>
+<span class="headerbtn__text-container">repository</span>
+</a>
+
+      </li>
+      
+      <li>
+        <a href="https://github.com/KVSlab/vampy/issues/new?title=Issue%20on%20page%20%2Foverview.html&body=Your%20issue%20content%20here."
+   class="headerbtn"
+   data-toggle="tooltip"
+data-placement="left"
+title="Open an issue"
+>
+  
+
+<span class="headerbtn__icon-container">
+  <i class="fas fa-lightbulb"></i>
+  </span>
+<span class="headerbtn__text-container">open issue</span>
+</a>
+
+      </li>
+      
+    </ul>
+  </div>
+</div>
+
+<div class="menu-dropdown menu-dropdown-download-buttons">
+  <button class="headerbtn menu-dropdown__trigger"
+      aria-label="Download this page">
+      <i class="fas fa-download"></i>
+  </button>
+  <div class="menu-dropdown__content">
+    <ul>
+      <li>
+        <a href="_sources/overview.md"
+   class="headerbtn"
+   data-toggle="tooltip"
+data-placement="left"
+title="Download source file"
+>
+  
+
+<span class="headerbtn__icon-container">
+  <i class="fas fa-file"></i>
+  </span>
+<span class="headerbtn__text-container">.md</span>
+</a>
+
+      </li>
+      
+      <li>
+        
+<button onclick="printPdf(this)"
+  class="headerbtn"
+  data-toggle="tooltip"
+data-placement="left"
+title="Print to PDF"
+>
+  
+
+<span class="headerbtn__icon-container">
+  <i class="fas fa-file-pdf"></i>
+  </span>
+<span class="headerbtn__text-container">.pdf</span>
+</button>
+
+      </li>
+      
+    </ul>
+  </div>
+</div>
+<label for="__page-toc"
+  class="headerbtn headerbtn-page-toc"
+  
+>
+  
+
+<span class="headerbtn__icon-container">
+  <i class="fas fa-list"></i>
+  </span>
+
+</label>
+
+    </div>
+</div>
+
+<!-- Table of contents -->
+<div class="col-md-3 bd-toc show noprint">
+    <div class="tocsection onthispage pt-5 pb-3">
+        <i class="fas fa-list"></i> Contents
+    </div>
+    <nav id="bd-toc-nav" aria-label="Page">
+        <ul class="visible nav section-nav flex-column">
+ <li class="toc-h2 nav-item toc-entry">
+  <a class="reference internal nav-link" href="#pre-processing-meshing-and-boundary-conditions">
+   Pre-processing: Meshing and boundary conditions
+  </a>
+ </li>
+ <li class="toc-h2 nav-item toc-entry">
+  <a class="reference internal nav-link" href="#computational-fluid-dynamics-simulations-in-oasis">
+   Computational fluid dynamics simulations in Oasis
+  </a>
+ </li>
+ <li class="toc-h2 nav-item toc-entry">
+  <a class="reference internal nav-link" href="#post-processing-hemodynamic-indices-flow-and-simulation-metrics-velocity-and-pressure-and-probes">
+   Post-processing: Hemodynamic indices, flow and simulation metrics, velocity and pressure, and probes
+  </a>
+ </li>
+</ul>
+
+    </nav>
+</div>
+    </div>
+    <div class="article row">
+        <div class="col pl-md-3 pl-lg-5 content-container">
+            <!-- Table of contents that is only displayed when printing the page -->
+            <div id="jb-print-docs-body" class="onlyprint">
+                <h1>Overview</h1>
+                <!-- Table of contents -->
+                <div id="print-main-content">
+                    <div id="jb-print-toc">
+                        
+                        <div>
+                            <h2> Contents </h2>
+                        </div>
+                        <nav aria-label="Page">
+                            <ul class="visible nav section-nav flex-column">
+ <li class="toc-h2 nav-item toc-entry">
+  <a class="reference internal nav-link" href="#pre-processing-meshing-and-boundary-conditions">
+   Pre-processing: Meshing and boundary conditions
+  </a>
+ </li>
+ <li class="toc-h2 nav-item toc-entry">
+  <a class="reference internal nav-link" href="#computational-fluid-dynamics-simulations-in-oasis">
+   Computational fluid dynamics simulations in Oasis
+  </a>
+ </li>
+ <li class="toc-h2 nav-item toc-entry">
+  <a class="reference internal nav-link" href="#post-processing-hemodynamic-indices-flow-and-simulation-metrics-velocity-and-pressure-and-probes">
+   Post-processing: Hemodynamic indices, flow and simulation metrics, velocity and pressure, and probes
+  </a>
+ </li>
+</ul>
+
+                        </nav>
+                    </div>
+                </div>
+            </div>
+            <main id="main-content" role="main">
+                
+              <div>
+                
+  <section class="tex2jax_ignore mathjax_ignore" id="overview">
+<h1>Overview<a class="headerlink" href="#overview" title="Permalink to this headline">#</a></h1>
+<p>In this overview, we present VaMPy’s functionality by
+preparing, simulating, and post-processing an <a class="reference external" href="https://en.wikipedia.org/wiki/Internal_carotid_artery">internal carotid
+artery</a> geometry, although
+the software may be readily used for other tubular or vascular shapes.</p>
+<section id="pre-processing-meshing-and-boundary-conditions">
+<h2>Pre-processing: Meshing and boundary conditions<a class="headerlink" href="#pre-processing-meshing-and-boundary-conditions" title="Permalink to this headline">#</a></h2>
+<p>The first step of using the Vascular Modeling Pypeline is
+pre-processing. The pre-processing scripts are located inside the
+<code class="docutils literal notranslate"><span class="pre">automatedPreProcessing</span></code> folder, and we will be executing the
+<code class="docutils literal notranslate"><span class="pre">automatedPreProcessing.py</span></code> script to generate a mesh, boundary
+conditions, and probes for velocity and pressure sampling. Here we will
+perform pre-processing for the artery case located in the <code class="docutils literal notranslate"><span class="pre">test</span></code> folder.
+Start by entering the conda environment you created:</p>
+<div class="highlight-console notranslate"><div class="highlight"><pre><span></span><span class="gp">$ </span>conda<span class="w"> </span>activate<span class="w"> </span>your_environment
+</pre></div>
+</div>
+<p>Then, to perform meshing, execute the following command:</p>
+<div class="highlight-console notranslate"><div class="highlight"><pre><span></span><span class="gp">$ </span>python<span class="w"> </span>automatedPreProcessing/automatedPreProcessing.py<span class="w"> </span>-m<span class="w"> </span>diameter<span class="w"> </span>-i<span class="w"> </span>test/Case_test_artery/artery.vtp<span class="w"> </span>-c<span class="w"> </span><span class="m">1</span>.3
+</pre></div>
+</div>
+<p>When complete, the script will save the volumetric mesh as <code class="docutils literal notranslate"><span class="pre">artery.vtu</span></code>,
+alongside a compressed DOLFIN mesh in <code class="docutils literal notranslate"><span class="pre">artery.xml.gz</span></code>, used for the
+following simulations. The pre-processing script will also produce an
+info file and a probe file, named <code class="docutils literal notranslate"><span class="pre">artery_info.json</span></code> and
+<code class="docutils literal notranslate"><span class="pre">artery_probes</span></code>, respectively.</p>
+</section>
+<section id="computational-fluid-dynamics-simulations-in-oasis">
+<h2>Computational fluid dynamics simulations in Oasis<a class="headerlink" href="#computational-fluid-dynamics-simulations-in-oasis" title="Permalink to this headline">#</a></h2>
+<p>The next step of using the Vascular Modeling Pypeline is performing the
+CFD simulations with <code class="docutils literal notranslate"><span class="pre">Oasis</span></code>.
+For convenience, change directory to the <code class="docutils literal notranslate"><span class="pre">simulation</span></code> folder:</p>
+<div class="highlight-console notranslate"><div class="highlight"><pre><span></span><span class="gp">$ </span><span class="nb">cd</span><span class="w"> </span>simulation
+</pre></div>
+</div>
+<p>Then, to run a CFD simulation for two cycles with 10 000 time steps per
+cycle and default parameters with Oasis, execute the following command:</p>
+<div class="highlight-console notranslate"><div class="highlight"><pre><span></span><span class="gp">$ </span>oasis<span class="w"> </span>NSfracStep<span class="w"> </span><span class="nv">problem</span><span class="o">=</span>Artery<span class="w"> </span><span class="nv">mesh_path</span><span class="o">=</span>../test/Case_test_artery/artery.xml.gz<span class="w"> </span><span class="nv">T</span><span class="o">=</span><span class="m">9</span>.61<span class="w"> </span><span class="nv">save_solution_after_cycle</span><span class="o">=</span><span class="m">0</span>
+</pre></div>
+</div>
+<p>Running the simulations will create the result folder <code class="docutils literal notranslate"><span class="pre">results_artery</span></code>
+(specific to the artery problem), with the results and corresponding
+mesh saved compactly in HDF5 format.</p>
+</section>
+<section id="post-processing-hemodynamic-indices-flow-and-simulation-metrics-velocity-and-pressure-and-probes">
+<span id="overview-post"></span><h2>Post-processing: Hemodynamic indices, flow and simulation metrics, velocity and pressure, and probes<a class="headerlink" href="#post-processing-hemodynamic-indices-flow-and-simulation-metrics-velocity-and-pressure-and-probes" title="Permalink to this headline">#</a></h2>
+<p>Following the CFD simulations, the last step of the Vascular Modeling
+Pypeline is post-processing of the results. For reference, the
+quantities computed by the scripts <code class="docutils literal notranslate"><span class="pre">compute_hemodynamic_indices.py</span></code> and
+<code class="docutils literal notranslate"><span class="pre">compute_flow_and_simulation_metrics.py</span></code> can be viewed
+<a class="reference internal" href="quantities.html#post-quantities"><span class="std std-ref">here</span></a>.</p>
+<p>You can start by computing the wall shear stress, oscillatory shear
+index and other hemodynamic indices by executing the following command,
+executed from the root directory:</p>
+<div class="highlight-console notranslate"><div class="highlight"><pre><span></span><span class="gp">$ </span>python<span class="w"> </span>automatedPostProcessing/compute_hemodynamic_indices.py<span class="w"> </span>--case<span class="w"> </span>simulation/results_artery/artery/data/<span class="o">[</span>RUN_NUMBER<span class="o">]</span>/Solutions
+</pre></div>
+</div>
+<p>To compute fluid dynamic quantities and simulation metrics, you may
+execute the following command:</p>
+<div class="highlight-console notranslate"><div class="highlight"><pre><span></span><span class="gp">$ </span>python<span class="w"> </span>automatedPostProcessing/compute_flow_and_simulation_metrics.py<span class="w"> </span>--case<span class="w"> </span>simulation/results_artery/artery/data/<span class="o">[</span>RUN_NUMBER<span class="o">]</span>/Solutions
+</pre></div>
+</div>
+<p>As default, <code class="docutils literal notranslate"><span class="pre">compute_flow_and_simulation_metrics.py</span></code> computes the
+average values over full cycle, for a desired number of cycles,
+determined by the <code class="docutils literal notranslate"><span class="pre">--start-cycle</span></code> flag. Setting <code class="docutils literal notranslate"><span class="pre">--start-cycle</span> <span class="pre">2</span></code> would
+correspond to computing the averaged values from the second cardiac
+cycle and onward. Alternatively, the user may supply the specific times
+<span class="math notranslate nohighlight">\(t\)</span> during the cardiac cycle <span class="math notranslate nohighlight">\(T\)</span> to the <code class="docutils literal notranslate"><span class="pre">--times-to-average</span></code> flag, to
+compute phase averaged quantities, where <span class="math notranslate nohighlight">\(t \in [0,T)\)</span>. Thus, to compute
+the metrics at <span class="math notranslate nohighlight">\(t=0.2\)</span> s representing peak systole, and to skip the
+first cycle, the user may run the following command:</p>
+<div class="highlight-console notranslate"><div class="highlight"><pre><span></span><span class="gp">$ </span>python<span class="w"> </span>automatedPostProcessing/compute_flow_and_simulation_metrics.py<span class="w"> </span>--case<span class="w"> </span>simulation/results_artery/artery/data/<span class="o">[</span>RUN_NUMBER<span class="o">]</span>/Solutions<span class="w"> </span>--start-cycle<span class="w"> </span><span class="m">2</span><span class="w"> </span>--times-to-average<span class="w"> </span><span class="m">200</span><span class="w"> </span>--T<span class="w"> </span><span class="m">1000</span><span class="w"> </span>--dt<span class="w"> </span><span class="m">0</span>.1
+</pre></div>
+</div>
+<p>Note that the specified time is in milliseconds. A comparison between
+cycle averaged and phase averaged kinetic energy (KE) and turbulent
+kinetic energy (TKE) for a representative artery model is shown in
+<a class="reference internal" href="#phase"><span class="std std-numref">Fig. 1</span></a>. The leftmost panels displays the model, specifically case
+C0097 from the Aneurisk database. The top middle panel displays the
+cycle averaged KE over the last four cycles, whereas the bottom middle
+panel displays the phase averaged KE at <span class="math notranslate nohighlight">\(t=0.2\)</span> s. Similarly, the top
+right panel displays the cycle averaged TKE over the last four cycles,
+and bottom right panel displays the phase averaged TKE at <span class="math notranslate nohighlight">\(t=0.2\)</span> s. For
+this illustration, the simulation was run over 5 cycles, and the metrics
+were computed over the last four cycles.</p>
+<figure class="align-default" id="phase">
+<img alt="_images/phase_averaged.png" src="_images/phase_averaged.png" />
+<figcaption>
+<p><span class="caption-number">Fig. 1 </span><span class="caption-text">Cycle and phase average kinetic energy and turbulent kinetic
+energy. The leftmost panel disaply the model, the middle panels display
+kinetic energy, and the rightmost panel display turbulent kinetic
+energy.</span><a class="headerlink" href="#phase" title="Permalink to this image">#</a></p>
+</figcaption>
+</figure>
+<p>Because velocity and pressure results are currently saved in the
+compressed <code class="docutils literal notranslate"><span class="pre">.h5</span></code> format, they are not viewable in a software such as
+<a class="reference external" href="https://www.paraview.org/">ParaView</a>. If it is desired to convert the
+compressed velocity and pressure results to viewable <code class="docutils literal notranslate"><span class="pre">.xdmf</span></code> format, you
+may execute the following command:</p>
+<div class="highlight-console notranslate"><div class="highlight"><pre><span></span><span class="gp">$ </span>python<span class="w"> </span>automatedPostProcessing/compute_velocity_and_pressure.py<span class="w"> </span>--case<span class="w"> </span>simulation/results_artery/artery/data/<span class="o">[</span>RUN_NUMBER<span class="o">]</span>/Solutions
+</pre></div>
+</div>
+<p>which will store the velocity and pressure into <code class="docutils literal notranslate"><span class="pre">velocity.xdmf</span></code> and
+<code class="docutils literal notranslate"><span class="pre">pressure.xdmf</span></code>, respectively.</p>
+<p>Finally, to visualize velocity and pressure at the probes created by
+<code class="docutils literal notranslate"><span class="pre">Artery.py</span></code>, you can run the <code class="docutils literal notranslate"><span class="pre">visualize_probes.py</span></code> script, by executing
+the following command:</p>
+<div class="highlight-console notranslate"><div class="highlight"><pre><span></span><span class="gp">$ </span>python<span class="w"> </span>automatedPostProcessing/visualize_probes.py<span class="w"> </span>--case<span class="w"> </span>simulation/results_artery/artery/data/<span class="o">[</span>run_number<span class="o">]</span>/Probes
+</pre></div>
+</div>
+<p>Note that this has an additional dependency to
+<a class="reference external" href="https://github.com/matplotlib/matplotlib">Matplotlib</a>, which can
+quickly be installed with either <code class="docutils literal notranslate"><span class="pre">conda</span></code> or <code class="docutils literal notranslate"><span class="pre">pip</span></code>.</p>
+</section>
+</section>
+
+    <script type="text/x-thebe-config">
+    {
+        requestKernel: true,
+        binderOptions: {
+            repo: "binder-examples/jupyter-stacks-datascience",
+            ref: "master",
+        },
+        codeMirrorConfig: {
+            theme: "abcdef",
+            mode: "python"
+        },
+        kernelOptions: {
+            kernelName: "python3",
+            path: "./."
+        },
+        predefinedOutput: true
+    }
+    </script>
+    <script>kernelName = 'python3'</script>
+
+              </div>
+              
+            </main>
+            <footer class="footer-article noprint">
+                
+    <!-- Previous / next buttons -->
+<div class='prev-next-area'>
+    <a class='left-prev' id="prev-link" href="issues.html" title="previous page">
+        <i class="fas fa-angle-left"></i>
+        <div class="prev-next-info">
+            <p class="prev-next-subtitle">previous</p>
+            <p class="prev-next-title">Known issues</p>
+        </div>
+    </a>
+    <a class='right-next' id="next-link" href="quantities.html" title="next page">
+    <div class="prev-next-info">
+        <p class="prev-next-subtitle">next</p>
+        <p class="prev-next-title">Computed quantities</p>
+    </div>
+    <i class="fas fa-angle-right"></i>
+    </a>
+</div>
+            </footer>
+        </div>
+    </div>
+    <div class="footer-content row">
+        <footer class="col footer"><p>
+  
+    By Henrik A. Kjeldsberg<br/>
+  
+      &copy; Copyright 2023.<br/>
+</p>
+        </footer>
+    </div>
+    
+</div>
+
+
+      </div>
+    </div>
+  
+  <!-- Scripts loaded after <body> so the DOM is not blocked -->
+  <script src="_static/scripts/pydata-sphinx-theme.js?digest=1999514e3f237ded88cf"></script>
+
+
+  </body>
+</html>
