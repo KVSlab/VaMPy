@@ -16,59 +16,58 @@ on:
 jobs:
   check-code:
     runs-on: ubuntu-22.04
-    strategy:
-      matrix:
-        python-version: [ "3.8", "3.9", "3.10" ]
+    container: quay.io/fenicsproject/stable:current
+    #    strategy:
+    #      matrix:
+    #        python-version: [ "3.8", "3.9", "3.10" ]
 
     steps:
       # This action sets the current path to the root of your github repo
       - uses: actions/checkout@v3
 
-      - name: Set up Python ${{ matrix.python-version }}
-        uses: actions/setup-python@v4
-        with:
-          python-version: ${{ matrix.python-version }}
+      #      - name: Set up Python ${{ matrix.python-version }}
+      #        uses: actions/setup-python@v4
+      #        with:
+      #          python-version: ${{ matrix.python-version }}
 
       - name: Upgrade pip and setuptools
         run:
           python3 -m pip install pip setuptools --upgrade
 
       - name: Install code
-        run: python -m pip install .[test]
+        run: python3 -m pip install .[test]
 
       - name: Flake8 code
-        run: python -m flake8
+        run: python3 -m flake8
 
   test-code:
     # This code depends on the result of check-code
     needs: check-code
-
-    # runs-on: ${{ matrix.os }}
     runs-on: ubuntu-22.04
-    container: quay.io/fenicsproject/stable:latest
+    container: quay.io/fenicsproject/stable:current
 
-    strategy:
-      matrix:
-        os: [ ubuntu-22.04, windows-latest, macos-12 ]
-        python-version: [ "3.8", "3.9", "3.10" ]
+#    strategy:
+#      matrix:
+#        os: [ ubuntu-22.04, windows-latest, macos-12 ]
+#        python-version: [ "3.8", "3.9", "3.10" ]
 
+#    steps:
+#      - name: Set up Python ${{ matrix.python-version }}
+#        uses: actions/setup-python@v4
+#        with:
+#          python-version: ${{ matrix.python-version }}
     steps:
-      - name: Set up Python ${{ matrix.python-version }}
-        uses: actions/setup-python@v4
-        with:
-          python-version: ${{ matrix.python-version }}
+      - uses: actions/checkout@v3
 
       - name: Upgrade pip and setuptools
         run:
           python3 -m pip install pip setuptools --upgrade
 
-      - uses: actions/checkout@v3
-
-      - name: Install package
+      - name: Install VaMPy
         run: pip install .[test]
 
       - name: Run tests
-        run: python -m pytest
+        run: python3 -m pytest
 
       - name: Upload coverage report as artifact
         if: matrix.os == 'ubuntu-22.04' && matrix.python-version == '3.10'
