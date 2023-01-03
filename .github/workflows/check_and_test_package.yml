@@ -27,7 +27,7 @@ jobs:
           python3 -m pip install pip setuptools --upgrade
 
       - name: Install types-paramiko
-          python3 -m pip install types-paramiko
+        run: python3 -m pip install types-paramiko
 
       - name: Install code
         run: python3 -m pip install .[test]
