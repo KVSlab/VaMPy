@@ -7,7 +7,7 @@ _________________
 _________________
 
 <p align="center">
-    <img src=test/artery_pipeline.png width="830 height="370" alt="Output pre processing"/>
+    <img src=docs/figures/artery_pipeline.png width="830 height="370" alt="Output pre processing"/>
 </p>
 <p align="center">
     Pre-processed and simulated artery model. From left to right: A variable density volumetric mesh, zoomed in view of an outlet showing the four boundary layers, corresponding inlet flow rate, outlet flow split, and probes for velocity and pressure sampling. From the simulation results, we have shown the velocity field represented by vectors, and the time averaged wall shear stress (TAWSS) as one of the many hemodynamic indices computed by the post-processing scripts.
