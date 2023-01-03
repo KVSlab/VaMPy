@@ -15,8 +15,8 @@ on:
     - cron: "0 8 * * *"
 jobs:
   check-code:
-    runs-on: ubuntu-22.04
-    container: quay.io/fenicsproject/stable:current
+    runs-on: ubuntu-latest
+    container: "finsberg/fenics-extra"
     #    strategy:
     #      matrix:
     #        python-version: [ "3.8", "3.9", "3.10" ]
@@ -30,10 +30,10 @@ jobs:
       #        with:
       #          python-version: ${{ matrix.python-version }}
 
-      - name: Set up Python 3.8
-        uses: actions/setup-python@v4
-        with:
-          python-version: 3.8
+#      - name: Set up Python 3.8
+#        uses: actions/setup-python@v4
+#        with:
+#          python-version: 3.8
 
       - name: Upgrade pip and setuptools
         run:
