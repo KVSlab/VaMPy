@@ -2,31 +2,26 @@
 requires = ["setuptools>=61.0.0", "wheel"]
 
 [project]
-name = "vampy"
+name = "VaMPy"
 version = "0.2.0"
 description = "Automated tools used to prepare, run, and analyze vascular morphologies."
 authors = [{name = "Henrik A. Kjeldsberg", email = "henriakj@simula.no"}]
 license = {file = "LICENSE"}
 readme = "README.md"
+dependencies = [
+    'numpy'
+]
 
 [project.scripts]
 vampy = "vampy.__main__:main"
 
 [project.optional-dependencies]
 test = [
+    "mypy",
+    "flake8",
     "numpy",
     "pytest",
     "pytest-cov",
-]
-dev = [
-    "pdbpp",
-    "ipython",
-"mypy",
-    "flake8",
-]
-all = [
-   "vampy[test]",
-   "vampy[dev]",
 ]
 
 [tool.pytest.ini_options]
