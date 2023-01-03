@@ -41,7 +41,7 @@ ignore_missing_imports = true
 exclude = [
     "docs/",
     "build/",
-    "Probe.py"
+    "src/vampy/simulation/Probe.py"
 ]
 # Folder to check with mypy
 files = [
