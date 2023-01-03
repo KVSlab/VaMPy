@@ -17,7 +17,6 @@ vampy = "vampy.__main__:main"
 
 [project.optional-dependencies]
 test = [
-    "mypy",
     "flake8",
     "numpy",
     "pytest",
