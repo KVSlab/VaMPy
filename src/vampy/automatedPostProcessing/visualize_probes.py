@@ -5,7 +5,7 @@ from os import path
 import matplotlib.pyplot as plt
 import numpy as np
 
-from postprocessing_common import read_command_line
+from vampy.automatedPostProcessing.postprocessing_common import read_command_line
 
 
 def visualize_probes(case_path, probe_saving_frequency, show_figure=True, save_figure=False):

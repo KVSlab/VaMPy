@@ -1,5 +1,3 @@
-from __future__ import print_function
-
 import errno
 import json
 from os import path, walk
@@ -74,7 +72,7 @@ def run_simulation(config_path, local_dir, case_name):
 
         for filename in filenames:
             sftp.put(path.join(dirpath, filename), path.join(home, "probe", filename))
-            
+
     if not exists(sftp, "probe"):
         sftp.put(path.join(simulation_folder, "probe"), "probe")
     if not exists(sftp, "Womersley.py"):

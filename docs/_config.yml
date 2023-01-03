@@ -48,4 +48,4 @@ parse:
 html:
   use_issues_button: true
   use_repository_button: true
-  extra_navbar: See more at <a href="https://github.com/KVSlab">KVSLab</a>
+  extra_navbar: See more at <a href="https://kvslab.github.io">KVSLab</a>

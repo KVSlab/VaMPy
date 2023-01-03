@@ -2,7 +2,7 @@ from os import path
 
 from dolfin import *
 
-from postprocessing_common import STRESS, read_command_line, get_dataset_names
+from vampy.automatedPostProcessing.postprocessing_common import STRESS, read_command_line, get_dataset_names
 
 try:
     parameters["reorder_dofs_serial"] = False

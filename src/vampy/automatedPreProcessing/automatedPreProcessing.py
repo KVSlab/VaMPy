@@ -1,14 +1,11 @@
-# Python 2 / 3 support
-from __future__ import print_function
-
 import argparse
 from os import remove
 
-import ToolRepairSTL
 # Local imports
-from common import *
-from simulate import run_simulation
-from visualize import visualize
+from vampy.automatedPreProcessing import ToolRepairSTL
+from vampy.automatedPreProcessing.common import *
+from vampy.automatedPreProcessing.simulate import run_simulation
+from vampy.automatedPreProcessing.visualize import visualize
 
 
 def run_pre_processing(filename_model, verbose_print, smoothing_method, smoothing_factor, meshing_method,

@@ -1,6 +1,6 @@
 import vtk
 
-from DisplayData import DisplayModel, VtkPointCloud
+from vampy.automatedPreProcessing.DisplayData import DisplayModel, VtkPointCloud
 
 version = vtk.vtkVersion().GetVTKMajorVersion()
 

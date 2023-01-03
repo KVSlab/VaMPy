@@ -4,7 +4,7 @@ from pathlib import Path
 
 from dolfin import *
 
-from postprocessing_common import read_command_line
+from vampy.automatedPostProcessing.postprocessing_common import read_command_line
 
 try:
     parameters["reorder_dofs_serial"] = False

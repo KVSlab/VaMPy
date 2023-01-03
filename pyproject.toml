@@ -10,7 +10,7 @@ license = {file = "LICENSE"}
 readme = "README.md"
 
 [project.scripts]
-vampy = "vampy.cli:main"
+vampy = "vampy.__main__:main"
 
 [project.optional-dependencies]
 test = [

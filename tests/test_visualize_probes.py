@@ -1,15 +1,11 @@
-import sys
 from os import path, remove
 
-sys.path.append("..")
-sys.path.append("../automatedPostProcessing")
-
-from automatedPostProcessing.visualize_probes import visualize_probes
+from vampy.automatedPostProcessing.visualize_probes import visualize_probes
 
 
 def test_visualize_probes():
     # Path to test results and params
-    probe_path = "test_results/1/Probes"
+    probe_path = "tests/test_results/1/Probes"
     probe_frequency = 100
     file_path = path.join(probe_path, "Probes.png")
 

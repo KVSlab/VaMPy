@@ -1,14 +1,11 @@
-import sys
+from os import path
 
-sys.path.append("..")
-sys.path.append("../automatedPreProcessing")
-
-from automatedPreProcessing.common import *
-from automatedPreProcessing.automatedPreProcessing import read_command_line, run_pre_processing
+from vampy.automatedPreProcessing.automatedPreProcessing import read_command_line, run_pre_processing
+from vampy.automatedPreProcessing.common import read_polydata
 
 
 def test_pre_processing():
-    model_path = "Case_test_tiny_artery/tiny_artery.stl"
+    model_path = "tests/Case_test_tiny_artery/tiny_artery.stl"
     # Get default input parameters
     common_input = read_command_line()
     common_input.update(dict(meshing_method="diameter",

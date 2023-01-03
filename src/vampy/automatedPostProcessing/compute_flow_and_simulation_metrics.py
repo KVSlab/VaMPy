@@ -3,7 +3,7 @@ from os import path
 import numpy as np
 from dolfin import *
 
-from postprocessing_common import read_command_line, epsilon, get_dataset_names
+from vampy.automatedPostProcessing.postprocessing_common import read_command_line, epsilon, get_dataset_names
 
 
 def compute_flow_and_simulation_metrics(folder, nu, dt, velocity_degree, T, times_to_average, save_frequency,

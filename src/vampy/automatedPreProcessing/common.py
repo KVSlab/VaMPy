@@ -1,10 +1,10 @@
 from morphman.common import *
 
-import ImportData
-from NetworkBoundaryConditions import FlowSplitting
+from vampy.automatedPreProcessing import ImportData
+from vampy.automatedPreProcessing.NetworkBoundaryConditions import FlowSplitting
 
 try:
-    from vmtkpointselector import *
+    from vampy.automatedPreProcessing.vmtkpointselector import *
 except ImportError:
     pass
 import numpy as np

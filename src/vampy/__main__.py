@@ -1,5 +1,5 @@
 #!/usr/bin/env python
-from vampy.cli import main
+from vampy.main import main
 
 if __name__ == "__main__":
     import sys
