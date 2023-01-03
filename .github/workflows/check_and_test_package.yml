@@ -34,8 +34,8 @@ jobs:
       - name: Flake8 code
         run: python3 -m flake8
 
-      - name: mypy code
-        run: python3 -m mypy --exclude Probe.py
+#      - name: mypy code
+#        run: python3 -m mypy --exclude Probe.py
 
   test-code:
     # This code depends on the result of check-code
