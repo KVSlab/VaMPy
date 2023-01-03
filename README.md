@@ -1,7 +1,10 @@
-## VaMPy - Vascular Modeling Pypeline
+# VaMPy - Vascular Modeling Pypeline
+_________________
+[![GPL-3.0](https://img.shields.io/github/license/hkjeldsberg/vampy)](LICENSE)
 [![CircleCI](https://circleci.com/gh/KVSlab/VaMPy/tree/master.svg?style=svg)](https://circleci.com/gh/hkjeldsberg/VaMPy/tree/master)
 [![codecov](https://codecov.io/gh/KVSlab/VaMPy/branch/master/graph/badge.svg?token=M2NMX6HOSZ)](https://codecov.io/gh/KVSlab/VaMPy)
 [![Documentation Status](https://readthedocs.org/projects/vampy/badge/?version=latest)](https://vampy.readthedocs.io/en/latest/?badge=latest)
+_________________
 
 <p align="center">
     <img src=test/artery_pipeline.png width="830 height="370" alt="Output pre processing"/>
