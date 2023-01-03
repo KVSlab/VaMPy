@@ -40,7 +40,8 @@ ignore_missing_imports = true
 # Folders to exclude
 exclude = [
     "docs/",
-    "build/"
+    "build/",
+    "Probe.py"
 ]
 # Folder to check with mypy
 files = [
