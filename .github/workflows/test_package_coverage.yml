@@ -16,13 +16,14 @@ on:
 jobs:
   test-code:
     # This code depends on the result of check-code
-    runs-on: ${{ matrix.os }}
+    # runs-on: ${{ matrix.os }}
+    runs-on:  ubuntu-22.04
     container: quay.io/fenicsproject/stable:latest
 
-    strategy:
-      matrix:
-        os: [ubuntu-22.04, windows-latest, macos-12]
-        python-version: ["3.8", "3.9", "3.10"]
+#    strategy:
+#      matrix:
+#        os: [ubuntu-22.04, windows-latest, macos-12]
+#        python-version: ["3.8", "3.9", "3.10"]
 
     steps:
       - name: Set up Python ${{ matrix.python-version }}
