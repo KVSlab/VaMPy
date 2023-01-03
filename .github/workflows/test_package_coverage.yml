@@ -17,8 +17,7 @@ jobs:
   test-code:
     # This code depends on the result of check-code
     runs-on: ${{ matrix.os }}
-    container:
-      image: quay.io/fenicsproject/stable:latest
+    container: quay.io/fenicsproject/stable:latest
 
     strategy:
       matrix:
