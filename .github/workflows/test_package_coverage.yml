@@ -17,19 +17,23 @@ jobs:
   test-code:
     # This code depends on the result of check-code
     # runs-on: ${{ matrix.os }}
-    runs-on:  ubuntu-22.04
+    runs-on: ubuntu-22.04
     container: quay.io/fenicsproject/stable:latest
 
-#    strategy:
-#      matrix:
-#        os: [ubuntu-22.04, windows-latest, macos-12]
-#        python-version: ["3.8", "3.9", "3.10"]
+    strategy:
+      matrix:
+        os: [ ubuntu-22.04, windows-latest, macos-12 ]
+        python-version: [ "3.8", "3.9", "3.10" ]
 
     steps:
       - name: Set up Python ${{ matrix.python-version }}
         uses: actions/setup-python@v4
         with:
           python-version: ${{ matrix.python-version }}
+
+      - name: Upgrade pip and setuptools
+        run:
+          python3 -m pip install pip setuptools --upgrade
 
       - uses: actions/checkout@v3
 
