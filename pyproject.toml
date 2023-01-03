@@ -5,8 +5,8 @@ requires = ["setuptools>=61.0.0", "wheel"]
 name = "VaMPy"
 version = "0.2.0"
 description = "Automated tools used to prepare, run, and analyze vascular morphologies."
-authors = [{name = "Henrik A. Kjeldsberg", email = "henriakj@simula.no"}]
-license = {file = "LICENSE"}
+authors = [{ name = "Henrik A. Kjeldsberg", email = "henriakj@simula.no" }]
+license = { file = "LICENSE" }
 readme = "README.md"
 dependencies = [
     'numpy'
@@ -25,11 +25,11 @@ test = [
 
 [tool.pytest.ini_options]
 addopts = [
-   "--import-mode=importlib",
-   "--cov=vampy",
-   "--cov-report=html",
-   "--cov-report=term-missing",
-   "-v"
+    "--import-mode=importlib",
+    "--cov=vampy",
+    "--cov-report=html",
+    "--cov-report=term-missing",
+    "-v"
 ]
 testpaths = [
     "tests"
@@ -41,7 +41,7 @@ ignore_missing_imports = true
 exclude = [
     "docs/",
     "build/",
-    "src/vampy/simulation/Probe.py"
+    "Probe.py",
 ]
 # Folder to check with mypy
 files = [

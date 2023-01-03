@@ -23,8 +23,7 @@ jobs:
       - uses: actions/checkout@v3
 
       - name: Upgrade pip and setuptools
-        run:
-          python3 -m pip install pip setuptools --upgrade
+        run: python3 -m pip install pip setuptools --upgrade
 
       - name: Install types-paramiko
         run: python3 -m pip install types-paramiko
@@ -36,7 +35,7 @@ jobs:
         run: python3 -m flake8
 
       - name: mypy code
-        run: python3 -m mypy
+        run: python3 -m mypy --exclude Probe.py
 
   test-code:
     # This code depends on the result of check-code
