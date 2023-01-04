@@ -1,0 +1,15 @@
+name: vampy
+channels:
+  - conda-forge
+dependencies:
+  - vtk=*=qt*
+  - fenics-dolfin
+  - morphman
+  - paramiko
+  - vmtk
+  - pip
+  - python=3.10
+  - git
+  - pip:
+      - cppimport
+      - git+https://github.com/mikaem/Oasis
