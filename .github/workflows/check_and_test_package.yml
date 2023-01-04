@@ -32,11 +32,11 @@ jobs:
       - name: Install types-paramiko
         run: python3 -m pip install types-paramiko
 
-      - name: Install code
+      - name: Install VaMPy
         run: python3 -m pip install .[test]
 
-      - name: Flake8 code
-        run: python3 -m flake8 
+      - name: Check code with Flake8
+        run: python3 -m flake8
 
   test-code:
     needs: check-code
