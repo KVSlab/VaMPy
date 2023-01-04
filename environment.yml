@@ -4,12 +4,13 @@ channels:
   - conda-forge
 
 dependencies:
-  - fenics-dolfin
+  - fenics
   - morphman
   - paramiko
   - pip
   - python >=3.8
   - git
+  - matplotlib
   - pytest
   - pytest-cov
   - pip:
