@@ -51,7 +51,10 @@ jobs:
           - os: macos-latest
             label: osx-64
             prefix: /Users/runner/miniconda3/envs/vampy
-
+#
+#          - os: windows-latest
+#            label: win-64
+#            prefix: C:\Miniconda3\envs\my-env
 
     # This code depends on the result of check-code
     name: ${{ matrix.label }}
@@ -90,7 +93,7 @@ jobs:
 
       - name: Run tests
         shell: bash -l {0}
-        run: pytest ./tests
+        run: python3 -m pytest ./tests
 
 #      - name: Check morphman
 #        run: python3 -c "import morphman"
