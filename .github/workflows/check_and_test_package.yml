@@ -77,11 +77,6 @@ jobs:
         run: mamba env update -n my-env -f environment.yml
         if: steps.cache.outputs.cache-hit != 'true'
 
-      - name: Activate environment
-        run: |
-          conda info         
-          $CONDA/bin/activate my-env  # to activate the env 
-
       - name: Install VaMPy
         run: pip install .[test]
 

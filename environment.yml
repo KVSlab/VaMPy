@@ -1,13 +1,16 @@
 name: vampy
+
 channels:
   - conda-forge
+
 dependencies:
   - fenics
   - morphman
   - paramiko
   - pip
-  - python=3.10
+  - python >=3.8
   - git
+  - pytest
   - pip:
       - cppimport
       - git+https://github.com/mikaem/Oasis
