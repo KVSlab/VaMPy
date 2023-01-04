@@ -52,15 +52,15 @@ jobs:
       - name: Check for dockerenv file
         run: (ls /.dockerenv && echo Found dockerenv) || (echo No dockerenv)
 
-#      - name: Upgrade pip and setuptools
-#        run:
-#          python3 -m pip install pip setuptools --upgrade
-#
-#      - name: Install VaMPy
-#        run: pip install .[test]
+      - name: Upgrade pip and setuptools
+        run:
+          python3 -m pip install pip setuptools --upgrade
+
+      - name: Install VaMPy
+        run: pip install .[test]
 
       - name: Check dolfin
-        run: python -c "import dolfin"
+        run: python3 -c "import dolfin"
 
       - name: Run tests
         run: python3 -m pytest
