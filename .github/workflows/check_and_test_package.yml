@@ -43,7 +43,8 @@ jobs:
     # This code depends on the result of check-code
 #    needs: check-code
     runs-on: ubuntu-latest
-    container: hkjeldsberg/vampy:latest
+    container: quay.io/fenicsproject/stable:latest
+    #container: hkjeldsberg/vampy:latest
 
     steps:
       - uses: actions/checkout@v3
