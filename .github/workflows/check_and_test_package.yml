@@ -62,6 +62,9 @@ jobs:
 
       - name: Check dolfin
         run: python3 -c "import dolfin"
+        
+      - name: Check conda
+        run: conda
 
       - name: Run tests
         run: python3 -m pytest
