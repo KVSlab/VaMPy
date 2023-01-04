@@ -18,7 +18,28 @@ env:
   CACHE_NUMBER: 2 # Increase to reset cache
 
 jobs:
+  check-code:
+    name: Check code
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v3
+
+      - name: Upgrade pip and setuptools
+        run: python3 -m pip install pip setuptools --upgrade
+
+      - name: Install types-paramiko
+        run: python3 -m pip install types-paramiko
+
+      - name: Install code
+        run: python3 -m pip install .[test]
+
+#      - name: Flake8 code
+#        run: python3 -m flake8 --exclude Probe.py
+
   test-code:
+    needs: check-code
     strategy:
       matrix:
         include:
@@ -38,7 +59,8 @@ jobs:
         shell: bash -l {0}
 
     steps:
-      - uses: actions/checkout@v2
+      - name: Checkout
+        uses: actions/checkout@v3
 
       - name: Upgrade pip and setuptools
         run: |
@@ -69,17 +91,8 @@ jobs:
         run: mamba env update -n vampy -f environment.yml
         if: steps.cache.outputs.cache-hit != 'true'
 
-      - name: Install types-paramiko
-        run: python3 -m pip install types-paramiko
-
       - name: Install VaMPy
         run: python3 -m pip install .[test]
-
-      - name: Flake8 code
-        run: python3 -m flake8
-
-      #      - name: mypy code
-      #        run: python3 -m mypy --exclude Probe.py
 
       - name: Run tests
         run: python3 -m pytest tests

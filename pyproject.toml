@@ -21,6 +21,7 @@ test = [
     "numpy",
     "pytest",
     "pytest-cov",
+    "matplotlib"
 ]
 
 [tool.pytest.ini_options]

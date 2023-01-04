@@ -10,7 +10,6 @@ dependencies:
   - pip
   - python >=3.8
   - git
-  - matplotlib
   - pytest
   - pytest-cov
   - pip:
