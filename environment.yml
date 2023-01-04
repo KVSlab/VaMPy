@@ -10,8 +10,6 @@ dependencies:
   - pip
   - python >=3.8
   - git
-  - pytest
-  - pytest-cov
   - pip:
       - cppimport
       - git+https://github.com/mikaem/Oasis
