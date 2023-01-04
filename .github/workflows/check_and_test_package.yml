@@ -74,7 +74,7 @@ jobs:
         id: cache
 
       - name: Update environment
-        run: mamba env update -n my-env -f environment.yml
+        run: mamba env update -n vampy -f environment.yml
         if: steps.cache.outputs.cache-hit != 'true'
 
       - name: Install VaMPy
