@@ -78,7 +78,9 @@ jobs:
         if: steps.cache.outputs.cache-hit != 'true'
 
       - name: Activate environment
-        run: conda activate my-env
+        run: | 
+          conda init my-env
+          conda activate my-env
 
       - name: Install VaMPy
         run: pip install .[test]
