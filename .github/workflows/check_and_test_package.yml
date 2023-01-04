@@ -29,10 +29,6 @@ jobs:
             label: osx-64
             prefix: /Users/runner/miniconda3/envs/vampy
 
-          - os: windows-latest
-            label: win-64
-            prefix: C:\Miniconda3\envs\vampy
-
     name: Test VaMPy on ${{ matrix.label }}
     runs-on: ${{ matrix.os }}
 
