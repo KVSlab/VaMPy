@@ -44,7 +44,8 @@ jobs:
 #    needs: check-code
     runs-on: ubuntu-latest
     # container: quay.io/fenicsproject/stable:latest
-    container: hkjeldsberg/vampy:latest
+    container: finsberg/fenics-extra
+    #container: hkjeldsberg/vampy:latest
 
     steps:
       - uses: actions/checkout@v3
