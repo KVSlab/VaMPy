@@ -79,8 +79,9 @@ jobs:
 
       - name: Activate environment
         run: | 
-          conda init 
-          conda activate my-env
+          mamba init 
+          source /home/runner/.bashrc
+          mamba activate my-env
 
       - name: Install VaMPy
         run: pip install .[test]
