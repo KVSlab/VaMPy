@@ -59,6 +59,9 @@ jobs:
     # This code depends on the result of check-code
     name: ${{ matrix.label }}
     runs-on: ${{ matrix.os }}
+    defaults:
+      run:
+        shell: bash -l {0}
 
     steps:
       - uses: actions/checkout@v2
@@ -92,7 +95,6 @@ jobs:
         run: python3 -m pip install .[test]
 
       - name: Run tests
-        shell: bash -l {0}
         run: python3 -m pytest ./tests
 
 #      - name: Check morphman
