@@ -79,7 +79,7 @@ jobs:
 
       - name: Activate environment
         run: | 
-          conda init my-env
+          conda init 
           conda activate my-env
 
       - name: Install VaMPy
