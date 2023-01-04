@@ -17,27 +17,25 @@ The main dependencies of VaMPy are
 * Oasis (FEniCS)
 * Paramiko
 
+
+Downloading VaMPy
+=================
+All that is left is to clone the `VaMPy` repository::
+
+    $ git clone https://github.com/KVSLab/VaMPy.git
+    $ cd VaMPy
+
 You can choose how to install the dependencies, but the fastest way to get started is to install the dependencies through `conda-forge`.
-Start by installing `conda`, by downloading and installing `Anaconda <https://www.anaconda.com/products/distribution>`_ or `Miniconda <https://conda.io/projects/conda/en/latest/user-guide/install/index.html>`_ on your computer.
 
-Installing morphMan and FEniCS
-==============================
-The `morphMan <https://github.com/KVSlab/morphMan>`_ software can be installed on all operative systems through Anaconda or `conda-forge`.
-Similarly, the `FEniCS <https://fenicsproject.org/>`_ software is also available through Anaconda.
-Note that Windows users may need to install FEniCS as described `here <https://fenicsproject.org/download/>`_.
-To create a conda environment with both software's installed, start by adding the `conda-forge` channel with::
+Conda
+=====
 
-    $ conda config --add channels conda-forge
-    $ conda config --set channel_priority strict
+Start by installing ``conda``, by downloading and installing `Anaconda <https://www.anaconda.com/products/distribution>`_ or `Miniconda <https://conda.io/projects/conda/en/latest/user-guide/install/index.html>`_ on your computer.
 
-Once the `conda-forge` channel has been added, you can create a `conda` environment with `morphMan` and `FEniCS` installed with::
+Using the ``environment.yml`` file in the root of the repository, you can call::
 
-    $ conda create -n your_environment morphman fenics paramiko
+    $ conda env update --file environment.yml --name your_environment
 
-.. note::
-    Replace ``your_environment`` with the environment name.
-
-This will also install the minor dependency to `paramiko`.
 You can now activate your environment by running::
 
     $ conda activate your_environment
@@ -64,9 +62,14 @@ or::
 
         file = open(self.OutputFileName,'rb').
 
+Editable installations
+======================
+If you want to make changes to any of the underlying packages, you should remove them from the `environment.yml` file,
+and install then from source, as described for `Oasis` in the next section.
 
 Installing Oasis
-================
+################
+
 The next step is to download and install `Oasis <https://github.com/mikaem/Oasis>`_ on your machine.
 Inside your conda environment run the following commands to clone and install Oasis, and the minor dependency to `cppimport`::
 
@@ -76,11 +79,28 @@ Inside your conda environment run the following commands to clone and install Oa
 
 The ``--editable`` flag installs the project in editable mode meaning that any changes to the original package will be reflected directly in your environment.
 
-Downloading VaMPy
-=================
-All that is left is to clone the `VaMPy` repository::
+Docker
+======
+A `Dockerfile` is supplied in the `docker`-folder in the repository, which can build a docker-image with all dependencies installed.
+The Docker-image can be built from the root of the repository with the following command::
 
-    $ git clone https://github.com/KVSLab/VaMPy.git
-    $ cd VaMPy
+    $ docker build -t name_of_image -f docker/Dockerfile .
 
+A Docker-container can then be started with the following command::
+
+    $ docker run -ti --network=host -e DISPLAY=$DISPLAY -v /tmp/.X11-unix:/tmp/.X11-unix -v $(pwd):/root/shared -w /root/shared --rm --shm-size=512m name_of_image
+
+To run the VaMPy GUI, you need to call::
+
+    $ xhost +local:root
+
+
+.. WARNING::
+    
+    on your system before running the scripts. Remember to call::
+        
+        xhost -local:root
+        
+    on the host system when you are done running the Docker container.
+    
 Now you are all set, and can start using the Vascular Modeling Pypeline.
