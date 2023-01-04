@@ -50,7 +50,7 @@ jobs:
 #            prefix: /usr/share/miniconda3/envs/my-env
           - os: macos-latest
             label: osx-64
-            prefix: /Users/runner/miniconda3/envs/my-env
+            prefix: /Users/runner/miniconda3/envs/vampy
 
 
     # This code depends on the result of check-code
