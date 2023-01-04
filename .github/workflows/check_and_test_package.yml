@@ -81,16 +81,19 @@ jobs:
         run: |
           conda info         
           $CONDA/bin/activate my-env  # to activate the env 
-          python3 -c "import morphman"
 
       - name: Install VaMPy
         run: pip install .[test]
 
-      - name: Check morphman
-        run: python3 -c "import morphman"
+      - name: Run tests
+        shell: bash -l {0}
+        run: pytest ./tests
 
-      - name: Check dolfin
-        run: python3 -c "import dolfin"
+#      - name: Check morphman
+#        run: python3 -c "import morphman"
+#
+#      - name: Check dolfin
+#        run: python3 -c "import dolfin"
 
 #      - uses: actions/checkout@v3
 #
