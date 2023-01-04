@@ -2,11 +2,9 @@ name: vampy
 channels:
   - conda-forge
 dependencies:
-  - vtk=*=qt*
-  - fenics-dolfin
+  - fenics
   - morphman
   - paramiko
-  - vmtk
   - pip
   - python=3.10
   - git
