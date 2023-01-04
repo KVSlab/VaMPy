@@ -131,7 +131,6 @@ dmypy.json
 _build/
 
 # result files
-*.h5
 *.xdmf
 points
 params.dat
