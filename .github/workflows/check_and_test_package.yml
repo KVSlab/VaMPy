@@ -81,6 +81,7 @@ jobs:
         run: |
           conda info         
           $CONDA/bin/activate my-env  # to activate the env 
+          python3 -c "import morphman"
 
       - name: Install VaMPy
         run: pip install .[test]
