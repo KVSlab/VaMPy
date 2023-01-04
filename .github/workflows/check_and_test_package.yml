@@ -35,8 +35,8 @@ jobs:
       - name: Install code
         run: python3 -m pip install .[test]
 
-#      - name: Flake8 code
-#        run: python3 -m flake8 --exclude Probe.py
+      - name: Flake8 code
+        run: python3 -m flake8 
 
   test-code:
     needs: check-code
