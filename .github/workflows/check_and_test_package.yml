@@ -59,7 +59,7 @@ jobs:
 #        run: pip install .[test]
 
       - name: Check dolfin
-        run: python3 -c "import dolfin"
+        run: python -c "import dolfin"
 
       - name: Run tests
         run: python3 -m pytest
