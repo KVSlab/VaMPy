@@ -54,35 +54,4 @@ jobs:
         uses: actions/setup-python@v2
         with:
           python-version: 3.8
-      - name: Install dependencies
-        run: $CONDA/bin/conda env update --file environment.yml --name base
 
-      - name: Test with pytest
-        run: |
-          conda install pytest
-          run: python3 -m pytest
-
-        #      - name: Check for dockerenv file
-        #        run: (ls /.dockerenv && echo Found dockerenv) || (echo No dockerenv)
-        #
-        #      - name: Upgrade pip and setuptools
-        #        run:
-        #          python3 -m pip install pip setuptools --upgrade
-        #
-        #      - name: Install VaMPy
-        #        run: pip install .[test]
-        #
-        #      - name: Check dolfin
-        #        run: python3 -c "import dolfin"
-        #
-        #      - name: Check conda
-        #        run: conda
-
-
-        - name: Upload coverage report as artifact
-          if: matrix.os == 'ubuntu-22.04' && matrix.python-version == '3.10'
-          uses: actions/upload-artifact@v3
-          with:
-            name: code-coverage-report
-            path: htmlcov
-            if-no-files-found: error
