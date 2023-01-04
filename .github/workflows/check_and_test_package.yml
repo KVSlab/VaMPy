@@ -69,7 +69,7 @@ jobs:
         with:
           miniforge-variant: Mambaforge
           miniforge-version: latest
-          activate-environment: my-env
+          activate-environment: vampy
           use-mamba: true
 
       - name: Set cache date
