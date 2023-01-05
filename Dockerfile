@@ -24,3 +24,4 @@ RUN sed -i "s/gzfile[[:space:]]=[[:space:]]gzip.open(self.OutputFileName,'w')/gz
 
 SHELL ["mamba", "run", "-n", "dockerenv", "/bin/bash", "-c"]
 ENV MESA_LOADER_DRIVER_OVERRIDE=""
+
