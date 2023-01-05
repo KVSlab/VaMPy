@@ -8,60 +8,39 @@ scripts for computing WSS-based metrics, more advanced turbulence metrics, and a
 patient-specific geometries. The project is accessible through
 [GitHub](https://github.com/KVSlab/VaMPy).
 
-## Dependencies
+## Installing VaMPy using `conda`
 
-The main dependencies of VaMPy are
-
-- morphMan
-- Oasis (FEniCS)
-- Paramiko
-
-You can choose how to install the dependencies, but the fastest way to get started is to install the dependencies
-through
-`conda-forge`. Start by installing `conda`, by downloading and installing
-[Anaconda](https://www.anaconda.com/products/distribution) or
-[Miniconda](https://conda.io/projects/conda/en/latest/user-guide/install/index.html)
-on your computer.
-
-## Installing morphMan and FEniCS
-
-The [morphMan](https://github.com/KVSlab/morphMan) software can be installed on all operative systems through Anaconda
-or
-`conda-forge`. Similarly, the
-[FEniCS](https://fenicsproject.org/) software is also available through Anaconda. Note that Windows users may need to
-install FEniCS as described [here](https://fenicsproject.org/download/). To create a conda environment with both
-software\'s installed, start by adding the
-`conda-forge` channel with:
+We recommend installing `VaMPy` and its dependencies through `conda`.  
+Start by cloning into the repository:
 
 ``` console
-$ conda config --add channels conda-forge
-$ conda config --set channel_priority strict
+$ git clone https://github.com/KVSLab/VaMPy.git
+$ cd VaMPy
 ```
 
-Once the `conda-forge` channel has been added, you can create a `conda` environment with `morphMan` and
-`FEniCS` installed with:
+Then, using the ``environment.yml`` file in the root of the repository, you can call:
 
 ``` console
-$ conda create -n your_environment morphman fenics paramiko
+$ conda env update --file environment.yml --name your_environment
 ```
 
-This will also install the minor dependency to `paramiko`. You can now activate your environment by running:
+Next, can now activate your environment by running::
 
 ``` console
 $ conda activate your_environment
 ```
 
-or:
+Now you are all set, and can start using the Vascular Modeling Pypeline.
 
-``` console
-$ source activate your_environment
-```
+## Editable installations
 
-## Installing Oasis
+If you want to make changes to any of the underlying packages, you should remove them from the `environment.yml` file,
+and install them from source, as described for `Oasis` in the next section.
 
-The next step is to download and install
-[Oasis](https://github.com/mikaem/Oasis) on your machine. Inside your conda environment run the following commands to
-clone and install Oasis, and the minor dependency to \`cppimport\`:
+### Installing Oasis
+
+To install an editable version of `Oasis <https://github.com/mikaem/Oasis>`_ on your machine, run the following command
+inside your conda environment:
 
 ``` console
 $ git clone https://github.com/mikaem/Oasis
@@ -69,16 +48,39 @@ $ pip install cppimport
 $ pip install --editable Oasis
 ```
 
-The `--editable` flag installs the project in editable mode meaning that any changes to the original package will be
+The ``--editable`` flag installs the project in editable mode meaning that any changes to the original package will be
 reflected directly in your environment.
 
-## Downloading VaMPy
+## Running VaMPy using Docker
 
-All that is left is to clone the `VaMPy` repository:
+A `Dockerfile` is supplied in the `docker`-folder in the repository, which can build a docker-image with all
+dependencies installed. The Docker-image can be built from the root of the repository with the following command:
 
 ``` console
-$ git clone https://github.com/KVSLab/VaMPy.git
-$ cd VaMPy
+$ docker build -t name_of_image -f docker/Dockerfile .
 ```
 
-Now you are all set, and can start using the Vascular Modeling Pypeline.
+A Docker-container can then be started with the following command:
+
+``` console
+$ docker run -ti --network=host -e DISPLAY=$DISPLAY -v /tmp/.X11-unix:/tmp/.X11-unix -v $(pwd):/root/shared -w /root/shared --rm --shm-size=512m name_of_image
+```
+
+To run the VaMPy GUI, you need to call:
+
+``` console
+$ xhost +local:root
+```
+
+on your system before running the scripts.
+
+### Note on Docker::
+
+Remember to call:
+
+``` console
+xhost -local:root
+```
+
+on the host system when you are done running the Docker container.
+    
