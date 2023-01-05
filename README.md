@@ -1,9 +1,9 @@
 # VaMPy - Vascular Modeling Pypeline
 _________________
 [![GPL-3.0](https://img.shields.io/github/license/hkjeldsberg/vampy)](LICENSE)
-[![CircleCI](https://circleci.com/gh/KVSlab/VaMPy/tree/master.svg?style=svg)](https://circleci.com/gh/hkjeldsberg/VaMPy/tree/master)
 [![codecov](https://codecov.io/gh/KVSlab/VaMPy/branch/master/graph/badge.svg?token=M2NMX6HOSZ)](https://codecov.io/gh/KVSlab/VaMPy)
-[![Documentation Status](https://readthedocs.org/projects/vampy/badge/?version=latest)](https://vampy.readthedocs.io/en/latest/?badge=latest)
+[![CI](https://github.com/kvslab/vampy/actions/workflows/check_and_test_package.yml/badge.svg)](https://github.com/kvslab/vampy/actions/workflows/check_and_test_package.yml)
+[![GitHub pages](https://github.com/kvslab/vampy/actions/workflows/deploy_pages.yml/badge.svg)](https://github.com/kvslab/vampy/actions/workflows/deploy_pages.yml)
 _________________
 
 <p align="center">
@@ -17,13 +17,15 @@ Description
 -----------
 The Vascular Modeling Pypeline (VaMPy) is a collection of fully automated scripts used to prepare, run, and analyze cardiac and atrial morphologies.  This includes pre-processing scripts for meshing and probe sampling, two [Oasis](https://github.com/mikaem/Oasis) problem files for simulating flow in the [internal carotid artery](https://en.wikipedia.org/wiki/Internal_carotid_artery) and the [left atrium](https://en.wikipedia.org/wiki/Atrium_(heart)), and a variety of post-processing scripts for computing WSS-based metrics, more advanced turbulence metrics, and a variety of morphological parameters in patient-specific geometries. 
 
-Authors
--------
-VaMPy has been developed by
+Installation
+------------
+VaMPy and its dependencies can be installed using either `conda`, or by building and running a `Docker` container, and `pip`. 
+For detailed installation notes see the [installation guidelines](https://kvslab.github.io/VaMPy/installation.html).  
 
-* Aslak Wigdahl Bergersen
-* Christophe Chnafa
-* Henrik A. Kjeldsberg
+Documentation
+-------------
+VaMPy's documentation is hosted [here](https://kvslab.github.io/VaMPy).
+This includes two [demos], meant to guide the user through the basic steps of performing a computational fluid dynamic simulation in a vascular body.
 
 Licence
 -------
@@ -32,33 +34,12 @@ later version.
 
 VaMPy is Copyright (2018-2022) by the authors.
 
-Documentation
--------------
-For detailed installation notes and an introduction to VaMPy, please refer to the [documentation](https://vampy.readthedocs.io/en/latest/).
+Authors
+-------
+VaMPy has been developed by
 
-Installation
-------------
-For reference, VaMPy requires the following dependencies: morphMan, FEniCS, and Paramiko. 
-If you are on Windows, macOS or Linux you can install all the general dependencies through [Anaconda](https://docs.conda.io/projects/conda/en/latest/user-guide/install/index.html).
-First install Anaconda or Miniconda on your computer, and add the `conda-forge` channel with:
-
-    conda config --add channels conda-forge
-    conda config --set channel_priority strict
-
-Then create a conda environment for `morphMan` and `FEniCS` by executing the following command in a terminal
-
-    conda create -n your_environment morphman fenics paramiko 
-
-Next, you need to install [`Oasis`](https://github.com/mikaem/Oasis). You can do so with the following commands:
-
-    git clone https://github.com/mikaem/Oasis
-    pip install cppimport
-    pip install --editable Oasis
-
-Finally, you are ready to clone and use the Vascular Modeling Pypeline:
-
-    git clone https://github.com/KVSLab/VaMPy.git
-    cd VaMPy
+* [Aslak W. Bergersen](https://github.com/aslakbergersen)
+* [Henrik A. Kjeldsberg](https://github.com/HKjeldsberg)
 
 Issues
 ------

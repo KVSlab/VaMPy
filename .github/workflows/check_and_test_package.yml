@@ -1,4 +1,4 @@
-name: Test package
+name: CI
 
 on:
   push:
@@ -101,10 +101,8 @@ jobs:
       - name: Run tests
         run: python3 -m pytest tests
 
-      - name: Upload coverage report as artifact
+      - name: Upload coverage report to codecov
         if: matrix.os == 'ubuntu-latest'
-        uses: actions/upload-artifact@v3
+        uses: codecov/codecov-action@v3
         with:
-          name: code-coverage-report
-          path: htmlcov
-          if-no-files-found: error
+          fail_ci_if_error: true

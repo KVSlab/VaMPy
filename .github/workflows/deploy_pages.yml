@@ -1,4 +1,4 @@
-name: Build documentation
+name: GitHub pages
 
 on:
   # Trigger the workflow on push to main branch
