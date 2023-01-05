@@ -25,7 +25,7 @@ For detailed installation notes see the [installation guidelines](https://kvslab
 Documentation
 -------------
 VaMPy's documentation is hosted [here](https://kvslab.github.io/VaMPy).
-This includes two [demos], meant to guide the user through the basic steps of performing a computational fluid dynamic simulation in a vascular body.
+This includes two [tutorials](https://kvslab.github.io/VaMPy/tutorials.html), meant to guide the user through the basic steps of performing a computational fluid dynamic simulation in a vascular body.
 
 Licence
 -------
