@@ -16,7 +16,7 @@ try:
     probe11 = cppimport.imp('probe.probe11')
     ProbeObject = probe11.Probes
 except ImportError:
-    print("Failed importing probe.probe11")
+    print("Failed to import probe.probe11")
 
 
 # Give the compiled classes some additional pythonic functionality

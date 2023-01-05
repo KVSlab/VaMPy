@@ -121,9 +121,9 @@ def create_bcs(t, NS_expressions, V, Q, area_ratio, area_inlet, mesh, mesh_path,
 
     # Create pressure boundary condition
     area_out = []
-    ds = Measure("ds", domain=mesh)
+    ds = Measure("ds", domain=mesh, subdomain_data=boundary)
     for i, ind in enumerate(id_out):
-        dsi = ds(ind, subdomain_data=boundary)
+        dsi = ds(ind)
         area_out.append(assemble(Constant(1.0, name="one") * dsi))
 
     bc_p = []
@@ -324,12 +324,12 @@ def update_pressure_condition(NS_expressions, area_ratio, boundary, id_in, id_ou
     """
     Use a dual-pressure boundary condition as pressure condition at outlet.
     """
-    ds = Measure("ds", domain=mesh)
+    ds = Measure("ds", domain=mesh, subdomain_data=boundary)
     Q_in = abs(assemble(dot(u_, n) * ds(id_in[0], subdomain_data=boundary)))
     Q_outs = []
     Q_ideals = []
     for i, out_id in enumerate(id_out):
-        Q_out = abs(assemble(dot(u_, n) * ds(out_id, subdomain_data=boundary)))
+        Q_out = abs(assemble(dot(u_, n) * ds(out_id)))
         Q_outs.append(Q_out)
 
         Q_ideal = area_ratio[i] * Q_in

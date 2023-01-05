@@ -101,10 +101,10 @@ def create_bcs(NS_expressions, mesh, mesh_path, nu, t, V, Q, id_in, id_out, **NS
     Q_mean = info['mean_flow_rate']
 
     # Find corresponding areas
-    ds = Measure("ds", domain=mesh)
+    ds = Measure("ds", domain=mesh, subdomain_data=boundary)
     area_total = 0
     for ID in id_in:
-        area_total += assemble(Constant(1.0) * ds(ID, subdomain_data=boundary))
+        area_total += assemble(Constant(1.0) * ds(ID))
 
     # Load normalized time and flow rate values
     t_values, Q_ = np.loadtxt(path.join(path.dirname(path.abspath(__file__)), "PV_values")).T

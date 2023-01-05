@@ -66,7 +66,8 @@ def compute_radius(mesh, facet_domains, ind, center):
 def compute_boundary_geometry_acrn(mesh, ind, facet_domains):
     # Some convenient variables
     assert facet_domains is not None
-    dsi = Measure(ind, domain=mesh, subdomain_data=facet_domains)
+    ds = Measure("ds", domain=mesh, subdomain_data=facet_domains)
+    dsi = ds(ind)
 
     d = mesh.geometry().dim()
     x = SpatialCoordinate(mesh)
@@ -98,7 +99,8 @@ def compute_boundary_geometry_acrn(mesh, ind, facet_domains):
 def compute_area(mesh, ind, facet_domains):
     # Some convenient variables
     assert facet_domains is not None
-    dsi = Measure(ind, domain=mesh, subdomain_data=facet_domains)
+    ds = Measure("ds", domain=mesh, subdomain_data=facet_domains)
+    dsi = ds(ind)
 
     # Compute area of boundary tesselation by integrating 1.0 over all facets
     A = assemble(Constant(1.0, name="one") * dsi)
