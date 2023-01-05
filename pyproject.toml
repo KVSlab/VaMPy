@@ -28,8 +28,8 @@ test = [
 [tool.pytest.ini_options]
 addopts = [
     "--import-mode=importlib",
-    "--cov=vampy",
-    "--cov-report=html",
+    "--cov=./",
+    "--cov-report=xml",
     "--cov-report=term-missing",
     "-v"
 ]
