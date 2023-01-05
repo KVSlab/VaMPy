@@ -20,7 +20,7 @@ except ImportError:
 
 
 # Give the compiled classes some additional pythonic functionality
-class Probes(probe11.Probes):
+class Probes(ProbeObject):
 
     def __call__(self, *args):
         return self.eval(*args)
