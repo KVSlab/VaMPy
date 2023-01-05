@@ -32,7 +32,7 @@ Licence
 VaMPy is licensed under the GNU GPL, version 3 or (at your option) any
 later version.
 
-VaMPy is Copyright (2018-2022) by the authors.
+VaMPy is Copyright (2018-2023) by the authors.
 
 Authors
 -------
