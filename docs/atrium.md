@@ -2,7 +2,7 @@
 # Hemodynamics simulation on a left atrium
 
 The second tutorial focuses on a left atrium geometry, collected from a
-published public dataset by Roney et al.[^1], located
+published public dataset by Roney et al.{cite}`roney2021constructing`, located
 [here](https://zenodo.org/record/3764917#.YyHwsuxByDV). In particular,
 we selected the endocardium model labeled `LA_Endo_5.vtk` in the
 dataset, representing the inner left atrium wall. The tutorial is meant
@@ -121,6 +121,6 @@ the velocity field and corresponding vectors scaled by the velocity
 magnitude, TWSSG, TAWSS, OSI, RRT, and ECAP.
 ```
 
-[^1]: Roney, Caroline. (2020). Constructing a Human Atrial Fibre Atlas,
-    Roney et al. \[Data set\]. Zenodo.
-    <https://doi.org/10.5281/zenodo.3764917>
+```{bibliography}
+:filter: docname in docnames
+```
