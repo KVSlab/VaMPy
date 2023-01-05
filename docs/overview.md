@@ -136,4 +136,3 @@ $ python automatedPostProcessing/visualize_probes.py --case simulation/results_a
 Note that this has an additional dependency to
 [Matplotlib](https://github.com/matplotlib/matplotlib), which can
 quickly be installed with either `conda` or `pip`.
-

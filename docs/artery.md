@@ -154,4 +154,3 @@ From left to right: the volumetric rendering of velocity,
 the pressure field, volumetric rendering of the Q-criterion, TAWSS, OSI,
 and RRT.
 ```
-
