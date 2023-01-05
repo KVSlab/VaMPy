@@ -37,5 +37,3 @@ to
 ``` console
 file = open(self.OutputFileName,'rb')
 ```
-
-

@@ -260,7 +260,7 @@ title="Fullscreen mode"
   <div class="menu-dropdown__content">
     <ul>
       <li>
-        <a href="https://github.com/KVSlab/vampy"
+        <a href="https://kvslab.github.io/VaMPy/"
    class="headerbtn"
    data-toggle="tooltip"
 data-placement="left"
@@ -277,7 +277,7 @@ title="Source repository"
       </li>
       
       <li>
-        <a href="https://github.com/KVSlab/vampy/issues/new?title=Issue%20on%20page%20%2F_modules/vampy/simulation/Artery.html&body=Your%20issue%20content%20here."
+        <a href="https://kvslab.github.io/VaMPy//issues/new?title=Issue%20on%20page%20%2F_modules/vampy/simulation/Artery.html&body=Your%20issue%20content%20here."
    class="headerbtn"
    data-toggle="tooltip"
 data-placement="left"
@@ -444,9 +444,9 @@ title="Open an issue"
 
     <span class="c1"># Create pressure boundary condition</span>
     <span class="n">area_out</span> <span class="o">=</span> <span class="p">[]</span>
-    <span class="n">ds</span> <span class="o">=</span> <span class="n">Measure</span><span class="p">(</span><span class="s2">&quot;ds&quot;</span><span class="p">,</span> <span class="n">domain</span><span class="o">=</span><span class="n">mesh</span><span class="p">)</span>
+    <span class="n">ds</span> <span class="o">=</span> <span class="n">Measure</span><span class="p">(</span><span class="s2">&quot;ds&quot;</span><span class="p">,</span> <span class="n">domain</span><span class="o">=</span><span class="n">mesh</span><span class="p">,</span> <span class="n">subdomain_data</span><span class="o">=</span><span class="n">boundary</span><span class="p">)</span>
     <span class="k">for</span> <span class="n">i</span><span class="p">,</span> <span class="n">ind</span> <span class="ow">in</span> <span class="nb">enumerate</span><span class="p">(</span><span class="n">id_out</span><span class="p">):</span>
-        <span class="n">dsi</span> <span class="o">=</span> <span class="n">ds</span><span class="p">(</span><span class="n">ind</span><span class="p">,</span> <span class="n">subdomain_data</span><span class="o">=</span><span class="n">boundary</span><span class="p">)</span>
+        <span class="n">dsi</span> <span class="o">=</span> <span class="n">ds</span><span class="p">(</span><span class="n">ind</span><span class="p">)</span>
         <span class="n">area_out</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">assemble</span><span class="p">(</span><span class="n">Constant</span><span class="p">(</span><span class="mf">1.0</span><span class="p">,</span> <span class="n">name</span><span class="o">=</span><span class="s2">&quot;one&quot;</span><span class="p">)</span> <span class="o">*</span> <span class="n">dsi</span><span class="p">))</span>
 
     <span class="n">bc_p</span> <span class="o">=</span> <span class="p">[]</span>
@@ -647,12 +647,12 @@ title="Open an issue"
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">    Use a dual-pressure boundary condition as pressure condition at outlet.</span>
 <span class="sd">    &quot;&quot;&quot;</span>
-    <span class="n">ds</span> <span class="o">=</span> <span class="n">Measure</span><span class="p">(</span><span class="s2">&quot;ds&quot;</span><span class="p">,</span> <span class="n">domain</span><span class="o">=</span><span class="n">mesh</span><span class="p">)</span>
+    <span class="n">ds</span> <span class="o">=</span> <span class="n">Measure</span><span class="p">(</span><span class="s2">&quot;ds&quot;</span><span class="p">,</span> <span class="n">domain</span><span class="o">=</span><span class="n">mesh</span><span class="p">,</span> <span class="n">subdomain_data</span><span class="o">=</span><span class="n">boundary</span><span class="p">)</span>
     <span class="n">Q_in</span> <span class="o">=</span> <span class="nb">abs</span><span class="p">(</span><span class="n">assemble</span><span class="p">(</span><span class="n">dot</span><span class="p">(</span><span class="n">u_</span><span class="p">,</span> <span class="n">n</span><span class="p">)</span> <span class="o">*</span> <span class="n">ds</span><span class="p">(</span><span class="n">id_in</span><span class="p">[</span><span class="mi">0</span><span class="p">],</span> <span class="n">subdomain_data</span><span class="o">=</span><span class="n">boundary</span><span class="p">)))</span>
     <span class="n">Q_outs</span> <span class="o">=</span> <span class="p">[]</span>
     <span class="n">Q_ideals</span> <span class="o">=</span> <span class="p">[]</span>
     <span class="k">for</span> <span class="n">i</span><span class="p">,</span> <span class="n">out_id</span> <span class="ow">in</span> <span class="nb">enumerate</span><span class="p">(</span><span class="n">id_out</span><span class="p">):</span>
-        <span class="n">Q_out</span> <span class="o">=</span> <span class="nb">abs</span><span class="p">(</span><span class="n">assemble</span><span class="p">(</span><span class="n">dot</span><span class="p">(</span><span class="n">u_</span><span class="p">,</span> <span class="n">n</span><span class="p">)</span> <span class="o">*</span> <span class="n">ds</span><span class="p">(</span><span class="n">out_id</span><span class="p">,</span> <span class="n">subdomain_data</span><span class="o">=</span><span class="n">boundary</span><span class="p">)))</span>
+        <span class="n">Q_out</span> <span class="o">=</span> <span class="nb">abs</span><span class="p">(</span><span class="n">assemble</span><span class="p">(</span><span class="n">dot</span><span class="p">(</span><span class="n">u_</span><span class="p">,</span> <span class="n">n</span><span class="p">)</span> <span class="o">*</span> <span class="n">ds</span><span class="p">(</span><span class="n">out_id</span><span class="p">)))</span>
         <span class="n">Q_outs</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">Q_out</span><span class="p">)</span>
 
         <span class="n">Q_ideal</span> <span class="o">=</span> <span class="n">area_ratio</span><span class="p">[</span><span class="n">i</span><span class="p">]</span> <span class="o">*</span> <span class="n">Q_in</span>
