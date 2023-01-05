@@ -8,9 +8,9 @@ from oasis.problems.NSfracStep import set_log_level, MPI, Measure, Mesh, assembl
     Function, VectorFunctionSpace, HDF5File, NS_parameters, MeshFunction, FunctionSpace, project, sqrt, inner, \
     info_green, assign
 
-from Probe import Probes
-from Womersley import make_womersley_bcs, compute_boundary_geometry_acrn
-from common import store_u_mean, get_file_paths, print_mesh_information
+from vampy.simulation.Probe import Probes
+from vampy.simulation.Womersley import make_womersley_bcs, compute_boundary_geometry_acrn
+from vampy.simulation.simulation_common import store_u_mean, get_file_paths, print_mesh_information
 
 # FEniCS specific command to control the desired level of logging, here set to critical errors
 set_log_level(50)

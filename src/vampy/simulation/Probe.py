@@ -9,7 +9,7 @@ import cppimport
 from mpi4py.MPI import COMM_WORLD as comm
 from numpy import zeros, squeeze, save
 
-probe11 = cppimport.imp('probe.probe11')
+probe11 = cppimport.imp('vampy.simulation.probe.probe11')
 
 
 # Give the compiled classes some additional pythonic functionality

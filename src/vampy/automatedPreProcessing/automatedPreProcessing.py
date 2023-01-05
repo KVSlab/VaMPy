@@ -10,10 +10,10 @@ from morphman import is_surface_capped, get_uncapped_surface, write_polydata, ge
 
 # Local imports
 from vampy.automatedPreProcessing import ToolRepairSTL
-from vampy.automatedPreProcessing.common import read_polydata, get_centers_for_meshing, dist_sphere_diam, \
-    dist_sphere_curvature, dist_sphere_constant, get_regions_to_refine, radiusArrayName, make_voronoi_diagram, \
-    add_flow_extension, write_mesh, mesh_alternative, generate_mesh, find_boundaries, compute_flow_rate, \
-    setup_model_network
+from vampy.automatedPreProcessing.preprocessing_common import read_polydata, get_centers_for_meshing, \
+    dist_sphere_diam, dist_sphere_curvature, dist_sphere_constant, get_regions_to_refine, radiusArrayName, \
+    make_voronoi_diagram, add_flow_extension, write_mesh, mesh_alternative, generate_mesh, find_boundaries, \
+    compute_flow_rate, setup_model_network
 from vampy.automatedPreProcessing.simulate import run_simulation
 from vampy.automatedPreProcessing.visualize import visualize
 
