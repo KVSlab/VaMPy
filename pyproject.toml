@@ -18,6 +18,7 @@ vampy = "vampy.__main__:main"
 [project.optional-dependencies]
 test = [
     "flake8",
+    'mypy',
     "numpy",
     "pytest",
     "pytest-cov",
