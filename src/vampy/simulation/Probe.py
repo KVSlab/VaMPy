@@ -5,11 +5,18 @@ __license__ = "GNU Lesser GPL version 3 or any later version"
 """
 This module contains functionality for efficiently probing a Function many times.
 """
+
 import cppimport
 from mpi4py.MPI import COMM_WORLD as comm
 from numpy import zeros, squeeze, save
 
-probe11 = cppimport.imp('probe.probe11')
+ProbeObject = object
+
+try:
+    probe11 = cppimport.imp('probe.probe11')
+    ProbeObject = probe11.Probes
+except ImportError:
+    print("Failed importing probe.probe11")
 
 
 # Give the compiled classes some additional pythonic functionality
