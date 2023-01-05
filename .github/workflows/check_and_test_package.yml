@@ -38,6 +38,10 @@ jobs:
       - name: Check code with Flake8
         run: python3 -m flake8
 
+      - name: Check code with mypy
+        run: python3 -m mypy --exclude 'src/vampy/simulation/Probe\.py'
+
+
   test-code:
     needs: check-code
     strategy:
