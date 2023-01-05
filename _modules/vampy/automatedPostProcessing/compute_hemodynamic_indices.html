@@ -1,0 +1,619 @@
+
+<!DOCTYPE html>
+
+<html>
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>vampy.automatedPostProcessing.compute_hemodynamic_indices &#8212; VaMPy</title>
+    
+  <!-- Loaded before other Sphinx assets -->
+  <link href="../../../_static/styles/theme.css?digest=1999514e3f237ded88cf" rel="stylesheet">
+<link href="../../../_static/styles/pydata-sphinx-theme.css?digest=1999514e3f237ded88cf" rel="stylesheet">
+
+    
+  <link rel="stylesheet"
+    href="../../../_static/vendor/fontawesome/5.13.0/css/all.min.css">
+  <link rel="preload" as="font" type="font/woff2" crossorigin
+    href="../../../_static/vendor/fontawesome/5.13.0/webfonts/fa-solid-900.woff2">
+  <link rel="preload" as="font" type="font/woff2" crossorigin
+    href="../../../_static/vendor/fontawesome/5.13.0/webfonts/fa-brands-400.woff2">
+
+    <link rel="stylesheet" type="text/css" href="../../../_static/pygments.css" />
+    <link rel="stylesheet" href="../../../_static/styles/sphinx-book-theme.css?digest=5115cc725059bd94278eecd172e13a965bf8f5a9" type="text/css" />
+    <link rel="stylesheet" type="text/css" href="../../../_static/togglebutton.css" />
+    <link rel="stylesheet" type="text/css" href="../../../_static/copybutton.css" />
+    <link rel="stylesheet" type="text/css" href="../../../_static/mystnb.css" />
+    <link rel="stylesheet" type="text/css" href="../../../_static/sphinx-thebe.css" />
+    <link rel="stylesheet" type="text/css" href="../../../_static/design-style.b7bb847fb20b106c3d81b95245e65545.min.css" />
+    
+  <!-- Pre-loaded scripts that we'll load fully later -->
+  <link rel="preload" as="script" href="../../../_static/scripts/pydata-sphinx-theme.js?digest=1999514e3f237ded88cf">
+
+    <script data-url_root="../../../" id="documentation_options" src="../../../_static/documentation_options.js"></script>
+    <script src="../../../_static/jquery.js"></script>
+    <script src="../../../_static/underscore.js"></script>
+    <script src="../../../_static/doctools.js"></script>
+    <script src="../../../_static/clipboard.min.js"></script>
+    <script src="../../../_static/copybutton.js"></script>
+    <script src="../../../_static/scripts/sphinx-book-theme.js?digest=9c920249402e914e316237a7dbc6769907cce411"></script>
+    <script>let toggleHintShow = 'Click to show';</script>
+    <script>let toggleHintHide = 'Click to hide';</script>
+    <script>let toggleOpenOnPrint = 'true';</script>
+    <script src="../../../_static/togglebutton.js"></script>
+    <script>var togglebuttonSelector = '.toggle, .admonition.dropdown, .tag_hide_input div.cell_input, .tag_hide-input div.cell_input, .tag_hide_output div.cell_output, .tag_hide-output div.cell_output, .tag_hide_cell.cell, .tag_hide-cell.cell';</script>
+    <script src="../../../_static/design-tabs.js"></script>
+    <script>const THEBE_JS_URL = "https://unpkg.com/thebe@0.8.2/lib/index.js"
+const thebe_selector = ".thebe,.cell"
+const thebe_selector_input = "pre"
+const thebe_selector_output = ".output, .cell_output"
+</script>
+    <script async="async" src="../../../_static/sphinx-thebe.js"></script>
+    <link rel="index" title="Index" href="../../../genindex.html" />
+    <link rel="search" title="Search" href="../../../search.html" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <meta name="docsearch:language" content="None">
+    
+
+    <!-- Google Analytics -->
+    
+  </head>
+  <body data-spy="scroll" data-target="#bd-toc-nav" data-offset="60">
+<!-- Checkboxes to toggle the left sidebar -->
+<input type="checkbox" class="sidebar-toggle" name="__navigation" id="__navigation" aria-label="Toggle navigation sidebar">
+<label class="overlay overlay-navbar" for="__navigation">
+    <div class="visually-hidden">Toggle navigation sidebar</div>
+</label>
+<!-- Checkboxes to toggle the in-page toc -->
+<input type="checkbox" class="sidebar-toggle" name="__page-toc" id="__page-toc" aria-label="Toggle in-page Table of Contents">
+<label class="overlay overlay-pagetoc" for="__page-toc">
+    <div class="visually-hidden">Toggle in-page Table of Contents</div>
+</label>
+<!-- Headers at the top -->
+<div class="announcement header-item noprint"></div>
+<div class="header header-item noprint"></div>
+
+    
+    <div class="container-fluid" id="banner"></div>
+
+    
+
+    <div class="container-xl">
+      <div class="row">
+          
+<!-- Sidebar -->
+<div class="bd-sidebar noprint" id="site-navigation">
+    <div class="bd-sidebar__content">
+        <div class="bd-sidebar__top"><div class="navbar-brand-box">
+    <a class="navbar-brand text-wrap" href="../../../index.html">
+      
+        <!-- `logo` is deprecated in Sphinx 4.0, so remove this when we stop supporting 3 -->
+        
+      
+      
+      <img src="../../../_static/logo.png" class="logo" alt="logo">
+      
+      
+      <h1 class="site-logo" id="site-title">VaMPy</h1>
+      
+    </a>
+</div><form class="bd-search d-flex align-items-center" action="../../../search.html" method="get">
+  <i class="icon fas fa-search"></i>
+  <input type="search" class="form-control" name="q" id="search-input" placeholder="Search this book..." aria-label="Search this book..." autocomplete="off" >
+</form><nav class="bd-links" id="bd-docs-nav" aria-label="Main">
+    <div class="bd-toc-item active">
+        
+        <ul class="nav bd-sidenav bd-sidenav__home-link">
+            <li class="toctree-l1">
+                <a class="reference internal" href="../../../index.html">
+                    The Vascular Modeling Pypeline
+                </a>
+            </li>
+        </ul>
+        <p aria-level="2" class="caption" role="heading">
+ <span class="caption-text">
+  Installation
+ </span>
+</p>
+<ul class="nav bd-sidenav">
+ <li class="toctree-l1">
+  <a class="reference internal" href="../../../installation.html">
+   Installation
+  </a>
+ </li>
+ <li class="toctree-l1">
+  <a class="reference internal" href="../../../issues.html">
+   Known issues
+  </a>
+ </li>
+</ul>
+<p aria-level="2" class="caption" role="heading">
+ <span class="caption-text">
+  Using VaMPy
+ </span>
+</p>
+<ul class="nav bd-sidenav">
+ <li class="toctree-l1">
+  <a class="reference internal" href="../../../overview.html">
+   Overview
+  </a>
+ </li>
+ <li class="toctree-l1">
+  <a class="reference internal" href="../../../quantities.html">
+   Computed quantities
+  </a>
+ </li>
+ <li class="toctree-l1">
+  <a class="reference internal" href="../../../cluster.html">
+   Running a CFD simulation on an HPC cluster
+  </a>
+ </li>
+ <li class="toctree-l1">
+  <a class="reference internal" href="../../../features.html">
+   Features and issues
+  </a>
+ </li>
+</ul>
+<p aria-level="2" class="caption" role="heading">
+ <span class="caption-text">
+  Tutorials
+ </span>
+</p>
+<ul class="nav bd-sidenav">
+ <li class="toctree-l1">
+  <a class="reference internal" href="../../../tutorials.html">
+   Tutorials
+  </a>
+ </li>
+ <li class="toctree-l1">
+  <a class="reference internal" href="../../../artery.html">
+   High-resolution CFD simulation in the internal carotid artery
+  </a>
+ </li>
+ <li class="toctree-l1">
+  <a class="reference internal" href="../../../atrium.html">
+   Hemodynamics simulation on a left atrium
+  </a>
+ </li>
+</ul>
+<p aria-level="2" class="caption" role="heading">
+ <span class="caption-text">
+  Python API
+ </span>
+</p>
+<ul class="nav bd-sidenav">
+ <li class="toctree-l1">
+  <a class="reference internal" href="../../../api.html">
+   API Reference
+  </a>
+ </li>
+</ul>
+
+    </div>
+</nav></div>
+        <div class="bd-sidebar__bottom">
+             <!-- To handle the deprecated key -->
+            
+            <div class="navbar_extra_footer">
+            See more at <a href="https://kvslab.github.io">KVSLab</a>
+            </div>
+            
+        </div>
+    </div>
+    <div id="rtd-footer-container"></div>
+</div>
+
+
+          
+
+
+          
+<!-- A tiny helper pixel to detect if we've scrolled -->
+<div class="sbt-scroll-pixel-helper"></div>
+<!-- Main content -->
+<div class="col py-0 content-container">
+    
+    <div class="header-article row sticky-top noprint">
+        
+
+
+
+<div class="col py-1 d-flex header-article-main">
+    <div class="header-article__left">
+        
+        <label for="__navigation"
+  class="headerbtn"
+  data-toggle="tooltip"
+data-placement="right"
+title="Toggle navigation"
+>
+  
+
+<span class="headerbtn__icon-container">
+  <i class="fas fa-bars"></i>
+  </span>
+
+</label>
+
+        
+    </div>
+    <div class="header-article__right">
+<button onclick="toggleFullScreen()"
+  class="headerbtn"
+  data-toggle="tooltip"
+data-placement="bottom"
+title="Fullscreen mode"
+>
+  
+
+<span class="headerbtn__icon-container">
+  <i class="fas fa-expand"></i>
+  </span>
+
+</button>
+
+<div class="menu-dropdown menu-dropdown-repository-buttons">
+  <button class="headerbtn menu-dropdown__trigger"
+      aria-label="Source repositories">
+      <i class="fab fa-github"></i>
+  </button>
+  <div class="menu-dropdown__content">
+    <ul>
+      <li>
+        <a href="https://github.com/KVSlab/vampy"
+   class="headerbtn"
+   data-toggle="tooltip"
+data-placement="left"
+title="Source repository"
+>
+  
+
+<span class="headerbtn__icon-container">
+  <i class="fab fa-github"></i>
+  </span>
+<span class="headerbtn__text-container">repository</span>
+</a>
+
+      </li>
+      
+      <li>
+        <a href="https://github.com/KVSlab/vampy/issues/new?title=Issue%20on%20page%20%2F_modules/vampy/automatedPostProcessing/compute_hemodynamic_indices.html&body=Your%20issue%20content%20here."
+   class="headerbtn"
+   data-toggle="tooltip"
+data-placement="left"
+title="Open an issue"
+>
+  
+
+<span class="headerbtn__icon-container">
+  <i class="fas fa-lightbulb"></i>
+  </span>
+<span class="headerbtn__text-container">open issue</span>
+</a>
+
+      </li>
+      
+    </ul>
+  </div>
+</div>
+
+    </div>
+</div>
+
+<!-- Table of contents -->
+<div class="col-md-3 bd-toc show noprint">
+</div>
+    </div>
+    <div class="article row">
+        <div class="col pl-md-3 pl-lg-5 content-container">
+            <!-- Table of contents that is only displayed when printing the page -->
+            <div id="jb-print-docs-body" class="onlyprint">
+                <h1></h1>
+                <!-- Table of contents -->
+                <div id="print-main-content">
+                    <div id="jb-print-toc">
+                        
+                    </div>
+                </div>
+            </div>
+            <main id="main-content" role="main">
+                
+              <div>
+                
+  <h1>Source code for vampy.automatedPostProcessing.compute_hemodynamic_indices</h1><div class="highlight"><pre>
+<span></span><span class="kn">from</span> <span class="nn">os</span> <span class="kn">import</span> <span class="n">path</span>
+
+<span class="kn">from</span> <span class="nn">dolfin</span> <span class="kn">import</span> <span class="n">Function</span><span class="p">,</span> <span class="n">VectorFunctionSpace</span><span class="p">,</span> <span class="n">FunctionSpace</span><span class="p">,</span> <span class="n">parameters</span><span class="p">,</span> <span class="n">MPI</span><span class="p">,</span> <span class="n">HDF5File</span><span class="p">,</span> <span class="n">Mesh</span><span class="p">,</span> <span class="n">XDMFFile</span><span class="p">,</span> \
+    <span class="n">BoundaryMesh</span><span class="p">,</span> <span class="n">project</span><span class="p">,</span> <span class="n">inner</span>
+
+<span class="kn">from</span> <span class="nn">vampy.automatedPostProcessing.postprocessing_common</span> <span class="kn">import</span> <span class="n">STRESS</span><span class="p">,</span> <span class="n">read_command_line</span><span class="p">,</span> <span class="n">get_dataset_names</span>
+
+<span class="k">try</span><span class="p">:</span>
+    <span class="n">parameters</span><span class="p">[</span><span class="s2">&quot;reorder_dofs_serial&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="kc">False</span>
+<span class="k">except</span> <span class="ne">NameError</span><span class="p">:</span>
+    <span class="k">pass</span>
+
+
+<div class="viewcode-block" id="compute_hemodynamic_indices"><a class="viewcode-back" href="../../../api.html#vampy.automatedPostProcessing.compute_hemodynamic_indices.compute_hemodynamic_indices">[docs]</a><span class="k">def</span> <span class="nf">compute_hemodynamic_indices</span><span class="p">(</span><span class="n">folder</span><span class="p">,</span> <span class="n">nu</span><span class="p">,</span> <span class="n">rho</span><span class="p">,</span> <span class="n">dt</span><span class="p">,</span> <span class="n">T</span><span class="p">,</span> <span class="n">velocity_degree</span><span class="p">,</span> <span class="n">save_frequency</span><span class="p">,</span> <span class="n">start_cycle</span><span class="p">,</span> <span class="n">step</span><span class="p">,</span>
+                                <span class="n">average_over_cycles</span><span class="p">):</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Loads velocity fields from completed CFD simulation,</span>
+<span class="sd">    and computes and saves the following hemodynamic quantities:</span>
+<span class="sd">    (1) WSS - Wall shear stress</span>
+<span class="sd">    (2) TAWSS - Time averaged wall shear stress</span>
+<span class="sd">    (3) TWSSG - Temporal wall shear stress gradient</span>
+<span class="sd">    (4) OSI - Oscillatory shear index</span>
+<span class="sd">    (5) RRT - Relative residence time</span>
+<span class="sd">    (6) ECAP - Endothelial cell activation potential</span>
+
+<span class="sd">    The resulting wall shear stress will be in units Pascal [Pa], given that the provided</span>
+<span class="sd">    density (rho) is in [kg/m^3], the time step (dt) is in [ms], and viscosity (nu) is in [mm^2/ms].</span>
+
+<span class="sd">    Args:</span>
+<span class="sd">        velocity_degree (int): Finite element degree of velocity</span>
+<span class="sd">        folder (str): Path to results from simulation</span>
+<span class="sd">        nu (float): Kinematic viscosity</span>
+<span class="sd">        rho (float): Fluid density</span>
+<span class="sd">        dt (float): Time step of simulation</span>
+<span class="sd">        T (float): One cardiac cycle, in [ms]</span>
+<span class="sd">        save_frequency (int): Frequency that velocity has been stored</span>
+<span class="sd">        start_cycle (int): Determines which cardiac cycle to start from for post-processing</span>
+<span class="sd">        step (int): Step size determining number of times data is sampled</span>
+<span class="sd">        average_over_cycles (bool): Averages over cardiac cycles if True</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="c1"># File paths</span>
+    <span class="n">file_path_u</span> <span class="o">=</span> <span class="n">path</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">folder</span><span class="p">,</span> <span class="s2">&quot;u.h5&quot;</span><span class="p">)</span>
+    <span class="n">mesh_path</span> <span class="o">=</span> <span class="n">path</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">folder</span><span class="p">,</span> <span class="s2">&quot;mesh.h5&quot;</span><span class="p">)</span>
+    <span class="n">file_u</span> <span class="o">=</span> <span class="n">HDF5File</span><span class="p">(</span><span class="n">MPI</span><span class="o">.</span><span class="n">comm_world</span><span class="p">,</span> <span class="n">file_path_u</span><span class="p">,</span> <span class="s2">&quot;r&quot;</span><span class="p">)</span>
+
+    <span class="c1"># Determine what time step to start post-processing from</span>
+    <span class="n">start</span> <span class="o">=</span> <span class="nb">int</span><span class="p">(</span><span class="n">T</span> <span class="o">/</span> <span class="n">dt</span> <span class="o">/</span> <span class="n">save_frequency</span> <span class="o">*</span> <span class="p">(</span><span class="n">start_cycle</span> <span class="o">-</span> <span class="mi">1</span><span class="p">))</span>
+
+    <span class="c1"># Get names of data to extract</span>
+    <span class="k">if</span> <span class="n">MPI</span><span class="o">.</span><span class="n">rank</span><span class="p">(</span><span class="n">MPI</span><span class="o">.</span><span class="n">comm_world</span><span class="p">)</span> <span class="o">==</span> <span class="mi">0</span><span class="p">:</span>
+        <span class="nb">print</span><span class="p">(</span><span class="s2">&quot;Reading dataset names&quot;</span><span class="p">)</span>
+
+    <span class="n">dataset</span> <span class="o">=</span> <span class="n">get_dataset_names</span><span class="p">(</span><span class="n">file_u</span><span class="p">,</span> <span class="n">start</span><span class="o">=</span><span class="n">start</span><span class="p">,</span> <span class="n">step</span><span class="o">=</span><span class="n">step</span><span class="p">)</span>
+
+    <span class="c1"># Read mesh saved as HDF5 format</span>
+    <span class="n">mesh</span> <span class="o">=</span> <span class="n">Mesh</span><span class="p">()</span>
+    <span class="k">with</span> <span class="n">HDF5File</span><span class="p">(</span><span class="n">MPI</span><span class="o">.</span><span class="n">comm_world</span><span class="p">,</span> <span class="n">mesh_path</span><span class="o">.</span><span class="fm">__str__</span><span class="p">(),</span> <span class="s2">&quot;r&quot;</span><span class="p">)</span> <span class="k">as</span> <span class="n">mesh_file</span><span class="p">:</span>
+        <span class="n">mesh_file</span><span class="o">.</span><span class="n">read</span><span class="p">(</span><span class="n">mesh</span><span class="p">,</span> <span class="s2">&quot;mesh&quot;</span><span class="p">,</span> <span class="kc">False</span><span class="p">)</span>
+
+    <span class="n">bm</span> <span class="o">=</span> <span class="n">BoundaryMesh</span><span class="p">(</span><span class="n">mesh</span><span class="p">,</span> <span class="s1">&#39;exterior&#39;</span><span class="p">)</span>
+
+    <span class="k">if</span> <span class="n">MPI</span><span class="o">.</span><span class="n">rank</span><span class="p">(</span><span class="n">MPI</span><span class="o">.</span><span class="n">comm_world</span><span class="p">)</span> <span class="o">==</span> <span class="mi">0</span><span class="p">:</span>
+        <span class="nb">print</span><span class="p">(</span><span class="s2">&quot;Defining function spaces&quot;</span><span class="p">)</span>
+
+    <span class="n">V_b1</span> <span class="o">=</span> <span class="n">VectorFunctionSpace</span><span class="p">(</span><span class="n">bm</span><span class="p">,</span> <span class="s2">&quot;CG&quot;</span><span class="p">,</span> <span class="mi">1</span><span class="p">)</span>
+    <span class="n">U_b1</span> <span class="o">=</span> <span class="n">FunctionSpace</span><span class="p">(</span><span class="n">bm</span><span class="p">,</span> <span class="s2">&quot;CG&quot;</span><span class="p">,</span> <span class="mi">1</span><span class="p">)</span>
+    <span class="n">V</span> <span class="o">=</span> <span class="n">VectorFunctionSpace</span><span class="p">(</span><span class="n">mesh</span><span class="p">,</span> <span class="s2">&quot;CG&quot;</span><span class="p">,</span> <span class="n">velocity_degree</span><span class="p">)</span>
+
+    <span class="k">if</span> <span class="n">MPI</span><span class="o">.</span><span class="n">rank</span><span class="p">(</span><span class="n">MPI</span><span class="o">.</span><span class="n">comm_world</span><span class="p">)</span> <span class="o">==</span> <span class="mi">0</span><span class="p">:</span>
+        <span class="nb">print</span><span class="p">(</span><span class="s2">&quot;Defining functions&quot;</span><span class="p">)</span>
+
+    <span class="n">u</span> <span class="o">=</span> <span class="n">Function</span><span class="p">(</span><span class="n">V</span><span class="p">)</span>
+
+    <span class="c1"># RRT</span>
+    <span class="n">RRT</span> <span class="o">=</span> <span class="n">Function</span><span class="p">(</span><span class="n">U_b1</span><span class="p">)</span>
+    <span class="n">RRT_avg</span> <span class="o">=</span> <span class="n">Function</span><span class="p">(</span><span class="n">U_b1</span><span class="p">)</span>
+
+    <span class="c1"># OSI</span>
+    <span class="n">OSI</span> <span class="o">=</span> <span class="n">Function</span><span class="p">(</span><span class="n">U_b1</span><span class="p">)</span>
+    <span class="n">OSI_avg</span> <span class="o">=</span> <span class="n">Function</span><span class="p">(</span><span class="n">U_b1</span><span class="p">)</span>
+
+    <span class="c1"># ECAP</span>
+    <span class="n">ECAP</span> <span class="o">=</span> <span class="n">Function</span><span class="p">(</span><span class="n">U_b1</span><span class="p">)</span>
+    <span class="n">ECAP_avg</span> <span class="o">=</span> <span class="n">Function</span><span class="p">(</span><span class="n">U_b1</span><span class="p">)</span>
+
+    <span class="c1"># WSS_mean</span>
+    <span class="n">WSS_mean</span> <span class="o">=</span> <span class="n">Function</span><span class="p">(</span><span class="n">V_b1</span><span class="p">)</span>
+    <span class="n">WSS_mean_avg</span> <span class="o">=</span> <span class="n">Function</span><span class="p">(</span><span class="n">V_b1</span><span class="p">)</span>
+
+    <span class="c1"># TAWSS</span>
+    <span class="n">TAWSS</span> <span class="o">=</span> <span class="n">Function</span><span class="p">(</span><span class="n">U_b1</span><span class="p">)</span>
+    <span class="n">TAWSS_avg</span> <span class="o">=</span> <span class="n">Function</span><span class="p">(</span><span class="n">U_b1</span><span class="p">)</span>
+
+    <span class="c1"># TWSSG</span>
+    <span class="n">TWSSG</span> <span class="o">=</span> <span class="n">Function</span><span class="p">(</span><span class="n">U_b1</span><span class="p">)</span>
+    <span class="n">TWSSG_avg</span> <span class="o">=</span> <span class="n">Function</span><span class="p">(</span><span class="n">U_b1</span><span class="p">)</span>
+    <span class="n">twssg</span> <span class="o">=</span> <span class="n">Function</span><span class="p">(</span><span class="n">V_b1</span><span class="p">)</span>
+    <span class="n">tau_prev</span> <span class="o">=</span> <span class="n">Function</span><span class="p">(</span><span class="n">V_b1</span><span class="p">)</span>
+
+    <span class="n">stress</span> <span class="o">=</span> <span class="n">STRESS</span><span class="p">(</span><span class="n">u</span><span class="p">,</span> <span class="mf">0.0</span><span class="p">,</span> <span class="n">nu</span><span class="p">,</span> <span class="n">mesh</span><span class="p">)</span>
+
+    <span class="c1"># Get number of saved steps and cycles</span>
+    <span class="n">saved_time_steps_per_cycle</span> <span class="o">=</span> <span class="nb">int</span><span class="p">(</span><span class="n">T</span> <span class="o">/</span> <span class="n">dt</span> <span class="o">/</span> <span class="n">save_frequency</span> <span class="o">/</span> <span class="n">step</span><span class="p">)</span>
+    <span class="n">n_cycles</span> <span class="o">=</span> <span class="nb">int</span><span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="n">dataset</span><span class="p">)</span> <span class="o">/</span> <span class="n">saved_time_steps_per_cycle</span><span class="p">)</span>
+
+    <span class="c1"># Set number of cycles to average over</span>
+    <span class="n">cycles_to_average</span> <span class="o">=</span> <span class="nb">list</span><span class="p">(</span><span class="nb">range</span><span class="p">(</span><span class="mi">1</span><span class="p">,</span> <span class="n">n_cycles</span> <span class="o">+</span> <span class="mi">1</span><span class="p">))</span> <span class="k">if</span> <span class="n">average_over_cycles</span> <span class="k">else</span> <span class="p">[]</span>
+    <span class="n">counters_to_save</span> <span class="o">=</span> <span class="p">[</span><span class="n">saved_time_steps_per_cycle</span> <span class="o">*</span> <span class="n">cycle</span> <span class="k">for</span> <span class="n">cycle</span> <span class="ow">in</span> <span class="n">cycles_to_average</span><span class="p">]</span>
+    <span class="n">cycle_names</span> <span class="o">=</span> <span class="p">[</span><span class="s2">&quot;&quot;</span><span class="p">]</span> <span class="o">+</span> <span class="p">[</span><span class="s2">&quot;_cycle_</span><span class="si">{:02d}</span><span class="s2">&quot;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">cycle</span><span class="p">)</span> <span class="k">for</span> <span class="n">cycle</span> <span class="ow">in</span> <span class="n">cycles_to_average</span><span class="p">]</span>
+
+    <span class="c1"># Create XDMF files for saving indices</span>
+    <span class="n">fullname</span> <span class="o">=</span> <span class="n">file_path_u</span><span class="o">.</span><span class="n">replace</span><span class="p">(</span><span class="s2">&quot;u.h5&quot;</span><span class="p">,</span> <span class="s2">&quot;</span><span class="si">%s%s</span><span class="s2">.xdmf&quot;</span><span class="p">)</span>
+    <span class="n">fullname</span> <span class="o">=</span> <span class="n">fullname</span><span class="o">.</span><span class="n">replace</span><span class="p">(</span><span class="s2">&quot;Solutions&quot;</span><span class="p">,</span> <span class="s2">&quot;Hemodynamics&quot;</span><span class="p">)</span>
+    <span class="n">index_names</span> <span class="o">=</span> <span class="p">[</span><span class="s2">&quot;RRT&quot;</span><span class="p">,</span> <span class="s2">&quot;OSI&quot;</span><span class="p">,</span> <span class="s2">&quot;ECAP&quot;</span><span class="p">,</span> <span class="s2">&quot;TAWSS&quot;</span><span class="p">,</span> <span class="s2">&quot;TWSSG&quot;</span><span class="p">]</span>
+    <span class="n">index_variables</span> <span class="o">=</span> <span class="p">[</span><span class="n">RRT</span><span class="p">,</span> <span class="n">OSI</span><span class="p">,</span> <span class="n">ECAP</span><span class="p">,</span> <span class="n">TAWSS</span><span class="p">,</span> <span class="n">TWSSG</span><span class="p">]</span>
+    <span class="n">index_variables_avg</span> <span class="o">=</span> <span class="p">[</span><span class="n">RRT_avg</span><span class="p">,</span> <span class="n">OSI_avg</span><span class="p">,</span> <span class="n">ECAP_avg</span><span class="p">,</span> <span class="n">TAWSS_avg</span><span class="p">,</span> <span class="n">TWSSG_avg</span><span class="p">]</span>
+
+    <span class="n">index_dict</span> <span class="o">=</span> <span class="nb">dict</span><span class="p">(</span><span class="nb">zip</span><span class="p">(</span><span class="n">index_names</span><span class="p">,</span> <span class="n">index_variables</span><span class="p">))</span>
+    <span class="n">index_dict_cycle</span> <span class="o">=</span> <span class="nb">dict</span><span class="p">(</span><span class="nb">zip</span><span class="p">(</span><span class="n">index_names</span><span class="p">,</span> <span class="n">index_variables_avg</span><span class="p">))</span>
+
+    <span class="n">indices</span> <span class="o">=</span> <span class="p">{}</span>
+    <span class="k">for</span> <span class="n">cycle_name</span> <span class="ow">in</span> <span class="n">cycle_names</span><span class="p">:</span>
+        <span class="k">for</span> <span class="n">index</span> <span class="ow">in</span> <span class="n">index_names</span> <span class="o">+</span> <span class="p">[</span><span class="s2">&quot;WSS&quot;</span><span class="p">]:</span>
+            <span class="n">indices</span><span class="p">[</span><span class="n">index</span> <span class="o">+</span> <span class="n">cycle_name</span><span class="p">]</span> <span class="o">=</span> <span class="n">XDMFFile</span><span class="p">(</span><span class="n">MPI</span><span class="o">.</span><span class="n">comm_world</span><span class="p">,</span> <span class="n">fullname</span> <span class="o">%</span> <span class="p">(</span><span class="n">index</span><span class="p">,</span> <span class="n">cycle_name</span><span class="p">))</span>
+            <span class="n">indices</span><span class="p">[</span><span class="n">index</span> <span class="o">+</span> <span class="n">cycle_name</span><span class="p">]</span><span class="o">.</span><span class="n">parameters</span><span class="p">[</span><span class="s2">&quot;rewrite_function_mesh&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="kc">False</span>
+            <span class="n">indices</span><span class="p">[</span><span class="n">index</span> <span class="o">+</span> <span class="n">cycle_name</span><span class="p">]</span><span class="o">.</span><span class="n">parameters</span><span class="p">[</span><span class="s2">&quot;flush_output&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="kc">True</span>
+            <span class="n">indices</span><span class="p">[</span><span class="n">index</span> <span class="o">+</span> <span class="n">cycle_name</span><span class="p">]</span><span class="o">.</span><span class="n">parameters</span><span class="p">[</span><span class="s2">&quot;functions_share_mesh&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="kc">True</span>
+
+    <span class="k">if</span> <span class="n">MPI</span><span class="o">.</span><span class="n">rank</span><span class="p">(</span><span class="n">MPI</span><span class="o">.</span><span class="n">comm_world</span><span class="p">)</span> <span class="o">==</span> <span class="mi">0</span><span class="p">:</span>
+        <span class="nb">print</span><span class="p">(</span><span class="s2">&quot;=&quot;</span> <span class="o">*</span> <span class="mi">10</span><span class="p">,</span> <span class="s2">&quot;Start post processing&quot;</span><span class="p">,</span> <span class="s2">&quot;=&quot;</span> <span class="o">*</span> <span class="mi">10</span><span class="p">)</span>
+
+    <span class="n">counter</span> <span class="o">=</span> <span class="n">start</span>
+    <span class="k">for</span> <span class="n">data</span> <span class="ow">in</span> <span class="n">dataset</span><span class="p">:</span>
+        <span class="c1"># Update file_counter</span>
+        <span class="n">counter</span> <span class="o">+=</span> <span class="n">step</span>
+
+        <span class="n">file_u</span><span class="o">.</span><span class="n">read</span><span class="p">(</span><span class="n">u</span><span class="p">,</span> <span class="n">data</span><span class="p">)</span>
+
+        <span class="k">if</span> <span class="n">MPI</span><span class="o">.</span><span class="n">rank</span><span class="p">(</span><span class="n">MPI</span><span class="o">.</span><span class="n">comm_world</span><span class="p">)</span> <span class="o">==</span> <span class="mi">0</span><span class="p">:</span>
+            <span class="n">timestamp</span> <span class="o">=</span> <span class="n">file_u</span><span class="o">.</span><span class="n">attributes</span><span class="p">(</span><span class="n">data</span><span class="p">)[</span><span class="s2">&quot;timestamp&quot;</span><span class="p">]</span>
+            <span class="nb">print</span><span class="p">(</span><span class="s2">&quot;=&quot;</span> <span class="o">*</span> <span class="mi">10</span><span class="p">,</span> <span class="s2">&quot;Timestep: </span><span class="si">{}</span><span class="s2">&quot;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">timestamp</span><span class="p">),</span> <span class="s2">&quot;=&quot;</span> <span class="o">*</span> <span class="mi">10</span><span class="p">)</span>
+
+        <span class="c1"># Compute WSS</span>
+        <span class="k">if</span> <span class="n">MPI</span><span class="o">.</span><span class="n">rank</span><span class="p">(</span><span class="n">MPI</span><span class="o">.</span><span class="n">comm_world</span><span class="p">)</span> <span class="o">==</span> <span class="mi">0</span><span class="p">:</span>
+            <span class="nb">print</span><span class="p">(</span><span class="s2">&quot;Compute WSS (mean)&quot;</span><span class="p">)</span>
+        <span class="n">tau</span> <span class="o">=</span> <span class="n">stress</span><span class="p">()</span>
+        <span class="n">tau</span><span class="o">.</span><span class="n">vector</span><span class="p">()[:]</span> <span class="o">=</span> <span class="n">tau</span><span class="o">.</span><span class="n">vector</span><span class="p">()[:]</span> <span class="o">*</span> <span class="n">rho</span>
+        <span class="n">WSS_mean_avg</span><span class="o">.</span><span class="n">vector</span><span class="p">()</span><span class="o">.</span><span class="n">axpy</span><span class="p">(</span><span class="mi">1</span><span class="p">,</span> <span class="n">tau</span><span class="o">.</span><span class="n">vector</span><span class="p">())</span>
+
+        <span class="k">if</span> <span class="n">MPI</span><span class="o">.</span><span class="n">rank</span><span class="p">(</span><span class="n">MPI</span><span class="o">.</span><span class="n">comm_world</span><span class="p">)</span> <span class="o">==</span> <span class="mi">0</span><span class="p">:</span>
+            <span class="nb">print</span><span class="p">(</span><span class="s2">&quot;Compute WSS (absolute value)&quot;</span><span class="p">)</span>
+        <span class="n">tawss</span> <span class="o">=</span> <span class="n">project</span><span class="p">(</span><span class="n">inner</span><span class="p">(</span><span class="n">tau</span><span class="p">,</span> <span class="n">tau</span><span class="p">)</span> <span class="o">**</span> <span class="p">(</span><span class="mi">1</span> <span class="o">/</span> <span class="mi">2</span><span class="p">),</span> <span class="n">U_b1</span><span class="p">)</span>
+        <span class="n">TAWSS_avg</span><span class="o">.</span><span class="n">vector</span><span class="p">()</span><span class="o">.</span><span class="n">axpy</span><span class="p">(</span><span class="mi">1</span><span class="p">,</span> <span class="n">tawss</span><span class="o">.</span><span class="n">vector</span><span class="p">())</span>
+
+        <span class="c1"># Compute TWSSG</span>
+        <span class="k">if</span> <span class="n">MPI</span><span class="o">.</span><span class="n">rank</span><span class="p">(</span><span class="n">MPI</span><span class="o">.</span><span class="n">comm_world</span><span class="p">)</span> <span class="o">==</span> <span class="mi">0</span><span class="p">:</span>
+            <span class="nb">print</span><span class="p">(</span><span class="s2">&quot;Compute TWSSG&quot;</span><span class="p">)</span>
+        <span class="n">twssg</span><span class="o">.</span><span class="n">vector</span><span class="p">()</span><span class="o">.</span><span class="n">set_local</span><span class="p">((</span><span class="n">tau</span><span class="o">.</span><span class="n">vector</span><span class="p">()</span><span class="o">.</span><span class="n">get_local</span><span class="p">()</span> <span class="o">-</span> <span class="n">tau_prev</span><span class="o">.</span><span class="n">vector</span><span class="p">()</span><span class="o">.</span><span class="n">get_local</span><span class="p">())</span> <span class="o">/</span> <span class="n">dt</span><span class="p">)</span>
+        <span class="n">twssg</span><span class="o">.</span><span class="n">vector</span><span class="p">()</span><span class="o">.</span><span class="n">apply</span><span class="p">(</span><span class="s2">&quot;insert&quot;</span><span class="p">)</span>
+        <span class="n">twssg_</span> <span class="o">=</span> <span class="n">project</span><span class="p">(</span><span class="n">inner</span><span class="p">(</span><span class="n">twssg</span><span class="p">,</span> <span class="n">twssg</span><span class="p">)</span> <span class="o">**</span> <span class="p">(</span><span class="mi">1</span> <span class="o">/</span> <span class="mi">2</span><span class="p">),</span> <span class="n">U_b1</span><span class="p">)</span>
+        <span class="n">TWSSG_avg</span><span class="o">.</span><span class="n">vector</span><span class="p">()</span><span class="o">.</span><span class="n">axpy</span><span class="p">(</span><span class="mi">1</span><span class="p">,</span> <span class="n">twssg_</span><span class="o">.</span><span class="n">vector</span><span class="p">())</span>
+
+        <span class="c1"># Update tau</span>
+        <span class="k">if</span> <span class="n">MPI</span><span class="o">.</span><span class="n">rank</span><span class="p">(</span><span class="n">MPI</span><span class="o">.</span><span class="n">comm_world</span><span class="p">)</span> <span class="o">==</span> <span class="mi">0</span><span class="p">:</span>
+            <span class="nb">print</span><span class="p">(</span><span class="s2">&quot;Update WSS </span><span class="se">\n</span><span class="s2">&quot;</span><span class="p">)</span>
+        <span class="n">tau_prev</span><span class="o">.</span><span class="n">vector</span><span class="p">()</span><span class="o">.</span><span class="n">zero</span><span class="p">()</span>
+        <span class="n">tau_prev</span><span class="o">.</span><span class="n">vector</span><span class="p">()</span><span class="o">.</span><span class="n">axpy</span><span class="p">(</span><span class="mi">1</span><span class="p">,</span> <span class="n">tau</span><span class="o">.</span><span class="n">vector</span><span class="p">())</span>
+
+        <span class="c1"># Save instantaneous WSS</span>
+        <span class="n">tau</span><span class="o">.</span><span class="n">rename</span><span class="p">(</span><span class="s2">&quot;WSS&quot;</span><span class="p">,</span> <span class="s2">&quot;WSS&quot;</span><span class="p">)</span>
+        <span class="n">indices</span><span class="p">[</span><span class="s2">&quot;WSS&quot;</span><span class="p">]</span><span class="o">.</span><span class="n">write</span><span class="p">(</span><span class="n">tau</span><span class="p">,</span> <span class="n">dt</span> <span class="o">*</span> <span class="n">counter</span><span class="p">)</span>
+
+        <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="n">cycles_to_average</span><span class="p">)</span> <span class="o">!=</span> <span class="mi">0</span> <span class="ow">and</span> <span class="n">counter</span> <span class="o">==</span> <span class="n">counters_to_save</span><span class="p">[</span><span class="mi">0</span><span class="p">]:</span>
+            <span class="c1"># Get cycle number</span>
+            <span class="n">cycle</span> <span class="o">=</span> <span class="nb">int</span><span class="p">(</span><span class="n">counters_to_save</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span> <span class="o">/</span> <span class="n">saved_time_steps_per_cycle</span><span class="p">)</span>
+            <span class="k">if</span> <span class="n">MPI</span><span class="o">.</span><span class="n">rank</span><span class="p">(</span><span class="n">MPI</span><span class="o">.</span><span class="n">comm_world</span><span class="p">)</span> <span class="o">==</span> <span class="mi">0</span><span class="p">:</span>
+                <span class="nb">print</span><span class="p">(</span><span class="s2">&quot;=&quot;</span> <span class="o">*</span> <span class="mi">10</span><span class="p">,</span> <span class="s2">&quot;Storing cardiac cycle </span><span class="si">{}</span><span class="s2">&quot;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">cycle</span><span class="p">),</span> <span class="s2">&quot;=&quot;</span> <span class="o">*</span> <span class="mi">10</span><span class="p">)</span>
+
+            <span class="c1"># Get average over sampled time steps</span>
+            <span class="k">for</span> <span class="n">index</span> <span class="ow">in</span> <span class="p">[</span><span class="n">TWSSG_avg</span><span class="p">,</span> <span class="n">TAWSS_avg</span><span class="p">,</span> <span class="n">WSS_mean_avg</span><span class="p">]:</span>
+                <span class="n">index</span><span class="o">.</span><span class="n">vector</span><span class="p">()[:]</span> <span class="o">=</span> <span class="n">index</span><span class="o">.</span><span class="n">vector</span><span class="p">()[:]</span> <span class="o">/</span> <span class="n">saved_time_steps_per_cycle</span>
+
+            <span class="c1"># Compute OSI, RRT and ECAP</span>
+            <span class="n">wss_mean</span> <span class="o">=</span> <span class="n">project</span><span class="p">(</span><span class="n">inner</span><span class="p">(</span><span class="n">WSS_mean_avg</span><span class="p">,</span> <span class="n">WSS_mean_avg</span><span class="p">)</span> <span class="o">**</span> <span class="p">(</span><span class="mi">1</span> <span class="o">/</span> <span class="mi">2</span><span class="p">),</span> <span class="n">U_b1</span><span class="p">)</span>
+            <span class="n">wss_mean_vec</span> <span class="o">=</span> <span class="n">wss_mean</span><span class="o">.</span><span class="n">vector</span><span class="p">()</span><span class="o">.</span><span class="n">get_local</span><span class="p">()</span>
+            <span class="n">tawss_vec</span> <span class="o">=</span> <span class="n">TAWSS_avg</span><span class="o">.</span><span class="n">vector</span><span class="p">()</span><span class="o">.</span><span class="n">get_local</span><span class="p">()</span>
+
+            <span class="c1"># Compute RRT, OSI, and ECAP based on mean and absolute WSS</span>
+            <span class="n">RRT_avg</span><span class="o">.</span><span class="n">vector</span><span class="p">()</span><span class="o">.</span><span class="n">set_local</span><span class="p">(</span><span class="mi">1</span> <span class="o">/</span> <span class="n">wss_mean_vec</span><span class="p">)</span>
+            <span class="n">OSI_avg</span><span class="o">.</span><span class="n">vector</span><span class="p">()</span><span class="o">.</span><span class="n">set_local</span><span class="p">(</span><span class="mf">0.5</span> <span class="o">*</span> <span class="p">(</span><span class="mi">1</span> <span class="o">-</span> <span class="n">wss_mean_vec</span> <span class="o">/</span> <span class="n">tawss_vec</span><span class="p">))</span>
+            <span class="n">ECAP_avg</span><span class="o">.</span><span class="n">vector</span><span class="p">()</span><span class="o">.</span><span class="n">set_local</span><span class="p">(</span><span class="n">OSI_avg</span><span class="o">.</span><span class="n">vector</span><span class="p">()</span><span class="o">.</span><span class="n">get_local</span><span class="p">()</span> <span class="o">/</span> <span class="n">tawss_vec</span><span class="p">)</span>
+
+            <span class="k">for</span> <span class="n">index</span> <span class="ow">in</span> <span class="p">[</span><span class="n">RRT_avg</span><span class="p">,</span> <span class="n">OSI_avg</span><span class="p">,</span> <span class="n">ECAP_avg</span><span class="p">]:</span>
+                <span class="n">index</span><span class="o">.</span><span class="n">vector</span><span class="p">()</span><span class="o">.</span><span class="n">apply</span><span class="p">(</span><span class="s2">&quot;insert&quot;</span><span class="p">)</span>
+
+            <span class="c1"># Rename displayed variable names</span>
+            <span class="k">for</span> <span class="n">var</span><span class="p">,</span> <span class="n">name</span> <span class="ow">in</span> <span class="nb">zip</span><span class="p">(</span><span class="n">index_variables_avg</span><span class="p">,</span> <span class="n">index_names</span><span class="p">):</span>
+                <span class="n">var</span><span class="o">.</span><span class="n">rename</span><span class="p">(</span><span class="n">name</span><span class="p">,</span> <span class="n">name</span><span class="p">)</span>
+
+            <span class="c1"># Store solution</span>
+            <span class="k">for</span> <span class="n">name</span><span class="p">,</span> <span class="n">index</span> <span class="ow">in</span> <span class="n">index_dict_cycle</span><span class="o">.</span><span class="n">items</span><span class="p">():</span>
+                <span class="n">indices</span><span class="p">[</span><span class="n">name</span> <span class="o">+</span> <span class="s2">&quot;_cycle_</span><span class="si">{:02d}</span><span class="s2">&quot;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">cycle</span><span class="p">)]</span><span class="o">.</span><span class="n">write</span><span class="p">(</span><span class="n">index</span><span class="p">)</span>
+
+            <span class="c1"># Append solution to total solution</span>
+            <span class="k">for</span> <span class="n">index</span><span class="p">,</span> <span class="n">index_avg</span> <span class="ow">in</span> <span class="nb">zip</span><span class="p">(</span><span class="n">index_dict</span><span class="o">.</span><span class="n">values</span><span class="p">(),</span> <span class="n">index_dict_cycle</span><span class="o">.</span><span class="n">values</span><span class="p">()):</span>
+                <span class="n">index_avg</span><span class="o">.</span><span class="n">vector</span><span class="p">()</span><span class="o">.</span><span class="n">apply</span><span class="p">(</span><span class="s2">&quot;insert&quot;</span><span class="p">)</span>
+                <span class="n">index</span><span class="o">.</span><span class="n">vector</span><span class="p">()</span><span class="o">.</span><span class="n">axpy</span><span class="p">(</span><span class="mi">1</span><span class="p">,</span> <span class="n">index_avg</span><span class="o">.</span><span class="n">vector</span><span class="p">())</span>
+
+            <span class="n">WSS_mean_avg</span><span class="o">.</span><span class="n">vector</span><span class="p">()</span><span class="o">.</span><span class="n">apply</span><span class="p">(</span><span class="s2">&quot;insert&quot;</span><span class="p">)</span>
+            <span class="n">WSS_mean</span><span class="o">.</span><span class="n">vector</span><span class="p">()</span><span class="o">.</span><span class="n">axpy</span><span class="p">(</span><span class="mi">1</span><span class="p">,</span> <span class="n">WSS_mean_avg</span><span class="o">.</span><span class="n">vector</span><span class="p">())</span>
+
+            <span class="c1"># Reset tmp solutions</span>
+            <span class="k">for</span> <span class="n">index_avg</span> <span class="ow">in</span> <span class="n">index_dict_cycle</span><span class="o">.</span><span class="n">values</span><span class="p">():</span>
+                <span class="n">index_avg</span><span class="o">.</span><span class="n">vector</span><span class="p">()</span><span class="o">.</span><span class="n">zero</span><span class="p">()</span>
+
+            <span class="n">WSS_mean_avg</span><span class="o">.</span><span class="n">vector</span><span class="p">()</span><span class="o">.</span><span class="n">zero</span><span class="p">()</span>
+
+            <span class="n">counters_to_save</span><span class="o">.</span><span class="n">pop</span><span class="p">(</span><span class="mi">0</span><span class="p">)</span>
+
+    <span class="k">if</span> <span class="n">MPI</span><span class="o">.</span><span class="n">rank</span><span class="p">(</span><span class="n">MPI</span><span class="o">.</span><span class="n">comm_world</span><span class="p">)</span> <span class="o">==</span> <span class="mi">0</span><span class="p">:</span>
+        <span class="nb">print</span><span class="p">(</span><span class="s2">&quot;=&quot;</span> <span class="o">*</span> <span class="mi">10</span><span class="p">,</span> <span class="s2">&quot;Saving hemodynamic indices&quot;</span><span class="p">,</span> <span class="s2">&quot;=&quot;</span> <span class="o">*</span> <span class="mi">10</span><span class="p">)</span>
+
+    <span class="c1"># Time average computed indices</span>
+    <span class="n">n</span> <span class="o">=</span> <span class="n">n_cycles</span> <span class="k">if</span> <span class="n">average_over_cycles</span> <span class="k">else</span> <span class="p">(</span><span class="n">counter</span> <span class="o">-</span> <span class="n">start</span><span class="p">)</span> <span class="o">//</span> <span class="n">step</span>
+    <span class="n">index_dict</span> <span class="o">=</span> <span class="n">index_dict</span> <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="n">cycles_to_average</span><span class="p">)</span> <span class="o">!=</span> <span class="mi">0</span> <span class="k">else</span> <span class="n">index_dict_cycle</span>
+    <span class="n">WSS_mean</span> <span class="o">=</span> <span class="n">WSS_mean</span> <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="n">cycles_to_average</span><span class="p">)</span> <span class="o">!=</span> <span class="mi">0</span> <span class="k">else</span> <span class="n">WSS_mean_avg</span>
+
+    <span class="n">index_dict</span><span class="p">[</span><span class="s1">&#39;TWSSG&#39;</span><span class="p">]</span><span class="o">.</span><span class="n">vector</span><span class="p">()[:]</span> <span class="o">=</span> <span class="n">index_dict</span><span class="p">[</span><span class="s1">&#39;TWSSG&#39;</span><span class="p">]</span><span class="o">.</span><span class="n">vector</span><span class="p">()[:]</span> <span class="o">/</span> <span class="n">n</span>
+    <span class="n">index_dict</span><span class="p">[</span><span class="s1">&#39;TAWSS&#39;</span><span class="p">]</span><span class="o">.</span><span class="n">vector</span><span class="p">()[:]</span> <span class="o">=</span> <span class="n">index_dict</span><span class="p">[</span><span class="s1">&#39;TAWSS&#39;</span><span class="p">]</span><span class="o">.</span><span class="n">vector</span><span class="p">()[:]</span> <span class="o">/</span> <span class="n">n</span>
+    <span class="n">WSS_mean</span><span class="o">.</span><span class="n">vector</span><span class="p">()[:]</span> <span class="o">=</span> <span class="n">WSS_mean</span><span class="o">.</span><span class="n">vector</span><span class="p">()[:]</span> <span class="o">/</span> <span class="n">n</span>
+    <span class="n">wss_mean</span> <span class="o">=</span> <span class="n">project</span><span class="p">(</span><span class="n">inner</span><span class="p">(</span><span class="n">WSS_mean</span><span class="p">,</span> <span class="n">WSS_mean</span><span class="p">)</span> <span class="o">**</span> <span class="p">(</span><span class="mi">1</span> <span class="o">/</span> <span class="mi">2</span><span class="p">),</span> <span class="n">U_b1</span><span class="p">)</span>
+    <span class="n">wss_mean_vec</span> <span class="o">=</span> <span class="n">wss_mean</span><span class="o">.</span><span class="n">vector</span><span class="p">()</span><span class="o">.</span><span class="n">get_local</span><span class="p">()</span>
+    <span class="n">tawss_vec</span> <span class="o">=</span> <span class="n">index_dict</span><span class="p">[</span><span class="s1">&#39;TAWSS&#39;</span><span class="p">]</span><span class="o">.</span><span class="n">vector</span><span class="p">()</span><span class="o">.</span><span class="n">get_local</span><span class="p">()</span>
+
+    <span class="c1"># Compute RRT, OSI, and ECAP based on mean and absolute WSS</span>
+    <span class="n">index_dict</span><span class="p">[</span><span class="s1">&#39;RRT&#39;</span><span class="p">]</span><span class="o">.</span><span class="n">vector</span><span class="p">()</span><span class="o">.</span><span class="n">set_local</span><span class="p">(</span><span class="mi">1</span> <span class="o">/</span> <span class="n">wss_mean_vec</span><span class="p">)</span>
+    <span class="n">index_dict</span><span class="p">[</span><span class="s1">&#39;OSI&#39;</span><span class="p">]</span><span class="o">.</span><span class="n">vector</span><span class="p">()</span><span class="o">.</span><span class="n">set_local</span><span class="p">(</span><span class="mf">0.5</span> <span class="o">*</span> <span class="p">(</span><span class="mi">1</span> <span class="o">-</span> <span class="n">wss_mean_vec</span> <span class="o">/</span> <span class="n">tawss_vec</span><span class="p">))</span>
+    <span class="n">index_dict</span><span class="p">[</span><span class="s1">&#39;ECAP&#39;</span><span class="p">]</span><span class="o">.</span><span class="n">vector</span><span class="p">()</span><span class="o">.</span><span class="n">set_local</span><span class="p">(</span><span class="n">index_dict</span><span class="p">[</span><span class="s1">&#39;OSI&#39;</span><span class="p">]</span><span class="o">.</span><span class="n">vector</span><span class="p">()</span><span class="o">.</span><span class="n">get_local</span><span class="p">()</span> <span class="o">/</span> <span class="n">tawss_vec</span><span class="p">)</span>
+
+    <span class="k">for</span> <span class="n">index</span> <span class="ow">in</span> <span class="p">[</span><span class="s1">&#39;RRT&#39;</span><span class="p">,</span> <span class="s1">&#39;OSI&#39;</span><span class="p">,</span> <span class="s1">&#39;ECAP&#39;</span><span class="p">]:</span>
+        <span class="n">index_dict</span><span class="p">[</span><span class="n">index</span><span class="p">]</span><span class="o">.</span><span class="n">vector</span><span class="p">()</span><span class="o">.</span><span class="n">apply</span><span class="p">(</span><span class="s2">&quot;insert&quot;</span><span class="p">)</span>
+
+    <span class="c1"># Rename displayed variable names</span>
+    <span class="k">for</span> <span class="n">name</span><span class="p">,</span> <span class="n">var</span> <span class="ow">in</span> <span class="n">index_dict</span><span class="o">.</span><span class="n">items</span><span class="p">():</span>
+        <span class="n">var</span><span class="o">.</span><span class="n">rename</span><span class="p">(</span><span class="n">name</span><span class="p">,</span> <span class="n">name</span><span class="p">)</span>
+
+    <span class="c1"># Write indices to file</span>
+    <span class="k">for</span> <span class="n">name</span><span class="p">,</span> <span class="n">index</span> <span class="ow">in</span> <span class="n">index_dict</span><span class="o">.</span><span class="n">items</span><span class="p">():</span>
+        <span class="n">indices</span><span class="p">[</span><span class="n">name</span><span class="p">]</span><span class="o">.</span><span class="n">write</span><span class="p">(</span><span class="n">index</span><span class="p">)</span>
+
+    <span class="k">if</span> <span class="n">MPI</span><span class="o">.</span><span class="n">rank</span><span class="p">(</span><span class="n">MPI</span><span class="o">.</span><span class="n">comm_world</span><span class="p">)</span> <span class="o">==</span> <span class="mi">0</span><span class="p">:</span>
+        <span class="nb">print</span><span class="p">(</span><span class="s2">&quot;=&quot;</span> <span class="o">*</span> <span class="mi">10</span><span class="p">,</span> <span class="s2">&quot;Post processing finished&quot;</span><span class="p">,</span> <span class="s2">&quot;=&quot;</span> <span class="o">*</span> <span class="mi">10</span><span class="p">)</span>
+        <span class="nb">print</span><span class="p">(</span><span class="s2">&quot;Results saved to: </span><span class="si">{}</span><span class="s2">&quot;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">folder</span><span class="p">))</span></div>
+
+
+<span class="k">if</span> <span class="vm">__name__</span> <span class="o">==</span> <span class="s1">&#39;__main__&#39;</span><span class="p">:</span>
+    <span class="n">folder</span><span class="p">,</span> <span class="n">nu</span><span class="p">,</span> <span class="n">rho</span><span class="p">,</span> <span class="n">dt</span><span class="p">,</span> <span class="n">velocity_degree</span><span class="p">,</span> <span class="n">_</span><span class="p">,</span> <span class="n">_</span><span class="p">,</span> <span class="n">T</span><span class="p">,</span> <span class="n">save_frequency</span><span class="p">,</span> <span class="n">_</span><span class="p">,</span> <span class="n">start_cycle</span><span class="p">,</span> <span class="n">step</span><span class="p">,</span> <span class="n">average_over_cycles</span> \
+        <span class="o">=</span> <span class="n">read_command_line</span><span class="p">()</span>
+
+    <span class="n">compute_hemodynamic_indices</span><span class="p">(</span><span class="n">folder</span><span class="p">,</span> <span class="n">nu</span><span class="p">,</span> <span class="n">rho</span><span class="p">,</span> <span class="n">dt</span><span class="p">,</span> <span class="n">T</span><span class="p">,</span> <span class="n">velocity_degree</span><span class="p">,</span> <span class="n">save_frequency</span><span class="p">,</span> <span class="n">start_cycle</span><span class="p">,</span>
+                                <span class="n">step</span><span class="p">,</span> <span class="n">average_over_cycles</span><span class="p">)</span>
+</pre></div>
+
+              </div>
+              
+            </main>
+            <footer class="footer-article noprint">
+                
+    <!-- Previous / next buttons -->
+<div class='prev-next-area'>
+</div>
+            </footer>
+        </div>
+    </div>
+    <div class="footer-content row">
+        <footer class="col footer"><p>
+  
+    By Henrik A. Kjeldsberg<br/>
+  
+      &copy; Copyright 2023.<br/>
+</p>
+        </footer>
+    </div>
+    
+</div>
+
+
+      </div>
+    </div>
+  
+  <!-- Scripts loaded after <body> so the DOM is not blocked -->
+  <script src="../../../_static/scripts/pydata-sphinx-theme.js?digest=1999514e3f237ded88cf"></script>
+
+
+  </body>
+</html>

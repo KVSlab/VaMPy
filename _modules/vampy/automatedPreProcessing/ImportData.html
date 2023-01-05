@@ -1,0 +1,1077 @@
+
+<!DOCTYPE html>
+
+<html>
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>vampy.automatedPreProcessing.ImportData &#8212; VaMPy</title>
+    
+  <!-- Loaded before other Sphinx assets -->
+  <link href="../../../_static/styles/theme.css?digest=1999514e3f237ded88cf" rel="stylesheet">
+<link href="../../../_static/styles/pydata-sphinx-theme.css?digest=1999514e3f237ded88cf" rel="stylesheet">
+
+    
+  <link rel="stylesheet"
+    href="../../../_static/vendor/fontawesome/5.13.0/css/all.min.css">
+  <link rel="preload" as="font" type="font/woff2" crossorigin
+    href="../../../_static/vendor/fontawesome/5.13.0/webfonts/fa-solid-900.woff2">
+  <link rel="preload" as="font" type="font/woff2" crossorigin
+    href="../../../_static/vendor/fontawesome/5.13.0/webfonts/fa-brands-400.woff2">
+
+    <link rel="stylesheet" type="text/css" href="../../../_static/pygments.css" />
+    <link rel="stylesheet" href="../../../_static/styles/sphinx-book-theme.css?digest=5115cc725059bd94278eecd172e13a965bf8f5a9" type="text/css" />
+    <link rel="stylesheet" type="text/css" href="../../../_static/togglebutton.css" />
+    <link rel="stylesheet" type="text/css" href="../../../_static/copybutton.css" />
+    <link rel="stylesheet" type="text/css" href="../../../_static/mystnb.css" />
+    <link rel="stylesheet" type="text/css" href="../../../_static/sphinx-thebe.css" />
+    <link rel="stylesheet" type="text/css" href="../../../_static/design-style.b7bb847fb20b106c3d81b95245e65545.min.css" />
+    
+  <!-- Pre-loaded scripts that we'll load fully later -->
+  <link rel="preload" as="script" href="../../../_static/scripts/pydata-sphinx-theme.js?digest=1999514e3f237ded88cf">
+
+    <script data-url_root="../../../" id="documentation_options" src="../../../_static/documentation_options.js"></script>
+    <script src="../../../_static/jquery.js"></script>
+    <script src="../../../_static/underscore.js"></script>
+    <script src="../../../_static/doctools.js"></script>
+    <script src="../../../_static/clipboard.min.js"></script>
+    <script src="../../../_static/copybutton.js"></script>
+    <script src="../../../_static/scripts/sphinx-book-theme.js?digest=9c920249402e914e316237a7dbc6769907cce411"></script>
+    <script>let toggleHintShow = 'Click to show';</script>
+    <script>let toggleHintHide = 'Click to hide';</script>
+    <script>let toggleOpenOnPrint = 'true';</script>
+    <script src="../../../_static/togglebutton.js"></script>
+    <script>var togglebuttonSelector = '.toggle, .admonition.dropdown, .tag_hide_input div.cell_input, .tag_hide-input div.cell_input, .tag_hide_output div.cell_output, .tag_hide-output div.cell_output, .tag_hide_cell.cell, .tag_hide-cell.cell';</script>
+    <script src="../../../_static/design-tabs.js"></script>
+    <script>const THEBE_JS_URL = "https://unpkg.com/thebe@0.8.2/lib/index.js"
+const thebe_selector = ".thebe,.cell"
+const thebe_selector_input = "pre"
+const thebe_selector_output = ".output, .cell_output"
+</script>
+    <script async="async" src="../../../_static/sphinx-thebe.js"></script>
+    <link rel="index" title="Index" href="../../../genindex.html" />
+    <link rel="search" title="Search" href="../../../search.html" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <meta name="docsearch:language" content="None">
+    
+
+    <!-- Google Analytics -->
+    
+  </head>
+  <body data-spy="scroll" data-target="#bd-toc-nav" data-offset="60">
+<!-- Checkboxes to toggle the left sidebar -->
+<input type="checkbox" class="sidebar-toggle" name="__navigation" id="__navigation" aria-label="Toggle navigation sidebar">
+<label class="overlay overlay-navbar" for="__navigation">
+    <div class="visually-hidden">Toggle navigation sidebar</div>
+</label>
+<!-- Checkboxes to toggle the in-page toc -->
+<input type="checkbox" class="sidebar-toggle" name="__page-toc" id="__page-toc" aria-label="Toggle in-page Table of Contents">
+<label class="overlay overlay-pagetoc" for="__page-toc">
+    <div class="visually-hidden">Toggle in-page Table of Contents</div>
+</label>
+<!-- Headers at the top -->
+<div class="announcement header-item noprint"></div>
+<div class="header header-item noprint"></div>
+
+    
+    <div class="container-fluid" id="banner"></div>
+
+    
+
+    <div class="container-xl">
+      <div class="row">
+          
+<!-- Sidebar -->
+<div class="bd-sidebar noprint" id="site-navigation">
+    <div class="bd-sidebar__content">
+        <div class="bd-sidebar__top"><div class="navbar-brand-box">
+    <a class="navbar-brand text-wrap" href="../../../index.html">
+      
+        <!-- `logo` is deprecated in Sphinx 4.0, so remove this when we stop supporting 3 -->
+        
+      
+      
+      <img src="../../../_static/logo.png" class="logo" alt="logo">
+      
+      
+      <h1 class="site-logo" id="site-title">VaMPy</h1>
+      
+    </a>
+</div><form class="bd-search d-flex align-items-center" action="../../../search.html" method="get">
+  <i class="icon fas fa-search"></i>
+  <input type="search" class="form-control" name="q" id="search-input" placeholder="Search this book..." aria-label="Search this book..." autocomplete="off" >
+</form><nav class="bd-links" id="bd-docs-nav" aria-label="Main">
+    <div class="bd-toc-item active">
+        
+        <ul class="nav bd-sidenav bd-sidenav__home-link">
+            <li class="toctree-l1">
+                <a class="reference internal" href="../../../index.html">
+                    The Vascular Modeling Pypeline
+                </a>
+            </li>
+        </ul>
+        <p aria-level="2" class="caption" role="heading">
+ <span class="caption-text">
+  Installation
+ </span>
+</p>
+<ul class="nav bd-sidenav">
+ <li class="toctree-l1">
+  <a class="reference internal" href="../../../installation.html">
+   Installation
+  </a>
+ </li>
+ <li class="toctree-l1">
+  <a class="reference internal" href="../../../issues.html">
+   Known issues
+  </a>
+ </li>
+</ul>
+<p aria-level="2" class="caption" role="heading">
+ <span class="caption-text">
+  Using VaMPy
+ </span>
+</p>
+<ul class="nav bd-sidenav">
+ <li class="toctree-l1">
+  <a class="reference internal" href="../../../overview.html">
+   Overview
+  </a>
+ </li>
+ <li class="toctree-l1">
+  <a class="reference internal" href="../../../quantities.html">
+   Computed quantities
+  </a>
+ </li>
+ <li class="toctree-l1">
+  <a class="reference internal" href="../../../cluster.html">
+   Running a CFD simulation on an HPC cluster
+  </a>
+ </li>
+ <li class="toctree-l1">
+  <a class="reference internal" href="../../../features.html">
+   Features and issues
+  </a>
+ </li>
+</ul>
+<p aria-level="2" class="caption" role="heading">
+ <span class="caption-text">
+  Tutorials
+ </span>
+</p>
+<ul class="nav bd-sidenav">
+ <li class="toctree-l1">
+  <a class="reference internal" href="../../../tutorials.html">
+   Tutorials
+  </a>
+ </li>
+ <li class="toctree-l1">
+  <a class="reference internal" href="../../../artery.html">
+   High-resolution CFD simulation in the internal carotid artery
+  </a>
+ </li>
+ <li class="toctree-l1">
+  <a class="reference internal" href="../../../atrium.html">
+   Hemodynamics simulation on a left atrium
+  </a>
+ </li>
+</ul>
+<p aria-level="2" class="caption" role="heading">
+ <span class="caption-text">
+  Python API
+ </span>
+</p>
+<ul class="nav bd-sidenav">
+ <li class="toctree-l1">
+  <a class="reference internal" href="../../../api.html">
+   API Reference
+  </a>
+ </li>
+</ul>
+
+    </div>
+</nav></div>
+        <div class="bd-sidebar__bottom">
+             <!-- To handle the deprecated key -->
+            
+            <div class="navbar_extra_footer">
+            See more at <a href="https://kvslab.github.io">KVSLab</a>
+            </div>
+            
+        </div>
+    </div>
+    <div id="rtd-footer-container"></div>
+</div>
+
+
+          
+
+
+          
+<!-- A tiny helper pixel to detect if we've scrolled -->
+<div class="sbt-scroll-pixel-helper"></div>
+<!-- Main content -->
+<div class="col py-0 content-container">
+    
+    <div class="header-article row sticky-top noprint">
+        
+
+
+
+<div class="col py-1 d-flex header-article-main">
+    <div class="header-article__left">
+        
+        <label for="__navigation"
+  class="headerbtn"
+  data-toggle="tooltip"
+data-placement="right"
+title="Toggle navigation"
+>
+  
+
+<span class="headerbtn__icon-container">
+  <i class="fas fa-bars"></i>
+  </span>
+
+</label>
+
+        
+    </div>
+    <div class="header-article__right">
+<button onclick="toggleFullScreen()"
+  class="headerbtn"
+  data-toggle="tooltip"
+data-placement="bottom"
+title="Fullscreen mode"
+>
+  
+
+<span class="headerbtn__icon-container">
+  <i class="fas fa-expand"></i>
+  </span>
+
+</button>
+
+<div class="menu-dropdown menu-dropdown-repository-buttons">
+  <button class="headerbtn menu-dropdown__trigger"
+      aria-label="Source repositories">
+      <i class="fab fa-github"></i>
+  </button>
+  <div class="menu-dropdown__content">
+    <ul>
+      <li>
+        <a href="https://github.com/KVSlab/vampy"
+   class="headerbtn"
+   data-toggle="tooltip"
+data-placement="left"
+title="Source repository"
+>
+  
+
+<span class="headerbtn__icon-container">
+  <i class="fab fa-github"></i>
+  </span>
+<span class="headerbtn__text-container">repository</span>
+</a>
+
+      </li>
+      
+      <li>
+        <a href="https://github.com/KVSlab/vampy/issues/new?title=Issue%20on%20page%20%2F_modules/vampy/automatedPreProcessing/ImportData.html&body=Your%20issue%20content%20here."
+   class="headerbtn"
+   data-toggle="tooltip"
+data-placement="left"
+title="Open an issue"
+>
+  
+
+<span class="headerbtn__icon-container">
+  <i class="fas fa-lightbulb"></i>
+  </span>
+<span class="headerbtn__text-container">open issue</span>
+</a>
+
+      </li>
+      
+    </ul>
+  </div>
+</div>
+
+    </div>
+</div>
+
+<!-- Table of contents -->
+<div class="col-md-3 bd-toc show noprint">
+</div>
+    </div>
+    <div class="article row">
+        <div class="col pl-md-3 pl-lg-5 content-container">
+            <!-- Table of contents that is only displayed when printing the page -->
+            <div id="jb-print-docs-body" class="onlyprint">
+                <h1></h1>
+                <!-- Table of contents -->
+                <div id="print-main-content">
+                    <div id="jb-print-toc">
+                        
+                    </div>
+                </div>
+            </div>
+            <main id="main-content" role="main">
+                
+              <div>
+                
+  <h1>Source code for vampy.automatedPreProcessing.ImportData</h1><div class="highlight"><pre>
+<span></span><span class="ch">#!/usr/bin/env python</span>
+
+<span class="c1"># Program:   AneuTools</span>
+<span class="c1"># Module:    ImportData.py</span>
+<span class="c1"># Language:  Python</span>
+<span class="c1"># Date:      $Date: 2016/17/04 00:00:00 $</span>
+<span class="c1"># Version:   $Revision: 0.0.1 $</span>
+<span class="c1"># Author:    Christophe Chnafa</span>
+
+<span class="c1">#   Copyright (c) Christophe Chnafa. All rights reserved.</span>
+
+<span class="kn">import</span> <span class="nn">math</span>
+
+<span class="kn">import</span> <span class="nn">numpy</span> <span class="k">as</span> <span class="nn">np</span>
+<span class="kn">import</span> <span class="nn">vtk</span>
+
+<span class="c1"># Array names used by VMTK.</span>
+<span class="n">BLANKINGARRAYNAME</span> <span class="o">=</span> <span class="s1">&#39;Blanking&#39;</span>
+<span class="n">GROUPIDSARRAYNAME</span> <span class="o">=</span> <span class="s1">&#39;GroupIds&#39;</span>
+<span class="n">RADIUSARRAYNAME</span> <span class="o">=</span> <span class="s1">&#39;MaximumInscribedSphereRadius&#39;</span>
+<span class="n">SECTIONARRAYNAME</span> <span class="o">=</span> <span class="s1">&#39;CenterlineSectionArea&#39;</span>
+
+
+<div class="viewcode-block" id="loadFile"><a class="viewcode-back" href="../../../api.html#vampy.automatedPreProcessing.ImportData.loadFile">[docs]</a><span class="k">def</span> <span class="nf">loadFile</span><span class="p">(</span><span class="n">fileName</span><span class="p">):</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;Load the given file, and return a vtkPolyData object for it. &quot;&quot;&quot;</span>
+    <span class="n">fileType</span> <span class="o">=</span> <span class="n">fileName</span><span class="p">[</span><span class="o">-</span><span class="mi">3</span><span class="p">:]</span>
+    <span class="k">if</span> <span class="n">fileType</span> <span class="o">==</span> <span class="s1">&#39;&#39;</span><span class="p">:</span>
+        <span class="k">raise</span> <span class="ne">RuntimeError</span><span class="p">(</span><span class="s1">&#39;The file does not have an extension&#39;</span><span class="p">)</span>
+    <span class="k">if</span> <span class="n">fileType</span> <span class="o">==</span> <span class="s1">&#39;stl&#39;</span><span class="p">:</span>
+        <span class="n">reader</span> <span class="o">=</span> <span class="n">vtk</span><span class="o">.</span><span class="n">vtkSTLReader</span><span class="p">()</span>
+        <span class="n">reader</span><span class="o">.</span><span class="n">MergingOn</span><span class="p">()</span>
+    <span class="k">elif</span> <span class="n">fileType</span> <span class="o">==</span> <span class="s1">&#39;vtk&#39;</span><span class="p">:</span>
+        <span class="n">reader</span> <span class="o">=</span> <span class="n">vtk</span><span class="o">.</span><span class="n">vtkPolyDataReader</span><span class="p">()</span>
+    <span class="k">elif</span> <span class="n">fileType</span> <span class="o">==</span> <span class="s1">&#39;vtp&#39;</span><span class="p">:</span>
+        <span class="n">reader</span> <span class="o">=</span> <span class="n">vtk</span><span class="o">.</span><span class="n">vtkXMLPolyDataReader</span><span class="p">()</span>
+    <span class="k">elif</span> <span class="n">fileType</span> <span class="o">==</span> <span class="s1">&#39;vtu&#39;</span><span class="p">:</span>
+        <span class="n">reader</span> <span class="o">=</span> <span class="n">vtk</span><span class="o">.</span><span class="n">vtkUnstructuredGridReader</span><span class="p">()</span>
+    <span class="k">else</span><span class="p">:</span>
+        <span class="k">raise</span> <span class="ne">RuntimeError</span><span class="p">(</span><span class="s1">&#39;Unknown file type </span><span class="si">%s</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="n">fileType</span><span class="p">)</span>
+    <span class="n">reader</span><span class="o">.</span><span class="n">SetFileName</span><span class="p">(</span><span class="n">fileName</span><span class="p">)</span>
+    <span class="n">reader</span><span class="o">.</span><span class="n">Update</span><span class="p">()</span>
+    <span class="n">polyData</span> <span class="o">=</span> <span class="n">reader</span><span class="o">.</span><span class="n">GetOutput</span><span class="p">()</span>
+
+    <span class="k">return</span> <span class="n">polyData</span></div>
+
+
+<div class="viewcode-block" id="GetMaxGroupId"><a class="viewcode-back" href="../../../api.html#vampy.automatedPreProcessing.ImportData.GetMaxGroupId">[docs]</a><span class="k">def</span> <span class="nf">GetMaxGroupId</span><span class="p">(</span><span class="n">centerline</span><span class="p">):</span>
+    <span class="n">maxGroupId</span> <span class="o">=</span> <span class="mi">0</span>
+    <span class="n">groupIdsArray</span> <span class="o">=</span> <span class="n">centerline</span><span class="o">.</span><span class="n">GetCellData</span><span class="p">()</span><span class="o">.</span><span class="n">GetArray</span><span class="p">(</span><span class="n">GROUPIDSARRAYNAME</span><span class="p">)</span>
+    <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="n">centerline</span><span class="o">.</span><span class="n">GetNumberOfCells</span><span class="p">()):</span>
+        <span class="n">groupId</span> <span class="o">=</span> <span class="n">groupIdsArray</span><span class="o">.</span><span class="n">GetValue</span><span class="p">(</span><span class="n">i</span><span class="p">)</span>
+        <span class="k">if</span> <span class="n">groupId</span> <span class="o">&gt;</span> <span class="n">maxGroupId</span><span class="p">:</span>
+            <span class="n">maxGroupId</span> <span class="o">=</span> <span class="n">groupId</span>
+
+    <span class="k">return</span> <span class="n">maxGroupId</span></div>
+
+
+<div class="viewcode-block" id="GetBlankedGroupsIdList"><a class="viewcode-back" href="../../../api.html#vampy.automatedPreProcessing.ImportData.GetBlankedGroupsIdList">[docs]</a><span class="k">def</span> <span class="nf">GetBlankedGroupsIdList</span><span class="p">(</span><span class="n">centerline</span><span class="p">):</span>
+    <span class="n">blankedGroupdsArray</span> <span class="o">=</span> <span class="p">[]</span>
+    <span class="n">idx</span> <span class="o">=</span> <span class="mi">0</span>
+    <span class="n">groupIdsArray</span> <span class="o">=</span> <span class="n">centerline</span><span class="o">.</span><span class="n">GetCellData</span><span class="p">()</span><span class="o">.</span><span class="n">GetArray</span><span class="p">(</span><span class="n">GROUPIDSARRAYNAME</span><span class="p">)</span>
+    <span class="n">blankingArray</span> <span class="o">=</span> <span class="n">centerline</span><span class="o">.</span><span class="n">GetCellData</span><span class="p">()</span><span class="o">.</span><span class="n">GetArray</span><span class="p">(</span><span class="n">BLANKINGARRAYNAME</span><span class="p">)</span>
+    <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="n">centerline</span><span class="o">.</span><span class="n">GetNumberOfCells</span><span class="p">()):</span>
+        <span class="n">groupId</span> <span class="o">=</span> <span class="n">groupIdsArray</span><span class="o">.</span><span class="n">GetValue</span><span class="p">(</span><span class="n">i</span><span class="p">)</span>
+        <span class="n">blanking</span> <span class="o">=</span> <span class="n">blankingArray</span><span class="o">.</span><span class="n">GetValue</span><span class="p">(</span><span class="n">i</span><span class="p">)</span>
+        <span class="k">if</span> <span class="n">blanking</span> <span class="o">==</span> <span class="mi">1</span><span class="p">:</span>
+            <span class="n">blankedGroupdsArray</span><span class="o">.</span><span class="n">append</span><span class="p">((</span><span class="n">idx</span><span class="p">,</span> <span class="n">groupId</span><span class="p">))</span>
+        <span class="n">idx</span> <span class="o">+=</span> <span class="mi">1</span>
+
+    <span class="k">return</span> <span class="n">blankedGroupdsArray</span></div>
+
+
+<div class="viewcode-block" id="GetRedundantBlankedIdList"><a class="viewcode-back" href="../../../api.html#vampy.automatedPreProcessing.ImportData.GetRedundantBlankedIdList">[docs]</a><span class="k">def</span> <span class="nf">GetRedundantBlankedIdList</span><span class="p">(</span><span class="n">centerline</span><span class="p">,</span> <span class="n">blankedGroupsIdList</span><span class="p">):</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot; Get the redundant blanked segments.</span>
+
+<span class="sd">    Nominally, the x0 and x1 coordinates should be the same. Thus, the</span>
+<span class="sd">    computed distance should be exactly 0.0.</span>
+<span class="sd">    Sometimes branches are just different by a few and SHOULD be merged.</span>
+<span class="sd">    Visual inspection of the centerline with Paraview when the Warning</span>
+<span class="sd">    message pop up is advised.</span>
+<span class="sd">    Sometimes, the problem is more concerning. It is problematic that</span>
+<span class="sd">    VMTK split, sometimes, the branches with a segment with a blanked</span>
+<span class="sd">    segment, a lil&#39; something and another blanked segment. In case of</span>
+<span class="sd">    wierd branch splittings, try to lower the tol. It is cheating since</span>
+<span class="sd">    branches that should not be merge will be merged anyway.</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="n">currentX0</span> <span class="o">=</span> <span class="p">[</span><span class="mf">0.0</span><span class="p">,</span> <span class="mf">0.0</span><span class="p">,</span> <span class="mf">0.0</span><span class="p">]</span>
+    <span class="n">currentX1</span> <span class="o">=</span> <span class="p">[</span><span class="mf">0.0</span><span class="p">,</span> <span class="mf">0.0</span><span class="p">,</span> <span class="mf">0.0</span><span class="p">]</span>
+    <span class="n">otherX0</span> <span class="o">=</span> <span class="p">[</span><span class="mf">0.0</span><span class="p">,</span> <span class="mf">0.0</span><span class="p">,</span> <span class="mf">0.0</span><span class="p">]</span>
+    <span class="n">otherX1</span> <span class="o">=</span> <span class="p">[</span><span class="mf">0.0</span><span class="p">,</span> <span class="mf">0.0</span><span class="p">,</span> <span class="mf">0.0</span><span class="p">]</span>
+    <span class="n">minLength</span><span class="p">,</span> <span class="n">maxLength</span> <span class="o">=</span> <span class="n">ComputeGeometricTolerance</span><span class="p">(</span><span class="n">centerline</span><span class="p">)</span>
+    <span class="n">tol</span> <span class="o">=</span> <span class="n">maxLength</span> <span class="o">*</span> <span class="mf">0.1</span>  <span class="c1"># 10**(-5)</span>
+    <span class="n">redundantBranchesIndex</span> <span class="o">=</span> <span class="p">[]</span>
+    <span class="k">for</span> <span class="n">currentBranch</span> <span class="ow">in</span> <span class="n">blankedGroupsIdList</span><span class="p">:</span>
+        <span class="n">currentBranchIndex</span> <span class="o">=</span> <span class="n">currentBranch</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span>
+        <span class="k">if</span> <span class="n">currentBranchIndex</span> <span class="ow">in</span> <span class="n">redundantBranchesIndex</span><span class="p">:</span>
+            <span class="k">continue</span>
+        <span class="n">centerline</span><span class="o">.</span><span class="n">GetCell</span><span class="p">(</span><span class="n">currentBranchIndex</span><span class="p">)</span><span class="o">.</span><span class="n">GetPoints</span><span class="p">()</span><span class="o">.</span><span class="n">GetPoint</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="n">currentX0</span><span class="p">)</span>
+        <span class="n">npts</span> <span class="o">=</span> <span class="n">centerline</span><span class="o">.</span><span class="n">GetCell</span><span class="p">(</span><span class="n">currentBranchIndex</span><span class="p">)</span><span class="o">.</span><span class="n">GetPoints</span><span class="p">()</span><span class="o">.</span><span class="n">GetNumberOfPoints</span><span class="p">()</span>
+        <span class="n">centerline</span><span class="o">.</span><span class="n">GetCell</span><span class="p">(</span><span class="n">currentBranchIndex</span><span class="p">)</span><span class="o">.</span><span class="n">GetPoints</span><span class="p">()</span><span class="o">.</span><span class="n">GetPoint</span><span class="p">(</span><span class="n">npts</span> <span class="o">-</span> <span class="mi">1</span><span class="p">,</span> <span class="n">currentX1</span><span class="p">)</span>
+        <span class="k">for</span> <span class="n">otherBranch</span> <span class="ow">in</span> <span class="n">blankedGroupsIdList</span><span class="p">:</span>
+            <span class="n">otherBranchIndex</span> <span class="o">=</span> <span class="n">otherBranch</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span>
+            <span class="k">if</span> <span class="n">otherBranchIndex</span> <span class="o">==</span> <span class="n">currentBranchIndex</span><span class="p">:</span>
+                <span class="k">continue</span>
+            <span class="k">if</span> <span class="n">otherBranchIndex</span> <span class="ow">in</span> <span class="n">redundantBranchesIndex</span><span class="p">:</span>
+                <span class="k">continue</span>
+            <span class="n">centerline</span><span class="o">.</span><span class="n">GetCell</span><span class="p">(</span><span class="n">otherBranchIndex</span><span class="p">)</span><span class="o">.</span><span class="n">GetPoints</span><span class="p">()</span><span class="o">.</span><span class="n">GetPoint</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="n">otherX0</span><span class="p">)</span>
+            <span class="n">otherNpts</span> <span class="o">=</span> <span class="n">centerline</span><span class="o">.</span><span class="n">GetCell</span><span class="p">(</span><span class="n">otherBranchIndex</span><span class="p">)</span><span class="o">.</span><span class="n">GetPoints</span><span class="p">()</span><span class="o">.</span><span class="n">GetNumberOfPoints</span><span class="p">()</span>
+            <span class="n">centerline</span><span class="o">.</span><span class="n">GetCell</span><span class="p">(</span><span class="n">otherBranchIndex</span><span class="p">)</span><span class="o">.</span><span class="n">GetPoints</span><span class="p">()</span><span class="o">.</span><span class="n">GetPoint</span><span class="p">(</span><span class="n">otherNpts</span> <span class="o">-</span> <span class="mi">1</span><span class="p">,</span> <span class="n">otherX1</span><span class="p">)</span>
+            <span class="k">if</span> <span class="n">vtk</span><span class="o">.</span><span class="n">vtkMath</span><span class="o">.</span><span class="n">Distance2BetweenPoints</span><span class="p">(</span><span class="n">currentX0</span><span class="p">,</span> <span class="n">otherX0</span><span class="p">)</span> <span class="o">&lt;</span> <span class="n">tol</span> <span class="ow">and</span> \
+                    <span class="n">vtk</span><span class="o">.</span><span class="n">vtkMath</span><span class="o">.</span><span class="n">Distance2BetweenPoints</span><span class="p">(</span><span class="n">currentX1</span><span class="p">,</span> <span class="n">otherX1</span><span class="p">)</span> <span class="o">&lt;</span> <span class="n">tol</span><span class="p">:</span>
+                <span class="n">redundantBranchesIndex</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">otherBranchIndex</span><span class="p">)</span>
+                <span class="k">if</span> <span class="n">vtk</span><span class="o">.</span><span class="n">vtkMath</span><span class="o">.</span><span class="n">Distance2BetweenPoints</span><span class="p">(</span><span class="n">currentX0</span><span class="p">,</span> <span class="n">otherX0</span><span class="p">)</span> <span class="o">&gt;</span> <span class="n">minLength</span><span class="p">:</span>
+                    <span class="nb">print</span><span class="p">(</span><span class="s1">&#39;WARNING: POTENTIAL ISSUE DURING THE MERGING OF REDUNDANTS BLANKED SEGMENTS.&#39;</span><span class="p">)</span>
+                    <span class="nb">print</span><span class="p">(</span><span class="s1">&#39;         A distance between segments is suspicious.&#39;</span><span class="p">)</span>
+                    <span class="nb">print</span><span class="p">(</span><span class="s1">&#39;         The blanked segments of VTK Cell Id &#39;</span> <span class="o">+</span> <span class="nb">repr</span><span class="p">(</span><span class="n">currentBranchIndex</span><span class="p">))</span>
+                    <span class="nb">print</span><span class="p">(</span><span class="s1">&#39;         and, VTK Cell Id &#39;</span> <span class="o">+</span> <span class="nb">repr</span><span class="p">(</span><span class="n">otherBranchIndex</span><span class="p">)</span> <span class="o">+</span> <span class="s1">&#39; will be merged.&#39;</span><span class="p">)</span>
+                    <span class="nb">print</span><span class="p">(</span><span class="s1">&#39;         The segments points should be identical.  &#39;</span><span class="p">)</span>
+                    <span class="nb">print</span><span class="p">(</span><span class="s1">&#39;         Please check if this action was expected.&#39;</span><span class="p">)</span>
+                    <span class="nb">print</span><span class="p">()</span>
+
+    <span class="k">return</span> <span class="n">redundantBranchesIndex</span></div>
+
+
+<div class="viewcode-block" id="IsArrayDefined"><a class="viewcode-back" href="../../../api.html#vampy.automatedPreProcessing.ImportData.IsArrayDefined">[docs]</a><span class="k">def</span> <span class="nf">IsArrayDefined</span><span class="p">(</span><span class="n">centerline</span><span class="p">,</span> <span class="n">arrayName</span><span class="p">):</span>
+    <span class="n">nPointDataArrays</span> <span class="o">=</span> <span class="n">centerline</span><span class="o">.</span><span class="n">GetPointData</span><span class="p">()</span><span class="o">.</span><span class="n">GetNumberOfArrays</span><span class="p">()</span>
+    <span class="n">found</span> <span class="o">=</span> <span class="kc">False</span>
+    <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="n">nPointDataArrays</span><span class="p">):</span>
+        <span class="k">if</span> <span class="n">arrayName</span> <span class="o">==</span> <span class="n">centerline</span><span class="o">.</span><span class="n">GetPointData</span><span class="p">()</span><span class="o">.</span><span class="n">GetArrayName</span><span class="p">(</span><span class="n">i</span><span class="p">):</span>
+            <span class="n">found</span> <span class="o">=</span> <span class="kc">True</span>
+            <span class="k">break</span>
+    <span class="n">nCellDataArrays</span> <span class="o">=</span> <span class="n">centerline</span><span class="o">.</span><span class="n">GetCellData</span><span class="p">()</span><span class="o">.</span><span class="n">GetNumberOfArrays</span><span class="p">()</span>
+    <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="n">nCellDataArrays</span><span class="p">):</span>
+        <span class="k">if</span> <span class="n">arrayName</span> <span class="o">==</span> <span class="n">centerline</span><span class="o">.</span><span class="n">GetCellData</span><span class="p">()</span><span class="o">.</span><span class="n">GetArrayName</span><span class="p">(</span><span class="n">i</span><span class="p">):</span>
+            <span class="n">found</span> <span class="o">=</span> <span class="kc">True</span>
+            <span class="k">break</span>
+
+    <span class="k">return</span> <span class="n">found</span></div>
+
+
+<div class="viewcode-block" id="ComputeGeometricTolerance"><a class="viewcode-back" href="../../../api.html#vampy.automatedPreProcessing.ImportData.ComputeGeometricTolerance">[docs]</a><span class="k">def</span> <span class="nf">ComputeGeometricTolerance</span><span class="p">(</span><span class="n">centerline</span><span class="p">):</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;Return the min and max length for branches.</span>
+
+<span class="sd">    This routine compute the delta x minimum and maximum in the network.</span>
+<span class="sd">    The minimum length is used for the connectivity. The maximum length</span>
+<span class="sd">    is used for merging the blanked segments.</span>
+
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="n">minLength</span> <span class="o">=</span> <span class="mf">10000.0</span>
+    <span class="n">maxLength</span> <span class="o">=</span> <span class="mf">0.0</span>
+    <span class="n">numberOfCells</span> <span class="o">=</span> <span class="n">centerline</span><span class="o">.</span><span class="n">GetNumberOfCells</span><span class="p">()</span>
+    <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="n">numberOfCells</span><span class="p">):</span>
+        <span class="n">npts</span> <span class="o">=</span> <span class="n">centerline</span><span class="o">.</span><span class="n">GetCell</span><span class="p">(</span><span class="n">i</span><span class="p">)</span><span class="o">.</span><span class="n">GetPoints</span><span class="p">()</span><span class="o">.</span><span class="n">GetNumberOfPoints</span><span class="p">()</span>
+        <span class="k">for</span> <span class="n">k</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="n">npts</span> <span class="o">-</span> <span class="mi">1</span><span class="p">):</span>
+            <span class="n">point0</span> <span class="o">=</span> <span class="p">[</span><span class="mf">0.0</span><span class="p">,</span> <span class="mf">0.0</span><span class="p">,</span> <span class="mf">0.0</span><span class="p">]</span>
+            <span class="n">point1</span> <span class="o">=</span> <span class="p">[</span><span class="mf">0.0</span><span class="p">,</span> <span class="mf">0.0</span><span class="p">,</span> <span class="mf">0.0</span><span class="p">]</span>
+            <span class="n">centerline</span><span class="o">.</span><span class="n">GetCell</span><span class="p">(</span><span class="n">i</span><span class="p">)</span><span class="o">.</span><span class="n">GetPoints</span><span class="p">()</span><span class="o">.</span><span class="n">GetPoint</span><span class="p">(</span><span class="n">k</span><span class="p">,</span> <span class="n">point0</span><span class="p">)</span>
+            <span class="n">centerline</span><span class="o">.</span><span class="n">GetCell</span><span class="p">(</span><span class="n">i</span><span class="p">)</span><span class="o">.</span><span class="n">GetPoints</span><span class="p">()</span><span class="o">.</span><span class="n">GetPoint</span><span class="p">(</span><span class="n">k</span> <span class="o">+</span> <span class="mi">1</span><span class="p">,</span> <span class="n">point1</span><span class="p">)</span>
+            <span class="k">if</span> <span class="n">math</span><span class="o">.</span><span class="n">sqrt</span><span class="p">(</span><span class="n">vtk</span><span class="o">.</span><span class="n">vtkMath</span><span class="o">.</span><span class="n">Distance2BetweenPoints</span><span class="p">(</span><span class="n">point0</span><span class="p">,</span> <span class="n">point1</span><span class="p">))</span> <span class="o">&lt;</span> <span class="n">minLength</span><span class="p">:</span>
+                <span class="k">if</span> <span class="n">math</span><span class="o">.</span><span class="n">sqrt</span><span class="p">(</span><span class="n">vtk</span><span class="o">.</span><span class="n">vtkMath</span><span class="o">.</span><span class="n">Distance2BetweenPoints</span><span class="p">(</span><span class="n">point0</span><span class="p">,</span> <span class="n">point1</span><span class="p">))</span> <span class="o">==</span> <span class="mf">0.0</span><span class="p">:</span>
+                    <span class="k">continue</span>
+                <span class="n">minLength</span> <span class="o">=</span> <span class="n">math</span><span class="o">.</span><span class="n">sqrt</span><span class="p">(</span><span class="n">vtk</span><span class="o">.</span><span class="n">vtkMath</span><span class="o">.</span><span class="n">Distance2BetweenPoints</span><span class="p">(</span><span class="n">point0</span><span class="p">,</span> <span class="n">point1</span><span class="p">))</span>
+            <span class="k">if</span> <span class="n">math</span><span class="o">.</span><span class="n">sqrt</span><span class="p">(</span><span class="n">vtk</span><span class="o">.</span><span class="n">vtkMath</span><span class="o">.</span><span class="n">Distance2BetweenPoints</span><span class="p">(</span><span class="n">point0</span><span class="p">,</span> <span class="n">point1</span><span class="p">))</span> <span class="o">&gt;</span> <span class="n">maxLength</span><span class="p">:</span>
+                <span class="n">maxLength</span> <span class="o">=</span> <span class="n">math</span><span class="o">.</span><span class="n">sqrt</span><span class="p">(</span><span class="n">vtk</span><span class="o">.</span><span class="n">vtkMath</span><span class="o">.</span><span class="n">Distance2BetweenPoints</span><span class="p">(</span><span class="n">point0</span><span class="p">,</span> <span class="n">point1</span><span class="p">))</span>
+
+    <span class="k">return</span> <span class="n">minLength</span><span class="p">,</span> <span class="n">maxLength</span></div>
+
+
+<div class="viewcode-block" id="ComputeGroupLength"><a class="viewcode-back" href="../../../api.html#vampy.automatedPreProcessing.ImportData.ComputeGroupLength">[docs]</a><span class="k">def</span> <span class="nf">ComputeGroupLength</span><span class="p">(</span><span class="n">centerline</span><span class="p">,</span> <span class="n">branchGroupId</span><span class="p">):</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;Return the mean length for branches of branchGroupId.&quot;&quot;&quot;</span>
+
+    <span class="n">groupLength</span> <span class="o">=</span> <span class="mf">0.0</span>
+    <span class="n">lengthWeightSum</span> <span class="o">=</span> <span class="mf">0.0</span>
+    <span class="n">groupIdsArray</span> <span class="o">=</span> <span class="n">centerline</span><span class="o">.</span><span class="n">GetCellData</span><span class="p">()</span><span class="o">.</span><span class="n">GetArray</span><span class="p">(</span><span class="n">GROUPIDSARRAYNAME</span><span class="p">)</span>
+    <span class="n">numberOfCells</span> <span class="o">=</span> <span class="n">centerline</span><span class="o">.</span><span class="n">GetNumberOfCells</span><span class="p">()</span>
+    <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="n">numberOfCells</span><span class="p">):</span>
+        <span class="n">groupId</span> <span class="o">=</span> <span class="n">groupIdsArray</span><span class="o">.</span><span class="n">GetValue</span><span class="p">(</span><span class="n">i</span><span class="p">)</span>
+        <span class="k">if</span> <span class="n">groupId</span> <span class="o">!=</span> <span class="n">branchGroupId</span><span class="p">:</span>
+            <span class="k">continue</span>
+        <span class="n">length</span> <span class="o">=</span> <span class="n">ComputeBranchLength</span><span class="p">(</span><span class="n">centerline</span><span class="p">,</span> <span class="n">i</span><span class="p">)</span>
+        <span class="n">groupLength</span> <span class="o">+=</span> <span class="n">length</span>
+        <span class="n">lengthWeightSum</span> <span class="o">+=</span> <span class="mf">1.0</span>
+    <span class="n">groupLength</span> <span class="o">/=</span> <span class="n">lengthWeightSum</span>
+
+    <span class="k">return</span> <span class="n">groupLength</span></div>
+
+
+<div class="viewcode-block" id="ComputeBranchLength"><a class="viewcode-back" href="../../../api.html#vampy.automatedPreProcessing.ImportData.ComputeBranchLength">[docs]</a><span class="k">def</span> <span class="nf">ComputeBranchLength</span><span class="p">(</span><span class="n">centerline</span><span class="p">,</span> <span class="n">branchId</span><span class="p">):</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;Return the length for the branch of index branchId.&quot;&quot;&quot;</span>
+
+    <span class="n">length</span> <span class="o">=</span> <span class="mf">0.0</span>
+    <span class="n">npts</span> <span class="o">=</span> <span class="n">centerline</span><span class="o">.</span><span class="n">GetCell</span><span class="p">(</span><span class="n">branchId</span><span class="p">)</span><span class="o">.</span><span class="n">GetPoints</span><span class="p">()</span><span class="o">.</span><span class="n">GetNumberOfPoints</span><span class="p">()</span>
+    <span class="k">for</span> <span class="n">k</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="n">npts</span> <span class="o">-</span> <span class="mi">1</span><span class="p">):</span>
+        <span class="n">point0</span> <span class="o">=</span> <span class="p">[</span><span class="mf">0.0</span><span class="p">,</span> <span class="mf">0.0</span><span class="p">,</span> <span class="mf">0.0</span><span class="p">]</span>
+        <span class="n">point1</span> <span class="o">=</span> <span class="p">[</span><span class="mf">0.0</span><span class="p">,</span> <span class="mf">0.0</span><span class="p">,</span> <span class="mf">0.0</span><span class="p">]</span>
+        <span class="n">centerline</span><span class="o">.</span><span class="n">GetCell</span><span class="p">(</span><span class="n">branchId</span><span class="p">)</span><span class="o">.</span><span class="n">GetPoints</span><span class="p">()</span><span class="o">.</span><span class="n">GetPoint</span><span class="p">(</span><span class="n">k</span><span class="p">,</span> <span class="n">point0</span><span class="p">)</span>
+        <span class="n">centerline</span><span class="o">.</span><span class="n">GetCell</span><span class="p">(</span><span class="n">branchId</span><span class="p">)</span><span class="o">.</span><span class="n">GetPoints</span><span class="p">()</span><span class="o">.</span><span class="n">GetPoint</span><span class="p">(</span><span class="n">k</span> <span class="o">+</span> <span class="mi">1</span><span class="p">,</span> <span class="n">point1</span><span class="p">)</span>
+        <span class="n">length</span> <span class="o">+=</span> <span class="n">math</span><span class="o">.</span><span class="n">sqrt</span><span class="p">(</span><span class="n">vtk</span><span class="o">.</span><span class="n">vtkMath</span><span class="o">.</span><span class="n">Distance2BetweenPoints</span><span class="p">(</span><span class="n">point0</span><span class="p">,</span> <span class="n">point1</span><span class="p">))</span>
+
+    <span class="k">return</span> <span class="n">length</span></div>
+
+
+<div class="viewcode-block" id="ComputeGroupRadius"><a class="viewcode-back" href="../../../api.html#vampy.automatedPreProcessing.ImportData.ComputeGroupRadius">[docs]</a><span class="k">def</span> <span class="nf">ComputeGroupRadius</span><span class="p">(</span><span class="n">centerline</span><span class="p">,</span> <span class="n">branchGroupId</span><span class="p">):</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;Return the mean radius of a group.</span>
+
+<span class="sd">    The mean radius is computed using the hydraulic resistance for</span>
+<span class="sd">    the branches of branchGroupId. See Chnafa et al. International</span>
+<span class="sd">    Journal for Numerical Methods in Biomedical Engineering, 2016.</span>
+
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="n">groupRadius</span> <span class="o">=</span> <span class="mf">0.0</span>
+    <span class="n">radiusWeightSum</span> <span class="o">=</span> <span class="mf">0.0</span>
+    <span class="n">groupIdsArray</span> <span class="o">=</span> <span class="n">centerline</span><span class="o">.</span><span class="n">GetCellData</span><span class="p">()</span><span class="o">.</span><span class="n">GetArray</span><span class="p">(</span><span class="n">GROUPIDSARRAYNAME</span><span class="p">)</span>
+    <span class="n">numberOfCells</span> <span class="o">=</span> <span class="n">centerline</span><span class="o">.</span><span class="n">GetNumberOfCells</span><span class="p">()</span>
+    <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="n">numberOfCells</span><span class="p">):</span>
+        <span class="k">if</span> <span class="n">groupIdsArray</span><span class="o">.</span><span class="n">GetValue</span><span class="p">(</span><span class="n">i</span><span class="p">)</span> <span class="o">!=</span> <span class="n">branchGroupId</span><span class="p">:</span>
+            <span class="k">continue</span>
+        <span class="n">groupRadius</span> <span class="o">+=</span> <span class="n">ComputeBranchRadius</span><span class="p">(</span><span class="n">centerline</span><span class="p">,</span> <span class="n">i</span><span class="p">)</span>
+        <span class="n">radiusWeightSum</span> <span class="o">+=</span> <span class="mf">1.0</span>
+    <span class="n">groupRadius</span> <span class="o">/=</span> <span class="n">radiusWeightSum</span>
+
+    <span class="k">return</span> <span class="n">groupRadius</span></div>
+
+
+<div class="viewcode-block" id="ComputeBranchRadius"><a class="viewcode-back" href="../../../api.html#vampy.automatedPreProcessing.ImportData.ComputeBranchRadius">[docs]</a><span class="k">def</span> <span class="nf">ComputeBranchRadius</span><span class="p">(</span><span class="n">centerline</span><span class="p">,</span> <span class="n">branchId</span><span class="p">):</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;Return the radius for a branch with index branchId. &quot;&quot;&quot;</span>
+    <span class="n">length</span> <span class="o">=</span> <span class="mf">0.0</span>
+    <span class="n">resistance</span> <span class="o">=</span> <span class="mf">0.0</span>
+    <span class="n">radiusArray</span> <span class="o">=</span> <span class="n">centerline</span><span class="o">.</span><span class="n">GetPointData</span><span class="p">()</span><span class="o">.</span><span class="n">GetArray</span><span class="p">(</span><span class="n">RADIUSARRAYNAME</span><span class="p">)</span>
+    <span class="n">npts</span> <span class="o">=</span> <span class="n">centerline</span><span class="o">.</span><span class="n">GetCell</span><span class="p">(</span><span class="n">branchId</span><span class="p">)</span><span class="o">.</span><span class="n">GetPoints</span><span class="p">()</span><span class="o">.</span><span class="n">GetNumberOfPoints</span><span class="p">()</span>
+    <span class="k">for</span> <span class="n">k</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="n">npts</span> <span class="o">-</span> <span class="mi">1</span><span class="p">):</span>
+        <span class="n">point0</span> <span class="o">=</span> <span class="p">[</span><span class="mf">0.0</span><span class="p">,</span> <span class="mf">0.0</span><span class="p">,</span> <span class="mf">0.0</span><span class="p">]</span>
+        <span class="n">point1</span> <span class="o">=</span> <span class="p">[</span><span class="mf">0.0</span><span class="p">,</span> <span class="mf">0.0</span><span class="p">,</span> <span class="mf">0.0</span><span class="p">]</span>
+        <span class="n">centerline</span><span class="o">.</span><span class="n">GetCell</span><span class="p">(</span><span class="n">branchId</span><span class="p">)</span><span class="o">.</span><span class="n">GetPoints</span><span class="p">()</span><span class="o">.</span><span class="n">GetPoint</span><span class="p">(</span><span class="n">k</span><span class="p">,</span> <span class="n">point0</span><span class="p">)</span>
+        <span class="n">centerline</span><span class="o">.</span><span class="n">GetCell</span><span class="p">(</span><span class="n">branchId</span><span class="p">)</span><span class="o">.</span><span class="n">GetPoints</span><span class="p">()</span><span class="o">.</span><span class="n">GetPoint</span><span class="p">(</span><span class="n">k</span> <span class="o">+</span> <span class="mi">1</span><span class="p">,</span> <span class="n">point1</span><span class="p">)</span>
+        <span class="n">dx</span> <span class="o">=</span> <span class="n">math</span><span class="o">.</span><span class="n">sqrt</span><span class="p">(</span><span class="n">vtk</span><span class="o">.</span><span class="n">vtkMath</span><span class="o">.</span><span class="n">Distance2BetweenPoints</span><span class="p">(</span><span class="n">point0</span><span class="p">,</span> <span class="n">point1</span><span class="p">))</span>
+        <span class="n">length</span> <span class="o">+=</span> <span class="n">dx</span>
+        <span class="n">r</span> <span class="o">=</span> <span class="n">radiusArray</span><span class="o">.</span><span class="n">GetComponent</span><span class="p">(</span><span class="n">centerline</span><span class="o">.</span><span class="n">GetCell</span><span class="p">(</span><span class="n">branchId</span><span class="p">)</span><span class="o">.</span><span class="n">GetPointId</span><span class="p">(</span><span class="n">k</span><span class="p">),</span> <span class="mi">0</span><span class="p">)</span>
+        <span class="n">resistance</span> <span class="o">+=</span> <span class="n">dx</span> <span class="o">/</span> <span class="n">r</span> <span class="o">**</span> <span class="mf">4.0</span>
+    <span class="n">branchRadius</span> <span class="o">=</span> <span class="p">(</span><span class="n">length</span> <span class="o">/</span> <span class="n">resistance</span><span class="p">)</span> <span class="o">**</span> <span class="mf">0.25</span>
+
+    <span class="k">return</span> <span class="n">branchRadius</span></div>
+
+
+<div class="viewcode-block" id="GetListsUniqueBlankedBranches"><a class="viewcode-back" href="../../../api.html#vampy.automatedPreProcessing.ImportData.GetListsUniqueBlankedBranches">[docs]</a><span class="k">def</span> <span class="nf">GetListsUniqueBlankedBranches</span><span class="p">(</span><span class="n">blankedGroupsIdList</span><span class="p">,</span> <span class="n">redundantBlankedBranchesIdList</span><span class="p">):</span>
+    <span class="n">blankedGroupsIndex</span> <span class="o">=</span> <span class="p">[]</span>
+    <span class="n">blankedUniqueBranchesIndex</span> <span class="o">=</span> <span class="p">[]</span>
+    <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="nb">len</span><span class="p">(</span><span class="n">blankedGroupsIdList</span><span class="p">)):</span>
+        <span class="k">if</span> <span class="n">blankedGroupsIdList</span><span class="p">[</span><span class="n">i</span><span class="p">][</span><span class="mi">0</span><span class="p">]</span> <span class="ow">in</span> <span class="n">redundantBlankedBranchesIdList</span><span class="p">:</span>
+            <span class="k">continue</span>
+        <span class="n">blankedGroupsIndex</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">blankedGroupsIdList</span><span class="p">[</span><span class="n">i</span><span class="p">][</span><span class="mi">1</span><span class="p">])</span>
+        <span class="n">blankedUniqueBranchesIndex</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">blankedGroupsIdList</span><span class="p">[</span><span class="n">i</span><span class="p">][</span><span class="mi">0</span><span class="p">])</span>
+
+    <span class="k">return</span> <span class="n">blankedGroupsIndex</span><span class="p">,</span> <span class="n">blankedUniqueBranchesIndex</span></div>
+
+
+<div class="viewcode-block" id="SetNetworkStructure"><a class="viewcode-back" href="../../../api.html#vampy.automatedPreProcessing.ImportData.SetNetworkStructure">[docs]</a><span class="k">def</span> <span class="nf">SetNetworkStructure</span><span class="p">(</span><span class="n">centerline</span><span class="p">,</span> <span class="n">network</span><span class="p">,</span> <span class="n">verboseprint</span><span class="p">,</span>
+                        <span class="n">isConnectivityNeeded</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span> <span class="n">isRadiusInletNeeded</span><span class="o">=</span><span class="kc">True</span><span class="p">):</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;Fills a network structure with a vtkPolyData object.</span>
+
+<span class="sd">    Each element has an unique index. The groups length and radius are</span>
+<span class="sd">    averaged out. When the element is not not part of the bifurcation</span>
+<span class="sd">    reference system, it is possible that multiple end points exist. They are</span>
+<span class="sd">    all saved. For the complet formalism of the bifurcation reference system</span>
+<span class="sd">    see Antiga, L., &amp; Steinman, D. A. (2004). Robust and objective</span>
+<span class="sd">    decomposition and mapping of bifurcating vessels. Medical Imaging,</span>
+<span class="sd">    IEEE Transactions on, 23(6), 704-713.</span>
+
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="n">verboseprint</span><span class="p">(</span><span class="s2">&quot;&gt; Filling the network structure with the raw data.&quot;</span><span class="p">)</span>
+    <span class="k">if</span> <span class="ow">not</span> <span class="p">(</span><span class="n">IsArrayDefined</span><span class="p">(</span><span class="n">centerline</span><span class="p">,</span> <span class="n">GROUPIDSARRAYNAME</span><span class="p">)):</span>
+        <span class="kn">from</span> <span class="nn">vmtk</span> <span class="kn">import</span> <span class="n">vmtkscripts</span>
+        <span class="n">centerlines</span> <span class="o">=</span> <span class="n">vmtkscripts</span><span class="o">.</span><span class="n">vmtkBranchExtractor</span><span class="p">()</span>
+        <span class="n">centerlines</span><span class="o">.</span><span class="n">Centerlines</span> <span class="o">=</span> <span class="n">centerline</span>
+        <span class="n">centerlines</span><span class="o">.</span><span class="n">RadiusArrayName</span> <span class="o">=</span> <span class="n">RADIUSARRAYNAME</span>
+        <span class="n">centerlines</span><span class="o">.</span><span class="n">Execute</span><span class="p">()</span>
+        <span class="n">centerline</span> <span class="o">=</span> <span class="n">centerlines</span><span class="o">.</span><span class="n">Centerlines</span>
+
+    <span class="c1"># Treat the splitted centerline.</span>
+    <span class="n">maxGroupId</span> <span class="o">=</span> <span class="n">GetMaxGroupId</span><span class="p">(</span><span class="n">centerline</span><span class="p">)</span>
+    <span class="n">blankedGroupsIdList</span> <span class="o">=</span> <span class="n">GetBlankedGroupsIdList</span><span class="p">(</span><span class="n">centerline</span><span class="p">)</span>
+    <span class="n">redundantBlankedBranchesIdList</span> <span class="o">=</span> <span class="n">GetRedundantBlankedIdList</span><span class="p">(</span><span class="n">centerline</span><span class="p">,</span>
+                                                               <span class="n">blankedGroupsIdList</span><span class="p">)</span>
+    <span class="n">blankedGroupsIndex</span><span class="p">,</span> <span class="n">blankedUniqueBranchesIndex</span> <span class="o">=</span> \
+        <span class="n">GetListsUniqueBlankedBranches</span><span class="p">(</span><span class="n">blankedGroupsIdList</span><span class="p">,</span>
+                                      <span class="n">redundantBlankedBranchesIdList</span><span class="p">)</span>
+    <span class="n">indexUniqueBranches</span> <span class="o">=</span> <span class="mi">0</span>
+    <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="n">maxGroupId</span> <span class="o">+</span> <span class="mi">1</span><span class="p">):</span>
+        <span class="n">x0List</span> <span class="o">=</span> <span class="p">[]</span>
+        <span class="n">x1List</span> <span class="o">=</span> <span class="p">[]</span>
+        <span class="n">VtkCellIdList</span> <span class="o">=</span> <span class="p">[]</span>
+        <span class="n">VtkGroupIdList</span> <span class="o">=</span> <span class="p">[]</span>
+        <span class="k">if</span> <span class="n">i</span> <span class="ow">in</span> <span class="n">blankedGroupsIndex</span><span class="p">:</span>
+            <span class="k">for</span> <span class="n">j</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="nb">len</span><span class="p">(</span><span class="n">blankedGroupsIndex</span><span class="p">)):</span>
+                <span class="k">if</span> <span class="n">blankedGroupsIndex</span><span class="p">[</span><span class="n">j</span><span class="p">]</span> <span class="o">==</span> <span class="n">i</span><span class="p">:</span>
+                    <span class="n">el</span> <span class="o">=</span> <span class="n">Element</span><span class="p">(</span><span class="n">Id</span><span class="o">=</span><span class="n">indexUniqueBranches</span><span class="p">)</span>
+                    <span class="n">el</span><span class="o">.</span><span class="n">SetMeanRadius</span><span class="p">(</span><span class="n">ComputeBranchRadius</span><span class="p">(</span><span class="n">centerline</span><span class="p">,</span>
+                                                         <span class="n">blankedUniqueBranchesIndex</span><span class="p">[</span><span class="n">j</span><span class="p">]))</span>
+                    <span class="n">el</span><span class="o">.</span><span class="n">SetLength</span><span class="p">(</span><span class="n">ComputeBranchLength</span><span class="p">(</span><span class="n">centerline</span><span class="p">,</span>
+                                                     <span class="n">blankedUniqueBranchesIndex</span><span class="p">[</span><span class="n">j</span><span class="p">]))</span>
+                    <span class="n">el</span><span class="o">.</span><span class="n">SetBlanking</span><span class="p">(</span><span class="mi">1</span><span class="p">)</span>
+                    <span class="n">npts</span> <span class="o">=</span> <span class="n">centerline</span><span class="o">.</span><span class="n">GetCell</span><span class="p">(</span><span class="n">blankedUniqueBranchesIndex</span><span class="p">[</span><span class="n">j</span><span class="p">])</span><span class="o">.</span> \
+                        <span class="n">GetPoints</span><span class="p">()</span><span class="o">.</span><span class="n">GetNumberOfPoints</span><span class="p">()</span>
+                    <span class="n">x0</span> <span class="o">=</span> <span class="p">[</span><span class="mf">0.0</span><span class="p">,</span> <span class="mf">0.0</span><span class="p">,</span> <span class="mf">0.0</span><span class="p">]</span>
+                    <span class="n">x1</span> <span class="o">=</span> <span class="p">[</span><span class="mf">0.0</span><span class="p">,</span> <span class="mf">0.0</span><span class="p">,</span> <span class="mf">0.0</span><span class="p">]</span>
+                    <span class="n">centerline</span><span class="o">.</span><span class="n">GetCell</span><span class="p">(</span><span class="n">blankedUniqueBranchesIndex</span><span class="p">[</span><span class="n">j</span><span class="p">])</span><span class="o">.</span> \
+                        <span class="n">GetPoints</span><span class="p">()</span><span class="o">.</span><span class="n">GetPoint</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="n">x0</span><span class="p">)</span>
+                    <span class="n">centerline</span><span class="o">.</span><span class="n">GetCell</span><span class="p">(</span><span class="n">blankedUniqueBranchesIndex</span><span class="p">[</span><span class="n">j</span><span class="p">])</span><span class="o">.</span> \
+                        <span class="n">GetPoints</span><span class="p">()</span><span class="o">.</span><span class="n">GetPoint</span><span class="p">(</span><span class="n">npts</span> <span class="o">-</span> <span class="mi">1</span><span class="p">,</span> <span class="n">x1</span><span class="p">)</span>
+                    <span class="n">x0List</span> <span class="o">=</span> <span class="p">[]</span>
+                    <span class="n">x1List</span> <span class="o">=</span> <span class="p">[]</span>
+                    <span class="n">VtkCellIdList</span> <span class="o">=</span> <span class="p">[]</span>
+                    <span class="n">VtkGroupIdList</span> <span class="o">=</span> <span class="p">[]</span>
+                    <span class="n">x1List</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">x1</span><span class="p">)</span>
+                    <span class="n">x0List</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">x0</span><span class="p">)</span>
+                    <span class="n">el</span><span class="o">.</span><span class="n">SetInOutPointsCoordinates</span><span class="p">(</span><span class="n">x0List</span><span class="p">,</span> <span class="n">x1List</span><span class="p">)</span>
+                    <span class="n">VtkCellIdList</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">blankedUniqueBranchesIndex</span><span class="p">[</span><span class="n">j</span><span class="p">])</span>
+                    <span class="n">VtkGroupIdList</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">i</span><span class="p">)</span>
+                    <span class="n">el</span><span class="o">.</span><span class="n">SetVtkGroupIdList</span><span class="p">(</span><span class="n">VtkGroupIdList</span><span class="p">)</span>
+                    <span class="n">el</span><span class="o">.</span><span class="n">SetVtkCellIdList</span><span class="p">(</span><span class="n">VtkCellIdList</span><span class="p">)</span>
+                    <span class="n">network</span><span class="o">.</span><span class="n">AddElement</span><span class="p">(</span><span class="n">el</span><span class="p">)</span>
+                    <span class="n">verboseprint</span><span class="p">(</span><span class="s2">&quot;&gt; Edge Id &quot;</span> <span class="o">+</span> <span class="nb">repr</span><span class="p">(</span><span class="n">indexUniqueBranches</span><span class="p">)</span>
+                                 <span class="o">+</span> <span class="s2">&quot;, Length = &quot;</span> <span class="o">+</span> <span class="nb">repr</span><span class="p">(</span><span class="n">el</span><span class="o">.</span><span class="n">GetLength</span><span class="p">())</span> <span class="o">+</span> <span class="s2">&quot; and Radius = &quot;</span>
+                                 <span class="o">+</span> <span class="nb">repr</span><span class="p">(</span><span class="n">el</span><span class="o">.</span><span class="n">GetMeanRadius</span><span class="p">())</span> <span class="o">+</span> <span class="s2">&quot;.&quot;</span><span class="p">)</span>
+                    <span class="n">indexUniqueBranches</span> <span class="o">+=</span> <span class="mi">1</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="n">el</span> <span class="o">=</span> <span class="n">Element</span><span class="p">(</span><span class="n">Id</span><span class="o">=</span><span class="n">indexUniqueBranches</span><span class="p">)</span>
+            <span class="n">el</span><span class="o">.</span><span class="n">SetMeanRadius</span><span class="p">(</span><span class="n">ComputeGroupRadius</span><span class="p">(</span><span class="n">centerline</span><span class="p">,</span> <span class="n">i</span><span class="p">))</span>
+            <span class="n">el</span><span class="o">.</span><span class="n">SetLength</span><span class="p">(</span><span class="n">ComputeGroupLength</span><span class="p">(</span><span class="n">centerline</span><span class="p">,</span> <span class="n">i</span><span class="p">))</span>
+            <span class="n">groupIdsArray</span> <span class="o">=</span> <span class="n">centerline</span><span class="o">.</span><span class="n">GetCellData</span><span class="p">()</span><span class="o">.</span><span class="n">GetArray</span><span class="p">(</span><span class="n">GROUPIDSARRAYNAME</span><span class="p">)</span>
+            <span class="n">numberOfCells</span> <span class="o">=</span> <span class="n">centerline</span><span class="o">.</span><span class="n">GetNumberOfCells</span><span class="p">()</span>
+            <span class="k">for</span> <span class="n">k</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="n">numberOfCells</span><span class="p">):</span>
+                <span class="n">groupId</span> <span class="o">=</span> <span class="n">groupIdsArray</span><span class="o">.</span><span class="n">GetValue</span><span class="p">(</span><span class="n">k</span><span class="p">)</span>
+                <span class="k">if</span> <span class="n">groupId</span> <span class="o">!=</span> <span class="n">i</span><span class="p">:</span>
+                    <span class="k">continue</span>
+                <span class="n">x0</span> <span class="o">=</span> <span class="p">[</span><span class="mf">0.0</span><span class="p">,</span> <span class="mf">0.0</span><span class="p">,</span> <span class="mf">0.0</span><span class="p">]</span>
+                <span class="n">x1</span> <span class="o">=</span> <span class="p">[</span><span class="mf">0.0</span><span class="p">,</span> <span class="mf">0.0</span><span class="p">,</span> <span class="mf">0.0</span><span class="p">]</span>
+                <span class="n">npts</span> <span class="o">=</span> <span class="n">centerline</span><span class="o">.</span><span class="n">GetCell</span><span class="p">(</span><span class="n">k</span><span class="p">)</span><span class="o">.</span><span class="n">GetPoints</span><span class="p">()</span><span class="o">.</span><span class="n">GetNumberOfPoints</span><span class="p">()</span>
+                <span class="n">centerline</span><span class="o">.</span><span class="n">GetCell</span><span class="p">(</span><span class="n">k</span><span class="p">)</span><span class="o">.</span><span class="n">GetPoints</span><span class="p">()</span><span class="o">.</span><span class="n">GetPoint</span><span class="p">(</span><span class="n">npts</span> <span class="o">-</span> <span class="mi">1</span><span class="p">,</span> <span class="n">x1</span><span class="p">)</span>
+                <span class="n">x1List</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">x1</span><span class="p">)</span>
+                <span class="n">centerline</span><span class="o">.</span><span class="n">GetCell</span><span class="p">(</span><span class="n">k</span><span class="p">)</span><span class="o">.</span><span class="n">GetPoints</span><span class="p">()</span><span class="o">.</span><span class="n">GetPoint</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="n">x0</span><span class="p">)</span>
+                <span class="n">x0List</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">x0</span><span class="p">)</span>
+                <span class="n">VtkCellIdList</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">k</span><span class="p">)</span>
+                <span class="n">VtkGroupIdList</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">i</span><span class="p">)</span>
+            <span class="n">uniqueX0List</span> <span class="o">=</span> <span class="p">[</span><span class="nb">list</span><span class="p">(</span><span class="n">x</span><span class="p">)</span> <span class="k">for</span> <span class="n">x</span> <span class="ow">in</span> <span class="nb">set</span><span class="p">(</span><span class="nb">tuple</span><span class="p">(</span><span class="n">x</span><span class="p">)</span> <span class="k">for</span> <span class="n">x</span> <span class="ow">in</span> <span class="n">x0List</span><span class="p">)]</span>
+            <span class="n">uniqueX1List</span> <span class="o">=</span> <span class="p">[</span><span class="nb">list</span><span class="p">(</span><span class="n">x</span><span class="p">)</span> <span class="k">for</span> <span class="n">x</span> <span class="ow">in</span> <span class="nb">set</span><span class="p">(</span><span class="nb">tuple</span><span class="p">(</span><span class="n">x</span><span class="p">)</span> <span class="k">for</span> <span class="n">x</span> <span class="ow">in</span> <span class="n">x1List</span><span class="p">)]</span>
+            <span class="n">el</span><span class="o">.</span><span class="n">SetInOutPointsCoordinates</span><span class="p">(</span><span class="n">uniqueX0List</span><span class="p">,</span> <span class="n">uniqueX1List</span><span class="p">)</span>
+            <span class="n">el</span><span class="o">.</span><span class="n">SetVtkGroupIdList</span><span class="p">(</span><span class="n">VtkGroupIdList</span><span class="p">)</span>
+            <span class="n">el</span><span class="o">.</span><span class="n">SetVtkCellIdList</span><span class="p">(</span><span class="n">VtkCellIdList</span><span class="p">)</span>
+            <span class="n">network</span><span class="o">.</span><span class="n">AddElement</span><span class="p">(</span><span class="n">el</span><span class="p">)</span>
+            <span class="n">verboseprint</span><span class="p">(</span><span class="s2">&quot;&gt; Edge Id &quot;</span> <span class="o">+</span> <span class="nb">repr</span><span class="p">(</span><span class="n">indexUniqueBranches</span><span class="p">)</span>
+                         <span class="o">+</span> <span class="s2">&quot;, Length = &quot;</span> <span class="o">+</span> <span class="nb">repr</span><span class="p">(</span><span class="n">el</span><span class="o">.</span><span class="n">GetLength</span><span class="p">())</span> <span class="o">+</span> <span class="s2">&quot; and Radius = &quot;</span>
+                         <span class="o">+</span> <span class="nb">repr</span><span class="p">(</span><span class="n">el</span><span class="o">.</span><span class="n">GetMeanRadius</span><span class="p">())</span> <span class="o">+</span> <span class="s2">&quot;.&quot;</span><span class="p">)</span>
+            <span class="n">indexUniqueBranches</span> <span class="o">+=</span> <span class="mi">1</span>
+    <span class="n">verboseprint</span><span class="p">(</span><span class="s2">&quot;&gt; &quot;</span><span class="p">)</span>
+
+    <span class="k">if</span> <span class="n">isConnectivityNeeded</span><span class="p">:</span>
+        <span class="n">minLength</span><span class="p">,</span> <span class="n">maxLength</span> <span class="o">=</span> <span class="n">ComputeGeometricTolerance</span><span class="p">(</span><span class="n">centerline</span><span class="p">)</span>
+        <span class="n">ComputeConnectivity</span><span class="p">(</span><span class="n">network</span><span class="p">,</span> <span class="n">minLength</span><span class="p">,</span> <span class="n">verboseprint</span><span class="p">)</span>
+    <span class="n">SetRadiusX0</span><span class="p">(</span><span class="n">centerline</span><span class="p">,</span> <span class="n">network</span><span class="p">,</span> <span class="n">verboseprint</span><span class="p">)</span>
+    <span class="n">network</span><span class="o">.</span><span class="n">SetNetworkInletRadius</span><span class="p">(</span>
+        <span class="n">ComputeInletAverageRadius</span><span class="p">(</span><span class="n">centerline</span><span class="p">,</span> <span class="mf">0.0</span><span class="p">,</span> <span class="n">verboseprint</span><span class="p">))</span>
+
+    <span class="k">return</span> <span class="n">centerline</span></div>
+
+
+<div class="viewcode-block" id="ComputeConnectivity"><a class="viewcode-back" href="../../../api.html#vampy.automatedPreProcessing.ImportData.ComputeConnectivity">[docs]</a><span class="k">def</span> <span class="nf">ComputeConnectivity</span><span class="p">(</span><span class="n">network</span><span class="p">,</span> <span class="n">tolerance</span><span class="p">,</span> <span class="n">verboseprint</span><span class="p">):</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;Compute the branches connectivity in the network.</span>
+
+<span class="sd">    It is assumed that the first element is the inlet. In case of several</span>
+<span class="sd">    inlets, modification to this routine should be coded. This routine search</span>
+<span class="sd">    for each branch, its connected branches by comparing the coordinates of</span>
+<span class="sd">    the distal extremity of the treated branch with the proximal extremity</span>
+<span class="sd">    of the other branches in the network. As sometimes the coordinates do not</span>
+<span class="sd">    perfectly match, a tolerance is applied.</span>
+
+<span class="sd">    TODO: use simply vtkPolyDataConnectivityFilter to do the job...?</span>
+
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="c1"># A few cases were bordeline, hence the factor.</span>
+    <span class="n">tol</span> <span class="o">=</span> <span class="mf">5.0</span> <span class="o">*</span> <span class="n">tolerance</span>
+    <span class="c1"># Initialization of the first branch.</span>
+    <span class="n">network</span><span class="o">.</span><span class="n">elements</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span><span class="o">.</span><span class="n">SetIfInlet</span><span class="p">(</span><span class="kc">True</span><span class="p">)</span>
+    <span class="n">network</span><span class="o">.</span><span class="n">elements</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span><span class="o">.</span><span class="n">SetInOutPointsIds</span><span class="p">(</span><span class="mi">1</span><span class="p">,</span> <span class="mi">2</span><span class="p">)</span>
+    <span class="c1"># Test the end node (x1) of a branch with the start node</span>
+    <span class="c1"># of the other branches (x0).</span>
+    <span class="k">for</span> <span class="n">treatedBranch</span> <span class="ow">in</span> <span class="n">network</span><span class="o">.</span><span class="n">elements</span><span class="p">:</span>
+        <span class="n">atLeastOneFound</span> <span class="o">=</span> <span class="kc">False</span>
+        <span class="k">for</span> <span class="n">x1</span> <span class="ow">in</span> <span class="n">treatedBranch</span><span class="o">.</span><span class="n">GetOutPointsx1</span><span class="p">():</span>
+            <span class="k">for</span> <span class="n">otherBranch</span> <span class="ow">in</span> <span class="n">network</span><span class="o">.</span><span class="n">elements</span><span class="p">:</span>
+                <span class="k">if</span> <span class="n">otherBranch</span><span class="o">.</span><span class="n">GetId</span><span class="p">()</span> <span class="o">==</span> <span class="n">treatedBranch</span><span class="o">.</span><span class="n">GetId</span><span class="p">():</span>
+                    <span class="k">continue</span>
+                <span class="k">for</span> <span class="n">x0</span> <span class="ow">in</span> <span class="n">otherBranch</span><span class="o">.</span><span class="n">GetInPointsx0</span><span class="p">():</span>
+                    <span class="k">if</span> <span class="n">vtk</span><span class="o">.</span><span class="n">vtkMath</span><span class="o">.</span><span class="n">Distance2BetweenPoints</span><span class="p">(</span><span class="n">x0</span><span class="p">,</span> <span class="n">x1</span><span class="p">)</span> <span class="o">&lt;</span> <span class="n">tol</span><span class="p">:</span>
+                        <span class="k">if</span> <span class="n">vtk</span><span class="o">.</span><span class="n">vtkMath</span><span class="o">.</span><span class="n">Distance2BetweenPoints</span><span class="p">(</span><span class="n">x0</span><span class="p">,</span> <span class="n">x1</span><span class="p">)</span> <span class="o">&gt;</span> <span class="n">tolerance</span><span class="p">:</span>
+                            <span class="nb">print</span><span class="p">(</span><span class="s1">&#39;WARNING: POTENTIAL CONNECTIVITY ISSUE. &#39;</span><span class="p">)</span>
+                            <span class="nb">print</span><span class="p">(</span><span class="s1">&#39;         A distance between connected points is suspicious.&#39;</span><span class="p">)</span>
+                            <span class="nb">print</span><span class="p">(</span><span class="s1">&#39;         The segment(s) of CELL ID VTK &#39;</span> <span class="o">+</span> <span class="nb">repr</span><span class="p">(</span><span class="n">treatedBranch</span><span class="o">.</span><span class="n">GetVtkCellIdList</span><span class="p">()))</span>
+                            <span class="nb">print</span><span class="p">(</span><span class="s1">&#39;         and, the segment(s) of CELL ID VTK &#39;</span> <span class="o">+</span> <span class="nb">repr</span><span class="p">(</span>
+                                <span class="n">otherBranch</span><span class="o">.</span><span class="n">GetVtkCellIdList</span><span class="p">())</span> <span class="o">+</span> <span class="s1">&#39; will be considered&#39;</span><span class="p">)</span>
+                            <span class="nb">print</span><span class="p">(</span><span class="s1">&#39;         as connected. Please check if this action was expected.&#39;</span><span class="p">)</span>
+                            <span class="nb">print</span><span class="p">()</span>
+                        <span class="n">otherBranch</span><span class="o">.</span><span class="n">SetInOutPointsIds</span><span class="p">(</span>
+                            <span class="n">treatedBranch</span><span class="o">.</span><span class="n">GetOutPointsx1Id</span><span class="p">(),</span>
+                            <span class="n">otherBranch</span><span class="o">.</span><span class="n">GetId</span><span class="p">()</span> <span class="o">+</span> <span class="mi">2</span><span class="p">)</span>
+                        <span class="n">otherBranch</span><span class="o">.</span><span class="n">SetBehindSegment</span><span class="p">(</span><span class="n">treatedBranch</span><span class="o">.</span><span class="n">GetId</span><span class="p">())</span>
+                        <span class="n">treatedBranch</span><span class="o">.</span><span class="n">SetFrontSegment</span><span class="p">(</span><span class="n">otherBranch</span><span class="o">.</span><span class="n">GetId</span><span class="p">())</span>
+                        <span class="n">atLeastOneFound</span> <span class="o">=</span> <span class="kc">True</span>
+
+        <span class="k">if</span> <span class="ow">not</span> <span class="p">(</span><span class="n">atLeastOneFound</span><span class="p">):</span>
+            <span class="n">treatedBranch</span><span class="o">.</span><span class="n">SetIfOutlet</span><span class="p">(</span><span class="kc">True</span><span class="p">)</span>
+            <span class="n">treatedBranch</span><span class="o">.</span><span class="n">SetInOutPointsIds</span><span class="p">(</span>
+                <span class="n">treatedBranch</span><span class="o">.</span><span class="n">GetInPointsx0Id</span><span class="p">(),</span>
+                <span class="n">treatedBranch</span><span class="o">.</span><span class="n">GetId</span><span class="p">()</span> <span class="o">+</span> <span class="mi">2</span><span class="p">)</span></div>
+
+
+<div class="viewcode-block" id="SetRadiusX0"><a class="viewcode-back" href="../../../api.html#vampy.automatedPreProcessing.ImportData.SetRadiusX0">[docs]</a><span class="k">def</span> <span class="nf">SetRadiusX0</span><span class="p">(</span><span class="n">centerline</span><span class="p">,</span> <span class="n">network</span><span class="p">,</span> <span class="n">verboseprint</span><span class="p">):</span>
+    <span class="k">for</span> <span class="n">branch</span> <span class="ow">in</span> <span class="n">network</span><span class="o">.</span><span class="n">elements</span><span class="p">:</span>
+        <span class="n">cellID</span> <span class="o">=</span> <span class="n">branch</span><span class="o">.</span><span class="n">GetVtkCellIdList</span><span class="p">()</span>
+        <span class="n">radiusArray</span> <span class="o">=</span> <span class="n">centerline</span><span class="o">.</span><span class="n">GetPointData</span><span class="p">()</span><span class="o">.</span><span class="n">GetArray</span><span class="p">(</span><span class="n">RADIUSARRAYNAME</span><span class="p">)</span>
+        <span class="n">r</span> <span class="o">=</span> <span class="n">radiusArray</span><span class="o">.</span><span class="n">GetComponent</span><span class="p">(</span><span class="n">centerline</span><span class="o">.</span><span class="n">GetCell</span><span class="p">(</span><span class="n">cellID</span><span class="p">[</span><span class="mi">0</span><span class="p">])</span><span class="o">.</span><span class="n">GetPointId</span><span class="p">(</span><span class="mi">0</span><span class="p">),</span> <span class="mi">0</span><span class="p">)</span>
+        <span class="n">branch</span><span class="o">.</span><span class="n">SetInletRadius</span><span class="p">(</span><span class="n">r</span><span class="p">)</span></div>
+
+
+<div class="viewcode-block" id="ComputeInletAverageRadius"><a class="viewcode-back" href="../../../api.html#vampy.automatedPreProcessing.ImportData.ComputeInletAverageRadius">[docs]</a><span class="k">def</span> <span class="nf">ComputeInletAverageRadius</span><span class="p">(</span><span class="n">centerline</span><span class="p">,</span> <span class="n">desiredLength</span><span class="p">,</span> <span class="n">verboseprint</span><span class="p">):</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;Compute the inlet radius as an averaged radius.</span>
+
+<span class="sd">    Computes an average radius over a certain length of the ICA. The mean</span>
+<span class="sd">    radius is computed with the maximum inscribed sphere radius in the vessel.</span>
+<span class="sd">    Thus, the actual radius might be underestimated if the vessel has</span>
+<span class="sd">    an elliptical shape.</span>
+
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="n">branchId</span> <span class="o">=</span> <span class="mi">0</span>
+    <span class="n">length</span> <span class="o">=</span> <span class="mf">0.0</span>
+    <span class="n">resistance</span> <span class="o">=</span> <span class="mf">0.0</span>
+    <span class="n">radiusArray</span> <span class="o">=</span> <span class="n">centerline</span><span class="o">.</span><span class="n">GetPointData</span><span class="p">()</span><span class="o">.</span><span class="n">GetArray</span><span class="p">(</span><span class="n">RADIUSARRAYNAME</span><span class="p">)</span>
+    <span class="n">npts</span> <span class="o">=</span> <span class="n">GetIndexCenterlineForADefinedLength</span><span class="p">(</span><span class="n">centerline</span><span class="p">,</span> <span class="n">branchId</span><span class="p">,</span>
+                                               <span class="n">desiredLength</span><span class="p">,</span> <span class="n">verboseprint</span><span class="p">)</span>
+    <span class="k">for</span> <span class="n">k</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="n">npts</span> <span class="o">-</span> <span class="mi">1</span><span class="p">):</span>
+        <span class="n">point0</span> <span class="o">=</span> <span class="p">[</span><span class="mf">0.0</span><span class="p">,</span> <span class="mf">0.0</span><span class="p">,</span> <span class="mf">0.0</span><span class="p">]</span>
+        <span class="n">point1</span> <span class="o">=</span> <span class="p">[</span><span class="mf">0.0</span><span class="p">,</span> <span class="mf">0.0</span><span class="p">,</span> <span class="mf">0.0</span><span class="p">]</span>
+        <span class="n">centerline</span><span class="o">.</span><span class="n">GetCell</span><span class="p">(</span><span class="n">branchId</span><span class="p">)</span><span class="o">.</span><span class="n">GetPoints</span><span class="p">()</span><span class="o">.</span><span class="n">GetPoint</span><span class="p">(</span><span class="n">k</span><span class="p">,</span> <span class="n">point0</span><span class="p">)</span>
+        <span class="n">centerline</span><span class="o">.</span><span class="n">GetCell</span><span class="p">(</span><span class="n">branchId</span><span class="p">)</span><span class="o">.</span><span class="n">GetPoints</span><span class="p">()</span><span class="o">.</span><span class="n">GetPoint</span><span class="p">(</span><span class="n">k</span> <span class="o">+</span> <span class="mi">1</span><span class="p">,</span> <span class="n">point1</span><span class="p">)</span>
+        <span class="n">dx</span> <span class="o">=</span> <span class="n">math</span><span class="o">.</span><span class="n">sqrt</span><span class="p">(</span><span class="n">vtk</span><span class="o">.</span><span class="n">vtkMath</span><span class="o">.</span><span class="n">Distance2BetweenPoints</span><span class="p">(</span><span class="n">point0</span><span class="p">,</span> <span class="n">point1</span><span class="p">))</span>
+        <span class="n">length</span> <span class="o">+=</span> <span class="n">dx</span>
+        <span class="n">r</span> <span class="o">=</span> <span class="n">radiusArray</span><span class="o">.</span><span class="n">GetComponent</span><span class="p">(</span><span class="n">centerline</span><span class="o">.</span><span class="n">GetCell</span><span class="p">(</span><span class="n">branchId</span><span class="p">)</span><span class="o">.</span><span class="n">GetPointId</span><span class="p">(</span><span class="n">k</span><span class="p">),</span> <span class="mi">0</span><span class="p">)</span>
+        <span class="n">resistance</span> <span class="o">+=</span> <span class="n">dx</span> <span class="o">/</span> <span class="n">r</span> <span class="o">**</span> <span class="p">(</span><span class="mf">4.0</span><span class="p">)</span>
+    <span class="k">if</span> <span class="n">npts</span> <span class="o">&lt;</span> <span class="mi">2</span><span class="p">:</span>
+        <span class="n">branchMeanRadius</span> <span class="o">=</span> <span class="n">radiusArray</span><span class="o">.</span><span class="n">GetComponent</span><span class="p">(</span>
+            <span class="n">centerline</span><span class="o">.</span><span class="n">GetCell</span><span class="p">(</span><span class="n">branchId</span><span class="p">)</span><span class="o">.</span><span class="n">GetPointId</span><span class="p">(</span><span class="mi">0</span><span class="p">),</span> <span class="mi">0</span><span class="p">)</span>
+    <span class="k">else</span><span class="p">:</span>
+        <span class="n">branchMeanRadius</span> <span class="o">=</span> <span class="p">(</span><span class="n">length</span> <span class="o">/</span> <span class="n">resistance</span><span class="p">)</span> <span class="o">**</span> <span class="p">(</span><span class="mf">0.25</span><span class="p">)</span>
+
+    <span class="k">return</span> <span class="n">branchMeanRadius</span></div>
+
+
+<div class="viewcode-block" id="ComputeInletAverageCrossSectionArea"><a class="viewcode-back" href="../../../api.html#vampy.automatedPreProcessing.ImportData.ComputeInletAverageCrossSectionArea">[docs]</a><span class="k">def</span> <span class="nf">ComputeInletAverageCrossSectionArea</span><span class="p">(</span><span class="n">centerline</span><span class="p">,</span> <span class="n">desiredLength</span><span class="p">,</span> <span class="n">verboseprint</span><span class="p">):</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;Compute the inlet radius as an averaged radius.</span>
+
+<span class="sd">    Computes an average radius over a certain length of the ICA. The mean</span>
+<span class="sd">    radius is computed with the cross section area. If the number of points</span>
+<span class="sd">    over the segment is lower than two, then the section area correspond</span>
+<span class="sd">    to the inlet point. Note that due to a bug in VTK the very first point</span>
+<span class="sd">    seems wrong, that is why I am taking the second point of the centerline.</span>
+
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="n">branchId</span> <span class="o">=</span> <span class="mi">0</span>
+    <span class="n">length</span> <span class="o">=</span> <span class="mf">0.0</span>
+    <span class="n">resistance</span> <span class="o">=</span> <span class="mf">0.0</span>
+    <span class="n">sectionArray</span> <span class="o">=</span> <span class="n">centerline</span><span class="o">.</span><span class="n">GetPointData</span><span class="p">()</span><span class="o">.</span><span class="n">GetArray</span><span class="p">(</span><span class="n">SECTIONARRAYNAME</span><span class="p">)</span>
+    <span class="n">npts</span> <span class="o">=</span> <span class="n">GetIndexCenterlineForADefinedLength</span><span class="p">(</span><span class="n">centerline</span><span class="p">,</span> <span class="n">branchId</span><span class="p">,</span>
+                                               <span class="n">desiredLength</span><span class="p">,</span> <span class="n">verboseprint</span><span class="p">)</span>
+    <span class="k">for</span> <span class="n">k</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="mi">1</span><span class="p">,</span> <span class="n">npts</span> <span class="o">-</span> <span class="mi">1</span><span class="p">):</span>
+        <span class="n">point0</span> <span class="o">=</span> <span class="p">[</span><span class="mf">0.0</span><span class="p">,</span> <span class="mf">0.0</span><span class="p">,</span> <span class="mf">0.0</span><span class="p">]</span>
+        <span class="n">point1</span> <span class="o">=</span> <span class="p">[</span><span class="mf">0.0</span><span class="p">,</span> <span class="mf">0.0</span><span class="p">,</span> <span class="mf">0.0</span><span class="p">]</span>
+        <span class="n">S</span> <span class="o">=</span> <span class="n">sectionArray</span><span class="o">.</span><span class="n">GetComponent</span><span class="p">(</span><span class="n">centerline</span><span class="o">.</span><span class="n">GetCell</span><span class="p">(</span><span class="n">branchId</span><span class="p">)</span><span class="o">.</span><span class="n">GetPointId</span><span class="p">(</span><span class="n">k</span><span class="p">),</span> <span class="mi">0</span><span class="p">)</span>
+        <span class="k">if</span> <span class="n">S</span> <span class="o">==</span> <span class="mf">0.0</span><span class="p">:</span>
+            <span class="k">continue</span>
+        <span class="n">centerline</span><span class="o">.</span><span class="n">GetCell</span><span class="p">(</span><span class="n">branchId</span><span class="p">)</span><span class="o">.</span><span class="n">GetPoints</span><span class="p">()</span><span class="o">.</span><span class="n">GetPoint</span><span class="p">(</span><span class="n">k</span><span class="p">,</span> <span class="n">point0</span><span class="p">)</span>
+        <span class="n">centerline</span><span class="o">.</span><span class="n">GetCell</span><span class="p">(</span><span class="n">branchId</span><span class="p">)</span><span class="o">.</span><span class="n">GetPoints</span><span class="p">()</span><span class="o">.</span><span class="n">GetPoint</span><span class="p">(</span><span class="n">k</span> <span class="o">+</span> <span class="mi">1</span><span class="p">,</span> <span class="n">point1</span><span class="p">)</span>
+        <span class="n">dx</span> <span class="o">=</span> <span class="n">math</span><span class="o">.</span><span class="n">sqrt</span><span class="p">(</span><span class="n">vtk</span><span class="o">.</span><span class="n">vtkMath</span><span class="o">.</span><span class="n">Distance2BetweenPoints</span><span class="p">(</span><span class="n">point0</span><span class="p">,</span> <span class="n">point1</span><span class="p">))</span>
+        <span class="n">length</span> <span class="o">+=</span> <span class="n">dx</span>
+        <span class="n">r</span> <span class="o">=</span> <span class="n">math</span><span class="o">.</span><span class="n">sqrt</span><span class="p">(</span><span class="n">S</span> <span class="o">/</span> <span class="n">np</span><span class="o">.</span><span class="n">pi</span><span class="p">)</span>
+        <span class="n">resistance</span> <span class="o">+=</span> <span class="n">dx</span> <span class="o">/</span> <span class="n">r</span> <span class="o">**</span> <span class="p">(</span><span class="mf">4.0</span><span class="p">)</span>
+    <span class="k">if</span> <span class="n">npts</span> <span class="o">&lt;</span> <span class="mi">2</span><span class="p">:</span>
+        <span class="n">S</span> <span class="o">=</span> <span class="n">sectionArray</span><span class="o">.</span><span class="n">GetComponent</span><span class="p">(</span><span class="n">centerline</span><span class="o">.</span><span class="n">GetCell</span><span class="p">(</span><span class="n">branchId</span><span class="p">)</span><span class="o">.</span><span class="n">GetPointId</span><span class="p">(</span><span class="mi">1</span><span class="p">),</span> <span class="mi">0</span><span class="p">)</span>
+        <span class="n">branchMeanRadius</span> <span class="o">=</span> <span class="n">math</span><span class="o">.</span><span class="n">sqrt</span><span class="p">(</span><span class="n">S</span> <span class="o">/</span> <span class="n">np</span><span class="o">.</span><span class="n">pi</span><span class="p">)</span>
+    <span class="k">else</span><span class="p">:</span>
+        <span class="n">branchMeanRadius</span> <span class="o">=</span> <span class="p">(</span><span class="n">length</span> <span class="o">/</span> <span class="n">resistance</span><span class="p">)</span> <span class="o">**</span> <span class="p">(</span><span class="mf">0.25</span><span class="p">)</span>
+
+    <span class="k">return</span> <span class="n">branchMeanRadius</span></div>
+
+
+<div class="viewcode-block" id="GetIndexCenterlineForADefinedLength"><a class="viewcode-back" href="../../../api.html#vampy.automatedPreProcessing.ImportData.GetIndexCenterlineForADefinedLength">[docs]</a><span class="k">def</span> <span class="nf">GetIndexCenterlineForADefinedLength</span><span class="p">(</span><span class="n">centerline</span><span class="p">,</span> <span class="n">branchId</span><span class="p">,</span> <span class="n">desiredLength</span><span class="p">,</span>
+                                        <span class="n">verboseprint</span><span class="p">):</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;Get the index of the point such as the desired distance between the index and</span>
+<span class="sd">    the beginning of the branch is reached. &quot;&quot;&quot;</span>
+
+    <span class="n">length</span> <span class="o">=</span> <span class="mf">0.0</span>
+    <span class="n">done</span> <span class="o">=</span> <span class="kc">False</span>
+    <span class="n">npts</span> <span class="o">=</span> <span class="n">centerline</span><span class="o">.</span><span class="n">GetCell</span><span class="p">(</span><span class="n">branchId</span><span class="p">)</span><span class="o">.</span><span class="n">GetPoints</span><span class="p">()</span><span class="o">.</span><span class="n">GetNumberOfPoints</span><span class="p">()</span>
+    <span class="k">for</span> <span class="n">k</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="n">npts</span> <span class="o">-</span> <span class="mi">1</span><span class="p">):</span>
+        <span class="n">point0</span> <span class="o">=</span> <span class="p">[</span><span class="mf">0.0</span><span class="p">,</span> <span class="mf">0.0</span><span class="p">,</span> <span class="mf">0.0</span><span class="p">]</span>
+        <span class="n">point1</span> <span class="o">=</span> <span class="p">[</span><span class="mf">0.0</span><span class="p">,</span> <span class="mf">0.0</span><span class="p">,</span> <span class="mf">0.0</span><span class="p">]</span>
+        <span class="n">centerline</span><span class="o">.</span><span class="n">GetCell</span><span class="p">(</span><span class="n">branchId</span><span class="p">)</span><span class="o">.</span><span class="n">GetPoints</span><span class="p">()</span><span class="o">.</span><span class="n">GetPoint</span><span class="p">(</span><span class="n">k</span><span class="p">,</span> <span class="n">point0</span><span class="p">)</span>
+        <span class="n">centerline</span><span class="o">.</span><span class="n">GetCell</span><span class="p">(</span><span class="n">branchId</span><span class="p">)</span><span class="o">.</span><span class="n">GetPoints</span><span class="p">()</span><span class="o">.</span><span class="n">GetPoint</span><span class="p">(</span><span class="n">k</span> <span class="o">+</span> <span class="mi">1</span><span class="p">,</span> <span class="n">point1</span><span class="p">)</span>
+        <span class="n">length</span> <span class="o">+=</span> <span class="n">math</span><span class="o">.</span><span class="n">sqrt</span><span class="p">(</span><span class="n">vtk</span><span class="o">.</span><span class="n">vtkMath</span><span class="o">.</span><span class="n">Distance2BetweenPoints</span><span class="p">(</span><span class="n">point0</span><span class="p">,</span> <span class="n">point1</span><span class="p">))</span>
+        <span class="k">if</span> <span class="n">length</span> <span class="o">&gt;=</span> <span class="n">desiredLength</span><span class="p">:</span>
+            <span class="n">index</span> <span class="o">=</span> <span class="n">k</span>
+            <span class="n">done</span> <span class="o">=</span> <span class="kc">True</span>
+            <span class="k">break</span>
+    <span class="k">if</span> <span class="ow">not</span> <span class="p">(</span><span class="n">done</span><span class="p">):</span>
+        <span class="k">try</span><span class="p">:</span>
+            <span class="n">index</span> <span class="o">=</span> <span class="n">k</span>
+        <span class="k">except</span> <span class="ne">Exception</span><span class="p">:</span>
+            <span class="n">index</span> <span class="o">=</span> <span class="kc">None</span>
+
+    <span class="k">return</span> <span class="n">index</span></div>
+
+
+<div class="viewcode-block" id="GetListProbePoints"><a class="viewcode-back" href="../../../api.html#vampy.automatedPreProcessing.ImportData.GetListProbePoints">[docs]</a><span class="k">def</span> <span class="nf">GetListProbePoints</span><span class="p">(</span><span class="n">centerline</span><span class="p">,</span> <span class="n">network</span><span class="p">,</span> <span class="n">verboseprint</span><span class="p">):</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;Get points on a centerline spaced by the inlet diameter. &quot;&quot;&quot;</span>
+
+    <span class="n">diameterInlet</span> <span class="o">=</span> <span class="mf">2.0</span> <span class="o">*</span> <span class="n">network</span><span class="o">.</span><span class="n">GetNetworkInletRadius</span><span class="p">()</span>
+    <span class="n">pointsList</span> <span class="o">=</span> <span class="p">[]</span>
+    <span class="k">for</span> <span class="n">el</span> <span class="ow">in</span> <span class="n">network</span><span class="o">.</span><span class="n">elements</span><span class="p">:</span>
+        <span class="k">if</span> <span class="n">el</span><span class="o">.</span><span class="n">IsBlanked</span><span class="p">():</span>
+            <span class="k">continue</span>
+        <span class="n">branchId</span> <span class="o">=</span> <span class="n">el</span><span class="o">.</span><span class="n">GetVtkCellIdList</span><span class="p">()[</span><span class="mi">0</span><span class="p">]</span>
+        <span class="n">npts</span> <span class="o">=</span> <span class="n">centerline</span><span class="o">.</span><span class="n">GetCell</span><span class="p">(</span><span class="n">branchId</span><span class="p">)</span><span class="o">.</span><span class="n">GetPoints</span><span class="p">()</span><span class="o">.</span><span class="n">GetNumberOfPoints</span><span class="p">()</span>
+        <span class="n">done</span> <span class="o">=</span> <span class="kc">False</span>
+        <span class="n">ctr</span> <span class="o">=</span> <span class="mi">0</span>
+        <span class="k">while</span> <span class="ow">not</span> <span class="p">(</span><span class="n">done</span><span class="p">):</span>
+            <span class="n">x</span> <span class="o">=</span> <span class="p">[</span><span class="mf">0.0</span><span class="p">,</span> <span class="mf">0.0</span><span class="p">,</span> <span class="mf">0.0</span><span class="p">]</span>
+            <span class="n">desiredLength</span> <span class="o">=</span> <span class="nb">float</span><span class="p">(</span><span class="n">ctr</span><span class="p">)</span> <span class="o">*</span> <span class="n">diameterInlet</span>
+            <span class="n">idx</span> <span class="o">=</span> <span class="n">GetIndexCenterlineForADefinedLength</span><span class="p">(</span><span class="n">centerline</span><span class="p">,</span> <span class="n">branchId</span><span class="p">,</span> <span class="n">desiredLength</span><span class="p">,</span>
+                                                      <span class="n">verboseprint</span><span class="p">)</span>
+            <span class="k">if</span> <span class="n">idx</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
+                <span class="k">break</span>
+            <span class="n">centerline</span><span class="o">.</span><span class="n">GetCell</span><span class="p">(</span><span class="n">branchId</span><span class="p">)</span><span class="o">.</span><span class="n">GetPoints</span><span class="p">()</span><span class="o">.</span><span class="n">GetPoint</span><span class="p">(</span><span class="n">idx</span><span class="p">,</span> <span class="n">x</span><span class="p">)</span>
+            <span class="n">pointsList</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">x</span><span class="p">)</span>
+            <span class="n">ctr</span> <span class="o">+=</span> <span class="mi">1</span>
+            <span class="k">if</span> <span class="n">idx</span> <span class="o">==</span> <span class="n">npts</span> <span class="o">-</span> <span class="mi">2</span><span class="p">:</span>
+                <span class="n">done</span> <span class="o">=</span> <span class="kc">True</span>
+
+    <span class="k">return</span> <span class="p">(</span><span class="n">pointsList</span><span class="p">)</span></div>
+
+
+<div class="viewcode-block" id="Element"><a class="viewcode-back" href="../../../api.html#vampy.automatedPreProcessing.ImportData.Element">[docs]</a><span class="k">class</span> <span class="nc">Element</span><span class="p">(</span><span class="nb">object</span><span class="p">):</span>
+
+    <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">Id</span><span class="p">):</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">Id</span> <span class="o">=</span> <span class="n">Id</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">vtkGroupIdList</span> <span class="o">=</span> <span class="p">[]</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">vtkCellIdList</span> <span class="o">=</span> <span class="p">[]</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">length</span> <span class="o">=</span> <span class="mf">0.0</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">inletRadius</span> <span class="o">=</span> <span class="mf">0.0</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">meanInletRadius</span> <span class="o">=</span> <span class="mf">0.0</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">outletRadius</span> <span class="o">=</span> <span class="mf">0.0</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">meanRadius</span> <span class="o">=</span> <span class="mf">0.0</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">blanking</span> <span class="o">=</span> <span class="mi">0</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">inlet</span> <span class="o">=</span> <span class="kc">False</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">outlet</span> <span class="o">=</span> <span class="kc">False</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">x0</span> <span class="o">=</span> <span class="p">[]</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">x1</span> <span class="o">=</span> <span class="p">[]</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">x0Id</span> <span class="o">=</span> <span class="o">-</span><span class="mi">1</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">x1Id</span> <span class="o">=</span> <span class="o">-</span><span class="mi">1</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">behindSegment</span> <span class="o">=</span> <span class="kc">None</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">frontSegment</span> <span class="o">=</span> <span class="kc">None</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">alpha</span> <span class="o">=</span> <span class="mf">1.0</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">beta</span> <span class="o">=</span> <span class="mf">0.0</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">gamma</span> <span class="o">=</span> <span class="mf">0.0</span>
+
+<div class="viewcode-block" id="Element.SetLength"><a class="viewcode-back" href="../../../api.html#vampy.automatedPreProcessing.ImportData.Element.SetLength">[docs]</a>    <span class="k">def</span> <span class="nf">SetLength</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">length</span><span class="p">):</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">length</span> <span class="o">=</span> <span class="n">length</span></div>
+
+<div class="viewcode-block" id="Element.SetAlpha"><a class="viewcode-back" href="../../../api.html#vampy.automatedPreProcessing.ImportData.Element.SetAlpha">[docs]</a>    <span class="k">def</span> <span class="nf">SetAlpha</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">alpha</span><span class="p">):</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">alpha</span> <span class="o">=</span> <span class="n">alpha</span></div>
+
+<div class="viewcode-block" id="Element.SetBeta"><a class="viewcode-back" href="../../../api.html#vampy.automatedPreProcessing.ImportData.Element.SetBeta">[docs]</a>    <span class="k">def</span> <span class="nf">SetBeta</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">beta</span><span class="p">):</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">beta</span> <span class="o">=</span> <span class="n">beta</span></div>
+
+<div class="viewcode-block" id="Element.SetGamma"><a class="viewcode-back" href="../../../api.html#vampy.automatedPreProcessing.ImportData.Element.SetGamma">[docs]</a>    <span class="k">def</span> <span class="nf">SetGamma</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">gamma</span><span class="p">):</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">gamma</span> <span class="o">=</span> <span class="n">gamma</span></div>
+
+<div class="viewcode-block" id="Element.SetBehindSegment"><a class="viewcode-back" href="../../../api.html#vampy.automatedPreProcessing.ImportData.Element.SetBehindSegment">[docs]</a>    <span class="k">def</span> <span class="nf">SetBehindSegment</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="nb">id</span><span class="p">):</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">behindSegment</span> <span class="o">=</span> <span class="nb">id</span></div>
+
+<div class="viewcode-block" id="Element.SetFrontSegment"><a class="viewcode-back" href="../../../api.html#vampy.automatedPreProcessing.ImportData.Element.SetFrontSegment">[docs]</a>    <span class="k">def</span> <span class="nf">SetFrontSegment</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="nb">id</span><span class="p">):</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">frontSegment</span> <span class="o">=</span> <span class="nb">id</span></div>
+
+<div class="viewcode-block" id="Element.SetVtkGroupIdList"><a class="viewcode-back" href="../../../api.html#vampy.automatedPreProcessing.ImportData.Element.SetVtkGroupIdList">[docs]</a>    <span class="k">def</span> <span class="nf">SetVtkGroupIdList</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">VtkGroupIdList</span><span class="p">):</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">vtkGroupIdList</span> <span class="o">=</span> <span class="n">VtkGroupIdList</span></div>
+
+<div class="viewcode-block" id="Element.SetVtkCellIdList"><a class="viewcode-back" href="../../../api.html#vampy.automatedPreProcessing.ImportData.Element.SetVtkCellIdList">[docs]</a>    <span class="k">def</span> <span class="nf">SetVtkCellIdList</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">vtkCellIdList</span><span class="p">):</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">vtkCellIdList</span> <span class="o">=</span> <span class="n">vtkCellIdList</span></div>
+
+<div class="viewcode-block" id="Element.SetMeanRadius"><a class="viewcode-back" href="../../../api.html#vampy.automatedPreProcessing.ImportData.Element.SetMeanRadius">[docs]</a>    <span class="k">def</span> <span class="nf">SetMeanRadius</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">radius</span><span class="p">):</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">meanRadius</span> <span class="o">=</span> <span class="n">radius</span></div>
+
+<div class="viewcode-block" id="Element.SetInletRadius"><a class="viewcode-back" href="../../../api.html#vampy.automatedPreProcessing.ImportData.Element.SetInletRadius">[docs]</a>    <span class="k">def</span> <span class="nf">SetInletRadius</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">radius</span><span class="p">):</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">inletRadius</span> <span class="o">=</span> <span class="n">radius</span></div>
+
+<div class="viewcode-block" id="Element.SetOutletRadius"><a class="viewcode-back" href="../../../api.html#vampy.automatedPreProcessing.ImportData.Element.SetOutletRadius">[docs]</a>    <span class="k">def</span> <span class="nf">SetOutletRadius</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">radius</span><span class="p">):</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">outletRadius</span> <span class="o">=</span> <span class="n">radius</span></div>
+
+<div class="viewcode-block" id="Element.SetBlanking"><a class="viewcode-back" href="../../../api.html#vampy.automatedPreProcessing.ImportData.Element.SetBlanking">[docs]</a>    <span class="k">def</span> <span class="nf">SetBlanking</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">blanking</span><span class="p">):</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">blanking</span> <span class="o">=</span> <span class="n">blanking</span></div>
+
+<div class="viewcode-block" id="Element.SetIfInlet"><a class="viewcode-back" href="../../../api.html#vampy.automatedPreProcessing.ImportData.Element.SetIfInlet">[docs]</a>    <span class="k">def</span> <span class="nf">SetIfInlet</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">inlet</span><span class="p">):</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">inlet</span> <span class="o">=</span> <span class="n">inlet</span></div>
+
+<div class="viewcode-block" id="Element.SetIfOutlet"><a class="viewcode-back" href="../../../api.html#vampy.automatedPreProcessing.ImportData.Element.SetIfOutlet">[docs]</a>    <span class="k">def</span> <span class="nf">SetIfOutlet</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">outlet</span><span class="p">):</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">outlet</span> <span class="o">=</span> <span class="n">outlet</span></div>
+
+<div class="viewcode-block" id="Element.SetInOutPointsCoordinates"><a class="viewcode-back" href="../../../api.html#vampy.automatedPreProcessing.ImportData.Element.SetInOutPointsCoordinates">[docs]</a>    <span class="k">def</span> <span class="nf">SetInOutPointsCoordinates</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">x0</span><span class="p">,</span> <span class="n">x1</span><span class="p">):</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">x0</span> <span class="o">=</span> <span class="n">x0</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">x1</span> <span class="o">=</span> <span class="n">x1</span></div>
+
+<div class="viewcode-block" id="Element.SetInOutPointsIds"><a class="viewcode-back" href="../../../api.html#vampy.automatedPreProcessing.ImportData.Element.SetInOutPointsIds">[docs]</a>    <span class="k">def</span> <span class="nf">SetInOutPointsIds</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">x0Id</span><span class="p">,</span> <span class="n">x1Id</span><span class="p">):</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">x0Id</span> <span class="o">=</span> <span class="n">x0Id</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">x1Id</span> <span class="o">=</span> <span class="n">x1Id</span></div>
+
+<div class="viewcode-block" id="Element.GetId"><a class="viewcode-back" href="../../../api.html#vampy.automatedPreProcessing.ImportData.Element.GetId">[docs]</a>    <span class="k">def</span> <span class="nf">GetId</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">Id</span></div>
+
+<div class="viewcode-block" id="Element.GetBehindSegment"><a class="viewcode-back" href="../../../api.html#vampy.automatedPreProcessing.ImportData.Element.GetBehindSegment">[docs]</a>    <span class="k">def</span> <span class="nf">GetBehindSegment</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">behindSegment</span></div>
+
+<div class="viewcode-block" id="Element.GetFrontSegment"><a class="viewcode-back" href="../../../api.html#vampy.automatedPreProcessing.ImportData.Element.GetFrontSegment">[docs]</a>    <span class="k">def</span> <span class="nf">GetFrontSegment</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">frontSegment</span></div>
+
+<div class="viewcode-block" id="Element.GetVtkCellIdList"><a class="viewcode-back" href="../../../api.html#vampy.automatedPreProcessing.ImportData.Element.GetVtkCellIdList">[docs]</a>    <span class="k">def</span> <span class="nf">GetVtkCellIdList</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">vtkCellIdList</span></div>
+
+<div class="viewcode-block" id="Element.GetVtkGroupIdList"><a class="viewcode-back" href="../../../api.html#vampy.automatedPreProcessing.ImportData.Element.GetVtkGroupIdList">[docs]</a>    <span class="k">def</span> <span class="nf">GetVtkGroupIdList</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">vtkGroupIdList</span></div>
+
+<div class="viewcode-block" id="Element.GetLength"><a class="viewcode-back" href="../../../api.html#vampy.automatedPreProcessing.ImportData.Element.GetLength">[docs]</a>    <span class="k">def</span> <span class="nf">GetLength</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">length</span></div>
+
+<div class="viewcode-block" id="Element.GetAlpha"><a class="viewcode-back" href="../../../api.html#vampy.automatedPreProcessing.ImportData.Element.GetAlpha">[docs]</a>    <span class="k">def</span> <span class="nf">GetAlpha</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">alpha</span></div>
+
+<div class="viewcode-block" id="Element.GetBeta"><a class="viewcode-back" href="../../../api.html#vampy.automatedPreProcessing.ImportData.Element.GetBeta">[docs]</a>    <span class="k">def</span> <span class="nf">GetBeta</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">beta</span></div>
+
+<div class="viewcode-block" id="Element.GetMeanRadius"><a class="viewcode-back" href="../../../api.html#vampy.automatedPreProcessing.ImportData.Element.GetMeanRadius">[docs]</a>    <span class="k">def</span> <span class="nf">GetMeanRadius</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">meanRadius</span></div>
+
+<div class="viewcode-block" id="Element.GetInletRadius"><a class="viewcode-back" href="../../../api.html#vampy.automatedPreProcessing.ImportData.Element.GetInletRadius">[docs]</a>    <span class="k">def</span> <span class="nf">GetInletRadius</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">inletRadius</span></div>
+
+<div class="viewcode-block" id="Element.GetMeanArea"><a class="viewcode-back" href="../../../api.html#vampy.automatedPreProcessing.ImportData.Element.GetMeanArea">[docs]</a>    <span class="k">def</span> <span class="nf">GetMeanArea</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="n">meanArea</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">pi</span> <span class="o">*</span> <span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">meanRadius</span> <span class="o">**</span> <span class="mf">2.0</span><span class="p">)</span>
+        <span class="k">return</span> <span class="n">meanArea</span></div>
+
+<div class="viewcode-block" id="Element.GetInPointsx0"><a class="viewcode-back" href="../../../api.html#vampy.automatedPreProcessing.ImportData.Element.GetInPointsx0">[docs]</a>    <span class="k">def</span> <span class="nf">GetInPointsx0</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">x0</span></div>
+
+<div class="viewcode-block" id="Element.GetOutPointsx1"><a class="viewcode-back" href="../../../api.html#vampy.automatedPreProcessing.ImportData.Element.GetOutPointsx1">[docs]</a>    <span class="k">def</span> <span class="nf">GetOutPointsx1</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">x1</span></div>
+
+<div class="viewcode-block" id="Element.GetInPointsx0Id"><a class="viewcode-back" href="../../../api.html#vampy.automatedPreProcessing.ImportData.Element.GetInPointsx0Id">[docs]</a>    <span class="k">def</span> <span class="nf">GetInPointsx0Id</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">x0Id</span></div>
+
+<div class="viewcode-block" id="Element.GetOutPointsx1Id"><a class="viewcode-back" href="../../../api.html#vampy.automatedPreProcessing.ImportData.Element.GetOutPointsx1Id">[docs]</a>    <span class="k">def</span> <span class="nf">GetOutPointsx1Id</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">x1Id</span></div>
+
+<div class="viewcode-block" id="Element.IsBlanked"><a class="viewcode-back" href="../../../api.html#vampy.automatedPreProcessing.ImportData.Element.IsBlanked">[docs]</a>    <span class="k">def</span> <span class="nf">IsBlanked</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;Returns True if the element is part of a branch division.&quot;&quot;&quot;</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">blanking</span></div>
+
+<div class="viewcode-block" id="Element.IsAnInlet"><a class="viewcode-back" href="../../../api.html#vampy.automatedPreProcessing.ImportData.Element.IsAnInlet">[docs]</a>    <span class="k">def</span> <span class="nf">IsAnInlet</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">inlet</span></div>
+
+<div class="viewcode-block" id="Element.IsAnOutlet"><a class="viewcode-back" href="../../../api.html#vampy.automatedPreProcessing.ImportData.Element.IsAnOutlet">[docs]</a>    <span class="k">def</span> <span class="nf">IsAnOutlet</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">outlet</span></div></div>
+
+
+<div class="viewcode-block" id="Network"><a class="viewcode-back" href="../../../api.html#vampy.automatedPreProcessing.ImportData.Network">[docs]</a><span class="k">class</span> <span class="nc">Network</span><span class="p">(</span><span class="nb">object</span><span class="p">):</span>
+
+    <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">elements</span> <span class="o">=</span> <span class="p">[]</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">numberOfElements</span> <span class="o">=</span> <span class="mi">0</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">numberOfBifurcations</span> <span class="o">=</span> <span class="mi">0</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">numberOfOutlets</span> <span class="o">=</span> <span class="mi">0</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">networkInletRadius</span> <span class="o">=</span> <span class="mf">0.0</span>
+
+<div class="viewcode-block" id="Network.AddElement"><a class="viewcode-back" href="../../../api.html#vampy.automatedPreProcessing.ImportData.Network.AddElement">[docs]</a>    <span class="k">def</span> <span class="nf">AddElement</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">x</span><span class="p">):</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">elements</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">x</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">numberOfElements</span> <span class="o">+=</span> <span class="mi">1</span></div>
+
+<div class="viewcode-block" id="Network.SetNetworkInletRadius"><a class="viewcode-back" href="../../../api.html#vampy.automatedPreProcessing.ImportData.Network.SetNetworkInletRadius">[docs]</a>    <span class="k">def</span> <span class="nf">SetNetworkInletRadius</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">radius</span><span class="p">):</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">networkInletRadius</span> <span class="o">=</span> <span class="n">radius</span></div>
+
+<div class="viewcode-block" id="Network.GetNumberOfElements"><a class="viewcode-back" href="../../../api.html#vampy.automatedPreProcessing.ImportData.Network.GetNumberOfElements">[docs]</a>    <span class="k">def</span> <span class="nf">GetNumberOfElements</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">numberOfElements</span></div>
+
+<div class="viewcode-block" id="Network.GetNumberOfBifBranches"><a class="viewcode-back" href="../../../api.html#vampy.automatedPreProcessing.ImportData.Network.GetNumberOfBifBranches">[docs]</a>    <span class="k">def</span> <span class="nf">GetNumberOfBifBranches</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="n">nBlanked</span> <span class="o">=</span> <span class="mi">0</span>
+        <span class="k">for</span> <span class="n">el</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">elements</span><span class="p">:</span>
+            <span class="n">nBlanked</span> <span class="o">+=</span> <span class="n">el</span><span class="o">.</span><span class="n">IsBlanked</span><span class="p">()</span>
+        <span class="k">return</span> <span class="n">nBlanked</span></div>
+
+<div class="viewcode-block" id="Network.GetNumberOfInlet"><a class="viewcode-back" href="../../../api.html#vampy.automatedPreProcessing.ImportData.Network.GetNumberOfInlet">[docs]</a>    <span class="k">def</span> <span class="nf">GetNumberOfInlet</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="n">nInlet</span> <span class="o">=</span> <span class="mi">0</span>
+        <span class="k">for</span> <span class="n">el</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">elements</span><span class="p">:</span>
+            <span class="n">nInlet</span> <span class="o">+=</span> <span class="n">el</span><span class="o">.</span><span class="n">IsAnInlet</span><span class="p">()</span>
+        <span class="k">return</span> <span class="n">nInlet</span></div>
+
+<div class="viewcode-block" id="Network.GetNumberOfOutlet"><a class="viewcode-back" href="../../../api.html#vampy.automatedPreProcessing.ImportData.Network.GetNumberOfOutlet">[docs]</a>    <span class="k">def</span> <span class="nf">GetNumberOfOutlet</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="n">nOutlet</span> <span class="o">=</span> <span class="mi">0</span>
+        <span class="k">for</span> <span class="n">el</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">elements</span><span class="p">:</span>
+            <span class="n">nOutlet</span> <span class="o">+=</span> <span class="n">el</span><span class="o">.</span><span class="n">IsAnOutlet</span><span class="p">()</span>
+        <span class="k">return</span> <span class="n">nOutlet</span></div>
+
+<div class="viewcode-block" id="Network.GetNetworkInletRadius"><a class="viewcode-back" href="../../../api.html#vampy.automatedPreProcessing.ImportData.Network.GetNetworkInletRadius">[docs]</a>    <span class="k">def</span> <span class="nf">GetNetworkInletRadius</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">networkInletRadius</span></div></div>
+</pre></div>
+
+              </div>
+              
+            </main>
+            <footer class="footer-article noprint">
+                
+    <!-- Previous / next buttons -->
+<div class='prev-next-area'>
+</div>
+            </footer>
+        </div>
+    </div>
+    <div class="footer-content row">
+        <footer class="col footer"><p>
+  
+    By Henrik A. Kjeldsberg<br/>
+  
+      &copy; Copyright 2023.<br/>
+</p>
+        </footer>
+    </div>
+    
+</div>
+
+
+      </div>
+    </div>
+  
+  <!-- Scripts loaded after <body> so the DOM is not blocked -->
+  <script src="../../../_static/scripts/pydata-sphinx-theme.js?digest=1999514e3f237ded88cf"></script>
+
+
+  </body>
+</html>

@@ -1,0 +1,524 @@
+
+<!DOCTYPE html>
+
+<html>
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>vampy.automatedPreProcessing.DisplayData &#8212; VaMPy</title>
+    
+  <!-- Loaded before other Sphinx assets -->
+  <link href="../../../_static/styles/theme.css?digest=1999514e3f237ded88cf" rel="stylesheet">
+<link href="../../../_static/styles/pydata-sphinx-theme.css?digest=1999514e3f237ded88cf" rel="stylesheet">
+
+    
+  <link rel="stylesheet"
+    href="../../../_static/vendor/fontawesome/5.13.0/css/all.min.css">
+  <link rel="preload" as="font" type="font/woff2" crossorigin
+    href="../../../_static/vendor/fontawesome/5.13.0/webfonts/fa-solid-900.woff2">
+  <link rel="preload" as="font" type="font/woff2" crossorigin
+    href="../../../_static/vendor/fontawesome/5.13.0/webfonts/fa-brands-400.woff2">
+
+    <link rel="stylesheet" type="text/css" href="../../../_static/pygments.css" />
+    <link rel="stylesheet" href="../../../_static/styles/sphinx-book-theme.css?digest=5115cc725059bd94278eecd172e13a965bf8f5a9" type="text/css" />
+    <link rel="stylesheet" type="text/css" href="../../../_static/togglebutton.css" />
+    <link rel="stylesheet" type="text/css" href="../../../_static/copybutton.css" />
+    <link rel="stylesheet" type="text/css" href="../../../_static/mystnb.css" />
+    <link rel="stylesheet" type="text/css" href="../../../_static/sphinx-thebe.css" />
+    <link rel="stylesheet" type="text/css" href="../../../_static/design-style.b7bb847fb20b106c3d81b95245e65545.min.css" />
+    
+  <!-- Pre-loaded scripts that we'll load fully later -->
+  <link rel="preload" as="script" href="../../../_static/scripts/pydata-sphinx-theme.js?digest=1999514e3f237ded88cf">
+
+    <script data-url_root="../../../" id="documentation_options" src="../../../_static/documentation_options.js"></script>
+    <script src="../../../_static/jquery.js"></script>
+    <script src="../../../_static/underscore.js"></script>
+    <script src="../../../_static/doctools.js"></script>
+    <script src="../../../_static/clipboard.min.js"></script>
+    <script src="../../../_static/copybutton.js"></script>
+    <script src="../../../_static/scripts/sphinx-book-theme.js?digest=9c920249402e914e316237a7dbc6769907cce411"></script>
+    <script>let toggleHintShow = 'Click to show';</script>
+    <script>let toggleHintHide = 'Click to hide';</script>
+    <script>let toggleOpenOnPrint = 'true';</script>
+    <script src="../../../_static/togglebutton.js"></script>
+    <script>var togglebuttonSelector = '.toggle, .admonition.dropdown, .tag_hide_input div.cell_input, .tag_hide-input div.cell_input, .tag_hide_output div.cell_output, .tag_hide-output div.cell_output, .tag_hide_cell.cell, .tag_hide-cell.cell';</script>
+    <script src="../../../_static/design-tabs.js"></script>
+    <script>const THEBE_JS_URL = "https://unpkg.com/thebe@0.8.2/lib/index.js"
+const thebe_selector = ".thebe,.cell"
+const thebe_selector_input = "pre"
+const thebe_selector_output = ".output, .cell_output"
+</script>
+    <script async="async" src="../../../_static/sphinx-thebe.js"></script>
+    <link rel="index" title="Index" href="../../../genindex.html" />
+    <link rel="search" title="Search" href="../../../search.html" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <meta name="docsearch:language" content="None">
+    
+
+    <!-- Google Analytics -->
+    
+  </head>
+  <body data-spy="scroll" data-target="#bd-toc-nav" data-offset="60">
+<!-- Checkboxes to toggle the left sidebar -->
+<input type="checkbox" class="sidebar-toggle" name="__navigation" id="__navigation" aria-label="Toggle navigation sidebar">
+<label class="overlay overlay-navbar" for="__navigation">
+    <div class="visually-hidden">Toggle navigation sidebar</div>
+</label>
+<!-- Checkboxes to toggle the in-page toc -->
+<input type="checkbox" class="sidebar-toggle" name="__page-toc" id="__page-toc" aria-label="Toggle in-page Table of Contents">
+<label class="overlay overlay-pagetoc" for="__page-toc">
+    <div class="visually-hidden">Toggle in-page Table of Contents</div>
+</label>
+<!-- Headers at the top -->
+<div class="announcement header-item noprint"></div>
+<div class="header header-item noprint"></div>
+
+    
+    <div class="container-fluid" id="banner"></div>
+
+    
+
+    <div class="container-xl">
+      <div class="row">
+          
+<!-- Sidebar -->
+<div class="bd-sidebar noprint" id="site-navigation">
+    <div class="bd-sidebar__content">
+        <div class="bd-sidebar__top"><div class="navbar-brand-box">
+    <a class="navbar-brand text-wrap" href="../../../index.html">
+      
+        <!-- `logo` is deprecated in Sphinx 4.0, so remove this when we stop supporting 3 -->
+        
+      
+      
+      <img src="../../../_static/logo.png" class="logo" alt="logo">
+      
+      
+      <h1 class="site-logo" id="site-title">VaMPy</h1>
+      
+    </a>
+</div><form class="bd-search d-flex align-items-center" action="../../../search.html" method="get">
+  <i class="icon fas fa-search"></i>
+  <input type="search" class="form-control" name="q" id="search-input" placeholder="Search this book..." aria-label="Search this book..." autocomplete="off" >
+</form><nav class="bd-links" id="bd-docs-nav" aria-label="Main">
+    <div class="bd-toc-item active">
+        
+        <ul class="nav bd-sidenav bd-sidenav__home-link">
+            <li class="toctree-l1">
+                <a class="reference internal" href="../../../index.html">
+                    The Vascular Modeling Pypeline
+                </a>
+            </li>
+        </ul>
+        <p aria-level="2" class="caption" role="heading">
+ <span class="caption-text">
+  Installation
+ </span>
+</p>
+<ul class="nav bd-sidenav">
+ <li class="toctree-l1">
+  <a class="reference internal" href="../../../installation.html">
+   Installation
+  </a>
+ </li>
+ <li class="toctree-l1">
+  <a class="reference internal" href="../../../issues.html">
+   Known issues
+  </a>
+ </li>
+</ul>
+<p aria-level="2" class="caption" role="heading">
+ <span class="caption-text">
+  Using VaMPy
+ </span>
+</p>
+<ul class="nav bd-sidenav">
+ <li class="toctree-l1">
+  <a class="reference internal" href="../../../overview.html">
+   Overview
+  </a>
+ </li>
+ <li class="toctree-l1">
+  <a class="reference internal" href="../../../quantities.html">
+   Computed quantities
+  </a>
+ </li>
+ <li class="toctree-l1">
+  <a class="reference internal" href="../../../cluster.html">
+   Running a CFD simulation on an HPC cluster
+  </a>
+ </li>
+ <li class="toctree-l1">
+  <a class="reference internal" href="../../../features.html">
+   Features and issues
+  </a>
+ </li>
+</ul>
+<p aria-level="2" class="caption" role="heading">
+ <span class="caption-text">
+  Tutorials
+ </span>
+</p>
+<ul class="nav bd-sidenav">
+ <li class="toctree-l1">
+  <a class="reference internal" href="../../../tutorials.html">
+   Tutorials
+  </a>
+ </li>
+ <li class="toctree-l1">
+  <a class="reference internal" href="../../../artery.html">
+   High-resolution CFD simulation in the internal carotid artery
+  </a>
+ </li>
+ <li class="toctree-l1">
+  <a class="reference internal" href="../../../atrium.html">
+   Hemodynamics simulation on a left atrium
+  </a>
+ </li>
+</ul>
+<p aria-level="2" class="caption" role="heading">
+ <span class="caption-text">
+  Python API
+ </span>
+</p>
+<ul class="nav bd-sidenav">
+ <li class="toctree-l1">
+  <a class="reference internal" href="../../../api.html">
+   API Reference
+  </a>
+ </li>
+</ul>
+
+    </div>
+</nav></div>
+        <div class="bd-sidebar__bottom">
+             <!-- To handle the deprecated key -->
+            
+            <div class="navbar_extra_footer">
+            See more at <a href="https://kvslab.github.io">KVSLab</a>
+            </div>
+            
+        </div>
+    </div>
+    <div id="rtd-footer-container"></div>
+</div>
+
+
+          
+
+
+          
+<!-- A tiny helper pixel to detect if we've scrolled -->
+<div class="sbt-scroll-pixel-helper"></div>
+<!-- Main content -->
+<div class="col py-0 content-container">
+    
+    <div class="header-article row sticky-top noprint">
+        
+
+
+
+<div class="col py-1 d-flex header-article-main">
+    <div class="header-article__left">
+        
+        <label for="__navigation"
+  class="headerbtn"
+  data-toggle="tooltip"
+data-placement="right"
+title="Toggle navigation"
+>
+  
+
+<span class="headerbtn__icon-container">
+  <i class="fas fa-bars"></i>
+  </span>
+
+</label>
+
+        
+    </div>
+    <div class="header-article__right">
+<button onclick="toggleFullScreen()"
+  class="headerbtn"
+  data-toggle="tooltip"
+data-placement="bottom"
+title="Fullscreen mode"
+>
+  
+
+<span class="headerbtn__icon-container">
+  <i class="fas fa-expand"></i>
+  </span>
+
+</button>
+
+<div class="menu-dropdown menu-dropdown-repository-buttons">
+  <button class="headerbtn menu-dropdown__trigger"
+      aria-label="Source repositories">
+      <i class="fab fa-github"></i>
+  </button>
+  <div class="menu-dropdown__content">
+    <ul>
+      <li>
+        <a href="https://github.com/KVSlab/vampy"
+   class="headerbtn"
+   data-toggle="tooltip"
+data-placement="left"
+title="Source repository"
+>
+  
+
+<span class="headerbtn__icon-container">
+  <i class="fab fa-github"></i>
+  </span>
+<span class="headerbtn__text-container">repository</span>
+</a>
+
+      </li>
+      
+      <li>
+        <a href="https://github.com/KVSlab/vampy/issues/new?title=Issue%20on%20page%20%2F_modules/vampy/automatedPreProcessing/DisplayData.html&body=Your%20issue%20content%20here."
+   class="headerbtn"
+   data-toggle="tooltip"
+data-placement="left"
+title="Open an issue"
+>
+  
+
+<span class="headerbtn__icon-container">
+  <i class="fas fa-lightbulb"></i>
+  </span>
+<span class="headerbtn__text-container">open issue</span>
+</a>
+
+      </li>
+      
+    </ul>
+  </div>
+</div>
+
+    </div>
+</div>
+
+<!-- Table of contents -->
+<div class="col-md-3 bd-toc show noprint">
+</div>
+    </div>
+    <div class="article row">
+        <div class="col pl-md-3 pl-lg-5 content-container">
+            <!-- Table of contents that is only displayed when printing the page -->
+            <div id="jb-print-docs-body" class="onlyprint">
+                <h1></h1>
+                <!-- Table of contents -->
+                <div id="print-main-content">
+                    <div id="jb-print-toc">
+                        
+                    </div>
+                </div>
+            </div>
+            <main id="main-content" role="main">
+                
+              <div>
+                
+  <h1>Source code for vampy.automatedPreProcessing.DisplayData</h1><div class="highlight"><pre>
+<span></span><span class="ch">#!/usr/bin/env python</span>
+
+<span class="c1"># Program:   AneuTools</span>
+<span class="c1"># Module:    DisplayData.py</span>
+<span class="c1"># Language:  Python</span>
+<span class="c1"># Date:      $Date: 2016/17/04 00:00:00 $</span>
+<span class="c1"># Version:   $Revision: 0.0.1 $</span>
+<span class="c1"># Author:    Christophe Chnafa</span>
+
+<span class="c1">#   Copyright (c) Christophe Chnafa. All rights reserved.</span>
+
+<span class="kn">import</span> <span class="nn">vtk</span>
+
+
+<div class="viewcode-block" id="VtkPointCloud"><a class="viewcode-back" href="../../../api.html#vampy.automatedPreProcessing.DisplayData.VtkPointCloud">[docs]</a><span class="k">class</span> <span class="nc">VtkPointCloud</span><span class="p">:</span>
+
+    <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">maxNumPoints</span><span class="o">=</span><span class="mf">1e6</span><span class="p">):</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">maxNumPoints</span> <span class="o">=</span> <span class="n">maxNumPoints</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">vtkPolyData</span> <span class="o">=</span> <span class="n">vtk</span><span class="o">.</span><span class="n">vtkPolyData</span><span class="p">()</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">clearPoints</span><span class="p">()</span>
+        <span class="n">mapper</span> <span class="o">=</span> <span class="n">vtk</span><span class="o">.</span><span class="n">vtkPolyDataMapper</span><span class="p">()</span>
+        <span class="n">mapper</span><span class="o">.</span><span class="n">SetInputData</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">vtkPolyData</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">vtkActor</span> <span class="o">=</span> <span class="n">vtk</span><span class="o">.</span><span class="n">vtkActor</span><span class="p">()</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">vtkActor</span><span class="o">.</span><span class="n">SetMapper</span><span class="p">(</span><span class="n">mapper</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">vtkActor</span><span class="o">.</span><span class="n">GetProperty</span><span class="p">()</span><span class="o">.</span><span class="n">SetPointSize</span><span class="p">(</span><span class="mf">9.</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">vtkActor</span><span class="o">.</span><span class="n">GetProperty</span><span class="p">()</span><span class="o">.</span><span class="n">SetColor</span><span class="p">(</span><span class="mf">1.</span><span class="p">,</span> <span class="mf">.0</span><span class="p">,</span> <span class="mf">.0</span><span class="p">)</span>
+
+<div class="viewcode-block" id="VtkPointCloud.addPoint"><a class="viewcode-back" href="../../../api.html#vampy.automatedPreProcessing.DisplayData.VtkPointCloud.addPoint">[docs]</a>    <span class="k">def</span> <span class="nf">addPoint</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">point</span><span class="p">):</span>
+        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">vtkPoints</span><span class="o">.</span><span class="n">GetNumberOfPoints</span><span class="p">()</span> <span class="o">&lt;</span> <span class="bp">self</span><span class="o">.</span><span class="n">maxNumPoints</span><span class="p">:</span>
+            <span class="n">pointId</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">vtkPoints</span><span class="o">.</span><span class="n">InsertNextPoint</span><span class="p">(</span><span class="n">point</span><span class="p">[:])</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">vtkCells</span><span class="o">.</span><span class="n">InsertNextCell</span><span class="p">(</span><span class="mi">1</span><span class="p">)</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">vtkCells</span><span class="o">.</span><span class="n">InsertCellPoint</span><span class="p">(</span><span class="n">pointId</span><span class="p">)</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="nb">print</span><span class="p">(</span><span class="s2">&quot;&gt;&gt;&gt; Warning: number of points &gt; 1e6.&quot;</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">vtkCells</span><span class="o">.</span><span class="n">Modified</span><span class="p">()</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">vtkPoints</span><span class="o">.</span><span class="n">Modified</span><span class="p">()</span></div>
+
+<div class="viewcode-block" id="VtkPointCloud.clearPoints"><a class="viewcode-back" href="../../../api.html#vampy.automatedPreProcessing.DisplayData.VtkPointCloud.clearPoints">[docs]</a>    <span class="k">def</span> <span class="nf">clearPoints</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">vtkPoints</span> <span class="o">=</span> <span class="n">vtk</span><span class="o">.</span><span class="n">vtkPoints</span><span class="p">()</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">vtkCells</span> <span class="o">=</span> <span class="n">vtk</span><span class="o">.</span><span class="n">vtkCellArray</span><span class="p">()</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">vtkPolyData</span><span class="o">.</span><span class="n">SetPoints</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">vtkPoints</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">vtkPolyData</span><span class="o">.</span><span class="n">SetVerts</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">vtkCells</span><span class="p">)</span></div></div>
+
+
+<div class="viewcode-block" id="VtkText"><a class="viewcode-back" href="../../../api.html#vampy.automatedPreProcessing.DisplayData.VtkText">[docs]</a><span class="k">class</span> <span class="nc">VtkText</span><span class="p">:</span>
+
+    <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">guiText</span><span class="o">=</span><span class="s2">&quot;&quot;</span><span class="p">):</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">text</span> <span class="o">=</span> <span class="n">vtk</span><span class="o">.</span><span class="n">vtkTextActor</span><span class="p">()</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">text</span><span class="o">.</span><span class="n">SetInputData</span><span class="p">(</span><span class="n">guiText</span><span class="p">)</span>
+        <span class="n">textProperties</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">text</span><span class="o">.</span><span class="n">GetTextProperty</span><span class="p">()</span>
+        <span class="n">textProperties</span><span class="o">.</span><span class="n">SetFontSize</span><span class="p">(</span><span class="mi">15</span><span class="p">)</span>
+        <span class="n">textProperties</span><span class="o">.</span><span class="n">SetColor</span><span class="p">(</span><span class="mi">1</span><span class="p">,</span> <span class="mi">1</span><span class="p">,</span> <span class="mi">1</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">text</span><span class="o">.</span><span class="n">SetDisplayPosition</span><span class="p">(</span><span class="mi">20</span><span class="p">,</span> <span class="mi">30</span><span class="p">)</span></div>
+
+
+<div class="viewcode-block" id="DisplayModel"><a class="viewcode-back" href="../../../api.html#vampy.automatedPreProcessing.DisplayData.DisplayModel">[docs]</a><span class="k">class</span> <span class="nc">DisplayModel</span><span class="p">(</span><span class="nb">object</span><span class="p">):</span>
+
+<div class="viewcode-block" id="DisplayModel.polyDataToActor"><a class="viewcode-back" href="../../../api.html#vampy.automatedPreProcessing.DisplayData.DisplayModel.polyDataToActor">[docs]</a>    <span class="k">def</span> <span class="nf">polyDataToActor</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">polyData</span><span class="p">,</span> <span class="n">opacity</span><span class="o">=</span><span class="mf">1.0</span><span class="p">):</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;Wrap the provided vtkPolyData object in a mapper and an actor,</span>
+<span class="sd">        returning the actor. &quot;&quot;&quot;</span>
+        <span class="n">mapper</span> <span class="o">=</span> <span class="n">vtk</span><span class="o">.</span><span class="n">vtkPolyDataMapper</span><span class="p">()</span>
+        <span class="k">if</span> <span class="n">vtk</span><span class="o">.</span><span class="n">VTK_MAJOR_VERSION</span> <span class="o">&gt;</span> <span class="mi">5</span><span class="p">:</span>
+            <span class="n">mapper</span><span class="o">.</span><span class="n">SetInputData</span><span class="p">(</span><span class="n">polyData</span><span class="p">)</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="n">mapper</span><span class="o">.</span><span class="n">SetInputConnection</span><span class="p">(</span><span class="n">polyData</span><span class="o">.</span><span class="n">GetProducerPort</span><span class="p">())</span>
+        <span class="n">actor</span> <span class="o">=</span> <span class="n">vtk</span><span class="o">.</span><span class="n">vtkActor</span><span class="p">()</span>
+        <span class="n">actor</span><span class="o">.</span><span class="n">SetMapper</span><span class="p">(</span><span class="n">mapper</span><span class="p">)</span>
+        <span class="n">actor</span><span class="o">.</span><span class="n">GetProperty</span><span class="p">()</span><span class="o">.</span><span class="n">SetOpacity</span><span class="p">(</span><span class="n">opacity</span><span class="p">)</span>
+
+        <span class="k">return</span> <span class="p">(</span><span class="n">actor</span><span class="p">)</span></div>
+
+<div class="viewcode-block" id="DisplayModel.setLight"><a class="viewcode-back" href="../../../api.html#vampy.automatedPreProcessing.DisplayData.DisplayModel.setLight">[docs]</a>    <span class="k">def</span> <span class="nf">setLight</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">renderer</span><span class="p">):</span>
+        <span class="n">lightKit</span> <span class="o">=</span> <span class="n">vtk</span><span class="o">.</span><span class="n">vtkLightKit</span><span class="p">()</span>
+        <span class="n">lightKit</span><span class="o">.</span><span class="n">MaintainLuminanceOn</span><span class="p">()</span>
+        <span class="n">lightKit</span><span class="o">.</span><span class="n">SetKeyLightIntensity</span><span class="p">(</span><span class="mf">0.8</span><span class="p">)</span>
+        <span class="c1"># 0 cold blue, 0.5 neutral white, 1 is reddish</span>
+        <span class="n">lightKit</span><span class="o">.</span><span class="n">SetKeyLightWarmth</span><span class="p">(</span><span class="mf">0.5</span><span class="p">)</span>
+        <span class="n">lightKit</span><span class="o">.</span><span class="n">SetFillLightWarmth</span><span class="p">(</span><span class="mf">0.5</span><span class="p">)</span>
+
+        <span class="c1"># The function is called SetHeadLightWarmth starting from VTK 5.0</span>
+        <span class="k">try</span><span class="p">:</span>
+            <span class="n">lightKit</span><span class="o">.</span><span class="n">SetHeadLightWarmth</span><span class="p">(</span><span class="mf">0.5</span><span class="p">)</span>
+        <span class="k">except</span> <span class="ne">Exception</span><span class="p">:</span>
+            <span class="n">lightKit</span><span class="o">.</span><span class="n">SetHeadlightWarmth</span><span class="p">(</span><span class="mf">0.5</span><span class="p">)</span>
+
+        <span class="c1"># intensity ratios</span>
+        <span class="n">lightKit</span><span class="o">.</span><span class="n">SetKeyToFillRatio</span><span class="p">(</span><span class="mf">2.</span><span class="p">)</span>
+        <span class="n">lightKit</span><span class="o">.</span><span class="n">SetKeyToHeadRatio</span><span class="p">(</span><span class="mf">7.</span><span class="p">)</span>
+        <span class="n">lightKit</span><span class="o">.</span><span class="n">SetKeyToBackRatio</span><span class="p">(</span><span class="mf">1000.</span><span class="p">)</span>
+        <span class="n">lightKit</span><span class="o">.</span><span class="n">AddLightsToRenderer</span><span class="p">(</span><span class="n">renderer</span><span class="p">)</span></div>
+
+<div class="viewcode-block" id="DisplayModel.renderWindow"><a class="viewcode-back" href="../../../api.html#vampy.automatedPreProcessing.DisplayData.DisplayModel.renderWindow">[docs]</a>    <span class="k">def</span> <span class="nf">renderWindow</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">renderer</span><span class="p">,</span> <span class="n">titleWindow</span><span class="p">):</span>
+        <span class="n">renderWindow</span> <span class="o">=</span> <span class="n">vtk</span><span class="o">.</span><span class="n">vtkRenderWindow</span><span class="p">()</span>
+        <span class="n">renderWindow</span><span class="o">.</span><span class="n">SetSize</span><span class="p">(</span><span class="mi">700</span><span class="p">,</span> <span class="mi">700</span><span class="p">)</span>
+        <span class="n">renderWindow</span><span class="o">.</span><span class="n">AddRenderer</span><span class="p">(</span><span class="n">renderer</span><span class="p">)</span>
+        <span class="n">renderWindow</span><span class="o">.</span><span class="n">SetWindowName</span><span class="p">(</span><span class="n">titleWindow</span><span class="p">)</span>
+
+        <span class="c1"># Assign a control style.</span>
+        <span class="n">interactor</span> <span class="o">=</span> <span class="n">vtk</span><span class="o">.</span><span class="n">vtkRenderWindowInteractor</span><span class="p">()</span>
+        <span class="n">interactor</span><span class="o">.</span><span class="n">SetRenderWindow</span><span class="p">(</span><span class="n">renderWindow</span><span class="p">)</span>
+        <span class="n">interactorStyle</span> <span class="o">=</span> <span class="n">vtk</span><span class="o">.</span><span class="n">vtkInteractorStyleTrackballCamera</span><span class="p">()</span>
+        <span class="n">interactor</span><span class="o">.</span><span class="n">SetInteractorStyle</span><span class="p">(</span><span class="n">interactorStyle</span><span class="p">)</span>
+
+        <span class="c1"># Initialize and start the interactor.</span>
+        <span class="n">interactor</span><span class="o">.</span><span class="n">Initialize</span><span class="p">()</span>
+        <span class="n">interactor</span><span class="o">.</span><span class="n">Start</span><span class="p">()</span></div>
+
+<div class="viewcode-block" id="DisplayModel.DisplayProbesAndModel"><a class="viewcode-back" href="../../../api.html#vampy.automatedPreProcessing.DisplayData.DisplayModel.DisplayProbesAndModel">[docs]</a>    <span class="k">def</span> <span class="nf">DisplayProbesAndModel</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">centerline</span><span class="p">,</span> <span class="n">fileNameCenterline</span><span class="p">,</span>
+                              <span class="n">listProbePoints</span><span class="p">,</span> <span class="n">model</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;Displays a model and the corresponding probe points along</span>
+<span class="sd">        the centerline. &quot;&quot;&quot;</span>
+
+        <span class="k">if</span> <span class="n">model</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
+            <span class="n">isDisplayingModel</span> <span class="o">=</span> <span class="kc">False</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="n">isDisplayingModel</span> <span class="o">=</span> <span class="kc">True</span>
+
+        <span class="c1"># Create a cloud of points from the list of probe points.</span>
+        <span class="n">pointCloud</span> <span class="o">=</span> <span class="n">VtkPointCloud</span><span class="p">()</span>
+        <span class="n">nPoints</span> <span class="o">=</span> <span class="nb">len</span><span class="p">(</span><span class="n">listProbePoints</span><span class="p">)</span>
+        <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="n">nPoints</span> <span class="o">-</span> <span class="mi">1</span><span class="p">):</span>
+            <span class="n">pointCloud</span><span class="o">.</span><span class="n">addPoint</span><span class="p">(</span><span class="n">listProbePoints</span><span class="p">[</span><span class="n">i</span><span class="p">])</span>
+
+        <span class="c1"># Create a rendering window and renderer.</span>
+        <span class="n">ren</span> <span class="o">=</span> <span class="n">vtk</span><span class="o">.</span><span class="n">vtkRenderer</span><span class="p">()</span>
+        <span class="n">renWindows</span> <span class="o">=</span> <span class="n">vtk</span><span class="o">.</span><span class="n">vtkRenderWindow</span><span class="p">()</span>
+        <span class="n">renWindows</span><span class="o">.</span><span class="n">AddRenderer</span><span class="p">(</span><span class="n">ren</span><span class="p">)</span>
+
+        <span class="c1"># Create a renderwindowinteractor</span>
+        <span class="n">iren</span> <span class="o">=</span> <span class="n">vtk</span><span class="o">.</span><span class="n">vtkRenderWindowInteractor</span><span class="p">()</span>
+        <span class="n">iren</span><span class="o">.</span><span class="n">SetRenderWindow</span><span class="p">(</span><span class="n">renWindows</span><span class="p">)</span>
+
+        <span class="c1"># Assign a control style.</span>
+        <span class="n">style</span> <span class="o">=</span> <span class="n">vtk</span><span class="o">.</span><span class="n">vtkInteractorStyleTrackballCamera</span><span class="p">()</span>
+        <span class="n">iren</span><span class="o">.</span><span class="n">SetInteractorStyle</span><span class="p">(</span><span class="n">style</span><span class="p">)</span>
+
+        <span class="c1"># Assign actor to the renderer.</span>
+        <span class="n">ren</span><span class="o">.</span><span class="n">AddActor</span><span class="p">(</span><span class="n">pointCloud</span><span class="o">.</span><span class="n">vtkActor</span><span class="p">)</span>
+        <span class="k">if</span> <span class="n">isDisplayingModel</span><span class="p">:</span>
+            <span class="n">opacity</span> <span class="o">=</span> <span class="mf">0.25</span>
+            <span class="n">ren</span><span class="o">.</span><span class="n">AddActor</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">polyDataToActor</span><span class="p">(</span><span class="n">model</span><span class="p">,</span> <span class="n">opacity</span><span class="p">))</span>
+        <span class="n">ren</span><span class="o">.</span><span class="n">AddActor</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">polyDataToActor</span><span class="p">(</span><span class="n">centerline</span><span class="p">))</span>
+        <span class="n">ren</span><span class="o">.</span><span class="n">SetBackground</span><span class="p">(</span><span class="mf">.2</span><span class="p">,</span> <span class="mf">.3</span><span class="p">,</span> <span class="mf">.4</span><span class="p">)</span>
+        <span class="n">renWindows</span><span class="o">.</span><span class="n">SetSize</span><span class="p">(</span><span class="mi">700</span><span class="p">,</span> <span class="mi">700</span><span class="p">)</span>
+
+        <span class="c1"># Create a text actor.</span>
+        <span class="n">txt</span> <span class="o">=</span> <span class="n">vtk</span><span class="o">.</span><span class="n">vtkTextActor</span><span class="p">()</span>
+        <span class="n">guiText</span> <span class="o">=</span> <span class="p">(</span><span class="s2">&quot;Centerline file name: &quot;</span>
+                   <span class="o">+</span> <span class="nb">repr</span><span class="p">(</span><span class="n">fileNameCenterline</span><span class="o">.</span><span class="n">rsplit</span><span class="p">(</span><span class="s1">&#39;/&#39;</span><span class="p">,</span> <span class="mi">1</span><span class="p">)[</span><span class="o">-</span><span class="mi">1</span><span class="p">])</span> <span class="o">+</span> <span class="s2">&quot;</span><span class="se">\n</span><span class="s2">&quot;</span>
+                   <span class="o">+</span> <span class="s2">&quot;Number of probes: &quot;</span> <span class="o">+</span> <span class="nb">repr</span><span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="n">listProbePoints</span><span class="p">))</span> <span class="o">+</span> <span class="s2">&quot;</span><span class="se">\n</span><span class="s2">&quot;</span>
+                   <span class="o">+</span> <span class="s2">&quot;Q to exit.&quot;</span><span class="p">)</span>
+        <span class="n">txt</span><span class="o">.</span><span class="n">SetInputData</span><span class="p">(</span><span class="n">guiText</span><span class="p">)</span>
+        <span class="n">txtprop</span> <span class="o">=</span> <span class="n">txt</span><span class="o">.</span><span class="n">GetTextProperty</span><span class="p">()</span>
+        <span class="n">txtprop</span><span class="o">.</span><span class="n">SetFontFamilyToArial</span><span class="p">()</span>
+        <span class="n">txtprop</span><span class="o">.</span><span class="n">SetFontSize</span><span class="p">(</span><span class="mi">15</span><span class="p">)</span>
+        <span class="n">txtprop</span><span class="o">.</span><span class="n">SetColor</span><span class="p">(</span><span class="mi">1</span><span class="p">,</span> <span class="mi">1</span><span class="p">,</span> <span class="mi">1</span><span class="p">)</span>
+        <span class="n">txt</span><span class="o">.</span><span class="n">SetDisplayPosition</span><span class="p">(</span><span class="mi">20</span><span class="p">,</span> <span class="mi">30</span><span class="p">)</span>
+
+        <span class="c1"># Assign actor to the renderer.</span>
+        <span class="n">ren</span><span class="o">.</span><span class="n">AddActor</span><span class="p">(</span><span class="n">txt</span><span class="p">)</span>
+
+        <span class="c1"># Enable user interface interactor.</span>
+        <span class="n">iren</span><span class="o">.</span><span class="n">Initialize</span><span class="p">()</span>
+        <span class="n">renWindows</span><span class="o">.</span><span class="n">Render</span><span class="p">()</span>
+        <span class="n">renWindows</span><span class="o">.</span><span class="n">SetWindowName</span><span class="p">(</span><span class="s2">&quot;Probe Points.&quot;</span><span class="p">)</span>
+        <span class="n">iren</span><span class="o">.</span><span class="n">Start</span><span class="p">()</span></div></div>
+</pre></div>
+
+              </div>
+              
+            </main>
+            <footer class="footer-article noprint">
+                
+    <!-- Previous / next buttons -->
+<div class='prev-next-area'>
+</div>
+            </footer>
+        </div>
+    </div>
+    <div class="footer-content row">
+        <footer class="col footer"><p>
+  
+    By Henrik A. Kjeldsberg<br/>
+  
+      &copy; Copyright 2023.<br/>
+</p>
+        </footer>
+    </div>
+    
+</div>
+
+
+      </div>
+    </div>
+  
+  <!-- Scripts loaded after <body> so the DOM is not blocked -->
+  <script src="../../../_static/scripts/pydata-sphinx-theme.js?digest=1999514e3f237ded88cf"></script>
+
+
+  </body>
+</html>
