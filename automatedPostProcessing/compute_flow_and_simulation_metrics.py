@@ -219,12 +219,12 @@ def define_functions_and_iterate_dataset(time_to_average, dataset, dataset_avg, 
         t0.stop()
 
         # Compute CFL
-        t0 = Timer("CFL number")
-        u_mag = project(sqrt(inner(u, u)), DG)
-        CFL.vector().set_local(u_mag.vector().get_local() / characteristic_edge_length.vector().get_local() * dt)
-        CFL.vector().apply("insert")
-        CFL_avg.vector().axpy(1, CFL.vector())
-        t0.stop()
+        #t0 = Timer("CFL number")
+        #u_mag = project(sqrt(inner(u, u)), DG)
+        #CFL.vector().set_local(u_mag.vector().get_local() / characteristic_edge_length.vector().get_local() * dt)
+        #CFL.vector().apply("insert")
+        #CFL_cycle_avg.vector().axpy(1, CFL.vector())
+        #t0.stop()
 
         # Compute rate-of-strain
         t0 = Timer("Rate of strain")
