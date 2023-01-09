@@ -134,8 +134,18 @@ const thebe_selector_output = ".output, .cell_output"
 </p>
 <ul class="nav bd-sidenav">
  <li class="toctree-l1">
-  <a class="reference internal" href="../../../overview.html">
-   Overview
+  <a class="reference internal" href="../../../preprocess.html">
+   Pre-processing
+  </a>
+ </li>
+ <li class="toctree-l1">
+  <a class="reference internal" href="../../../simulation.html">
+   Computational fluid dynamics
+  </a>
+ </li>
+ <li class="toctree-l1">
+  <a class="reference internal" href="../../../postprocess.html">
+   Post-processing
   </a>
  </li>
  <li class="toctree-l1">
@@ -145,7 +155,7 @@ const thebe_selector_output = ".output, .cell_output"
  </li>
  <li class="toctree-l1">
   <a class="reference internal" href="../../../cluster.html">
-   Running a CFD simulation on an HPC cluster
+   Running a simulation on an HPC cluster
   </a>
  </li>
  <li class="toctree-l1">
@@ -670,13 +680,20 @@ title="Open an issue"
             <span class="n">remove</span><span class="p">(</span><span class="n">file</span><span class="p">)</span></div>
 
 
-<div class="viewcode-block" id="read_command_line"><a class="viewcode-back" href="../../../api.html#vampy.automatedPreProcessing.automatedPreProcessing.read_command_line">[docs]</a><span class="k">def</span> <span class="nf">read_command_line</span><span class="p">():</span>
+<div class="viewcode-block" id="read_command_line"><a class="viewcode-back" href="../../../api.html#vampy.automatedPreProcessing.automatedPreProcessing.read_command_line">[docs]</a><span class="k">def</span> <span class="nf">read_command_line</span><span class="p">(</span><span class="n">input_path</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">    Read arguments from commandline and return all values in a dictionary.</span>
+<span class="sd">    If input_path is not None, then do not parse command line, but</span>
+<span class="sd">    only return default values.</span>
+
+<span class="sd">        Args:</span>
+<span class="sd">            input_path (str): Input file path, positional argument with default None.</span>
 <span class="sd">    &quot;&quot;&quot;</span>
     <span class="n">parser</span> <span class="o">=</span> <span class="n">argparse</span><span class="o">.</span><span class="n">ArgumentParser</span><span class="p">(</span><span class="n">formatter_class</span><span class="o">=</span><span class="n">argparse</span><span class="o">.</span><span class="n">ArgumentDefaultsHelpFormatter</span><span class="p">,</span>
                                      <span class="n">description</span><span class="o">=</span><span class="s2">&quot;Automated pre-processing for vascular modeling.&quot;</span><span class="p">)</span>
 
+    <span class="c1"># Add common arguments</span>
+    <span class="n">required</span> <span class="o">=</span> <span class="n">input_path</span> <span class="ow">is</span> <span class="kc">None</span>
     <span class="n">v</span> <span class="o">=</span> <span class="n">parser</span><span class="o">.</span><span class="n">add_mutually_exclusive_group</span><span class="p">(</span><span class="n">required</span><span class="o">=</span><span class="kc">False</span><span class="p">)</span>
     <span class="n">v</span><span class="o">.</span><span class="n">add_argument</span><span class="p">(</span><span class="s1">&#39;-v&#39;</span><span class="p">,</span> <span class="s1">&#39;--verbosity&#39;</span><span class="p">,</span>
                    <span class="n">dest</span><span class="o">=</span><span class="s1">&#39;verbosity&#39;</span><span class="p">,</span>
@@ -686,9 +703,8 @@ title="Open an issue"
 
     <span class="n">parser</span><span class="o">.</span><span class="n">add_argument</span><span class="p">(</span><span class="s1">&#39;-i&#39;</span><span class="p">,</span> <span class="s1">&#39;--inputModel&#39;</span><span class="p">,</span>
                         <span class="nb">type</span><span class="o">=</span><span class="nb">str</span><span class="p">,</span>
-                        <span class="n">required</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span>
+                        <span class="n">required</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span>
                         <span class="n">dest</span><span class="o">=</span><span class="s1">&#39;fileNameModel&#39;</span><span class="p">,</span>
-                        <span class="n">default</span><span class="o">=</span><span class="s1">&#39;example/surface.vtp&#39;</span><span class="p">,</span>
                         <span class="n">help</span><span class="o">=</span><span class="s2">&quot;Input file containing the 3D model.&quot;</span><span class="p">)</span>
 
     <span class="n">parser</span><span class="o">.</span><span class="n">add_argument</span><span class="p">(</span><span class="s1">&#39;-cM&#39;</span><span class="p">,</span> <span class="s1">&#39;--compress-mesh&#39;</span><span class="p">,</span>
@@ -791,7 +807,11 @@ title="Open an issue"
                         <span class="n">help</span><span class="o">=</span><span class="s1">&#39;Path to configuration file for remote simulation. &#39;</span> <span class="o">+</span>
                              <span class="s1">&#39;See example/ssh_config.json for details&#39;</span><span class="p">)</span>
 
-    <span class="n">args</span><span class="p">,</span> <span class="n">_</span> <span class="o">=</span> <span class="n">parser</span><span class="o">.</span><span class="n">parse_known_args</span><span class="p">()</span>
+    <span class="c1"># Parse path to get default values</span>
+    <span class="k">if</span> <span class="n">required</span><span class="p">:</span>
+        <span class="n">args</span> <span class="o">=</span> <span class="n">parser</span><span class="o">.</span><span class="n">parse_args</span><span class="p">()</span>
+    <span class="k">else</span><span class="p">:</span>
+        <span class="n">args</span> <span class="o">=</span> <span class="n">parser</span><span class="o">.</span><span class="n">parse_args</span><span class="p">([</span><span class="s2">&quot;-i&quot;</span> <span class="o">+</span> <span class="n">input_path</span><span class="p">])</span>
 
     <span class="k">if</span> <span class="n">args</span><span class="o">.</span><span class="n">verbosity</span><span class="p">:</span>
         <span class="nb">print</span><span class="p">()</span>
@@ -814,6 +834,10 @@ title="Open an issue"
                 <span class="n">inlet_flow_extension_length</span><span class="o">=</span><span class="n">args</span><span class="o">.</span><span class="n">inletFlowExtLen</span><span class="p">,</span> <span class="n">edge_length</span><span class="o">=</span><span class="n">args</span><span class="o">.</span><span class="n">edgeLength</span><span class="p">,</span>
                 <span class="n">region_points</span><span class="o">=</span><span class="n">args</span><span class="o">.</span><span class="n">regionPoints</span><span class="p">,</span> <span class="n">compress_mesh</span><span class="o">=</span><span class="n">args</span><span class="o">.</span><span class="n">compressMesh</span><span class="p">,</span>
                 <span class="n">outlet_flow_extension_length</span><span class="o">=</span><span class="n">args</span><span class="o">.</span><span class="n">outletFlowExtLen</span><span class="p">)</span></div>
+
+
+<div class="viewcode-block" id="main_meshing"><a class="viewcode-back" href="../../../api.html#vampy.automatedPreProcessing.automatedPreProcessing.main_meshing">[docs]</a><span class="k">def</span> <span class="nf">main_meshing</span><span class="p">():</span>
+    <span class="n">run_pre_processing</span><span class="p">(</span><span class="o">**</span><span class="n">read_command_line</span><span class="p">())</span></div>
 
 
 <span class="k">if</span> <span class="vm">__name__</span> <span class="o">==</span> <span class="s2">&quot;__main__&quot;</span><span class="p">:</span>

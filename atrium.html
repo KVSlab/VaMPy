@@ -139,8 +139,18 @@ const thebe_selector_output = ".output, .cell_output"
 </p>
 <ul class="nav bd-sidenav">
  <li class="toctree-l1">
-  <a class="reference internal" href="overview.html">
-   Overview
+  <a class="reference internal" href="preprocess.html">
+   Pre-processing
+  </a>
+ </li>
+ <li class="toctree-l1">
+  <a class="reference internal" href="simulation.html">
+   Computational fluid dynamics
+  </a>
+ </li>
+ <li class="toctree-l1">
+  <a class="reference internal" href="postprocess.html">
+   Post-processing
   </a>
  </li>
  <li class="toctree-l1">
@@ -150,7 +160,7 @@ const thebe_selector_output = ".output, .cell_output"
  </li>
  <li class="toctree-l1">
   <a class="reference internal" href="cluster.html">
-   Running a CFD simulation on an HPC cluster
+   Running a simulation on an HPC cluster
   </a>
  </li>
  <li class="toctree-l1">
@@ -370,8 +380,8 @@ title="Print to PDF"
     <nav id="bd-toc-nav" aria-label="Page">
         <ul class="visible nav section-nav flex-column">
  <li class="toc-h2 nav-item toc-entry">
-  <a class="reference internal nav-link" href="#meshing-an-atrium-with-refined-appendage">
-   Meshing an atrium with refined appendage
+  <a class="reference internal nav-link" href="#meshing-an-atrium-with-appendage-refinement">
+   Meshing an atrium with appendage refinement
   </a>
  </li>
  <li class="toc-h2 nav-item toc-entry">
@@ -399,8 +409,8 @@ title="Print to PDF"
                         <nav aria-label="Page">
                             <ul class="visible nav section-nav flex-column">
  <li class="toc-h2 nav-item toc-entry">
-  <a class="reference internal nav-link" href="#meshing-an-atrium-with-refined-appendage">
-   Meshing an atrium with refined appendage
+  <a class="reference internal nav-link" href="#meshing-an-atrium-with-appendage-refinement">
+   Meshing an atrium with appendage refinement
   </a>
  </li>
  <li class="toc-h2 nav-item toc-entry">
@@ -421,7 +431,7 @@ title="Print to PDF"
   <section class="tex2jax_ignore mathjax_ignore" id="hemodynamics-simulation-on-a-left-atrium">
 <span id="tutorial-atrium"></span><h1>Hemodynamics simulation on a left atrium<a class="headerlink" href="#hemodynamics-simulation-on-a-left-atrium" title="Permalink to this headline">#</a></h1>
 <p>The second tutorial focuses on a left atrium geometry, collected from a
-published public dataset by Roney et al.<span id="id1">[<a class="reference internal" href="#id3" title="Caroline H Roney, Rokas Bendikas, Farhad Pashakhanloo, Cesare Corrado, Edward J Vigmond, Elliot R McVeigh, Natalia A Trayanova, and Steven A Niederer. Constructing a human atrial fibre atlas. Annals of biomedical engineering, 49(1):233–250, 2021.">RBP+21</a>]</span>, located
+published public dataset by Roney et al.<span id="id1">[<a class="reference internal" href="postprocess.html#id3" title="Caroline H Roney, Rokas Bendikas, Farhad Pashakhanloo, Cesare Corrado, Edward J Vigmond, Elliot R McVeigh, Natalia A Trayanova, and Steven A Niederer. Constructing a human atrial fibre atlas. Annals of biomedical engineering, 49(1):233–250, 2021.">RBP+21</a>]</span>, located
 <a class="reference external" href="https://zenodo.org/record/3764917#.YyHwsuxByDV">here</a>. In particular,
 we selected the endocardium model labeled <code class="docutils literal notranslate"><span class="pre">LA_Endo_5.vtk</span></code> in the
 dataset, representing the inner left atrium wall. The tutorial is meant
@@ -429,37 +439,37 @@ to demonstrate that VaMPy is also applicable to other vascular domains,
 not only tubular structures.</p>
 <blockquote>
 <div><p><strong>Note</strong>: Because VaMPy relies on <code class="docutils literal notranslate"><span class="pre">vtkPolyData</span></code> as input, the <code class="docutils literal notranslate"><span class="pre">.vtk</span></code> model needs
-to be converted to <code class="docutils literal notranslate"><span class="pre">.vtp</span></code> format, which can quicly be done in ParaView
+to be converted to <code class="docutils literal notranslate"><span class="pre">.vtp</span></code> (or <code class="docutils literal notranslate"><span class="pre">.stl</span></code>) format, which can quicly be done in ParaView
 by using the <code class="docutils literal notranslate"><span class="pre">Extract</span> <span class="pre">Surface</span></code> filter, and saving the data as
 <code class="docutils literal notranslate"><span class="pre">LA_Endo_5.vtp</span></code>.</p>
 </div></blockquote>
-<section id="meshing-an-atrium-with-refined-appendage">
-<h2>Meshing an atrium with refined appendage<a class="headerlink" href="#meshing-an-atrium-with-refined-appendage" title="Permalink to this headline">#</a></h2>
-<p>The morphology of the left atrium is shown in <a class="reference internal" href="#atrium"><span class="std std-numref">Fig. 8</span></a>, and typically
+<section id="meshing-an-atrium-with-appendage-refinement">
+<h2>Meshing an atrium with appendage refinement<a class="headerlink" href="#meshing-an-atrium-with-appendage-refinement" title="Permalink to this headline">#</a></h2>
+<p>The morphology of the left atrium is shown in <a class="reference internal" href="#atrium"><span class="std std-numref">Fig. 14</span></a>, and typically
 includes an average of four pulmonary veins leading to a
 large chamber where blood circulates during the atrial diastole, before
 being pumped through the mitral valve into the left
 ventricle during atrial systole. In addition, on the left side of the
 chamber, the left atrium harbours the left atrial
 appendage, a small pouch-like extension of the atrium and
-known to the most prone site of blood clot formation. Hence, this region
-of the left atrium is of interest, similar to aneurysms as presented
-earlier.</p>
+known to be the most prone site of blood clot formation. Hence, this region
+of the left atrium is of interest, similar to intracranial aneurysms as presented
+earlier for the artery case.</p>
 <figure class="align-default" id="atrium">
 <img alt="_images/la.png" src="_images/la.png" />
 <figcaption>
-<p><span class="caption-number">Fig. 8 </span><span class="caption-text">The surface model considered in this tutorial, where we have
+<p><span class="caption-number">Fig. 14 </span><span class="caption-text">The surface model considered in this tutorial, where we have
 pointed out two of the four pulmonary veins, the left atrial appendage,
 and the mitral valve.</span><a class="headerlink" href="#atrium" title="Permalink to this image">#</a></p>
 </figcaption>
 </figure>
-<p>Therefore, to ensure that the hemodynamics are captured sufficiently
+<p>To ensure that the hemodynamics are captured sufficiently
 inside the left atrial appendage, we will perform mesh generation with
 refinement of this particular region. To manually refine a region on the
 geometry, the user may provide the <code class="docutils literal notranslate"><span class="pre">--refine-region</span> <span class="pre">True</span></code> flag, or
 <code class="docutils literal notranslate"><span class="pre">-r</span> <span class="pre">True</span></code> for short. Thus, to include a user-defined area of refinement,
 run the following command:</p>
-<div class="highlight-console notranslate"><div class="highlight"><pre><span></span><span class="gp">$ </span>python<span class="w"> </span>automatedPreProcessing/automatedPreProcessing.py<span class="w"> </span>-m<span class="w"> </span>constant<span class="w"> </span>-i<span class="w"> </span>LA_Endo/5/LA_Endo_5.vtp<span class="w"> </span>-r<span class="w"> </span>True<span class="w"> </span>-el<span class="w"> </span><span class="m">1</span>.5<span class="w"> </span>-bl<span class="w"> </span>False<span class="w"> </span>-fli<span class="w"> </span><span class="m">1</span><span class="w"> </span>-flo<span class="w"> </span><span class="m">3</span><span class="w"> </span>-at<span class="w"> </span>True
+<div class="highlight-console notranslate"><div class="highlight"><pre><span></span><span class="gp">$ </span>vampy-mesh<span class="w"> </span>-m<span class="w"> </span>constant<span class="w"> </span>-i<span class="w"> </span>LA_Endo/5/LA_Endo_5.vtp<span class="w"> </span>-r<span class="w"> </span>True<span class="w"> </span>-el<span class="w"> </span><span class="m">1</span>.5<span class="w"> </span>-bl<span class="w"> </span>False<span class="w"> </span>-fli<span class="w"> </span><span class="m">1</span><span class="w"> </span>-flo<span class="w"> </span><span class="m">3</span><span class="w"> </span>-at<span class="w"> </span>True
 </pre></div>
 </div>
 <p>Here, the <code class="docutils literal notranslate"><span class="pre">-fli</span></code> and <code class="docutils literal notranslate"><span class="pre">-flo</span></code> flags determine the length of the flow
@@ -473,27 +483,26 @@ Navigate with the mouse, and press <code class="docutils literal notranslate"><s
 undo, and <code class="docutils literal notranslate"><span class="pre">q</span></code> to proceed. The rest of the meshing pipeline is automated.
 Alternatively, the user may supply the <code class="docutils literal notranslate"><span class="pre">--region-points</span></code> (<code class="docutils literal notranslate"><span class="pre">-rp</span></code> for
 short), followed by three numbers representing the <span class="math notranslate nohighlight">\(x, y\)</span>, and <span class="math notranslate nohighlight">\(z\)</span>
-coordinates of the point, make the pipeline fully
+coordinates of the point, making the pipeline fully
 <em>automated</em> again. If the point is located slightly off the
 surface, it will stick to the closest surface point. For the point shown
-in <a class="reference internal" href="#seed"><span class="std std-numref">Fig. 9</span></a>, this would correspond to running the following command:</p>
-<div class="highlight-console notranslate"><div class="highlight"><pre><span></span><span class="gp">$ </span>python<span class="w"> </span>automatedPreProcessing/automatedPreProcessing.py<span class="w"> </span>-m<span class="w"> </span>constant<span class="w"> </span>-i<span class="w"> </span>LA_Endo/5/LA_Endo_5.vtp<span class="w"> </span>-r<span class="w"> </span>True<span class="w"> </span>-rp<span class="w"> </span><span class="m">29</span>.8<span class="w"> </span><span class="m">28</span>.7<span class="w"> </span><span class="m">66</span>.5<span class="w"> </span>-el<span class="w"> </span><span class="m">1</span>.5<span class="w"> </span>-bl<span class="w"> </span>False<span class="w"> </span>-fli<span class="w"> </span><span class="m">1</span><span class="w"> </span>-flo<span class="w"> </span><span class="m">3</span><span class="w"> </span>-at<span class="w"> </span>True
+in <a class="reference internal" href="#seed"><span class="std std-numref">Fig. 15</span></a>, this would correspond to running the following command:</p>
+<div class="highlight-console notranslate"><div class="highlight"><pre><span></span><span class="gp">$ </span>vampy-mesh<span class="w"> </span>-m<span class="w"> </span>constant<span class="w"> </span>-i<span class="w"> </span>LA_Endo/5/LA_Endo_5.vtp<span class="w"> </span>-r<span class="w"> </span>True<span class="w"> </span>-rp<span class="w"> </span><span class="m">29</span>.8<span class="w"> </span><span class="m">28</span>.7<span class="w"> </span><span class="m">66</span>.5<span class="w"> </span>-el<span class="w"> </span><span class="m">1</span>.5<span class="w"> </span>-bl<span class="w"> </span>False<span class="w"> </span>-fli<span class="w"> </span><span class="m">1</span><span class="w"> </span>-flo<span class="w"> </span><span class="m">3</span><span class="w"> </span>-at<span class="w"> </span>True
 </pre></div>
 </div>
 <figure class="align-default" id="seed">
 <img alt="_images/la_vmtk.png" src="_images/la_vmtk.png" />
 <figcaption>
-<p><span class="caption-number">Fig. 9 </span><span class="caption-text">VMTK render window for placing a seed, corresponding to area
-that will be refined.</span><a class="headerlink" href="#seed" title="Permalink to this image">#</a></p>
+<p><span class="caption-number">Fig. 15 </span><span class="caption-text">Render window for placing a seed, defining which region of the geometry that will be refined.</span><a class="headerlink" href="#seed" title="Permalink to this image">#</a></p>
 </figcaption>
 </figure>
 <p>Using the command above should result in a volumetric mesh consisting of
-~3.1M tetrahedral cells, as shown in <a class="reference internal" href="#la-mesh"><span class="std std-numref">Fig. 10</span></a>, also displaying the
-refinement in the left atrial appendage, including four boundary layers.</p>
+~3.1M tetrahedral cells, as shown in <a class="reference internal" href="#la-mesh"><span class="std std-numref">Fig. 16</span></a> displaying the
+refinement in the left atrial appendage, and four boundary layers.</p>
 <figure class="align-default" id="la-mesh">
 <img alt="_images/la_mesh.png" src="_images/la_mesh.png" />
 <figcaption>
-<p><span class="caption-number">Fig. 10 </span><span class="caption-text">Volumetric mesh of the left atrium model, with a zoomed in
+<p><span class="caption-number">Fig. 16 </span><span class="caption-text">Volumetric mesh of the left atrium model, with a zoomed in
 view of the left atrial appendage, clipped to display the refinement and
 four boundary layers.</span><a class="headerlink" href="#la-mesh" title="Permalink to this image">#</a></p>
 </figcaption>
@@ -502,31 +511,31 @@ four boundary layers.</span><a class="headerlink" href="#la-mesh" title="Permali
 <section id="cfd-simulation-of-the-left-atrium">
 <h2>CFD simulation of the left atrium<a class="headerlink" href="#cfd-simulation-of-the-left-atrium" title="Permalink to this headline">#</a></h2>
 <p>The resulting mesh from the previous section is now used as input to the
-CFD simulations, followed by computation of the hemodynamic indices. The
+CFD simulation, followed by computation of the hemodynamic indices. The
 only real difference from the artery problem from eariler is that
 instead of running the <code class="docutils literal notranslate"><span class="pre">Artery.py</span></code> problem file, we here will be solving
 the problem defined in <code class="docutils literal notranslate"><span class="pre">Atrium.py</span></code>, also located in the <code class="docutils literal notranslate"><span class="pre">simulation</span></code>
-folder. Assuming the user has navigated to the <code class="docutils literal notranslate"><span class="pre">simulation</span></code> folder,
-running a left atrial CFD simulation can be performed by executing the
+folder.
+Thus, running a left atrial CFD simulation can be performed by executing the
 following command:</p>
-<div class="highlight-console notranslate"><div class="highlight"><pre><span></span><span class="gp">$ </span>oasis<span class="w"> </span>NSfracStep<span class="w"> </span><span class="nv">problem</span><span class="o">=</span>Atrium<span class="w"> </span><span class="nv">mesh_path</span><span class="o">=</span>../LA_Endo/5/LA_5_Endo.xml.gz<span class="w"> </span><span class="nv">T</span><span class="o">=</span><span class="m">951</span><span class="w"> </span><span class="nv">dt</span><span class="o">=</span><span class="m">0</span>.951<span class="w"> </span><span class="nv">save_solution_after_cycle</span><span class="o">=</span><span class="m">0</span>
+<div class="highlight-console notranslate"><div class="highlight"><pre><span></span><span class="gp">$ </span>vampy-oasis<span class="w"> </span><span class="nv">problem</span><span class="o">=</span>Atrium<span class="w"> </span><span class="nv">mesh_path</span><span class="o">=</span>../LA_Endo/5/LA_5_Endo.xml.gz<span class="w"> </span><span class="nv">T</span><span class="o">=</span><span class="m">951</span><span class="w"> </span><span class="nv">dt</span><span class="o">=</span><span class="m">0</span>.951<span class="w"> </span><span class="nv">save_solution_after_cycle</span><span class="o">=</span><span class="m">0</span>
 </pre></div>
 </div>
 <p>Running the simulations will create the result folder <code class="docutils literal notranslate"><span class="pre">results_atrium</span></code>,
 with the results and corresponding mesh saved compactly in HDF5 format.
-For this particular model, the simulation was run for one cardiac cycle,
+For this demonstration, the simulation was run for one cardiac cycle,
 corresponding to 0.951 s, with <span class="math notranslate nohighlight">\(\Delta t =\)</span> 0.951 ms resulting in a
-total of 1000 time steps per cycle. Finally, in <a class="reference internal" href="#la-hemo"><span class="std std-numref">Fig. 11</span></a> we present a
-velocity slice with vectors, the temporal wall shear stress gradient
-(TWSSG), time averaged wall shear stress (TAWSS), oscillatory shear
-index (OSI), relative residence time (RRT), and the endothelial cell
-activation potential (ECAP).</p>
+total of 1000 time steps per cycle.
+In <a class="reference internal" href="#la-hemo"><span class="std std-numref">Fig. 17</span></a> we present the volumetric rendering of velocity, the pressure field,
+the Q-criterion displaying vortical structures, and three hemodynamic
+indices; the time averaged wall shear stress (TAWSS), the oscillatory
+shear index (OSI), and the relative residence time (RRT).</p>
 <figure class="align-default" id="la-hemo">
-<img alt="_images/la_hemo.png" src="_images/la_hemo.png" />
+<img alt="_images/atrium.png" src="_images/atrium.png" />
 <figcaption>
-<p><span class="caption-number">Fig. 11 </span><span class="caption-text">From left to right: a slice through the geometry displaying
-the velocity field and corresponding vectors scaled by the velocity
-magnitude, TWSSG, TAWSS, OSI, RRT, and ECAP.</span><a class="headerlink" href="#la-hemo" title="Permalink to this image">#</a></p>
+<p><span class="caption-number">Fig. 17 </span><span class="caption-text">From left to right: the volumetric rendering of velocity,
+the pressure field, volumetric rendering of the Q-criterion, TAWSS, OSI,
+and RRT.</span><a class="headerlink" href="#la-hemo" title="Permalink to this image">#</a></p>
 </figcaption>
 </figure>
 <div class="docutils container" id="id2">

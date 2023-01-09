@@ -136,8 +136,18 @@ const thebe_selector_output = ".output, .cell_output"
 </p>
 <ul class="nav bd-sidenav">
  <li class="toctree-l1">
-  <a class="reference internal" href="overview.html">
-   Overview
+  <a class="reference internal" href="preprocess.html">
+   Pre-processing
+  </a>
+ </li>
+ <li class="toctree-l1">
+  <a class="reference internal" href="simulation.html">
+   Computational fluid dynamics
+  </a>
+ </li>
+ <li class="toctree-l1">
+  <a class="reference internal" href="postprocess.html">
+   Post-processing
   </a>
  </li>
  <li class="toctree-l1">
@@ -147,7 +157,7 @@ const thebe_selector_output = ".output, .cell_output"
  </li>
  <li class="toctree-l1">
   <a class="reference internal" href="cluster.html">
-   Running a CFD simulation on an HPC cluster
+   Running a simulation on an HPC cluster
   </a>
  </li>
  <li class="toctree-l1">
@@ -430,9 +440,22 @@ title="Print to PDF"
 <section id="module-vampy.automatedPreProcessing.automatedPreProcessing">
 <span id="pre-processing-scripts"></span><h2>Pre-processing scripts<a class="headerlink" href="#module-vampy.automatedPreProcessing.automatedPreProcessing" title="Permalink to this headline">#</a></h2>
 <dl class="py function">
+<dt class="sig sig-object py" id="vampy.automatedPreProcessing.automatedPreProcessing.main_meshing">
+<span class="sig-prename descclassname"><span class="pre">vampy.automatedPreProcessing.automatedPreProcessing.</span></span><span class="sig-name descname"><span class="pre">main_meshing</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="_modules/vampy/automatedPreProcessing/automatedPreProcessing.html#main_meshing"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#vampy.automatedPreProcessing.automatedPreProcessing.main_meshing" title="Permalink to this definition">#</a></dt>
+<dd></dd></dl>
+
+<dl class="py function">
 <dt class="sig sig-object py" id="vampy.automatedPreProcessing.automatedPreProcessing.read_command_line">
-<span class="sig-prename descclassname"><span class="pre">vampy.automatedPreProcessing.automatedPreProcessing.</span></span><span class="sig-name descname"><span class="pre">read_command_line</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="_modules/vampy/automatedPreProcessing/automatedPreProcessing.html#read_command_line"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#vampy.automatedPreProcessing.automatedPreProcessing.read_command_line" title="Permalink to this definition">#</a></dt>
-<dd><p>Read arguments from commandline and return all values in a dictionary.</p>
+<span class="sig-prename descclassname"><span class="pre">vampy.automatedPreProcessing.automatedPreProcessing.</span></span><span class="sig-name descname"><span class="pre">read_command_line</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">input_path</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/vampy/automatedPreProcessing/automatedPreProcessing.html#read_command_line"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#vampy.automatedPreProcessing.automatedPreProcessing.read_command_line" title="Permalink to this definition">#</a></dt>
+<dd><p>Read arguments from commandline and return all values in a dictionary.
+If input_path is not None, then do not parse command line, but
+only return default values.</p>
+<blockquote>
+<div><dl class="simple">
+<dt>Args:</dt><dd><p>input_path (str): Input file path, positional argument with default None.</p>
+</dd>
+</dl>
+</div></blockquote>
 </dd></dl>
 
 <dl class="py function">
@@ -1482,6 +1505,11 @@ for flow_metrics given viscosity and time step</p>
 <dd></dd></dl>
 
 <dl class="py function">
+<dt class="sig sig-object py" id="vampy.automatedPostProcessing.compute_flow_and_simulation_metrics.main_metrics">
+<span class="sig-prename descclassname"><span class="pre">vampy.automatedPostProcessing.compute_flow_and_simulation_metrics.</span></span><span class="sig-name descname"><span class="pre">main_metrics</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="_modules/vampy/automatedPostProcessing/compute_flow_and_simulation_metrics.html#main_metrics"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#vampy.automatedPostProcessing.compute_flow_and_simulation_metrics.main_metrics" title="Permalink to this definition">#</a></dt>
+<dd></dd></dl>
+
+<dl class="py function">
 <dt class="sig sig-object py" id="vampy.automatedPostProcessing.compute_flow_and_simulation_metrics.rate_of_dissipation">
 <span class="sig-prename descclassname"><span class="pre">vampy.automatedPostProcessing.compute_flow_and_simulation_metrics.</span></span><span class="sig-name descname"><span class="pre">rate_of_dissipation</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">dissipation</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">u</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">v</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">mesh</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">h</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">nu</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/vampy/automatedPostProcessing/compute_flow_and_simulation_metrics.html#rate_of_dissipation"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#vampy.automatedPostProcessing.compute_flow_and_simulation_metrics.rate_of_dissipation" title="Permalink to this definition">#</a></dt>
 <dd><p>Computes rate of dissipation</p>
@@ -1547,6 +1575,11 @@ density (rho) is in [kg/m^3], the time step (dt) is in [ms], and viscosity (nu) 
 </dl>
 </dd></dl>
 
+<dl class="py function">
+<dt class="sig sig-object py" id="vampy.automatedPostProcessing.compute_hemodynamic_indices.main_hemo">
+<span class="sig-prename descclassname"><span class="pre">vampy.automatedPostProcessing.compute_hemodynamic_indices.</span></span><span class="sig-name descname"><span class="pre">main_hemo</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="_modules/vampy/automatedPostProcessing/compute_hemodynamic_indices.html#main_hemo"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#vampy.automatedPostProcessing.compute_hemodynamic_indices.main_hemo" title="Permalink to this definition">#</a></dt>
+<dd></dd></dl>
+
 <span class="target" id="module-vampy.automatedPostProcessing.compute_velocity_and_pressure"></span><dl class="py function">
 <dt class="sig sig-object py" id="vampy.automatedPostProcessing.compute_velocity_and_pressure.compute_velocity_and_pressure">
 <span class="sig-prename descclassname"><span class="pre">vampy.automatedPostProcessing.compute_velocity_and_pressure.</span></span><span class="sig-name descname"><span class="pre">compute_velocity_and_pressure</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">case_path</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">dt</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">velocity_degree</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">pressure_degree</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">step</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/vampy/automatedPostProcessing/compute_velocity_and_pressure.html#compute_velocity_and_pressure"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#vampy.automatedPostProcessing.compute_velocity_and_pressure.compute_velocity_and_pressure" title="Permalink to this definition">#</a></dt>
@@ -1564,6 +1597,11 @@ converts and saves to .xdmf format for visualization (in e.g. ParaView).</p>
 </dd>
 </dl>
 </dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="vampy.automatedPostProcessing.compute_velocity_and_pressure.main_convert">
+<span class="sig-prename descclassname"><span class="pre">vampy.automatedPostProcessing.compute_velocity_and_pressure.</span></span><span class="sig-name descname"><span class="pre">main_convert</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="_modules/vampy/automatedPostProcessing/compute_velocity_and_pressure.html#main_convert"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#vampy.automatedPostProcessing.compute_velocity_and_pressure.main_convert" title="Permalink to this definition">#</a></dt>
+<dd></dd></dl>
 
 <span class="target" id="module-vampy.automatedPostProcessing.postprocessing_common"></span><dl class="py class">
 <dt class="sig sig-object py" id="vampy.automatedPostProcessing.postprocessing_common.STRESS">
@@ -1634,6 +1672,11 @@ converts and saves to .xdmf format for visualization (in e.g. ParaView).</p>
 </dd></dl>
 
 <span class="target" id="module-vampy.automatedPostProcessing.visualize_probes"></span><dl class="py function">
+<dt class="sig sig-object py" id="vampy.automatedPostProcessing.visualize_probes.main_probe">
+<span class="sig-prename descclassname"><span class="pre">vampy.automatedPostProcessing.visualize_probes.</span></span><span class="sig-name descname"><span class="pre">main_probe</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="_modules/vampy/automatedPostProcessing/visualize_probes.html#main_probe"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#vampy.automatedPostProcessing.visualize_probes.main_probe" title="Permalink to this definition">#</a></dt>
+<dd></dd></dl>
+
+<dl class="py function">
 <dt class="sig sig-object py" id="vampy.automatedPostProcessing.visualize_probes.visualize_probes">
 <span class="sig-prename descclassname"><span class="pre">vampy.automatedPostProcessing.visualize_probes.</span></span><span class="sig-name descname"><span class="pre">visualize_probes</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">case_path</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">probe_saving_frequency</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">show_figure</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">True</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">save_figure</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">False</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/vampy/automatedPostProcessing/visualize_probes.html#visualize_probes"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#vampy.automatedPostProcessing.visualize_probes.visualize_probes" title="Permalink to this definition">#</a></dt>
 <dd><p>Loads probe points from completed CFD simulation,

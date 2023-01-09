@@ -6,7 +6,7 @@
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" /><meta name="generator" content="Docutils 0.17.1: http://docutils.sourceforge.net/" />
 
-    <title>Running a CFD simulation on an HPC cluster &#8212; VaMPy</title>
+    <title>Running a simulation on an HPC cluster &#8212; VaMPy</title>
     
   <!-- Loaded before other Sphinx assets -->
   <link href="_static/styles/theme.css?digest=1999514e3f237ded88cf" rel="stylesheet">
@@ -137,8 +137,18 @@ const thebe_selector_output = ".output, .cell_output"
 </p>
 <ul class="current nav bd-sidenav">
  <li class="toctree-l1">
-  <a class="reference internal" href="overview.html">
-   Overview
+  <a class="reference internal" href="preprocess.html">
+   Pre-processing
+  </a>
+ </li>
+ <li class="toctree-l1">
+  <a class="reference internal" href="simulation.html">
+   Computational fluid dynamics
+  </a>
+ </li>
+ <li class="toctree-l1">
+  <a class="reference internal" href="postprocess.html">
+   Post-processing
   </a>
  </li>
  <li class="toctree-l1">
@@ -148,7 +158,7 @@ const thebe_selector_output = ".output, .cell_output"
  </li>
  <li class="toctree-l1 current active">
   <a class="current reference internal" href="#">
-   Running a CFD simulation on an HPC cluster
+   Running a simulation on an HPC cluster
   </a>
  </li>
  <li class="toctree-l1">
@@ -357,7 +367,7 @@ title="Print to PDF"
         <div class="col pl-md-3 pl-lg-5 content-container">
             <!-- Table of contents that is only displayed when printing the page -->
             <div id="jb-print-docs-body" class="onlyprint">
-                <h1>Running a CFD simulation on an HPC cluster</h1>
+                <h1>Running a simulation on an HPC cluster</h1>
                 <!-- Table of contents -->
                 <div id="print-main-content">
                     <div id="jb-print-toc">
@@ -369,15 +379,15 @@ title="Print to PDF"
                 
               <div>
                 
-  <section class="tex2jax_ignore mathjax_ignore" id="running-a-cfd-simulation-on-an-hpc-cluster">
-<h1>Running a CFD simulation on an HPC cluster<a class="headerlink" href="#running-a-cfd-simulation-on-an-hpc-cluster" title="Permalink to this headline">#</a></h1>
+  <section class="tex2jax_ignore mathjax_ignore" id="running-a-simulation-on-an-hpc-cluster">
+<h1>Running a simulation on an HPC cluster<a class="headerlink" href="#running-a-simulation-on-an-hpc-cluster" title="Permalink to this headline">#</a></h1>
 <p>Here, we present an automated pipeline for performing CFD simulations
 followed by post-processing of the results on an HPC cluster. For this
 tutorial, we have used the supercomputer
 <a class="reference external" href="https://documentation.sigma2.no/hpc_machines/saga.html">Saga</a> as our
 starting point.</p>
 <p>The automated procedure for running simulations on a cluster is part of
-the preprocessing script <code class="docutils literal notranslate"><span class="pre">automatedPreProcessing.py</span></code>. The
+the preprocessing script <code class="docutils literal notranslate"><span class="pre">automatedPreProcessing.py</span></code> or <code class="docutils literal notranslate"><span class="pre">vampy-mesh</span></code> command. The
 script includes the <code class="docutils literal notranslate"><span class="pre">--simulation-config</span></code> flag (<code class="docutils literal notranslate"><span class="pre">-sc</span></code> for short), which
 should be followed by the path to a configuration file for the remote
 simulation. As a template, we have included the configuration file
@@ -407,14 +417,14 @@ on the location of the remote <em>Oasis</em> folder. The
 <code class="docutils literal notranslate"><span class="pre">localDataDir</span></code> points to the path where the mesh, mesh information, and
 probe points are stored, and we assume that the file defined by the
 <code class="docutils literal notranslate"><span class="pre">job_script</span></code> key is located there as well. The job script currently
-located within the <code class="docutils literal notranslate"><span class="pre">test/Case_test_artery</span></code> folder is specific for the
+located within the <code class="docutils literal notranslate"><span class="pre">tests/Case_test_artery</span></code> folder is specific for the
 <code class="docutils literal notranslate"><span class="pre">Artery.py</span></code> problem run on Saga, but is adaptable to other simulations
 and clusters. The user will also need to edit <code class="docutils literal notranslate"><span class="pre">artery_job.sh</span></code> with their
 username information, cluster project, and FEniCS module location, all
 highlighted in the example job script. Then, to perform pre-processing,
 CFD simulation, and post-processing through a single script, run the
 following command:</p>
-<div class="highlight-console notranslate"><div class="highlight"><pre><span></span><span class="gp">$ </span>python<span class="w"> </span>automatedPreProcessing/automatedPreProcessing.py<span class="w"> </span>-m<span class="w"> </span>diameter<span class="w"> </span>-i<span class="w"> </span>test/Case_test_artery/artery.vtp<span class="w"> </span>-c<span class="w"> </span><span class="m">1</span>.3<span class="w"> </span>-sc<span class="w"> </span>automatedPreProcessing/ssh_config.json<span class="w"> </span>-vz<span class="w"> </span>False
+<div class="highlight-console notranslate"><div class="highlight"><pre><span></span><span class="gp">$ </span>vampy-mesh<span class="w"> </span>-m<span class="w"> </span>diameter<span class="w"> </span>-i<span class="w"> </span>tests/Case_test_artery/artery.vtp<span class="w"> </span>-c<span class="w"> </span><span class="m">1</span>.3<span class="w"> </span>-sc<span class="w"> </span>src/vampy/automatedPreProcessing/ssh_config.json<span class="w"> </span>-vz<span class="w"> </span>False
 </pre></div>
 </div>
 <p>If the script is successful, it should output:</p>

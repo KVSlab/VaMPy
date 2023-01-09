@@ -1,9 +1,9 @@
-(post:quantities)=
 # Computed quantities
 
 The following tables list the different quantities computed by the post-processing scripts implemented in VaMPy.
-In table {numref}`hemo` we present the hemodynamic indices computed by the script `compute_hemodynamic_indices.py`.
+In table {numref}`hemo` we present the hemodynamic indices computed by the script/command `compute_hemodynamic_indices.py`/`vampy-hemo`.
 
+(post:hemo_quantities)=
 ```{table} Hemodynamic indices 
 :name: hemo
 | Quantity                              | Abbreviation/Symbol | Definition                                                        | Unit                                     |
@@ -16,8 +16,9 @@ In table {numref}`hemo` we present the hemodynamic indices computed by the scrip
 | Endothelial cell activation potential | ECAP                | $\displaystyle \frac{\text{OSI}}{\text{TAWSS}}$                   | [1/Pa]                                   |
 ```
 
-In table {numref}`cfd` we present the fluid mechanical metrics and simulation quantities that are computed by the script `compute_flow_and_simulation_metrics.py`.
+In table {numref}`cfd` we present the fluid mechanical metrics and simulation quantities that are computed by the script/command `compute_flow_and_simulation_metrics.py`/`vampy-metrics`.
 
+(post:flow_quantities)=
 ```{table} Flow and simulation metrics
 :name: cfd
 

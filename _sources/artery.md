@@ -18,7 +18,7 @@ with a edge length of 0.3 mm, run the following command after
 downloading the C0001 case:
 
 ``` console
-$ python automatedPreProcessing/automatedPreProcessing.py -m constant -el 0.3 -i C0001/model.vtp -bl False
+$ vampy-mesh -m constant -el 0.3 -i C0001/model.vtp -bl False
 ```
 
 Note that we have also applied the `-bl False`, meaning we do not add
@@ -52,7 +52,7 @@ To generate a variable density mesh based on the surface curvature, run
 the following command:
 
 ``` console
-$ python automatedPreProcessing/automatedPreProcessing.py -m curvature -c 1.2 -i C0001/model.vtp
+$ vampy-mesh -m curvature -c 1.2 -i C0001/model.vtp
 ```
 
 The resulting volumetric mesh is shown in {numref}`mesh-variable`, with a zoomed in
@@ -94,7 +94,7 @@ above. To generate a variable density mesh based on the centerline
 diameter, run the following command:
 
 ``` console
-$ python automatedPreProcessing/automatedPreProcessing.py -m diameter -c 1.2 -i C0001/model.vtp
+$ vampy-mesh -m diameter -c 1.2 -i C0001/model.vtp
 ```
 
 The resulting volumetric mesh is shown in {numref}`mesh-diameter`, with a zoomed in
@@ -123,7 +123,7 @@ chose to mesh the artery model using a constant density mesh using the
 following command:
 
 ``` console
-$ python automatedPreProcessing/automatedPreProcessing.py -m constant -el 0.1 -i C0001/model.vtp
+$ vampy-mesh -m constant -el 0.1 -i C0001/model.vtp
 ```
 
 Running the command results in a volumetric mesh consisting of \~20M

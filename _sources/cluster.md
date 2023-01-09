@@ -1,4 +1,4 @@
-# Running a CFD simulation on an HPC cluster
+# Running a simulation on an HPC cluster
 
 Here, we present an automated pipeline for performing CFD simulations
 followed by post-processing of the results on an HPC cluster. For this
@@ -7,7 +7,7 @@ tutorial, we have used the supercomputer
 starting point.
 
 The automated procedure for running simulations on a cluster is part of
-the preprocessing script `automatedPreProcessing.py`. The
+the preprocessing script `automatedPreProcessing.py` or `vampy-mesh` command. The
 script includes the `--simulation-config` flag (`-sc` for short), which
 should be followed by the path to a configuration file for the remote
 simulation. As a template, we have included the configuration file
@@ -39,7 +39,7 @@ on the location of the remote *Oasis* folder. The
 `localDataDir` points to the path where the mesh, mesh information, and
 probe points are stored, and we assume that the file defined by the
 `job_script` key is located there as well. The job script currently
-located within the `test/Case_test_artery` folder is specific for the
+located within the `tests/Case_test_artery` folder is specific for the
 `Artery.py` problem run on Saga, but is adaptable to other simulations
 and clusters. The user will also need to edit `artery_job.sh` with their
 username information, cluster project, and FEniCS module location, all
@@ -48,7 +48,7 @@ CFD simulation, and post-processing through a single script, run the
 following command:
 
 ``` console
-$ python automatedPreProcessing/automatedPreProcessing.py -m diameter -i test/Case_test_artery/artery.vtp -c 1.3 -sc automatedPreProcessing/ssh_config.json -vz False
+$ vampy-mesh -m diameter -i tests/Case_test_artery/artery.vtp -c 1.3 -sc src/vampy/automatedPreProcessing/ssh_config.json -vz False
 ```
 
 If the script is successful, it should output:

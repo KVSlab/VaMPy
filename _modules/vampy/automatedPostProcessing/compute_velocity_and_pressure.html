@@ -134,8 +134,18 @@ const thebe_selector_output = ".output, .cell_output"
 </p>
 <ul class="nav bd-sidenav">
  <li class="toctree-l1">
-  <a class="reference internal" href="../../../overview.html">
-   Overview
+  <a class="reference internal" href="../../../preprocess.html">
+   Pre-processing
+  </a>
+ </li>
+ <li class="toctree-l1">
+  <a class="reference internal" href="../../../simulation.html">
+   Computational fluid dynamics
+  </a>
+ </li>
+ <li class="toctree-l1">
+  <a class="reference internal" href="../../../postprocess.html">
+   Post-processing
   </a>
  </li>
  <li class="toctree-l1">
@@ -145,7 +155,7 @@ const thebe_selector_output = ".output, .cell_output"
  </li>
  <li class="toctree-l1">
   <a class="reference internal" href="../../../cluster.html">
-   Running a CFD simulation on an HPC cluster
+   Running a simulation on an HPC cluster
   </a>
  </li>
  <li class="toctree-l1">
@@ -414,6 +424,11 @@ title="Open an issue"
 
     <span class="nb">print</span><span class="p">(</span><span class="s2">&quot;========== Post processing finished ==========&quot;</span><span class="p">)</span>
     <span class="nb">print</span><span class="p">(</span><span class="s2">&quot;Results saved to: </span><span class="si">{}</span><span class="s2">&quot;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">case_path</span><span class="p">))</span></div>
+
+
+<div class="viewcode-block" id="main_convert"><a class="viewcode-back" href="../../../api.html#vampy.automatedPostProcessing.compute_velocity_and_pressure.main_convert">[docs]</a><span class="k">def</span> <span class="nf">main_convert</span><span class="p">():</span>
+    <span class="n">folder</span><span class="p">,</span> <span class="n">_</span><span class="p">,</span> <span class="n">_</span><span class="p">,</span> <span class="n">dt</span><span class="p">,</span> <span class="n">velocity_degree</span><span class="p">,</span> <span class="n">pressure_degree</span><span class="p">,</span> <span class="n">_</span><span class="p">,</span> <span class="n">_</span><span class="p">,</span> <span class="n">_</span><span class="p">,</span> <span class="n">_</span><span class="p">,</span> <span class="n">_</span><span class="p">,</span> <span class="n">step</span><span class="p">,</span> <span class="n">_</span> <span class="o">=</span> <span class="n">read_command_line</span><span class="p">()</span>
+    <span class="n">compute_velocity_and_pressure</span><span class="p">(</span><span class="n">folder</span><span class="p">,</span> <span class="n">dt</span><span class="p">,</span> <span class="n">velocity_degree</span><span class="p">,</span> <span class="n">pressure_degree</span><span class="p">,</span> <span class="n">step</span><span class="p">)</span></div>
 
 
 <span class="k">if</span> <span class="vm">__name__</span> <span class="o">==</span> <span class="s1">&#39;__main__&#39;</span><span class="p">:</span>

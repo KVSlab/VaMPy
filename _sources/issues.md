@@ -9,7 +9,7 @@ you can remove conflicting channels using:
 $ conda config --remove channels [CHANNEL NAME]
 ```
 
-Alternatively, you set your Anaconda channel priority to *flexible*,
+Alternatively, you can set your Anaconda channel priority to *flexible*,
 with the following command:
 
 ``` console
@@ -18,7 +18,7 @@ $ conda config --set channel_priority flexible
 
 ## Issue with vmtkMeshWriter
 
-After installing `morphMan`, you may experience an error
+After installing the `morphMan` depenceny, you may experience an error
 during pre-processing, when the `.vtu` mesh is converted and compressed
 into `.xml.gz` format using the `vmtkMeshWriter` method. As a temporary
 fix you will need to update the `vmtkMeshWriter` script manually to

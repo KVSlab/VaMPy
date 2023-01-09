@@ -6,7 +6,7 @@
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" /><meta name="generator" content="Docutils 0.17.1: http://docutils.sourceforge.net/" />
 
-    <title>Installation &#8212; VaMPy</title>
+    <title>Pre-processing &#8212; VaMPy</title>
     
   <!-- Loaded before other Sphinx assets -->
   <link href="_static/styles/theme.css?digest=1999514e3f237ded88cf" rel="stylesheet">
@@ -52,8 +52,8 @@ const thebe_selector_output = ".output, .cell_output"
     <script async="async" src="_static/sphinx-thebe.js"></script>
     <link rel="index" title="Index" href="genindex.html" />
     <link rel="search" title="Search" href="search.html" />
-    <link rel="next" title="Known issues" href="issues.html" />
-    <link rel="prev" title="The Vascular Modeling Pypeline" href="index.html" />
+    <link rel="next" title="Computational fluid dynamics" href="simulation.html" />
+    <link rel="prev" title="Known issues" href="issues.html" />
     <meta name="viewport" content="width=device-width, initial-scale=1" />
     <meta name="docsearch:language" content="None">
     
@@ -118,9 +118,9 @@ const thebe_selector_output = ".output, .cell_output"
   Installation
  </span>
 </p>
-<ul class="current nav bd-sidenav">
- <li class="toctree-l1 current active">
-  <a class="current reference internal" href="#">
+<ul class="nav bd-sidenav">
+ <li class="toctree-l1">
+  <a class="reference internal" href="installation.html">
    Installation
   </a>
  </li>
@@ -135,9 +135,9 @@ const thebe_selector_output = ".output, .cell_output"
   Using VaMPy
  </span>
 </p>
-<ul class="nav bd-sidenav">
- <li class="toctree-l1">
-  <a class="reference internal" href="preprocess.html">
+<ul class="current nav bd-sidenav">
+ <li class="toctree-l1 current active">
+  <a class="current reference internal" href="#">
    Pre-processing
   </a>
  </li>
@@ -290,7 +290,7 @@ title="Source repository"
       </li>
       
       <li>
-        <a href="https://kvslab.github.io/VaMPy//issues/new?title=Issue%20on%20page%20%2Finstallation.html&body=Your%20issue%20content%20here."
+        <a href="https://kvslab.github.io/VaMPy//issues/new?title=Issue%20on%20page%20%2Fpreprocess.html&body=Your%20issue%20content%20here."
    class="headerbtn"
    data-toggle="tooltip"
 data-placement="left"
@@ -318,7 +318,7 @@ title="Open an issue"
   <div class="menu-dropdown__content">
     <ul>
       <li>
-        <a href="_sources/installation.md"
+        <a href="_sources/preprocess.md"
    class="headerbtn"
    data-toggle="tooltip"
 data-placement="left"
@@ -378,38 +378,9 @@ title="Print to PDF"
     <nav id="bd-toc-nav" aria-label="Page">
         <ul class="visible nav section-nav flex-column">
  <li class="toc-h2 nav-item toc-entry">
-  <a class="reference internal nav-link" href="#installing-vampy-using-conda">
-   Installing VaMPy using
-   <code class="docutils literal notranslate">
-    <span class="pre">
-     conda
-    </span>
-   </code>
+  <a class="reference internal nav-link" href="#meshing-and-boundary-conditions">
+   Meshing and boundary conditions
   </a>
- </li>
- <li class="toc-h2 nav-item toc-entry">
-  <a class="reference internal nav-link" href="#editable-installations">
-   Editable installations
-  </a>
-  <ul class="nav section-nav flex-column">
-   <li class="toc-h3 nav-item toc-entry">
-    <a class="reference internal nav-link" href="#installing-oasis">
-     Installing Oasis
-    </a>
-   </li>
-  </ul>
- </li>
- <li class="toc-h2 nav-item toc-entry">
-  <a class="reference internal nav-link" href="#running-vampy-using-docker">
-   Running VaMPy using Docker
-  </a>
-  <ul class="nav section-nav flex-column">
-   <li class="toc-h3 nav-item toc-entry">
-    <a class="reference internal nav-link" href="#note-on-docker">
-     Note on Docker
-    </a>
-   </li>
-  </ul>
  </li>
 </ul>
 
@@ -420,7 +391,7 @@ title="Print to PDF"
         <div class="col pl-md-3 pl-lg-5 content-container">
             <!-- Table of contents that is only displayed when printing the page -->
             <div id="jb-print-docs-body" class="onlyprint">
-                <h1>Installation</h1>
+                <h1>Pre-processing</h1>
                 <!-- Table of contents -->
                 <div id="print-main-content">
                     <div id="jb-print-toc">
@@ -431,38 +402,9 @@ title="Print to PDF"
                         <nav aria-label="Page">
                             <ul class="visible nav section-nav flex-column">
  <li class="toc-h2 nav-item toc-entry">
-  <a class="reference internal nav-link" href="#installing-vampy-using-conda">
-   Installing VaMPy using
-   <code class="docutils literal notranslate">
-    <span class="pre">
-     conda
-    </span>
-   </code>
+  <a class="reference internal nav-link" href="#meshing-and-boundary-conditions">
+   Meshing and boundary conditions
   </a>
- </li>
- <li class="toc-h2 nav-item toc-entry">
-  <a class="reference internal nav-link" href="#editable-installations">
-   Editable installations
-  </a>
-  <ul class="nav section-nav flex-column">
-   <li class="toc-h3 nav-item toc-entry">
-    <a class="reference internal nav-link" href="#installing-oasis">
-     Installing Oasis
-    </a>
-   </li>
-  </ul>
- </li>
- <li class="toc-h2 nav-item toc-entry">
-  <a class="reference internal nav-link" href="#running-vampy-using-docker">
-   Running VaMPy using Docker
-  </a>
-  <ul class="nav section-nav flex-column">
-   <li class="toc-h3 nav-item toc-entry">
-    <a class="reference internal nav-link" href="#note-on-docker">
-     Note on Docker
-    </a>
-   </li>
-  </ul>
  </li>
 </ul>
 
@@ -474,71 +416,27 @@ title="Print to PDF"
                 
               <div>
                 
-  <section class="tex2jax_ignore mathjax_ignore" id="installation">
-<h1>Installation<a class="headerlink" href="#installation" title="Permalink to this headline">#</a></h1>
-<section id="installing-vampy-using-conda">
-<h2>Installing VaMPy using <code class="docutils literal notranslate"><span class="pre">conda</span></code><a class="headerlink" href="#installing-vampy-using-conda" title="Permalink to this headline">#</a></h2>
-<p>We recommend installing <code class="docutils literal notranslate"><span class="pre">VaMPy</span></code> and its dependencies through <code class="docutils literal notranslate"><span class="pre">conda</span></code>.<br />
-Start by cloning into the repository:</p>
-<div class="highlight-console notranslate"><div class="highlight"><pre><span></span><span class="gp">$ </span>git<span class="w"> </span>clone<span class="w"> </span>https://github.com/KVSLab/VaMPy.git
-<span class="gp">$ </span><span class="nb">cd</span><span class="w"> </span>VaMPy
+  <section class="tex2jax_ignore mathjax_ignore" id="pre-processing">
+<h1>Pre-processing<a class="headerlink" href="#pre-processing" title="Permalink to this headline">#</a></h1>
+<section id="meshing-and-boundary-conditions">
+<h2>Meshing and boundary conditions<a class="headerlink" href="#meshing-and-boundary-conditions" title="Permalink to this headline">#</a></h2>
+<p>In this brief introduction, we present VaMPy’s functionality by
+preparing, simulating, and post-processing models of the <a class="reference external" href="https://en.wikipedia.org/wiki/Internal_carotid_artery">internal carotid
+artery</a> and the <a class="reference external" href="https://en.wikipedia.org/wiki/Atrium_(heart)">left atrium</a>, although
+the software may be readily used for other tubular or vascular shapes.</p>
+<p>The first step of using the Vascular Modeling Pypeline is
+pre-processing. The pre-processing scripts are located inside the
+<code class="docutils literal notranslate"><span class="pre">automatedPreProcessing</span></code> folder, and can be run by using the <code class="docutils literal notranslate"><span class="pre">vampy-mesh</span></code> command in the terminal. The script generates a mesh, boundary conditions, and probes for velocity and pressure sampling. Here we will perform pre-processing for the artery case located in the <code class="docutils literal notranslate"><span class="pre">tests</span></code> folder. In this example we pass the input model path (<code class="docutils literal notranslate"><span class="pre">-i</span></code>) and mesh coarsening factor (<code class="docutils literal notranslate"><span class="pre">-c</span></code>) command-line arguments:</p>
+<div class="highlight-console notranslate"><div class="highlight"><pre><span></span><span class="gp">$ </span>vampy-mesh<span class="w"> </span>-i<span class="w"> </span>tests/Case_test_artery/artery.vtp<span class="w"> </span>-c<span class="w"> </span><span class="m">1</span>.3
 </pre></div>
 </div>
-<p>Then, using the <code class="docutils literal notranslate"><span class="pre">environment.yml</span></code> file in the root of the repository, you can call:</p>
-<div class="highlight-console notranslate"><div class="highlight"><pre><span></span><span class="gp">$ </span>conda<span class="w"> </span>env<span class="w"> </span>update<span class="w"> </span>--file<span class="w"> </span>environment.yml<span class="w"> </span>--name<span class="w"> </span>your_environment
-</pre></div>
-</div>
-<p>Next, can now activate your environment by running::</p>
-<div class="highlight-console notranslate"><div class="highlight"><pre><span></span><span class="gp">$ </span>conda<span class="w"> </span>activate<span class="w"> </span>your_environment
-</pre></div>
-</div>
-<p>Finally, install <code class="docutils literal notranslate"><span class="pre">VaMPy</span></code> inside your <code class="docutils literal notranslate"><span class="pre">conda</span></code> environment using <code class="docutils literal notranslate"><span class="pre">pip</span></code>:</p>
-<div class="highlight-console notranslate"><div class="highlight"><pre><span></span><span class="gp">$ </span>python3<span class="w"> </span>-m<span class="w"> </span>pip<span class="w"> </span>install<span class="w"> </span>.
-</pre></div>
-</div>
-<p>Now you are all set, and can start using the Vascular Modeling Pypeline.</p>
-</section>
-<section id="editable-installations">
-<h2>Editable installations<a class="headerlink" href="#editable-installations" title="Permalink to this headline">#</a></h2>
-<p>If you want to make changes to any of the underlying packages, you should remove them from the <code class="docutils literal notranslate"><span class="pre">environment.yml</span></code> file,
-and install them from source, as described for <code class="docutils literal notranslate"><span class="pre">Oasis</span></code> in the next section.</p>
-<section id="installing-oasis">
-<h3>Installing Oasis<a class="headerlink" href="#installing-oasis" title="Permalink to this headline">#</a></h3>
-<p>To install an editable version of <a class="reference external" href="https://github.com/mikaem/Oasis">Oasis</a> on your machine, run the following commands
-inside your conda environment:</p>
-<div class="highlight-console notranslate"><div class="highlight"><pre><span></span><span class="gp">$ </span>git<span class="w"> </span>clone<span class="w"> </span>https://github.com/mikaem/Oasis
-<span class="gp">$ </span>pip<span class="w"> </span>install<span class="w"> </span>cppimport
-<span class="gp">$ </span>pip<span class="w"> </span>install<span class="w"> </span>--editable<span class="w"> </span>Oasis
-</pre></div>
-</div>
-<p>The <code class="docutils literal notranslate"><span class="pre">--editable</span></code> flag installs the project in editable mode meaning that any changes to the original package will be
-reflected directly in your environment.</p>
-</section>
-</section>
-<section id="running-vampy-using-docker">
-<h2>Running VaMPy using Docker<a class="headerlink" href="#running-vampy-using-docker" title="Permalink to this headline">#</a></h2>
-<p>A <code class="docutils literal notranslate"><span class="pre">Dockerfile</span></code> is supplied in the root directory of the repository, which can build a docker-image with all
-dependencies installed. The Docker-image can be built with the following command:</p>
-<div class="highlight-console notranslate"><div class="highlight"><pre><span></span><span class="gp">$ </span>docker<span class="w"> </span>build<span class="w"> </span>-t<span class="w"> </span>name_of_image<span class="w"> </span>-f<span class="w"> </span>Dockerfile<span class="w"> </span>.
-</pre></div>
-</div>
-<p>A Docker-container can then be started with the following command:</p>
-<div class="highlight-console notranslate"><div class="highlight"><pre><span></span><span class="gp">$ </span>docker<span class="w"> </span>run<span class="w"> </span>-ti<span class="w"> </span>--network<span class="o">=</span>host<span class="w"> </span>-e<span class="w"> </span><span class="nv">DISPLAY</span><span class="o">=</span><span class="nv">$DISPLAY</span><span class="w"> </span>-v<span class="w"> </span>/tmp/.X11-unix:/tmp/.X11-unix<span class="w"> </span>-v<span class="w"> </span><span class="k">$(</span><span class="nb">pwd</span><span class="k">)</span>:/root/shared<span class="w"> </span>-w<span class="w"> </span>/root/shared<span class="w"> </span>--rm<span class="w"> </span>--shm-size<span class="o">=</span>512m<span class="w"> </span>name_of_image
-</pre></div>
-</div>
-<p>To run the VaMPy GUI, you need to call:</p>
-<div class="highlight-console notranslate"><div class="highlight"><pre><span></span><span class="gp">$ </span>xhost<span class="w"> </span>+local:root
-</pre></div>
-</div>
-<p>on your system before running the scripts.</p>
-<section id="note-on-docker">
-<h3>Note on Docker<a class="headerlink" href="#note-on-docker" title="Permalink to this headline">#</a></h3>
-<p>Remember to call:</p>
-<div class="highlight-console notranslate"><div class="highlight"><pre><span></span><span class="go">xhost -local:root</span>
-</pre></div>
-</div>
-<p>on the host system when you are done running the Docker container.</p>
-</section>
+<p>When complete, a render window will pop up showing the meshed model, prope points, flow rate and pressure split, as shown in <a class="reference internal" href="#render"><span class="std std-numref">Fig. 1</span></a>. The script will save the volumetric mesh as <code class="docutils literal notranslate"><span class="pre">artery.vtu</span></code>, alongside a compressed DOLFIN mesh in <code class="docutils literal notranslate"><span class="pre">artery.xml.gz</span></code>, used for the computational fluid dynamics (CFD) simulations. The pre-processing script will also produce an info file and a probe file, named <code class="docutils literal notranslate"><span class="pre">artery_info.json</span></code> and <code class="docutils literal notranslate"><span class="pre">artery_probes</span></code>, respectively.</p>
+<figure class="align-default" id="render">
+<img alt="_images/render.png" src="_images/render.png" />
+<figcaption>
+<p><span class="caption-number">Fig. 1 </span><span class="caption-text">Visualization of the meshed artery model by running <code class="docutils literal notranslate"><span class="pre">vampy-mesh</span></code>.</span><a class="headerlink" href="#render" title="Permalink to this image">#</a></p>
+</figcaption>
+</figure>
 </section>
 </section>
 
@@ -569,17 +467,17 @@ dependencies installed. The Docker-image can be built with the following command
                 
     <!-- Previous / next buttons -->
 <div class='prev-next-area'>
-    <a class='left-prev' id="prev-link" href="index.html" title="previous page">
+    <a class='left-prev' id="prev-link" href="issues.html" title="previous page">
         <i class="fas fa-angle-left"></i>
         <div class="prev-next-info">
             <p class="prev-next-subtitle">previous</p>
-            <p class="prev-next-title">The Vascular Modeling Pypeline</p>
+            <p class="prev-next-title">Known issues</p>
         </div>
     </a>
-    <a class='right-next' id="next-link" href="issues.html" title="next page">
+    <a class='right-next' id="next-link" href="simulation.html" title="next page">
     <div class="prev-next-info">
         <p class="prev-next-subtitle">next</p>
-        <p class="prev-next-title">Known issues</p>
+        <p class="prev-next-title">Computational fluid dynamics</p>
     </div>
     <i class="fas fa-angle-right"></i>
     </a>

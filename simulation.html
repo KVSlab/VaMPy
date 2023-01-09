@@ -6,7 +6,7 @@
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" /><meta name="generator" content="Docutils 0.17.1: http://docutils.sourceforge.net/" />
 
-    <title>Installation &#8212; VaMPy</title>
+    <title>Computational fluid dynamics &#8212; VaMPy</title>
     
   <!-- Loaded before other Sphinx assets -->
   <link href="_static/styles/theme.css?digest=1999514e3f237ded88cf" rel="stylesheet">
@@ -52,8 +52,8 @@ const thebe_selector_output = ".output, .cell_output"
     <script async="async" src="_static/sphinx-thebe.js"></script>
     <link rel="index" title="Index" href="genindex.html" />
     <link rel="search" title="Search" href="search.html" />
-    <link rel="next" title="Known issues" href="issues.html" />
-    <link rel="prev" title="The Vascular Modeling Pypeline" href="index.html" />
+    <link rel="next" title="Post-processing" href="postprocess.html" />
+    <link rel="prev" title="Pre-processing" href="preprocess.html" />
     <meta name="viewport" content="width=device-width, initial-scale=1" />
     <meta name="docsearch:language" content="None">
     
@@ -118,9 +118,9 @@ const thebe_selector_output = ".output, .cell_output"
   Installation
  </span>
 </p>
-<ul class="current nav bd-sidenav">
- <li class="toctree-l1 current active">
-  <a class="current reference internal" href="#">
+<ul class="nav bd-sidenav">
+ <li class="toctree-l1">
+  <a class="reference internal" href="installation.html">
    Installation
   </a>
  </li>
@@ -135,14 +135,14 @@ const thebe_selector_output = ".output, .cell_output"
   Using VaMPy
  </span>
 </p>
-<ul class="nav bd-sidenav">
+<ul class="current nav bd-sidenav">
  <li class="toctree-l1">
   <a class="reference internal" href="preprocess.html">
    Pre-processing
   </a>
  </li>
- <li class="toctree-l1">
-  <a class="reference internal" href="simulation.html">
+ <li class="toctree-l1 current active">
+  <a class="current reference internal" href="#">
    Computational fluid dynamics
   </a>
  </li>
@@ -290,7 +290,7 @@ title="Source repository"
       </li>
       
       <li>
-        <a href="https://kvslab.github.io/VaMPy//issues/new?title=Issue%20on%20page%20%2Finstallation.html&body=Your%20issue%20content%20here."
+        <a href="https://kvslab.github.io/VaMPy//issues/new?title=Issue%20on%20page%20%2Fsimulation.html&body=Your%20issue%20content%20here."
    class="headerbtn"
    data-toggle="tooltip"
 data-placement="left"
@@ -318,7 +318,7 @@ title="Open an issue"
   <div class="menu-dropdown__content">
     <ul>
       <li>
-        <a href="_sources/installation.md"
+        <a href="_sources/simulation.md"
    class="headerbtn"
    data-toggle="tooltip"
 data-placement="left"
@@ -378,38 +378,19 @@ title="Print to PDF"
     <nav id="bd-toc-nav" aria-label="Page">
         <ul class="visible nav section-nav flex-column">
  <li class="toc-h2 nav-item toc-entry">
-  <a class="reference internal nav-link" href="#installing-vampy-using-conda">
-   Installing VaMPy using
+  <a class="reference internal nav-link" href="#simulations-in-oasis">
+   Simulations in
    <code class="docutils literal notranslate">
     <span class="pre">
-     conda
+     Oasis
     </span>
    </code>
   </a>
  </li>
  <li class="toc-h2 nav-item toc-entry">
-  <a class="reference internal nav-link" href="#editable-installations">
-   Editable installations
+  <a class="reference internal nav-link" href="#adjusting-simulation-parameters">
+   Adjusting simulation parameters
   </a>
-  <ul class="nav section-nav flex-column">
-   <li class="toc-h3 nav-item toc-entry">
-    <a class="reference internal nav-link" href="#installing-oasis">
-     Installing Oasis
-    </a>
-   </li>
-  </ul>
- </li>
- <li class="toc-h2 nav-item toc-entry">
-  <a class="reference internal nav-link" href="#running-vampy-using-docker">
-   Running VaMPy using Docker
-  </a>
-  <ul class="nav section-nav flex-column">
-   <li class="toc-h3 nav-item toc-entry">
-    <a class="reference internal nav-link" href="#note-on-docker">
-     Note on Docker
-    </a>
-   </li>
-  </ul>
  </li>
 </ul>
 
@@ -420,7 +401,7 @@ title="Print to PDF"
         <div class="col pl-md-3 pl-lg-5 content-container">
             <!-- Table of contents that is only displayed when printing the page -->
             <div id="jb-print-docs-body" class="onlyprint">
-                <h1>Installation</h1>
+                <h1>Computational fluid dynamics</h1>
                 <!-- Table of contents -->
                 <div id="print-main-content">
                     <div id="jb-print-toc">
@@ -431,38 +412,19 @@ title="Print to PDF"
                         <nav aria-label="Page">
                             <ul class="visible nav section-nav flex-column">
  <li class="toc-h2 nav-item toc-entry">
-  <a class="reference internal nav-link" href="#installing-vampy-using-conda">
-   Installing VaMPy using
+  <a class="reference internal nav-link" href="#simulations-in-oasis">
+   Simulations in
    <code class="docutils literal notranslate">
     <span class="pre">
-     conda
+     Oasis
     </span>
    </code>
   </a>
  </li>
  <li class="toc-h2 nav-item toc-entry">
-  <a class="reference internal nav-link" href="#editable-installations">
-   Editable installations
+  <a class="reference internal nav-link" href="#adjusting-simulation-parameters">
+   Adjusting simulation parameters
   </a>
-  <ul class="nav section-nav flex-column">
-   <li class="toc-h3 nav-item toc-entry">
-    <a class="reference internal nav-link" href="#installing-oasis">
-     Installing Oasis
-    </a>
-   </li>
-  </ul>
- </li>
- <li class="toc-h2 nav-item toc-entry">
-  <a class="reference internal nav-link" href="#running-vampy-using-docker">
-   Running VaMPy using Docker
-  </a>
-  <ul class="nav section-nav flex-column">
-   <li class="toc-h3 nav-item toc-entry">
-    <a class="reference internal nav-link" href="#note-on-docker">
-     Note on Docker
-    </a>
-   </li>
-  </ul>
  </li>
 </ul>
 
@@ -474,71 +436,58 @@ title="Print to PDF"
                 
               <div>
                 
-  <section class="tex2jax_ignore mathjax_ignore" id="installation">
-<h1>Installation<a class="headerlink" href="#installation" title="Permalink to this headline">#</a></h1>
-<section id="installing-vampy-using-conda">
-<h2>Installing VaMPy using <code class="docutils literal notranslate"><span class="pre">conda</span></code><a class="headerlink" href="#installing-vampy-using-conda" title="Permalink to this headline">#</a></h2>
-<p>We recommend installing <code class="docutils literal notranslate"><span class="pre">VaMPy</span></code> and its dependencies through <code class="docutils literal notranslate"><span class="pre">conda</span></code>.<br />
-Start by cloning into the repository:</p>
-<div class="highlight-console notranslate"><div class="highlight"><pre><span></span><span class="gp">$ </span>git<span class="w"> </span>clone<span class="w"> </span>https://github.com/KVSLab/VaMPy.git
-<span class="gp">$ </span><span class="nb">cd</span><span class="w"> </span>VaMPy
+  <section class="tex2jax_ignore mathjax_ignore" id="computational-fluid-dynamics">
+<h1>Computational fluid dynamics<a class="headerlink" href="#computational-fluid-dynamics" title="Permalink to this headline">#</a></h1>
+<section id="simulations-in-oasis">
+<h2>Simulations in <code class="docutils literal notranslate"><span class="pre">Oasis</span></code><a class="headerlink" href="#simulations-in-oasis" title="Permalink to this headline">#</a></h2>
+<p>Following pre-processing, the next step of using the Vascular Modeling Pypeline is performing the computational fluid dynamics (CFD) simulations with <code class="docutils literal notranslate"><span class="pre">oasis</span></code>.
+Assuming <code class="docutils literal notranslate"><span class="pre">oasis</span></code> has been installed, we can perform a CFD simulation for two cycles with 10 000 time steps per cycle and default parameters by executing the following command:</p>
+<div class="highlight-console notranslate"><div class="highlight"><pre><span></span><span class="gp">$ </span>vampy-oasis<span class="w"> </span><span class="nv">problem</span><span class="o">=</span>Artery<span class="w"> </span><span class="nv">mesh_path</span><span class="o">=</span>tests/Case_test_artery/artery.xml.gz<span class="w"> </span><span class="nv">save_solution_after_cycle</span><span class="o">=</span><span class="m">0</span>
 </pre></div>
 </div>
-<p>Then, using the <code class="docutils literal notranslate"><span class="pre">environment.yml</span></code> file in the root of the repository, you can call:</p>
-<div class="highlight-console notranslate"><div class="highlight"><pre><span></span><span class="gp">$ </span>conda<span class="w"> </span>env<span class="w"> </span>update<span class="w"> </span>--file<span class="w"> </span>environment.yml<span class="w"> </span>--name<span class="w"> </span>your_environment
-</pre></div>
-</div>
-<p>Next, can now activate your environment by running::</p>
-<div class="highlight-console notranslate"><div class="highlight"><pre><span></span><span class="gp">$ </span>conda<span class="w"> </span>activate<span class="w"> </span>your_environment
-</pre></div>
-</div>
-<p>Finally, install <code class="docutils literal notranslate"><span class="pre">VaMPy</span></code> inside your <code class="docutils literal notranslate"><span class="pre">conda</span></code> environment using <code class="docutils literal notranslate"><span class="pre">pip</span></code>:</p>
-<div class="highlight-console notranslate"><div class="highlight"><pre><span></span><span class="gp">$ </span>python3<span class="w"> </span>-m<span class="w"> </span>pip<span class="w"> </span>install<span class="w"> </span>.
-</pre></div>
-</div>
-<p>Now you are all set, and can start using the Vascular Modeling Pypeline.</p>
+<p>Running the simulations will create the result folder <code class="docutils literal notranslate"><span class="pre">results_artery</span></code> (specific to the <code class="docutils literal notranslate"><span class="pre">Artery.py</span></code> problem) located inside <code class="docutils literal notranslate"><span class="pre">src/vampy/simulation</span></code>, with the results and corresponding mesh saved compactly in HDF5 format.</p>
 </section>
-<section id="editable-installations">
-<h2>Editable installations<a class="headerlink" href="#editable-installations" title="Permalink to this headline">#</a></h2>
-<p>If you want to make changes to any of the underlying packages, you should remove them from the <code class="docutils literal notranslate"><span class="pre">environment.yml</span></code> file,
-and install them from source, as described for <code class="docutils literal notranslate"><span class="pre">Oasis</span></code> in the next section.</p>
-<section id="installing-oasis">
-<h3>Installing Oasis<a class="headerlink" href="#installing-oasis" title="Permalink to this headline">#</a></h3>
-<p>To install an editable version of <a class="reference external" href="https://github.com/mikaem/Oasis">Oasis</a> on your machine, run the following commands
-inside your conda environment:</p>
-<div class="highlight-console notranslate"><div class="highlight"><pre><span></span><span class="gp">$ </span>git<span class="w"> </span>clone<span class="w"> </span>https://github.com/mikaem/Oasis
-<span class="gp">$ </span>pip<span class="w"> </span>install<span class="w"> </span>cppimport
-<span class="gp">$ </span>pip<span class="w"> </span>install<span class="w"> </span>--editable<span class="w"> </span>Oasis
+<section id="adjusting-simulation-parameters">
+<h2>Adjusting simulation parameters<a class="headerlink" href="#adjusting-simulation-parameters" title="Permalink to this headline">#</a></h2>
+<p>The default parameters for CFD simulation have been chosen based on the authors’ experience and clinically reported hemodynamic parameters.
+However, changing any of the parameters is simply done by adding them as command line arguments.
+To demonstrate, consider the following Python snippet showing an overview of the parameters used for the <code class="docutils literal notranslate"><span class="pre">Artery.py</span></code> problem:</p>
+<div class="highlight-Python notranslate"><div class="highlight"><pre><span></span><span class="c1"># Parameters are in mm and ms</span>
+<span class="n">cardiac_cycle</span> <span class="o">=</span> <span class="nb">float</span><span class="p">(</span><span class="n">commandline_kwargs</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s2">&quot;cardiac_cycle&quot;</span><span class="p">,</span> <span class="mi">951</span><span class="p">))</span>
+<span class="n">number_of_cycles</span> <span class="o">=</span> <span class="nb">float</span><span class="p">(</span><span class="n">commandline_kwargs</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s2">&quot;number_of_cycles&quot;</span><span class="p">,</span> <span class="mi">2</span><span class="p">))</span>
+
+<span class="n">NS_parameters</span><span class="o">.</span><span class="n">update</span><span class="p">(</span>
+    <span class="c1"># Fluid parameters</span>
+    <span class="n">nu</span><span class="o">=</span><span class="mf">3.3018e-3</span><span class="p">,</span>  <span class="c1"># Kinematic viscosity: 0.0035 Pa-s / 1060 kg/m^3 = 3.3018E-6 m^2/s = 3.3018-3 mm^2/ms</span>
+    <span class="c1"># Geometry parameters</span>
+    <span class="n">id_in</span><span class="o">=</span><span class="p">[],</span>  <span class="c1"># Inlet boundary ID</span>
+    <span class="n">id_out</span><span class="o">=</span><span class="p">[],</span>  <span class="c1"># Outlet boundary IDs</span>
+    <span class="n">area_ratio</span><span class="o">=</span><span class="p">[],</span>  <span class="c1"># Area ratio for the flow outlets</span>
+    <span class="n">area_inlet</span><span class="o">=</span><span class="p">[],</span>  <span class="c1"># Area of inlet in [mm^2]</span>
+    <span class="c1"># Simulation parameters</span>
+    <span class="n">cardiac_cycle</span><span class="o">=</span><span class="n">cardiac_cycle</span><span class="p">,</span>  <span class="c1"># Duration of cardiac cycle [ms]</span>
+    <span class="n">T</span><span class="o">=</span><span class="n">cardiac_cycle</span> <span class="o">*</span> <span class="n">number_of_cycles</span><span class="p">,</span>  <span class="c1"># Simulation end time [ms]</span>
+    <span class="n">dt</span><span class="o">=</span><span class="mf">0.0951</span><span class="p">,</span>  <span class="c1"># Time step size [ms]</span>
+    <span class="n">dump_probe_frequency</span><span class="o">=</span><span class="mi">100</span><span class="p">,</span>  <span class="c1"># Dump frequency for sampling velocity &amp; pressure at probes along the centerline</span>
+    <span class="n">save_solution_frequency</span><span class="o">=</span><span class="mi">5</span><span class="p">,</span>  <span class="c1"># Save frequency for velocity and pressure field</span>
+    <span class="n">save_solution_after_cycle</span><span class="o">=</span><span class="mi">1</span><span class="p">,</span>  <span class="c1"># Store solution after 1 cardiac cycle</span>
+    <span class="c1"># Oasis specific parameters</span>
+    <span class="n">checkpoint</span><span class="o">=</span><span class="mi">500</span><span class="p">,</span>  <span class="c1"># Checkpoint frequency</span>
+    <span class="n">print_intermediate_info</span><span class="o">=</span><span class="mi">100</span><span class="p">,</span>  <span class="c1"># Frequency for printing solver statistics</span>
+    <span class="n">folder</span><span class="o">=</span><span class="s2">&quot;results_artery&quot;</span><span class="p">,</span>  <span class="c1"># Preferred results folder name</span>
+    <span class="n">mesh_path</span><span class="o">=</span><span class="n">commandline_kwargs</span><span class="p">[</span><span class="s2">&quot;mesh_path&quot;</span><span class="p">],</span>  <span class="c1"># Path to the mesh</span>
+    <span class="c1"># Solver parameters</span>
+    <span class="n">velocity_degree</span><span class="o">=</span><span class="mi">1</span><span class="p">,</span>  <span class="c1"># Polynomial order of finite element for velocity. Normally linear (1) or quadratic (2)</span>
+    <span class="n">pressure_degree</span><span class="o">=</span><span class="mi">1</span><span class="p">,</span>  <span class="c1"># Polynomial order of finite element for pressure. Normally linear (1)</span>
+    <span class="n">use_krylov_solvers</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span>
+    <span class="n">krylov_solvers</span><span class="o">=</span><span class="nb">dict</span><span class="p">(</span><span class="n">monitor_convergence</span><span class="o">=</span><span class="kc">False</span><span class="p">)</span>
+<span class="p">)</span>
 </pre></div>
 </div>
-<p>The <code class="docutils literal notranslate"><span class="pre">--editable</span></code> flag installs the project in editable mode meaning that any changes to the original package will be
-reflected directly in your environment.</p>
-</section>
-</section>
-<section id="running-vampy-using-docker">
-<h2>Running VaMPy using Docker<a class="headerlink" href="#running-vampy-using-docker" title="Permalink to this headline">#</a></h2>
-<p>A <code class="docutils literal notranslate"><span class="pre">Dockerfile</span></code> is supplied in the root directory of the repository, which can build a docker-image with all
-dependencies installed. The Docker-image can be built with the following command:</p>
-<div class="highlight-console notranslate"><div class="highlight"><pre><span></span><span class="gp">$ </span>docker<span class="w"> </span>build<span class="w"> </span>-t<span class="w"> </span>name_of_image<span class="w"> </span>-f<span class="w"> </span>Dockerfile<span class="w"> </span>.
+<p>To start a simulation that runs for five cardiac cycles, uses a coarser time step, and saves the solution less frequent we can run the following command:</p>
+<div class="highlight-console notranslate"><div class="highlight"><pre><span></span><span class="gp">$ </span>vampy-oasis<span class="w"> </span><span class="nv">problem</span><span class="o">=</span>Artery<span class="w"> </span><span class="nv">mesh_path</span><span class="o">=</span>tests/Case_test_artery/artery.xml.gz<span class="w"> </span><span class="nv">number_of_cycles</span><span class="o">=</span><span class="m">5</span><span class="w"> </span><span class="nv">dt</span><span class="o">=</span><span class="m">0</span>.951<span class="w"> </span><span class="nv">save_solution_frequency</span><span class="o">=</span><span class="m">20</span>
 </pre></div>
 </div>
-<p>A Docker-container can then be started with the following command:</p>
-<div class="highlight-console notranslate"><div class="highlight"><pre><span></span><span class="gp">$ </span>docker<span class="w"> </span>run<span class="w"> </span>-ti<span class="w"> </span>--network<span class="o">=</span>host<span class="w"> </span>-e<span class="w"> </span><span class="nv">DISPLAY</span><span class="o">=</span><span class="nv">$DISPLAY</span><span class="w"> </span>-v<span class="w"> </span>/tmp/.X11-unix:/tmp/.X11-unix<span class="w"> </span>-v<span class="w"> </span><span class="k">$(</span><span class="nb">pwd</span><span class="k">)</span>:/root/shared<span class="w"> </span>-w<span class="w"> </span>/root/shared<span class="w"> </span>--rm<span class="w"> </span>--shm-size<span class="o">=</span>512m<span class="w"> </span>name_of_image
-</pre></div>
-</div>
-<p>To run the VaMPy GUI, you need to call:</p>
-<div class="highlight-console notranslate"><div class="highlight"><pre><span></span><span class="gp">$ </span>xhost<span class="w"> </span>+local:root
-</pre></div>
-</div>
-<p>on your system before running the scripts.</p>
-<section id="note-on-docker">
-<h3>Note on Docker<a class="headerlink" href="#note-on-docker" title="Permalink to this headline">#</a></h3>
-<p>Remember to call:</p>
-<div class="highlight-console notranslate"><div class="highlight"><pre><span></span><span class="go">xhost -local:root</span>
-</pre></div>
-</div>
-<p>on the host system when you are done running the Docker container.</p>
-</section>
 </section>
 </section>
 
@@ -569,17 +518,17 @@ dependencies installed. The Docker-image can be built with the following command
                 
     <!-- Previous / next buttons -->
 <div class='prev-next-area'>
-    <a class='left-prev' id="prev-link" href="index.html" title="previous page">
+    <a class='left-prev' id="prev-link" href="preprocess.html" title="previous page">
         <i class="fas fa-angle-left"></i>
         <div class="prev-next-info">
             <p class="prev-next-subtitle">previous</p>
-            <p class="prev-next-title">The Vascular Modeling Pypeline</p>
+            <p class="prev-next-title">Pre-processing</p>
         </div>
     </a>
-    <a class='right-next' id="next-link" href="issues.html" title="next page">
+    <a class='right-next' id="next-link" href="postprocess.html" title="next page">
     <div class="prev-next-info">
         <p class="prev-next-subtitle">next</p>
-        <p class="prev-next-title">Known issues</p>
+        <p class="prev-next-title">Post-processing</p>
     </div>
     <i class="fas fa-angle-right"></i>
     </a>
