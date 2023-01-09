@@ -132,7 +132,7 @@ def compute_hemodynamic_indices(folder, nu, rho, dt, T, velocity_degree, save_fr
     counter = start
     for data in dataset:
         # Update file_counter
-        counter += step
+        counter += 1
 
         file_u.read(u, data)
 
