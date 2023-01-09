@@ -119,6 +119,11 @@ def visualize_probes(case_path, probe_saving_frequency, show_figure=True, save_f
     plt.clf()
 
 
+def main_probe():
+    folder, _, _, dt, _, _, probe_freq, _, _, _, _, _, _ = read_command_line()
+    visualize_probes(folder, probe_freq, save_figure=True)
+
+
 if __name__ == '__main__':
     folder, _, _, dt, _, _, probe_freq, _, _, _, _, _, _ = read_command_line()
     visualize_probes(folder, probe_freq, save_figure=True)

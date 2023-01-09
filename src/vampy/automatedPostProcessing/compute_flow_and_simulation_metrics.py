@@ -77,7 +77,7 @@ def compute_flow_and_simulation_metrics(folder, nu, dt, velocity_degree, T, time
         for t in times_to_average:
             time_step_to_average = int(t / dt / save_frequency)
             time_steps_to_average = [time_step_to_average + saved_time_steps_per_cycle * i for i in range(N_tmp)][
-                                    start_cycle - 1:]
+                start_cycle - 1:]
             dataset_names_t = [dataset_names[i] for i in time_steps_to_average]
             dataset_names_t_avg = [dataset_names[time_step_to_average]] * len(dataset_names_t)
             dataset_dict["_{}".format(t)] = dataset_names_t
@@ -461,6 +461,14 @@ def rate_of_dissipation(dissipation, u, v, mesh, h, nu):
     x = assemble(inner(f, v) / h * dx)
     dissipation.vector().set_local(x.get_local())
     dissipation.vector().apply("insert")
+
+
+def main_metrics():
+    folder, nu, _, dt, velocity_degree, _, _, T, save_frequency, times_to_average, start_cycle, step, \
+        average_over_cycles = read_command_line()
+
+    compute_flow_and_simulation_metrics(folder, nu, dt, velocity_degree, T, times_to_average, save_frequency,
+                                        start_cycle, step, average_over_cycles)
 
 
 if __name__ == '__main__':

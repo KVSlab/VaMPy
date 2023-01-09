@@ -24,6 +24,7 @@ from .simulation import Probe
 from .simulation import Womersley
 from .simulation import simulation_common
 
+
 meta = metadata("vampy")
 __version__ = meta["Version"]
 __author__ = meta["Author"]

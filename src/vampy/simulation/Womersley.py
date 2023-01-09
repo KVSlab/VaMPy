@@ -172,10 +172,10 @@ class WomersleyComponent(UserExpression):
         self.ns = np.arange(1, self.N)
 
         # Allocate for 0...N-1
-        alpha = np.zeros(self.N, dtype=np.complex)
-        self.beta = np.zeros(self.N, dtype=np.complex)
-        self.jn0_betas = np.zeros(self.N, dtype=np.complex)
-        self.jn1_betas = np.zeros(self.N, dtype=np.complex)
+        alpha = np.zeros(self.N, dtype=np.complex_)
+        self.beta = np.zeros(self.N, dtype=np.complex_)
+        self.jn0_betas = np.zeros(self.N, dtype=np.complex_)
+        self.jn1_betas = np.zeros(self.N, dtype=np.complex_)
 
         # Compute vectorized for 1...N-1 (keeping element 0 in arrays to make indexing work out later)
         alpha[1:] = self.radius * np.sqrt(self.ns * (self.omega / self.nu))
@@ -186,14 +186,13 @@ class WomersleyComponent(UserExpression):
     def _precompute_r_dependent_coeffs(self, y):
         pir2 = np.pi * self.radius ** 2
         # Compute intermediate terms for womersley function
-        r_dependent_coeffs = np.zeros(self.N, dtype=np.complex)
+        r_dependent_coeffs = np.zeros(self.N, dtype=np.complex_)
         if hasattr(self, 'Vn'):
             # r_dependent_coeffs[0] = (self.Vn[0]/2.0) * (1 - y**2)
             r_dependent_coeffs[0] = self.Vn[0] * (1 - y ** 2)
             for n in self.ns:
-                r_dependent_coeffs[n] = self.Vn[n] * (self.jn0_betas[n] - jn(0,
-                                                                             self.beta[n] * y)) / (
-                                                self.jn0_betas[n] - 1.0)
+                jn0b = self.jn0_betas[n]
+                r_dependent_coeffs[n] = self.Vn[n] * (jn0b - jn(0, self.beta[n] * y)) / (jn0b - 1.0)
         elif hasattr(self, 'Qn'):
             r_dependent_coeffs[0] = (2 * self.Qn[0] / pir2) * (1 - y ** 2)
             for n in self.ns:

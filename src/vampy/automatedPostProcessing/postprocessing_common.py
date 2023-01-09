@@ -179,7 +179,6 @@ def get_dataset_names(data_file, num_files=100000, step=1, start=1, print_info=T
         names (list): List of data file names
     """
     check = True
-
     # Find start file
     t0 = time()
     while check:

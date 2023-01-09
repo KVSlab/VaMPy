@@ -93,6 +93,11 @@ def compute_velocity_and_pressure(case_path, dt, velocity_degree, pressure_degre
     print("Results saved to: {}".format(case_path))
 
 
+def main_convert():
+    folder, _, _, dt, velocity_degree, pressure_degree, _, _, _, _, _, step, _ = read_command_line()
+    compute_velocity_and_pressure(folder, dt, velocity_degree, pressure_degree, step)
+
+
 if __name__ == '__main__':
     folder, _, _, dt, velocity_degree, pressure_degree, _, _, _, _, _, step, _ = read_command_line()
     compute_velocity_and_pressure(folder, dt, velocity_degree, pressure_degree, step)

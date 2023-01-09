@@ -9,20 +9,24 @@ authors = [{ name = "Henrik A. Kjeldsberg", email = "henriakj@simula.no" }]
 license = { file = "LICENSE" }
 readme = "README.md"
 dependencies = [
-    'numpy'
+    'numpy',
+    'matplotlib'
 ]
 
 [project.scripts]
-vampy = "vampy.__main__:main"
+vampy-mesh = "vampy.automatedPreProcessing.automatedPreProcessing:main_meshing"
+vampy-oasis = "vampy.run_oasis:main_oasis"
+vampy-hemo = "vampy.automatedPostProcessing.compute_hemodynamic_indices:main_hemo"
+vampy-metrics = "vampy.automatedPostProcessing.compute_flow_and_simulation_metrics:main_metrics"
+vampy-convert = "vampy.automatedPostProcessing.compute_velocity_and_pressure:main_convert"
+vampy-probe = "vampy.automatedPostProcessing.visualize_probes:main_probe"
 
 [project.optional-dependencies]
 test = [
     "flake8",
     'mypy',
-    "numpy",
     "pytest",
-    "pytest-cov",
-    "matplotlib"
+    "pytest-cov"
 ]
 
 [tool.pytest.ini_options]

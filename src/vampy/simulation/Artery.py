@@ -1,11 +1,10 @@
 import json
 import pickle
-from os import makedirs, path
+from os import makedirs
 from pprint import pprint
 
 import numpy as np
-from oasis.problems.NSfracStep import set_log_level, MPI, Measure, Mesh, assemble, Constant, DirichletBC, FacetNormal, \
-    Function, VectorFunctionSpace, HDF5File, NS_parameters, MeshFunction, assign, dot, Expression
+from oasis.problems.NSfracStep import *
 
 from vampy.simulation.Probe import Probes
 from vampy.simulation.Womersley import make_womersley_bcs, compute_boundary_geometry_acrn

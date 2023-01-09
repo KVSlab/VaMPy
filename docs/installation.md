@@ -1,13 +1,4 @@
 # Installation
-
-The Vascular Modeling Pypeline (VaMPy) is a collection of scripts used to prepare, run, and analyze cardiac and atrial
-morphologies. This includes pre-processing scripts for meshing and probe sampling, a
-[Oasis](https://github.com/mikaem/Oasis) problem file for simulating flow in
-the [internal carotid artery](https://en.wikipedia.org/wiki/Internal_carotid_artery), and a variety of post-processing
-scripts for computing WSS-based metrics, more advanced turbulence metrics, and a variety of morphological parameters in
-patient-specific geometries. The project is accessible through
-[GitHub](https://github.com/KVSlab/VaMPy).
-
 ## Installing VaMPy using `conda`
 
 We recommend installing `VaMPy` and its dependencies through `conda`.  
@@ -30,6 +21,12 @@ Next, can now activate your environment by running::
 $ conda activate your_environment
 ```
 
+Finally, install `VaMPy` inside your `conda` environment using `pip`: 
+
+``` console
+$ python3 -m pip install .
+```
+
 Now you are all set, and can start using the Vascular Modeling Pypeline.
 
 ## Editable installations
@@ -39,7 +36,7 @@ and install them from source, as described for `Oasis` in the next section.
 
 ### Installing Oasis
 
-To install an editable version of `Oasis <https://github.com/mikaem/Oasis>`_ on your machine, run the following command
+To install an editable version of [Oasis](https://github.com/mikaem/Oasis) on your machine, run the following commands
 inside your conda environment:
 
 ``` console
@@ -53,11 +50,11 @@ reflected directly in your environment.
 
 ## Running VaMPy using Docker
 
-A `Dockerfile` is supplied in the `docker`-folder in the repository, which can build a docker-image with all
-dependencies installed. The Docker-image can be built from the root of the repository with the following command:
+A `Dockerfile` is supplied in the root directory of the repository, which can build a docker-image with all
+dependencies installed. The Docker-image can be built with the following command:
 
 ``` console
-$ docker build -t name_of_image -f docker/Dockerfile .
+$ docker build -t name_of_image -f Dockerfile .
 ```
 
 A Docker-container can then be started with the following command:
@@ -74,7 +71,7 @@ $ xhost +local:root
 
 on your system before running the scripts.
 
-### Note on Docker::
+### Note on Docker
 
 Remember to call:
 

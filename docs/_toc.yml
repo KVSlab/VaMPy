@@ -12,7 +12,9 @@ parts:
 
   - caption: Using VaMPy
     chapters:
-    - file: overview
+    - file: preprocess
+    - file: simulation
+    - file: postprocess
     - file: quantities
     - file: cluster
     - file: features

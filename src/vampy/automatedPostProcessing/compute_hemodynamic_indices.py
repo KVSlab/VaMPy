@@ -253,6 +253,14 @@ def compute_hemodynamic_indices(folder, nu, rho, dt, T, velocity_degree, save_fr
         print("Results saved to: {}".format(folder))
 
 
+def main_hemo():
+    folder, nu, rho, dt, velocity_degree, _, _, T, save_frequency, _, start_cycle, step, average_over_cycles \
+        = read_command_line()
+
+    compute_hemodynamic_indices(folder, nu, rho, dt, T, velocity_degree, save_frequency, start_cycle,
+                                step, average_over_cycles)
+
+
 if __name__ == '__main__':
     folder, nu, rho, dt, velocity_degree, _, _, T, save_frequency, _, start_cycle, step, average_over_cycles \
         = read_command_line()

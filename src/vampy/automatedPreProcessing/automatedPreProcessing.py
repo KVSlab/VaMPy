@@ -347,13 +347,20 @@ def run_pre_processing(filename_model, verbose_print, smoothing_method, smoothin
             remove(file)
 
 
-def read_command_line():
+def read_command_line(input_path=None):
     """
     Read arguments from commandline and return all values in a dictionary.
+    If input_path is not None, then do not parse command line, but
+    only return default values.
+
+        Args:
+            input_path (str): Input file path, positional argument with default None.
     """
     parser = argparse.ArgumentParser(formatter_class=argparse.ArgumentDefaultsHelpFormatter,
                                      description="Automated pre-processing for vascular modeling.")
 
+    # Add common arguments
+    required = input_path is None
     v = parser.add_mutually_exclusive_group(required=False)
     v.add_argument('-v', '--verbosity',
                    dest='verbosity',
@@ -363,9 +370,8 @@ def read_command_line():
 
     parser.add_argument('-i', '--inputModel',
                         type=str,
-                        required=False,
+                        required=True,
                         dest='fileNameModel',
-                        default='example/surface.vtp',
                         help="Input file containing the 3D model.")
 
     parser.add_argument('-cM', '--compress-mesh',
@@ -468,7 +474,11 @@ def read_command_line():
                         help='Path to configuration file for remote simulation. ' +
                              'See example/ssh_config.json for details')
 
-    args, _ = parser.parse_known_args()
+    # Parse path to get default values
+    if required:
+        args = parser.parse_args()
+    else:
+        args = parser.parse_args(["-i" + input_path])
 
     if args.verbosity:
         print()
@@ -491,6 +501,10 @@ def read_command_line():
                 inlet_flow_extension_length=args.inletFlowExtLen, edge_length=args.edgeLength,
                 region_points=args.regionPoints, compress_mesh=args.compressMesh,
                 outlet_flow_extension_length=args.outletFlowExtLen)
+
+
+def main_meshing():
+    run_pre_processing(**read_command_line())
 
 
 if __name__ == "__main__":
