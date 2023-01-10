@@ -38,12 +38,12 @@ def problem_parameters(commandline_kwargs, NS_parameters, scalar_components, Sch
         # Override some problem specific parameters
         # Parameters are in mm and ms
         cardiac_cycle = float(commandline_kwargs.get("cardiac_cycle", 1000))
-        number_of_cycles = float(commandline_kwargs.get("number_of_cycles", 3))
+        number_of_cycles = float(commandline_kwargs.get("number_of_cycles", 1))
 
         NS_parameters.update(
             # Moving atrium parameters
-            dynamic_mesh=False,  # Run moving mesh simulation
-            compute_velocity_and_pressure=True,  # Only solve mesh equations
+            dynamic_mesh=True,  # Run moving mesh simulation
+            compute_velocity_and_pressure=False,  # Only solve mesh equations
             # Backflow parameters
             backflow_beta=1.0,
             backflow_facets=[],
@@ -58,11 +58,11 @@ def problem_parameters(commandline_kwargs, NS_parameters, scalar_components, Sch
             dt=1,  # # Time step size [ms]
             # Frequencies to save data
             dump_probe_frequency=500,  # Dump frequency for sampling velocity & pressure at probes along the centerline
-            save_solution_frequency=20,  # Save frequency for velocity and pressure field
-            save_solution_frequency_xdmf=5e10,  # Save frequency for velocity and pressure field
+            save_solution_frequency=20e5,  # Save frequency for velocity and pressure field
+            save_solution_frequency_xdmf=5,  # Save frequency for velocity and pressure field
             save_solution_after_cycle=0,  # Store solution after 1 cardiac cycle
-            save_volume_frequency=5e10,  # Save frequency for storing volume
-            save_flow_metrics_frequency=20,  # Frequency for storing flow metrics
+            save_volume_frequency=2,  # Save frequency for storing volume
+            save_flow_metrics_frequency=20e5,  # Frequency for storing flow metrics
             # Oasis specific parameters
             checkpoint=500,  # Overwrite solution in Checkpoint folder each checkpoint
             print_intermediate_info=200,
@@ -84,8 +84,10 @@ def problem_parameters(commandline_kwargs, NS_parameters, scalar_components, Sch
     points = np.load(point_path)
     p_MV = points[0]
     p_FE = points[1]
+    FE_rad = points[2][0]
     NS_parameters["p_MV"] = p_MV
     NS_parameters["p_FE"] = p_FE
+    NS_parameters["FE_rad"] = FE_rad
 
     if MPI.rank(MPI.comm_world) == 0:
         print("=== Starting simulation for MovingAtrium.py ===")

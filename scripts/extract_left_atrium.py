@@ -40,15 +40,20 @@ def extract_LA_and_LAA(folder, index, cycle, clip_volume=False):
         surface (vtkPolyData): A landmarked surface
     """
     # File paths
-    cyclename = "_cycle_{}".format(cycle) if cycle is not None else ""
-    filename = "{}{}".format(index, cyclename)
+    case = folder.split("/")[-1]
+    cyclename = "_cycle_{:02d}".format(int(cycle)) if cycle is not None else ""
+    filename = "{}_{}{}".format(case,index, cyclename)
     if clip_volume:
         filetype = ".vtu"
-        input_path = path.join(folder, "VTU", filename + filetype)
+        input_path = path.join(folder,"..", "VTU", filename + filetype)
     else:
         filetype = "vtp"
         input_path = path.join(folder, "VTP", filename + filetype)
     save_path = path.join(folder, "CLIPPED")
+    #filename = folder.split("/")[-1].split("_")[0]
+    #save_path = folder.rsplit("/", 1)[0]
+    #input_path = path.join(folder)  # , "VTU", filename + filetype)
+
     if not isdir(save_path):
         mkdir(save_path)
 
@@ -138,11 +143,11 @@ def extract_LA_and_LAA(folder, index, cycle, clip_volume=False):
             surface, clipped = clipped, surface
             if clip_volume:
                 volume, clipped_volume = clipped_volume, volume
-
         surface = attach_clipped_regions_to_surface(surface, clipped, center)
         if clip_volume:
             volume = attach_clipped_regions_to_surface(volume, clipped_volume, center, clip_volume=True)
 
+    # LA006, LA023
     # Clip MV
     print("--- Clipping MV")
     line = extract_single_line(centerlines, 0)
@@ -216,13 +221,20 @@ def extract_LA_or_LAA(folder, laa_point, index, cycle, clip_volume=False):
         surface (vtkPolyData): A landmarked surface
     """
     # File paths
-    cyclename = "_cycle_{}".format(cycle) if cycle is not None else ""
-    filename = "{}{}".format(index, cyclename)
+    case = folder.split("/")[-1]
+    cyclename = "_cycle_{:02d}".format(int(cycle)) if cycle is not None else ""
+    filename = "{}_{}{}".format(case,index, cyclename)
+
     if clip_volume:
         filetype = ".vtu"
     else:
         filetype = ".vtp"
     save_path = path.join(folder, "CLIPPED")
+
+    # filename = folder.split("/")[-1].split("_")[0]
+    # save_path = folder.rsplit("/", 1)[0]
+    # input_path = path.join(folder)  # , "VTU", filename + filetype)
+
     if not isdir(save_path):
         mkdir(save_path)
 
@@ -291,7 +303,7 @@ def extract_LA_or_LAA(folder, laa_point, index, cycle, clip_volume=False):
     # tolerance = int(0.025 * len(laa_l))  # FIXME: Input parameter?
 
     dAdX = np.gradient(a.T[0], np.mean(l[1:] - l[:-1]))
-    stop_id = np.nonzero(dAdX < -50)[0][-1] + 10  # + tolerance
+    stop_id = np.nonzero(dAdX < -150)[0][-1] + 10  # + tolerance
     normal = n[stop_id]
     center = area.GetPoint(stop_id)
 

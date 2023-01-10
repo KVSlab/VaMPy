@@ -328,9 +328,9 @@ def run_pre_processing(filename_model, verbose_print, smoothing_method, smoothin
                        file_name_distance_to_sphere_curv, file_name_voronoi, file_name_voronoi_smooth,
                        file_name_surface_smooth, file_name_model_flow_ext, file_name_clipped_model,
                        file_name_flow_centerlines, file_name_surface_name, file_name_remeshed]
-    for file in files_to_remove:
-        if path.exists(file):
-            remove(file)
+    # for file in files_to_remove:
+    #     if path.exists(file):
+    #         remove(file)
 
 
 def get_refine_region(capped_surface, case_name, centerlines, dir_path, file_name_refine_region_centerlines,
