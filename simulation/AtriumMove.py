@@ -95,7 +95,6 @@ def problem_parameters(commandline_kwargs, NS_parameters, scalar_components, Sch
         pprint(NS_parameters)
 
 
-
 def mesh(mesh_path, **NS_namespace):
     # Read mesh and print mesh information
     atrium_mesh = Mesh(mesh_path)
@@ -160,7 +159,8 @@ def create_bcs(NS_expressions, dynamic_mesh, x_, cardiac_cycle, backflow_facets,
     # Set wall boundary conditions
     if dynamic_mesh:
         # Moving walls
-        print("Loading displacement points")
+        if MPI.rank(MPI.comm_world) == 0:
+            print("Loading displacement points")
         points = np.load(mesh_path.split(".xml")[0] + "_points.np", allow_pickle=True)
 
         # Define wall movement
@@ -182,12 +182,12 @@ def create_bcs(NS_expressions, dynamic_mesh, x_, cardiac_cycle, backflow_facets,
         bc_wall = [DirichletBC(V, NS_expressions["wall_%s" % coord], boundary, id_wall) for coord in coords]
     else:
         # No slip on walls
-        bc_wall = [DirichletBC(V, Constant(0.0), boundary, id_wall)]
+        bc_wall = [DirichletBC(V, Constant(0.0), boundary, id_wall)] * len(coords)
 
     # Create lists with all velocity boundary conditions
-    bc_u0 = [bc_inlets[ID][0] for ID in id_in] + bc_wall
-    bc_u1 = [bc_inlets[ID][1] for ID in id_in] + bc_wall
-    bc_u2 = [bc_inlets[ID][2] for ID in id_in] + bc_wall
+    bc_u0 = [bc_inlets[ID][0] for ID in id_in] + [bc_wall[0]]
+    bc_u1 = [bc_inlets[ID][1] for ID in id_in] + [bc_wall[1]]
+    bc_u2 = [bc_inlets[ID][2] for ID in id_in] + [bc_wall[2]]
 
     bc_blood = [DirichletBC(V, Constant(0.0), boundary, ID) for ID in id_in]
 
