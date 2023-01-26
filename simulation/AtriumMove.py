@@ -55,13 +55,13 @@ def problem_parameters(commandline_kwargs, NS_parameters, scalar_components, Sch
             # Simulation parameters
             cardiac_cycle=cardiac_cycle,  # Run simulation for 1 cardiac cycles [ms]
             T=number_of_cycles * cardiac_cycle,  # Number of cycles
-            dt=1,  # # Time step size [ms]
+            dt=0.2,  # # Time step size [ms]
             # Frequencies to save data
             dump_probe_frequency=500,  # Dump frequency for sampling velocity & pressure at probes along the centerline
             save_solution_frequency=40,  # Save frequency for velocity and pressure field
             save_solution_frequency_xdmf=40,  # Save frequency for velocity and pressure field
             save_solution_after_cycle=0,  # Store solution after 1 cardiac cycle
-            save_volume_frequency=20e5,  # Save frequency for storing volume
+            save_volume_frequency=1e10,  # Save frequency for storing volume
             save_flow_metrics_frequency=40,  # Frequency for storing flow metrics
             # Oasis specific parameters
             checkpoint=500,  # Overwrite solution in Checkpoint folder each checkpoint
@@ -130,6 +130,7 @@ def create_bcs(NS_expressions, dynamic_mesh, x_, cardiac_cycle, backflow_facets,
         flow_rate_path = mesh_path.split(".xml")[0] + "_flowrate_moving.txt"
     else:
         flow_rate_path = mesh_path.split(".xml")[0] + "_flowrate_rigid.txt"
+
     t_values, Q_ = np.loadtxt(flow_rate_path).T
     t_values *= 1000  # Scale time in normalised flow wave form to [ms]
 
@@ -314,6 +315,7 @@ def temporal_hook(mesh, id_wall, id_out, cardiac_cycle, dt, t, save_solution_fre
                   eval_dict, dump_probe_frequency, p_, save_solution_at_tstep, nu, D_mitral, U, u_mean0, u_mean1,
                   u_mean2, save_flow_metrics_frequency, save_volume_frequency, save_solution_frequency_xdmf, u_vec,
                   viz_U, boundary, outlet_area, **NS_namespace):
+
     if tstep % save_volume_frequency == 0:
         compute_volume(mesh, t, newfolder)
 
