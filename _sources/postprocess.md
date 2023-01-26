@@ -5,6 +5,7 @@ Hemodynamic indices are computed in the script `compute_hemodynamic_indices.py` 
 Flow and simulation metrics are computed in the script `compute_flow_and_simulation_metrics.py` through the VaMPy-command `vampy-metrics`, and stored in a folder named `FlowMetrics`.
 Converting velocity and pressure to viewable `.xdmf`-format is performed in the script `compute_velocity_and_pressure.py` through the VaMPy-command `vampy-convert`.
 Finally, visualization of the velocity and pressure at the probes is implemented in `visualize_probes.py` and run through the `vampy-probe` command. 
+In the following examples, we assume the user is working from the root directory of VaMPy. 
 
 ## Hemodynamic indices 
 To start with we can compute the wall shear stress, oscillatory shear
