@@ -152,3 +152,8 @@ logs/
 # IDE related
 .idea/
 .DS_Store
+
+# User related
+scripts/
+results/
+models/
