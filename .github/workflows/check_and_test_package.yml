@@ -1,0 +1,110 @@
+name: CI
+
+on:
+  push:
+    # The CI is executed on every push on every branch
+    branches:
+      - master
+  pull_request:
+    # The CI is executed on every pull request to the main branch
+    branches:
+      - master
+
+  schedule:
+    # The CI is executed every day at 8am
+    - cron: "0 8 * * *"
+
+env:
+  CACHE_NUMBER: 2 # Increase to reset cache
+
+jobs:
+  check-code:
+    name: Check code
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v3
+
+      - name: Upgrade pip and setuptools
+        run: python3 -m pip install pip setuptools --upgrade
+
+      - name: Install types-paramiko
+        run: python3 -m pip install types-paramiko
+
+      - name: Install VaMPy
+        run: python3 -m pip install .[test]
+
+      - name: Check code with Flake8
+        run: python3 -m flake8
+
+#      - name: Check code with mypy
+#        run: python3 -m mypy --exclude 'src/vampy/simulation/Probe\.py'
+
+
+  test-code:
+    needs: check-code
+    strategy:
+      matrix:
+        include:
+          - os: ubuntu-latest
+            label: linux-64
+            prefix: /usr/share/miniconda3/envs/vampy
+          - os: macos-latest
+            label: osx-64
+            prefix: /Users/runner/miniconda3/envs/vampy
+
+    name: Test VaMPy on ${{ matrix.label }}
+    runs-on: ${{ matrix.os }}
+
+    # https://github.com/marketplace/actions/setup-miniconda#use-a-default-shell
+    defaults:
+      run:
+        shell: bash -l {0}
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v3
+
+      - name: Upgrade pip and setuptools
+        run: |
+          python3 -m pip install pip setuptools --upgrade
+
+      # See: https://github.com/marketplace/actions/setup-miniconda
+      - name: Setup miniconda
+        uses: conda-incubator/setup-miniconda@v2
+        with:
+          auto-update-conda: true
+          miniforge-variant: Mambaforge
+          channels: conda-forge
+          python-version: 3.8
+          activate-environment: vampy
+          environment-file: environment.yml
+          use-mamba: true
+
+      - name: Set cache date
+        run: echo "DATE=$(date +'%Y%m%d')" >> $GITHUB_ENV
+
+      - uses: actions/cache@v2
+        with:
+          path: ${{ matrix.prefix }}
+          key: ${{ matrix.label }}-conda-${{ hashFiles('environment.yml') }}-${{ env.DATE }}-${{ env.CACHE_NUMBER }}
+        id: cache
+
+      - name: Update environment
+        run: mamba env update -n vampy -f environment.yml
+        if: steps.cache.outputs.cache-hit != 'true'
+
+      - name: Install VaMPy
+        run: python3 -m pip install .[test]
+
+      - name: Run tests
+        run: python3 -m pytest tests
+
+      - name: Upload coverage report to codecov
+        if: matrix.os == 'ubuntu-latest'
+        uses: codecov/codecov-action@v3
+        with:
+          fail_ci_if_error: true
+          files: ./coverage.xml
+          verbose: true
