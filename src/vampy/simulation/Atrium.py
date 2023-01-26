@@ -3,7 +3,6 @@ import pickle
 from os import makedirs
 from pprint import pprint
 
-import numpy as np
 from oasis.problems.NSfracStep import *
 
 from vampy.simulation.Probe import Probes
