@@ -39,41 +39,63 @@ def extract_LA_and_LAA(folder, index, cycle, clip_volume=False):
     Output:
         surface (vtkPolyData): A landmarked surface
     """
+    # Case 1: Postprocessing
+    # folder = PATH/Hemodynamics/CASE or PATH/FlowMetrics/CASE (CASE_INDEX_cycle_N.vtp)
+
+    # Case 2: Clipping model (CASE_clipped.vtp or similar)
+    # folder = PATH/CASE
+
     # File paths
-    case = folder.split("/")[-1]
-    cyclename = "_cycle_{:02d}".format(int(cycle)) if cycle is not None else ""
-    filename = "{}_{}{}".format(case,index, cyclename)
-    if clip_volume:
-        filetype = ".vtu"
-        input_path = path.join(folder,"..", "VTU", filename + filetype)
+    casename = (folder.split("/")[-2])
+
+    if index is None:
+        try:
+            input_path = path.join(folder, casename + "_flowext.vtp")
+        except:
+            input_path = path.join(folder, casename + "_clipped.vtp")
+        save_path = path.join(folder, casename)
+
     else:
-        filetype = "vtp"
-        input_path = path.join(folder, "VTP", filename + filetype)
-    save_path = path.join(folder, "CLIPPED")
-    #filename = folder.split("/")[-1].split("_")[0]
-    #save_path = folder.rsplit("/", 1)[0]
-    #input_path = path.join(folder)  # , "VTU", filename + filetype)
+        cyclename = "_cycle_{:02d}".format(int(cycle)) if cycle is not None else ""
+        # filename = "{}{}_{:03d}".format(index, cyclename, casename)
+        filename = "{}{}".format(index, cyclename)
 
-    if not isdir(save_path):
-        mkdir(save_path)
+        if clip_volume:
+            filetype = ".vtu"
+            input_path = path.join(folder, "VTU", filename + filetype)
+        else:
+            filetype = ".vtp"
+            input_path = path.join(folder, "VTP", filename + filetype)
 
-    centerline_path = path.join(save_path, filename + "_centerline.vtp")
-    la_and_laa_path = path.join(save_path, filename + "_la_and_laa.vtp")
-    la_and_laa_path_vtu = path.join(save_path, filename + "_la_and_laa.vtu")
+        save_path = path.join(folder, "CLIPPED", filename)
+
+        if not isdir(save_path):
+            mkdir(save_path)
+
+    centerline_path = path.join(save_path + "_centerline.vtp")
+    la_and_laa_path = path.join(save_path + "_la_and_laa.vtp")
+    la_and_laa_path_vtu = path.join(save_path + "_la_and_laa.vtu")
 
     # Open the surface file.
     print("--- Load model file\n")
     if clip_volume:
         # TODO: Add as input parameter
+        # Load a pre-clipped model
         surface = read_polydata(
             "/Users/henriakj/PhD/Code/VaMPy/models/models_for_convergence_study_upf_af_n_1/LA_20CYCLE_3M/LA_remeshed_surface.vtp")
+        la_rigid_path = "/Users/henriakj/PhD/Code/VaMPy/models/models_for_rigid_vs_moving/LAMOV/LAMOV_remeshed_surface.vtp"
+        surface = read_polydata(la_rigid_path)
         volume = read_polydata(input_path)
     else:
         surface = read_polydata(input_path)
 
     if is_surface_capped(surface)[0]:
         capped_surface = surface
-        surface = get_uncapped_surface(capped_surface, gradients_limit=0.035, area_limit=15, circleness_limit=4)
+        surface = read_polydata(
+            "/Users/henriakj/PhD/Code/VaMPy/models/models_for_convergence_study_upf_af_n_1/LA_20CYCLE_3M/LA_remeshed_surface.vtp")
+        la_rigid_path = "/Users/henriakj/PhD/Code/VaMPy/models/models_for_rigid_vs_moving/LAMOV/LAMOV_remeshed_surface.vtp"
+        surface = read_polydata(la_rigid_path)
+        surface = get_uncapped_surface(capped_surface, gradients_limit=0.3, area_limit=15, circleness_limit=4)
     else:
         capped_surface = vmtk_cap_polydata(surface)
 
@@ -90,29 +112,27 @@ def extract_LA_and_LAA(folder, index, cycle, clip_volume=False):
     print("--- Clipping PVs")
     for i in range((len(outlets) // 3)):
         line_tmp = extract_single_line(centerlines, i)
-        line = extract_single_line(line_tmp, 0, start_id=20, end_id=line_tmp.GetNumberOfPoints() - 20)
+        start = int(line_tmp.GetNumberOfPoints() * 0.5)
+        stop = int(line_tmp.GetNumberOfPoints() * 0.95)
+        line = extract_single_line(line_tmp, 0, start_id=start, end_id=stop)
         line = compute_splined_centerline(line, nknots=10, isline=True)
 
         # Resample line
         l = get_curvilinear_coordinate(line)
-        step = 5 * np.mean(l[1:] - l[:-1])
+        step = 1 * np.mean(l[1:] - l[:-1])
         line = vmtk_resample_centerline(line, step)
-
         area, sections = vmtk_compute_centerline_sections(capped_surface, line)
 
         # Get arrays
         a = get_point_data_array("CenterlineSectionArea", area)
         n = get_point_data_array("FrenetTangent", area, k=3)
-        l = get_curvilinear_coordinate(area)
 
         # Compute 'derivative' of the area
-        dAdX = (a[1:, 0] - a[:-1, 0]) / (l[1:] - l[:-1])
+        dAdX = np.gradient(a.T[0], step)
 
-        # Check only from "middle" of lumen and towards PV
-        half_dAdX = int(len(dAdX) / 2)
-        dAdX = dAdX[half_dAdX:]
-
-        stop_id = np.nonzero(dAdX < -100)[0][-1] + half_dAdX + 3  # 10
+        # Find the largest change in cross-sectional area
+        tol = 5
+        stop_id = np.nonzero(dAdX < -50)[0][-1] + tol  # + tol  # + tol
 
         normal = n[stop_id]
         center = area.GetPoint(stop_id)
@@ -147,11 +167,10 @@ def extract_LA_and_LAA(folder, index, cycle, clip_volume=False):
         if clip_volume:
             volume = attach_clipped_regions_to_surface(volume, clipped_volume, center, clip_volume=True)
 
-    # LA006, LA023
     # Clip MV
     print("--- Clipping MV")
     line = extract_single_line(centerlines, 0)
-    line = extract_single_line(line, 0, start_id=0, end_id=line.GetNumberOfPoints() - 40)
+    line = extract_single_line(line, 0, start_id=int(line.GetNumberOfPoints() * 0.05))
     line = compute_splined_centerline(line, nknots=10, isline=True)
 
     l = get_curvilinear_coordinate(line)
@@ -164,11 +183,11 @@ def extract_LA_and_LAA(folder, index, cycle, clip_volume=False):
     # Get arrays
     a = get_point_data_array("CenterlineSectionArea", area)
     n = get_point_data_array("FrenetTangent", area, k=3)
-    l = get_curvilinear_coordinate(area)
 
     # Compute 'derivative' of the area
-    dAdX = (a[1:, 0] - a[:-1, 0]) / (l[1:] - l[:-1])
-    stop_id = 40  # np.nonzero(dAdX > 50)[0][0]
+    dAdX = np.gradient(a.T[0], step)
+    tol = 5
+    stop_id = np.nonzero(dAdX > 50)[0][0] + tol
 
     normal = n[stop_id]
     center = area.GetPoint(stop_id)
@@ -220,29 +239,40 @@ def extract_LA_or_LAA(folder, laa_point, index, cycle, clip_volume=False):
     Output:
         surface (vtkPolyData): A landmarked surface
     """
+    # Case 1: Postprocessing
+    # folder = PATH/Hemodynamics/CASE or PATH/FlowMetrics/CASE (CASE_INDEX_cycle_N.vtp)
+
+    # Case 2: Clipping model (CASE_clipped.vtp or similar)
+    # folder = PATH/CASE
+
     # File paths
-    case = folder.split("/")[-1]
-    cyclename = "_cycle_{:02d}".format(int(cycle)) if cycle is not None else ""
-    filename = "{}_{}{}".format(case,index, cyclename)
+    casename = (folder.split("/")[-2])
+    # folder = folder.rsplit("/", 1)[0]
+
+    if index is None:
+        filename = casename
+        save_path = path.join(folder, filename)
+
+    else:
+        cyclename = "_cycle_{:02d}".format(int(cycle)) if cycle is not None else ""
+        filename = "{}{}".format(index, cyclename)
+        # filename = "{}{}_{:03d}".format(index, cyclename, casename)
+
+        save_path = path.join(folder, "CLIPPED", filename)
+
+        if not isdir(save_path):
+            mkdir(save_path)
 
     if clip_volume:
         filetype = ".vtu"
     else:
         filetype = ".vtp"
-    save_path = path.join(folder, "CLIPPED")
 
-    # filename = folder.split("/")[-1].split("_")[0]
-    # save_path = folder.rsplit("/", 1)[0]
-    # input_path = path.join(folder)  # , "VTU", filename + filetype)
-
-    if not isdir(save_path):
-        mkdir(save_path)
-
-    laa_centerline_path = path.join(save_path, filename + "_laa_centerline.vtp")
-    clipped_model = path.join(save_path, filename + "_la_and_laa.vtp")
-    clipped_model_vtu = path.join(save_path, filename + "_la_and_laa.vtu")
-    la_model_path = path.join(save_path, filename + "_la" + filetype)
-    laa_model_path = path.join(save_path, filename + "_laa" + filetype)
+    laa_centerline_path = path.join(save_path + "_laa_centerline.vtp")
+    clipped_model = path.join(save_path + "_la_and_laa.vtp")
+    clipped_model_vtu = path.join(save_path + "_la_and_laa.vtu")
+    la_model_path = path.join(save_path + "_la" + filetype)
+    laa_model_path = path.join(save_path + "_laa" + filetype)
 
     # Open the surface file.
     print("--- Load model file\n")
@@ -283,13 +313,13 @@ def extract_LA_or_LAA(folder, laa_point, index, cycle, clip_volume=False):
 
     # Compute centerline to orifice from MV to get tangent
     laa_centerlines, _, _ = compute_centerlines(p_outlet, appendage_point, laa_centerline_path, capped_surface,
-                                                resampling=0.1, smooth=False, base_path=save_path)
-    id_start = int(laa_centerlines.GetNumberOfPoints() * 0.25)
-    id_stop = int(laa_centerlines.GetNumberOfPoints() * 0.9)
-    # for la013 id_stop = int(laa_centerlines.GetNumberOfPoints() * 0.6)
+                                                resampling=0.1, smooth=False, base_path=save_path, recompute=True)
+    id_start = int(laa_centerlines.GetNumberOfPoints() * 0.4)
+    id_stop = int(laa_centerlines.GetNumberOfPoints() * 0.8)
+
     line = extract_single_line(laa_centerlines, 0, start_id=id_start, end_id=id_stop)
     laa_l = get_curvilinear_coordinate(line)
-    step = 2.5 * np.mean(laa_l[1:] - laa_l[:-1])
+    step = 5 * np.mean(laa_l[1:] - laa_l[:-1])
     line = vmtk_resample_centerline(line, step)
     line = compute_splined_centerline(line, nknots=10, isline=True)
     area, sections = vmtk_compute_centerline_sections(surface, line)
@@ -297,13 +327,13 @@ def extract_LA_or_LAA(folder, laa_point, index, cycle, clip_volume=False):
     # Get arrays
     a = get_point_data_array("CenterlineSectionArea", area)
     n = get_point_data_array("FrenetTangent", area, k=3)
-    l = get_curvilinear_coordinate(area)
 
     # Stopping criteria
-    # tolerance = int(0.025 * len(laa_l))  # FIXME: Input parameter?
+    dAdX = np.gradient(a.T[0], step)
+    tol = 5
+    lim = -35
 
-    dAdX = np.gradient(a.T[0], np.mean(l[1:] - l[:-1]))
-    stop_id = np.nonzero(dAdX < -150)[0][-1] + 10  # + tolerance
+    stop_id = np.nonzero(dAdX < lim)[0][-1] + tol
     normal = n[stop_id]
     center = area.GetPoint(stop_id)
 
@@ -570,7 +600,7 @@ def provide_region_points(surface, provided_points, dir_path=None):
 if __name__ == "__main__":
     parser = argparse.ArgumentParser()
     parser.add_argument("--folder")
-    parser.add_argument("--index")
+    parser.add_argument("--index", default=None)  # Assume index != None if postprocessing
     parser.add_argument("--cycle", default=None)
     parser.add_argument("--laa", default=None, type=float, nargs="+")
     parser.add_argument("--volume", default=0, type=int)
@@ -583,14 +613,13 @@ if __name__ == "__main__":
 
     print("--- Extracting from: {}".format(folder))
 
-    scale = 1  # Get seconds
     t0 = time.time()
     extract_LA_and_LAA(folder, index, cycle, clip_volume)
     t1 = time.time()
     print("--- LA Extraction complete")
-    print("--- Time spent extracting LA & LAA: {:.3f} s".format((t1 - t0) / scale))
+    print("--- Time spent extracting LA & LAA: {:.3f} s".format((t1 - t0)))
 
     extract_LA_or_LAA(folder, laa_point, index, cycle, clip_volume)
     t2 = time.time()
     print("--- LAA Extraction complete")
-    print("--- Time spent extracting LAA: {:.3f} s".format((t2 - t1) / scale))
+    print("--- Time spent extracting LAA: {:.3f} s".format((t2 - t1)))
