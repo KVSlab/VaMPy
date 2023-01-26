@@ -1,0 +1,12 @@
+cff-version: 1.2.0
+message: "If you use VaMPy, please cite it as below."
+authors:
+- family-names: "Kjeldsberg"
+  given-names: "Henrik A."
+  orcid: "0000-0002-7764-4248"
+- family-names: "Bergersen"
+  given-names: "Aslak W."
+  orcid: "0000-0001-5063-3680"
+title: "VaMPy"
+version: "0.2.0"
+date-released: 2023-01-05
