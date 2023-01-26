@@ -209,7 +209,7 @@ def project_displacement(clamp_boundaries, distance, folder_extended_surfaces, f
 
     n_surfaces = len(extended_surfaces)
 
-    print("-- Projecting surfaces --")
+    print("--- Projecting surfaces ---")
     points = np.zeros((surface_extended.GetNumberOfPoints(), 3, n_surfaces))
     for i in range(n_surfaces):
         model_path = path.join(folder_moved_surfaces, extended_surfaces[i])
