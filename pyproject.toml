@@ -15,7 +15,6 @@ dependencies = [
 
 [project.scripts]
 vampy-mesh = "vampy.automatedPreProcessing.automatedPreProcessing:main_meshing"
-vampy-oasis = "vampy.run_oasis:main_oasis"
 vampy-hemo = "vampy.automatedPostProcessing.compute_hemodynamic_indices:main_hemo"
 vampy-metrics = "vampy.automatedPostProcessing.compute_flow_and_simulation_metrics:main_metrics"
 vampy-convert = "vampy.automatedPostProcessing.compute_velocity_and_pressure:main_convert"
