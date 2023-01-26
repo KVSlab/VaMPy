@@ -38,7 +38,10 @@ jobs:
         run: python3 -m pip install .[test]
 
       - name: Check code with Flake8
-        run: python3 -m flake8
+        run: python3 -m flake8 src
+
+      - name: Check tests with Flake8
+        run: python3 -m flake8 tests
 
 #      - name: Check code with mypy
 #        run: python3 -m mypy --exclude 'src/vampy/simulation/Probe\.py'
