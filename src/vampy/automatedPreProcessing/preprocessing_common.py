@@ -1,14 +1,3 @@
-from morphman.common import *
-from vtk.numpy_interface import dataset_adapter as dsa
-
-import ImportData
-from NetworkBoundaryConditions import FlowSplitting
-
-try:
-    from vmtkpointselector import *
-except ImportError:
-    pass
-import numpy as np
 from os import path
 
 import numpy as np
@@ -18,8 +7,8 @@ from morphman import vtk_clean_polydata, vtk_triangulate_surface, get_parameters
     get_vtk_point_locator, vtk_extract_feature_edges, get_uncapped_surface, vtk_compute_connectivity, \
     vtk_compute_mass_properties, extract_single_line, get_centerline_tolerance
 from vampy.automatedPreProcessing import ImportData
-from vampy.automatedPreProcessing.NetworkBoundaryConditions import FlowSplitting
 from vampy.automatedPreProcessing.vmtkpointselector import vmtkPickPointSeedSelector
+from vtk.numpy_interface import dataset_adapter as dsa
 
 # Global array names
 radiusArrayName = 'MaximumInscribedSphereRadius'
@@ -414,14 +403,14 @@ def dist_sphere_constant(surface, centerlines, region_center, misr_max, save_pat
         laa = read_polydata(laa_path)
         for i in range(len(region_center)):
             distance_to_sphere = compute_distance_to_surface(distance_to_sphere, laa, min_distance=edge_length / 3,
-                                                         max_distance=edge_length)
+                                                             max_distance=edge_length)
     else:
         for i in range(len(region_center)):
             distance_to_sphere = compute_distance_to_sphere(distance_to_sphere,
-                                                        region_center[i],
-                                                        min_distance=edge_length / 3,
-                                                        max_distance=edge_length,
-                                                        distance_scale=F * edge_length * 3 / 4 / (misr_max[i] * 2.))
+                                                            region_center[i],
+                                                            min_distance=edge_length / 3,
+                                                            max_distance=edge_length,
+                                                            distance_scale=F * edge_length * 3 / 4 / (misr_max[i] * 2.))
 
     element_size = edge_length + np.zeros((surface.GetNumberOfPoints(), 1))
     if len(region_center) != 0:
@@ -662,8 +651,8 @@ def generate_mesh(surface, add_boundary_layer):
         # meshGenerator.NumberOfSubLayers = n_layers[6]
         # normal, down down up up
         # Cases 1 2 3 4 5 6. nr 3 = default
-        cases = [0.55, 0.7, 0.85, 1.0, 1.15, 1.3]
-        layer_ratios = [0.25, 0.40, 0.55, 0.70, 0.85, 1]
+        # cases = [0.55, 0.7, 0.85, 1.0, 1.15, 1.3]
+        # layer_ratios = [0.25, 0.40, 0.55, 0.70, 0.85, 1]
         # meshGenerator.SubLayerRatio = layer_ratios[-3]
         # Do 0 - 2 - 4 - 10 layer study
         # Note: Defaults: 0.85, 4, 0.75
@@ -806,7 +795,7 @@ def setup_model_network(centerlines, file_name_probe_points, region_center, verb
 
     # Set the flow split and inlet boundary condition
     # Compute the outlet boundary condition percentages.
-    flowSplitting = FlowSplitting()
+    # flowSplitting = FlowSplitting()
     # flowSplitting.ComputeAlphas(network, verbose_print)
     # flowSplitting.ComputeBetas(network, verbose_print)
     # flowSplitting.CheckTotalFlowRate(network, verbose_print)
@@ -924,64 +913,6 @@ def add_flow_extension(surface, centerlines, include_outlet, extension_length=2.
 
     return surface_extended
 
-def tmp():
-    search_id = 0
-    f2_factors = [0.95, 1.25, 1.42, 1.11]
-    for i in range(centerlines.GetNumberOfLines()):
-        if include_outlet and i == outlet_id:
-            boundaryIds = vtk.vtkIdList()
-            boundaryIds.InsertNextId(i)
-        if not include_outlet:
-            boundaryIds = vtk.vtkIdList()
-            if i == 3:
-                boundaryIds.InsertNextId(1)
-            else:
-                boundaryIds.InsertNextId(0)
-            centerline = extract_single_line(centerlines, i)
-            r = centerlines.GetPointData().GetArray(radiusArrayName).GetTuple1(0 + search_id)
-            search_id += centerline.GetNumberOfPoints()
-            factor = extension_length / r * f2_factors[i]  # in [mm]
-
-            flowExtensionsFilter = vtkvmtk.vtkvmtkPolyDataFlowExtensionsFilter()
-            flowExtensionsFilter.SetInputData(surface)
-            flowExtensionsFilter.SetCenterlines(centerline)
-            flowExtensionsFilter.SetAdaptiveExtensionLength(1)
-            flowExtensionsFilter.SetAdaptiveNumberOfBoundaryPoints(1)
-            flowExtensionsFilter.SetExtensionRatio(factor)
-            flowExtensionsFilter.SetTransitionRatio(1.0)
-            flowExtensionsFilter.SetCenterlineNormalEstimationDistanceRatio(1.0)
-            if extension_mode == "centerlinedirection":
-                flowExtensionsFilter.SetExtensionModeToUseCenterlineDirection()
-            if extension_mode == "boundarynormal":
-                flowExtensionsFilter.SetExtensionModeToUseNormalToBoundary()
-            flowExtensionsFilter.SetInterpolationModeToThinPlateSpline()
-            flowExtensionsFilter.SetBoundaryIds(boundaryIds)
-            flowExtensionsFilter.SetSigma(1.0)
-            flowExtensionsFilter.Update()
-
-            surface = flowExtensionsFilter.GetOutput()
-
-    if include_outlet:
-        flowExtensionsFilter = vtkvmtk.vtkvmtkPolyDataFlowExtensionsFilter()
-        flowExtensionsFilter.SetInputData(surface)
-        flowExtensionsFilter.SetCenterlines(centerlines)
-        flowExtensionsFilter.SetAdaptiveExtensionLength(1)
-        flowExtensionsFilter.SetAdaptiveNumberOfBoundaryPoints(1)
-        flowExtensionsFilter.SetExtensionRatio(extension_length)
-        flowExtensionsFilter.SetTransitionRatio(1.0)
-        flowExtensionsFilter.SetCenterlineNormalEstimationDistanceRatio(1.0)
-        if extension_mode == "centerlinedirection":
-            flowExtensionsFilter.SetExtensionModeToUseCenterlineDirection()
-        if extension_mode == "boundarynormal":
-            flowExtensionsFilter.SetExtensionModeToUseNormalToBoundary()
-        flowExtensionsFilter.SetInterpolationModeToThinPlateSpline()
-        flowExtensionsFilter.SetBoundaryIds(boundaryIds)
-        flowExtensionsFilter.SetSigma(1.0)
-        flowExtensionsFilter.Update()
-
-        surface = flowExtensionsFilter.GetOutput()
-
-    return surface
 
 def remesh_surface(surface, edge_length, exclude=None):
     surface = dsa.WrapDataObject(surface)

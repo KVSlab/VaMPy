@@ -9,26 +9,27 @@ from oasis.problems.NSfracStep.MovingCommon import get_visualization_writers
 
 from Probe import Probes
 from Womersley import make_womersley_bcs, compute_boundary_geometry_acrn
-from common import store_u_mean, get_file_paths, print_mesh_information
-
-"""
-Problem file for running CFD simulation in left atrial models consisting of arbitrary number of pulmonary veins (PV) 
-(normally 3 to 7), and one outlet being the mitral valve. A Womersley velocity profile is applied at the inlets, where 
-the total flow rate is split between the area ratio of the PVs. The mitral valve is considered open with a constant 
-pressure of p=0. Flow rate and flow split values for the inlet condition are computed from the pre-processing script 
-automatedPreProcessing.py. The simulation is run for two cycles (adjustable), but only the results/solutions from the 
-second cycle are stored to avoid non-physiological effects from the first cycle. One cardiac cycle is set to 0.951 s 
-from [1], and scaled by a factor of 1000, hence all parameters are in [mm] or [ms].  
-
-[1] Hoi, Yiemeng, et al. "Characterization of volumetric flow rate waveforms at the carotid bifurcations of older 
-    adults." Physiological measurement 31.3 (2010): 291.
-"""
+from vampy.simulation.simulation_common import store_u_mean, get_file_paths, print_mesh_information
 
 # FEniCS specific command to control the desired level of logging, here set to critical errors
 set_log_level(50)
 
 
 def problem_parameters(commandline_kwargs, NS_parameters, scalar_components, Schmidt, NS_expressions, **NS_namespace):
+    """
+    Problem file for running CFD simulation in left atrial models consisting of arbitrary number of pulmonary veins (PV)
+    (normally 3 to 7), and one outlet being the mitral valve. A Womersley velocity profile is applied at the inlets,
+    where the total flow rate is split between the area ratio of the PVs. The mitral valve is considered open with a
+    constant pressure of p=0. Flow rate and flow split values for the inlet condition are computed from the
+    pre-processing script automatedPreProcessing.py. The simulation is run for two cycles (adjustable), but only the
+    results/solutions from the second cycle are stored to avoid non-physiological effects from the first cycle.
+    One cardiac cycle is set to 0.951 s from [1], and scaled by a factor of 1000, hence all parameters are in
+    [mm] or [ms].
+
+    [1] Hoi, Yiemeng, et al. "Characterization of volumetric flow rate waveforms at the carotid bifurcations of older
+        adults." Physiological measurement 31.3 (2010): 291.
+    """
+
     if "restart_folder" in commandline_kwargs.keys():
         restart_folder = commandline_kwargs["restart_folder"]
         f = open(path.join(restart_folder, 'params.dat'), 'rb')
@@ -315,7 +316,6 @@ def temporal_hook(mesh, id_wall, id_out, cardiac_cycle, dt, t, save_solution_fre
                   eval_dict, dump_probe_frequency, p_, save_solution_at_tstep, nu, D_mitral, U, u_mean0, u_mean1,
                   u_mean2, save_flow_metrics_frequency, save_volume_frequency, save_solution_frequency_xdmf, u_vec,
                   viz_U, boundary, outlet_area, **NS_namespace):
-
     if tstep % save_volume_frequency == 0:
         compute_volume(mesh, t, newfolder)
 

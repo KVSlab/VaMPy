@@ -1,22 +1,22 @@
 import argparse
 import sys
-from os import remove, path
+from os import path
 
 import numpy as np
+# Local imports
 from morphman import is_surface_capped, get_uncapped_surface, write_polydata, get_parameters, vtk_clean_polydata, \
     vtk_triangulate_surface, write_parameters, vmtk_cap_polydata, compute_centerlines, get_centerline_tolerance, \
     get_vtk_point_locator, extract_single_line, vtk_merge_polydata, get_point_data_array, smooth_voronoi_diagram, \
     create_new_surface, compute_centers, vmtk_smooth_surface, str2bool
 
-# Local imports
 from vampy.automatedPreProcessing import ToolRepairSTL
 from vampy.automatedPreProcessing.preprocessing_common import read_polydata, get_centers_for_meshing, \
     dist_sphere_diam, dist_sphere_curvature, dist_sphere_constant, get_regions_to_refine, radiusArrayName, \
     make_voronoi_diagram, add_flow_extension, write_mesh, mesh_alternative, generate_mesh, find_boundaries, \
-    compute_flow_rate, setup_model_network
+    compute_flow_rate, setup_model_network, remesh_surface
 from vampy.automatedPreProcessing.simulate import run_simulation
 from vampy.automatedPreProcessing.visualize import visualize
-from moving_common import get_point_map, project_displacement, save_displacement
+from .moving_common import get_point_map, project_displacement, save_displacement
 
 
 def run_pre_processing(filename_model, verbose_print, smoothing_method, smoothing_factor, meshing_method,
@@ -72,7 +72,6 @@ def run_pre_processing(filename_model, verbose_print, smoothing_method, smoothin
     file_name_surface_name = path.join(dir_path, case_name + "_remeshed_surface.vtp")
     file_name_xml_mesh = path.join(dir_path, case_name + ".xml")
     file_name_vtu_mesh = path.join(dir_path, case_name + ".vtu")
-    file_name_run_script = path.join(dir_path, case_name + ".sh")
     file_name_displacement_points = path.join(dir_path, case_name + "_points.np")
     folder_moved_surfaces = path.join(dir_path, case_name + "_moved")
     folder_extended_surfaces = path.join(dir_path, case_name + "_extended")
@@ -144,6 +143,8 @@ def run_pre_processing(filename_model, verbose_print, smoothing_method, smoothin
             # Get smooth Voronoi diagram
             if not path.isfile(file_name_voronoi_smooth):
                 if refine_region:
+                    # TODO: Fix region centerliens
+                    region_centerlines = None
                     smooth_voronoi = smooth_voronoi_diagram(voronoi, centerlines, smoothing_factor, region_centerlines)
                 else:
                     smooth_voronoi = smooth_voronoi_diagram(voronoi, centerlines, smoothing_factor)
@@ -259,9 +260,9 @@ def run_pre_processing(filename_model, verbose_print, smoothing_method, smoothin
             centerlines = read_polydata(file_name_flow_centerlines)
 
     if refine_region:
-        region_centerlines = get_refine_region(capped_surface, case_name, centerlines, dir_path,
-                                               file_name_refine_region_centerlines, file_name_region_centerlines,
-                                               is_atrium, misr_max, region_center, region_points, source, tol)
+        get_refine_region(capped_surface, case_name, centerlines, dir_path,
+                          file_name_refine_region_centerlines, file_name_region_centerlines,
+                          is_atrium, misr_max, region_center, region_points, source, tol)
 
     # Choose input for the mesh
     print("--- Computing distance to sphere\n")
@@ -329,11 +330,11 @@ def run_pre_processing(filename_model, verbose_print, smoothing_method, smoothin
         run_simulation(config_path, dir_path, case_name)
 
     print("--- Removing unused pre-processing files")
-    files_to_remove = [file_name_centerlines, file_name_refine_region_centerlines, file_name_region_centerlines,
-                       file_name_distance_to_sphere_diam, file_name_distance_to_sphere_const,
-                       file_name_distance_to_sphere_curv, file_name_voronoi, file_name_voronoi_smooth,
-                       file_name_surface_smooth, file_name_model_flow_ext, file_name_clipped_model,
-                       file_name_flow_centerlines, file_name_surface_name, file_name_remeshed]
+    # files_to_remove = [file_name_centerlines, file_name_refine_region_centerlines, file_name_region_centerlines,
+    #                    file_name_distance_to_sphere_diam, file_name_distance_to_sphere_const,
+    #                    file_name_distance_to_sphere_curv, file_name_voronoi, file_name_voronoi_smooth,
+    #                    file_name_surface_smooth, file_name_model_flow_ext, file_name_clipped_model,
+    #                    file_name_flow_centerlines, file_name_surface_name, file_name_remeshed]
     # for file in files_to_remove:
     #     if path.exists(file):
     #         remove(file)
