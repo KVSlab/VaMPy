@@ -10,7 +10,7 @@ paraview.simple._DisableFirstRenderCameraReset()
 
 def convert_to_polydata(folder, nr, index, cycle):
     rRTxdmf = Xdmf3ReaderS(registrationName='{}.xdmf'.format(index),
-                           FileName=[path.join(folder, '{}_cycle_{}.xdmf'.format(index, cycle))])
+                           FileName=[path.join(folder, '{}_cycle_{:02d}.xdmf'.format(index, int(cycle)))])
     rRTxdmf.PointArrays = ['{}'.format(index)]
 
     # get active view
@@ -124,11 +124,11 @@ def convert_to_polydata(folder, nr, index, cycle):
     renderView1.OrientationAxesVisibility = 0
     # SaveData('/Users/henriakj/PhD/Oasis/results_moving_atrium/{}/data/{}/Solutions/{}.vtp'.format(model, nr, index),
     #         proxy=extractSurface1, PointDataArrays=['{}'.format(index)])
-    xdmf_path = path.join(folder, "XDMF")
+    xdmf_path = path.join(folder, "VTP")
     if not isdir(xdmf_path):
         os.mkdir(xdmf_path)
 
-    SaveData(os.path.join(xdmf_path, '{}_cycle_{}.vtp'.format(index, cycle)),
+    SaveData(os.path.join(xdmf_path, '{}_cycle_{:02d}.vtp'.format(index, int(cycle))),
              proxy=extractSurface1, PointDataArrays=['{}'.format(index)])
 
     # ================================================================
