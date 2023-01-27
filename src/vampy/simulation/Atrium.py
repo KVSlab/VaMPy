@@ -4,9 +4,8 @@ from os import makedirs
 from pprint import pprint
 
 import numpy as np
-from oasis.problems.NSfracStep import *
-
-from vampy.simulation.Probe import Probes
+from dolfin import set_log_level
+from vampy.simulation.Probe import Probes  # type: ignore
 from vampy.simulation.Womersley import make_womersley_bcs, compute_boundary_geometry_acrn
 from vampy.simulation.simulation_common import store_u_mean, get_file_paths, print_mesh_information
 
