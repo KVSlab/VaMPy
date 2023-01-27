@@ -5,7 +5,7 @@ from vampy.automatedPreProcessing.DisplayData import DisplayModel, VtkPointCloud
 version = vtk.vtkVersion().GetVTKMajorVersion()
 
 
-def visualize(network_elements, probe_points, output_surface, mean_inflow_rate):
+def visualize_model(network_elements, probe_points, output_surface, mean_inflow_rate):
     """
     Visualize surface model / mesh with distributed flow rates at each inlet/outlet
     in an interactive VTK window.

@@ -2,12 +2,9 @@ import json
 import pickle
 from os import makedirs, path
 from pprint import pprint
-
-import numpy as np
-from dolfin import MPI, HDF5File, assign, assemble, Function, VectorFunctionSpace, Constant, FacetNormal, DirichletBC, \
-    Mesh, MeshFunction, Measure, dot, Expression
 from dolfin import set_log_level
-from oasis import NS_parameters
+
+from oasis.problems.NSfracStep import *
 from vampy.simulation.Probe import Probes  # type: ignore
 from vampy.simulation.Womersley import make_womersley_bcs, compute_boundary_geometry_acrn
 from vampy.simulation.simulation_common import get_file_paths, store_u_mean, print_mesh_information

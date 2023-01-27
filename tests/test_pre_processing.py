@@ -13,7 +13,7 @@ def test_pre_processing():
                              smoothing_method="taubin",
                              refine_region=False,
                              coarsening_factor=1.3,
-                             viz=False,
+                             visualize=False,
                              compress_mesh=False,
                              outlet_flow_extension_length=1,
                              inlet_flow_extension_length=1
