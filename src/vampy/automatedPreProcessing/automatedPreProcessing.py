@@ -15,11 +15,11 @@ from vampy.automatedPreProcessing.preprocessing_common import read_polydata, get
     make_voronoi_diagram, add_flow_extension, write_mesh, mesh_alternative, generate_mesh, find_boundaries, \
     compute_flow_rate, setup_model_network
 from vampy.automatedPreProcessing.simulate import run_simulation
-from vampy.automatedPreProcessing.visualize import visualize
+from vampy.automatedPreProcessing.visualize import visualize_model
 
 
-def run_pre_processing(filename_model, verbose_print, smoothing_method, smoothing_factor, meshing_method,
-                       refine_region, is_atrium, create_flow_extensions, viz, config_path, coarsening_factor,
+def run_pre_processing(input_model, verbose_print, smoothing_method, smoothing_factor, meshing_method,
+                       refine_region, is_atrium, add_flow_extensions, visualize, config_path, coarsening_factor,
                        inlet_flow_extension_length, outlet_flow_extension_length, edge_length, region_points,
                        compress_mesh):
     """
@@ -29,15 +29,15 @@ def run_pre_processing(filename_model, verbose_print, smoothing_method, smoothin
     Runs simulation of meshed case on a remote ssh server if server configuration is provided.
 
     Args:
-        filename_model (str): Name of case
+        input_model (str): Name of case
         verbose_print (bool): Toggles verbose mode
         smoothing_method (str): Method for surface smoothing
         smoothing_factor (float): Smoothing parameter
         meshing_method (str): Method for meshing
         refine_region (bool): Refines selected region of input if True
         is_atrium (bool): Determines whether this is an atrium case
-        create_flow_extensions (bool): Adds flow extensions to mesh if True
-        viz (bool): Visualize resulting surface model with flow rates
+        add_flow_extensions (bool): Adds flow extensions to mesh if True
+        visualize (bool): Visualize resulting surface model with flow rates
         config_path (str): Path to configuration file for remote simulation
         coarsening_factor (float): Refine or coarsen the standard mesh size with given factor
         region_points (list): User defined points to define which region to refine
@@ -47,8 +47,8 @@ def run_pre_processing(filename_model, verbose_print, smoothing_method, smoothin
         compress_mesh (bool): Compresses finalized mesh if True
     """
     # Get paths
-    case_name = filename_model.rsplit(path.sep, 1)[-1].rsplit('.')[0]
-    dir_path = filename_model.rsplit(path.sep, 1)[0]
+    case_name = input_model.rsplit(path.sep, 1)[-1].rsplit('.')[0]
+    dir_path = input_model.rsplit(path.sep, 1)[0]
 
     # Naming conventions
     file_name_centerlines = path.join(dir_path, case_name + "_centerlines.vtp")
@@ -72,7 +72,7 @@ def run_pre_processing(filename_model, verbose_print, smoothing_method, smoothin
 
     # Open the surface file.
     print("--- Load model file\n")
-    surface = read_polydata(filename_model)
+    surface = read_polydata(input_model)
 
     # Check if surface is closed and uncapps model if True
     if is_surface_capped(surface)[0] and smoothing_method != "voronoi":
@@ -210,7 +210,7 @@ def run_pre_processing(filename_model, verbose_print, smoothing_method, smoothin
             surface = surface_uncapped
 
             # Smoothing to improve the quality of the elements
-            # Consider to add a subdivision here as well.
+            # Consider adding a subdivision here as well.
             surface = vmtk_smooth_surface(surface, "laplace", iterations=200)
 
             # Write surface
@@ -234,7 +234,7 @@ def run_pre_processing(filename_model, verbose_print, smoothing_method, smoothin
         print("--- No smoothing of surface\n")
 
     # Add flow extensions
-    if create_flow_extensions:
+    if add_flow_extensions:
         if not path.isfile(file_name_model_flow_ext):
             print("--- Adding flow extensions\n")
             # Add extension normal on boundary for atrium models
@@ -256,7 +256,7 @@ def run_pre_processing(filename_model, verbose_print, smoothing_method, smoothin
     capped_surface = vmtk_cap_polydata(surface_extended)
 
     # Get new centerlines with the flow extensions
-    if create_flow_extensions:
+    if add_flow_extensions:
         if not path.isfile(file_name_flow_centerlines):
             print("--- Compute the model centerlines with flow extension.\n")
             # Compute the centerlines.
@@ -326,10 +326,10 @@ def run_pre_processing(filename_model, verbose_print, smoothing_method, smoothin
     find_boundaries(path.join(dir_path, case_name), mean_inflow_rate, network, mesh, verbose_print, is_atrium)
 
     # Display the flow split at the outlets, inlet flow rate, and probes.
-    if viz:
+    if visualize:
         print("--- Visualizing flow split at outlets, inlet flow rate, and probes in VTK render window. ")
         print("--- Press 'q' inside the render window to exit.")
-        visualize(network.elements, probe_points, surface_extended, mean_inflow_rate)
+        visualize_model(network.elements, probe_points, surface_extended, mean_inflow_rate)
 
     # Start simulation though ssh, without password
     if config_path is not None:
@@ -368,66 +368,62 @@ def read_command_line(input_path=None):
                    default=False,
                    help="Activates the verbose mode.")
 
-    parser.add_argument('-i', '--inputModel',
+    parser.add_argument('-i', '--input-model',
                         type=str,
                         required=True,
-                        dest='fileNameModel',
-                        help="Input file containing the 3D model.")
+                        help="Path to input model containing the 3D model. Expected format is VTK/VTP or STL.")
 
-    parser.add_argument('-cM', '--compress-mesh',
+    parser.add_argument('-cm', '--compress-mesh',
                         type=str2bool,
                         required=False,
-                        dest='compressMesh',
                         default=True,
                         help="Compress output mesh after generation.")
 
-    parser.add_argument('-sM', '--smoothingMethod',
+    parser.add_argument('-sm', '--smoothing-method',
                         type=str,
                         required=False,
-                        dest='smoothingMethod',
                         default="no_smooth",
                         choices=["voronoi", "no_smooth", "laplace", "taubin"],
                         help="Smoothing method, for now only Voronoi smoothing is available." +
-                             " For Voronoi smoothing you can also control smoothingFactor" +
-                             " (default = 0.25).")
+                             " For Voronoi smoothing you can also control the smoothing factor with " +
+                             "--smoothing-factor (default = 0.25).")
 
-    parser.add_argument('-c', '--coarseningFactor',
+    parser.add_argument('-c', '--coarsening-factor',
                         type=float,
                         required=False,
-                        dest='coarseningFactor',
                         default=1.0,
                         help="Refine or coarsen the standard mesh size. The higher the value the coarser the mesh.")
 
-    parser.add_argument('-sF', '--smoothingFactor',
+    parser.add_argument('-sf', '--smoothing-factor',
                         type=float,
                         required=False,
-                        dest='smoothingFactor',
                         default=0.25,
-                        help="smoothingFactor for VoronoiSmoothing, removes all spheres which" +
+                        help="Smoothing factor for Voronoi smoothing, removes all spheres which" +
                              " has a radius < MISR*(1-0.25), where MISR varying along the centerline.")
 
-    parser.add_argument('-m', '--meshingMethod',
-                        dest="meshingMethod",
+    parser.add_argument('-m', '--meshing-method',
                         type=str,
                         choices=["diameter", "curvature", "constant"],
-                        default="diameter")
+                        default="diameter",
+                        help="Determines method of meshing. The method 'constant' is supplied with a constant edge " +
+                             "length controlled by the -el argument, resulting in a constant density mesh. " +
+                             "The 'curvature' method and 'diameter' method produces a variable density mesh," +
+                             " based on the surface curvature and the distance from the " +
+                             "centerline to the surface, respectively.")
 
     parser.add_argument('-el', '--edge-length',
-                        dest="edgeLength",
                         default=None,
                         type=float,
-                        help="Characteristic edge length used for meshing.")
+                        help="Characteristic edge length used for the 'constant' meshing method.")
 
     refine_region = parser.add_mutually_exclusive_group(required=False)
     refine_region.add_argument('-r', '--refine-region',
                                action='store_true',
-                               dest="refineRegion",
                                default=False,
                                help="Determine whether or not to refine a specific region of " +
                                     "the input model")
 
     parser.add_argument('-rp', '--region-points',
-                        dest="regionPoints",
                         type=float,
                         nargs="+",
                         default=None,
@@ -437,39 +433,33 @@ def read_command_line(input_path=None):
                              " --region-points 0.1 5 -1 1 5.24 3.21")
 
     atrium = parser.add_mutually_exclusive_group(required=False)
-    atrium.add_argument('-at', '--atrium',
-                        dest="isAtrium",
+    atrium.add_argument('-at', '--is-atrium',
                         action="store_true",
                         default=False,
-                        help="Determine whether or not the model is an Atrium model.")
+                        help="Determine whether or not the model is an atrium model.")
 
-    parser.add_argument('-f', '--flowext',
-                        dest="flowExtension",
+    parser.add_argument('-f', '--add-flowextensions',
                         default=True,
                         type=str2bool,
                         help="Add flow extensions to to the model.")
 
-    parser.add_argument('-fli', '--inletFlowext',
-                        dest="inletFlowExtLen",
+    parser.add_argument('-fli', '--inlet-flowextension',
                         default=5,
                         type=float,
                         help="Length of flow extensions at inlet(s).")
 
-    parser.add_argument('-flo', '--outletFlowext',
-                        dest="outletFlowExtLen",
+    parser.add_argument('-flo', '--outlet-flowextension',
                         default=5,
                         type=float,
                         help="Length of flow extensions at outlet(s).")
 
-    parser.add_argument('-vz', '--visualize',
-                        dest="viz",
+    parser.add_argument('-viz', '--visualize',
                         default=True,
                         type=str2bool,
                         help="Visualize surface, inlet, outlet and probes after meshing.")
 
-    parser.add_argument('-sc', '--simulation-config',
+    parser.add_argument('-cp', '--config-path',
                         type=str,
-                        dest="config",
                         default=None,
                         help='Path to configuration file for remote simulation. ' +
                              'See example/ssh_config.json for details')
@@ -494,13 +484,13 @@ def read_command_line(input_path=None):
 
     verbose_print(args)
 
-    return dict(filename_model=args.fileNameModel, verbose_print=verbose_print, smoothing_method=args.smoothingMethod,
-                smoothing_factor=args.smoothingFactor, meshing_method=args.meshingMethod,
-                refine_region=args.refineRegion, is_atrium=args.isAtrium, create_flow_extensions=args.flowExtension,
-                viz=args.viz, config_path=args.config, coarsening_factor=args.coarseningFactor,
-                inlet_flow_extension_length=args.inletFlowExtLen, edge_length=args.edgeLength,
-                region_points=args.regionPoints, compress_mesh=args.compressMesh,
-                outlet_flow_extension_length=args.outletFlowExtLen)
+    return dict(input_model=args.input_model, verbose_print=verbose_print, smoothing_method=args.smoothing_method,
+                smoothing_factor=args.smoothing_factor, meshing_method=args.meshing_method,
+                refine_region=args.refine_region, is_atrium=args.is_atrium, add_flow_extensions=args.add_flowextensions,
+                visualize=args.visualize, config_path=args.config_path, coarsening_factor=args.coarsening_factor,
+                inlet_flow_extension_length=args.inlet_flowextension, edge_length=args.edge_length,
+                region_points=args.region_points, compress_mesh=args.compress_mesh,
+                outlet_flow_extension_length=args.outlet_flowextension)
 
 
 def main_meshing():
