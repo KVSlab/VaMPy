@@ -62,15 +62,17 @@ def extract_LA_and_LAA(folder, index, cycle, clip_volume=False):
 
         if clip_volume:
             filetype = ".vtu"
-            input_path = path.join(folder, "VTU", filename + filetype)
+            input_path = path.join(folder, filename + filetype)
         else:
             filetype = ".vtp"
-            input_path = path.join(folder, "VTP", filename + filetype)
+            input_path = path.join(folder, filename + filetype)
+
+        clipped_path = path.join(folder, "CLIPPED")
+
+        if not isdir(clipped_path):
+            mkdir(clipped_path)
 
         save_path = path.join(folder, "CLIPPED", filename)
-
-        if not isdir(save_path):
-            mkdir(save_path)
 
     centerline_path = path.join(save_path + "_centerline.vtp")
     la_and_laa_path = path.join(save_path + "_la_and_laa.vtp")
@@ -83,8 +85,10 @@ def extract_LA_and_LAA(folder, index, cycle, clip_volume=False):
         # Load a pre-clipped model
         surface = read_polydata(
             "/Users/henriakj/PhD/Code/VaMPy/models/models_for_convergence_study_upf_af_n_1/LA_20CYCLE_3M/LA_remeshed_surface.vtp")
-        la_rigid_path = "/Users/henriakj/PhD/Code/VaMPy/models/models_for_rigid_vs_moving/LAMOV/LAMOV_remeshed_surface.vtp"
-        surface = read_polydata(la_rigid_path)
+        surface = read_polydata(
+            "/Users/henriakj/PhD/Code/VaMPy/models/models_for_rigid_vs_moving/LAMOV/LAMOV_remeshed_surface.vtp")
+        surface = read_polydata(
+            "/Users/henriakj/PhD/Code/VaMPy/models/models_from_roney_2022_n_20_v2/LA004/mesh/LA004_remeshed_surface.vtp")
         volume = read_polydata(input_path)
     else:
         surface = read_polydata(input_path)
@@ -186,8 +190,8 @@ def extract_LA_and_LAA(folder, index, cycle, clip_volume=False):
 
     # Compute 'derivative' of the area
     dAdX = np.gradient(a.T[0], step)
-    tol = 5
-    stop_id = np.nonzero(dAdX > 50)[0][0] + tol
+    tol = 0
+    stop_id = np.nonzero(dAdX > 55)[0][0] + tol
 
     normal = n[stop_id]
     center = area.GetPoint(stop_id)
@@ -224,6 +228,7 @@ def extract_LA_and_LAA(folder, index, cycle, clip_volume=False):
     write_polydata(surface, la_and_laa_path)
 
     if clip_volume:
+        print("--- Saving LA and LAA volume to: {}".format(la_and_laa_path_vtu))
         volume = attach_clipped_regions_to_surface(volume, clipped_volume, center, clip_volume=True)
         write_polydata(volume, la_and_laa_path_vtu)
 
@@ -298,12 +303,16 @@ def extract_LA_or_LAA(folder, laa_point, index, cycle, clip_volume=False):
         appendage_point = parameters["region_0"]
     else:
         if laa_point is None:
-            model = save_path.split("/")[-1]
-            print("Loading LAA points for model {}".format(model))
-            laa_points_path = save_path.rsplit("/", 1)[0] + "/LA20_LAA_POINTS.json"
-            with open(laa_points_path, "r") as f:
-                laa_points = json.load(f)
-            appendage_point = laa_points[model]
+            try:
+                model = save_path.split("/")[-1]
+                print("Loading LAA points for model {}".format(model))
+                laa_points_path = save_path.rsplit("/", 1)[0] + "/LA20_LAA_POINTS.json"
+                with open(laa_points_path, "r") as f:
+                    laa_points = json.load(f)
+                appendage_point = laa_points[model]
+            except:
+                p_laa = provide_region_points(capped_surface, laa_point, None)
+                appendage_point = p_laa[0]
         else:
             p_laa = provide_region_points(capped_surface, laa_point, None)
             appendage_point = p_laa[0]
