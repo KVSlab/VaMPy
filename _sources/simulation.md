@@ -11,7 +11,7 @@ $ cd src/vampy/simulation
 We can now perform a CFD simulation for two cycles with 10 000 time steps per cycle and default parameters by executing the following command:
  
 ``` console
-$ oasis NSfracStep problem=Artery mesh_path=../../tests/Case_test_artery/artery.xml.gz save_solution_after_cycle=0
+$ oasis NSfracStep problem=Artery mesh_path=../../../tests/Case_test_artery/artery.xml.gz save_solution_after_cycle=0
 ```
 
 Running the simulations will create the result folder `results_artery` (specific to the `Artery.py` problem) located inside `src/vampy/simulation`, with the results and corresponding mesh saved compactly in HDF5 format.
@@ -54,8 +54,8 @@ NS_parameters.update(
     krylov_solvers=dict(monitor_convergence=False)
 )
 ```
-To start a simulation that runs for five cardiac cycles, uses a coarser time step, and saves the solution less frequent we can run the following command:
+To start a simulation that runs for five cardiac cycles, use a coarser time step, and saves the solution less frequent we can run the following command:
 
 ``` console
-$ oasis NSfracStep problem=Artery mesh_path=../../tests/Case_test_artery/artery.xml.gz number_of_cycles=5 dt=0.951 save_solution_frequency=20
+$ oasis NSfracStep problem=Artery mesh_path=../../../tests/Case_test_artery/artery.xml.gz number_of_cycles=5 dt=0.951 save_solution_frequency=20
 ```
