@@ -1,0 +1,660 @@
+
+<!DOCTYPE html>
+
+<html>
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>vampy.simulation.Atrium &#8212; VaMPy</title>
+    
+  <!-- Loaded before other Sphinx assets -->
+  <link href="../../../_static/styles/theme.css?digest=1999514e3f237ded88cf" rel="stylesheet">
+<link href="../../../_static/styles/pydata-sphinx-theme.css?digest=1999514e3f237ded88cf" rel="stylesheet">
+
+    
+  <link rel="stylesheet"
+    href="../../../_static/vendor/fontawesome/5.13.0/css/all.min.css">
+  <link rel="preload" as="font" type="font/woff2" crossorigin
+    href="../../../_static/vendor/fontawesome/5.13.0/webfonts/fa-solid-900.woff2">
+  <link rel="preload" as="font" type="font/woff2" crossorigin
+    href="../../../_static/vendor/fontawesome/5.13.0/webfonts/fa-brands-400.woff2">
+
+    <link rel="stylesheet" type="text/css" href="../../../_static/pygments.css" />
+    <link rel="stylesheet" href="../../../_static/styles/sphinx-book-theme.css?digest=5115cc725059bd94278eecd172e13a965bf8f5a9" type="text/css" />
+    <link rel="stylesheet" type="text/css" href="../../../_static/togglebutton.css" />
+    <link rel="stylesheet" type="text/css" href="../../../_static/copybutton.css" />
+    <link rel="stylesheet" type="text/css" href="../../../_static/mystnb.css" />
+    <link rel="stylesheet" type="text/css" href="../../../_static/sphinx-thebe.css" />
+    <link rel="stylesheet" type="text/css" href="../../../_static/design-style.b7bb847fb20b106c3d81b95245e65545.min.css" />
+    
+  <!-- Pre-loaded scripts that we'll load fully later -->
+  <link rel="preload" as="script" href="../../../_static/scripts/pydata-sphinx-theme.js?digest=1999514e3f237ded88cf">
+
+    <script data-url_root="../../../" id="documentation_options" src="../../../_static/documentation_options.js"></script>
+    <script src="../../../_static/jquery.js"></script>
+    <script src="../../../_static/underscore.js"></script>
+    <script src="../../../_static/doctools.js"></script>
+    <script src="../../../_static/clipboard.min.js"></script>
+    <script src="../../../_static/copybutton.js"></script>
+    <script src="../../../_static/scripts/sphinx-book-theme.js?digest=9c920249402e914e316237a7dbc6769907cce411"></script>
+    <script>let toggleHintShow = 'Click to show';</script>
+    <script>let toggleHintHide = 'Click to hide';</script>
+    <script>let toggleOpenOnPrint = 'true';</script>
+    <script src="../../../_static/togglebutton.js"></script>
+    <script>var togglebuttonSelector = '.toggle, .admonition.dropdown, .tag_hide_input div.cell_input, .tag_hide-input div.cell_input, .tag_hide_output div.cell_output, .tag_hide-output div.cell_output, .tag_hide_cell.cell, .tag_hide-cell.cell';</script>
+    <script src="../../../_static/design-tabs.js"></script>
+    <script>const THEBE_JS_URL = "https://unpkg.com/thebe@0.8.2/lib/index.js"
+const thebe_selector = ".thebe,.cell"
+const thebe_selector_input = "pre"
+const thebe_selector_output = ".output, .cell_output"
+</script>
+    <script async="async" src="../../../_static/sphinx-thebe.js"></script>
+    <link rel="index" title="Index" href="../../../genindex.html" />
+    <link rel="search" title="Search" href="../../../search.html" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <meta name="docsearch:language" content="None">
+    
+
+    <!-- Google Analytics -->
+    
+  </head>
+  <body data-spy="scroll" data-target="#bd-toc-nav" data-offset="60">
+<!-- Checkboxes to toggle the left sidebar -->
+<input type="checkbox" class="sidebar-toggle" name="__navigation" id="__navigation" aria-label="Toggle navigation sidebar">
+<label class="overlay overlay-navbar" for="__navigation">
+    <div class="visually-hidden">Toggle navigation sidebar</div>
+</label>
+<!-- Checkboxes to toggle the in-page toc -->
+<input type="checkbox" class="sidebar-toggle" name="__page-toc" id="__page-toc" aria-label="Toggle in-page Table of Contents">
+<label class="overlay overlay-pagetoc" for="__page-toc">
+    <div class="visually-hidden">Toggle in-page Table of Contents</div>
+</label>
+<!-- Headers at the top -->
+<div class="announcement header-item noprint"></div>
+<div class="header header-item noprint"></div>
+
+    
+    <div class="container-fluid" id="banner"></div>
+
+    
+
+    <div class="container-xl">
+      <div class="row">
+          
+<!-- Sidebar -->
+<div class="bd-sidebar noprint" id="site-navigation">
+    <div class="bd-sidebar__content">
+        <div class="bd-sidebar__top"><div class="navbar-brand-box">
+    <a class="navbar-brand text-wrap" href="../../../index.html">
+      
+        <!-- `logo` is deprecated in Sphinx 4.0, so remove this when we stop supporting 3 -->
+        
+      
+      
+      <img src="../../../_static/logo.png" class="logo" alt="logo">
+      
+      
+      <h1 class="site-logo" id="site-title">VaMPy</h1>
+      
+    </a>
+</div><form class="bd-search d-flex align-items-center" action="../../../search.html" method="get">
+  <i class="icon fas fa-search"></i>
+  <input type="search" class="form-control" name="q" id="search-input" placeholder="Search this book..." aria-label="Search this book..." autocomplete="off" >
+</form><nav class="bd-links" id="bd-docs-nav" aria-label="Main">
+    <div class="bd-toc-item active">
+        
+        <ul class="nav bd-sidenav bd-sidenav__home-link">
+            <li class="toctree-l1">
+                <a class="reference internal" href="../../../index.html">
+                    The Vascular Modeling Pypeline
+                </a>
+            </li>
+        </ul>
+        <p aria-level="2" class="caption" role="heading">
+ <span class="caption-text">
+  Installation
+ </span>
+</p>
+<ul class="nav bd-sidenav">
+ <li class="toctree-l1">
+  <a class="reference internal" href="../../../installation.html">
+   Installation
+  </a>
+ </li>
+ <li class="toctree-l1">
+  <a class="reference internal" href="../../../issues.html">
+   Known issues
+  </a>
+ </li>
+</ul>
+<p aria-level="2" class="caption" role="heading">
+ <span class="caption-text">
+  Using VaMPy
+ </span>
+</p>
+<ul class="nav bd-sidenav">
+ <li class="toctree-l1">
+  <a class="reference internal" href="../../../preprocess.html">
+   Pre-processing
+  </a>
+ </li>
+ <li class="toctree-l1">
+  <a class="reference internal" href="../../../simulation.html">
+   Computational fluid dynamics
+  </a>
+ </li>
+ <li class="toctree-l1">
+  <a class="reference internal" href="../../../postprocess.html">
+   Post-processing
+  </a>
+ </li>
+ <li class="toctree-l1">
+  <a class="reference internal" href="../../../quantities.html">
+   Computed quantities
+  </a>
+ </li>
+ <li class="toctree-l1">
+  <a class="reference internal" href="../../../cluster.html">
+   Running a simulation on an HPC cluster
+  </a>
+ </li>
+ <li class="toctree-l1">
+  <a class="reference internal" href="../../../features.html">
+   Features and issues
+  </a>
+ </li>
+</ul>
+<p aria-level="2" class="caption" role="heading">
+ <span class="caption-text">
+  Tutorials
+ </span>
+</p>
+<ul class="nav bd-sidenav">
+ <li class="toctree-l1">
+  <a class="reference internal" href="../../../tutorials.html">
+   Tutorials
+  </a>
+ </li>
+ <li class="toctree-l1">
+  <a class="reference internal" href="../../../artery.html">
+   High-resolution CFD simulation in the internal carotid artery
+  </a>
+ </li>
+ <li class="toctree-l1">
+  <a class="reference internal" href="../../../atrium.html">
+   Hemodynamics simulation on a left atrium
+  </a>
+ </li>
+</ul>
+<p aria-level="2" class="caption" role="heading">
+ <span class="caption-text">
+  Python API
+ </span>
+</p>
+<ul class="nav bd-sidenav">
+ <li class="toctree-l1">
+  <a class="reference internal" href="../../../api.html">
+   API Reference
+  </a>
+ </li>
+</ul>
+
+    </div>
+</nav></div>
+        <div class="bd-sidebar__bottom">
+             <!-- To handle the deprecated key -->
+            
+            <div class="navbar_extra_footer">
+            See more at <a href="https://kvslab.github.io">KVSLab</a>
+            </div>
+            
+        </div>
+    </div>
+    <div id="rtd-footer-container"></div>
+</div>
+
+
+          
+
+
+          
+<!-- A tiny helper pixel to detect if we've scrolled -->
+<div class="sbt-scroll-pixel-helper"></div>
+<!-- Main content -->
+<div class="col py-0 content-container">
+    
+    <div class="header-article row sticky-top noprint">
+        
+
+
+
+<div class="col py-1 d-flex header-article-main">
+    <div class="header-article__left">
+        
+        <label for="__navigation"
+  class="headerbtn"
+  data-toggle="tooltip"
+data-placement="right"
+title="Toggle navigation"
+>
+  
+
+<span class="headerbtn__icon-container">
+  <i class="fas fa-bars"></i>
+  </span>
+
+</label>
+
+        
+    </div>
+    <div class="header-article__right">
+<button onclick="toggleFullScreen()"
+  class="headerbtn"
+  data-toggle="tooltip"
+data-placement="bottom"
+title="Fullscreen mode"
+>
+  
+
+<span class="headerbtn__icon-container">
+  <i class="fas fa-expand"></i>
+  </span>
+
+</button>
+
+<div class="menu-dropdown menu-dropdown-repository-buttons">
+  <button class="headerbtn menu-dropdown__trigger"
+      aria-label="Source repositories">
+      <i class="fab fa-github"></i>
+  </button>
+  <div class="menu-dropdown__content">
+    <ul>
+      <li>
+        <a href="https://kvslab.github.io/VaMPy/"
+   class="headerbtn"
+   data-toggle="tooltip"
+data-placement="left"
+title="Source repository"
+>
+  
+
+<span class="headerbtn__icon-container">
+  <i class="fab fa-github"></i>
+  </span>
+<span class="headerbtn__text-container">repository</span>
+</a>
+
+      </li>
+      
+      <li>
+        <a href="https://kvslab.github.io/VaMPy//issues/new?title=Issue%20on%20page%20%2F_modules/vampy/simulation/Atrium.html&body=Your%20issue%20content%20here."
+   class="headerbtn"
+   data-toggle="tooltip"
+data-placement="left"
+title="Open an issue"
+>
+  
+
+<span class="headerbtn__icon-container">
+  <i class="fas fa-lightbulb"></i>
+  </span>
+<span class="headerbtn__text-container">open issue</span>
+</a>
+
+      </li>
+      
+    </ul>
+  </div>
+</div>
+
+    </div>
+</div>
+
+<!-- Table of contents -->
+<div class="col-md-3 bd-toc show noprint">
+</div>
+    </div>
+    <div class="article row">
+        <div class="col pl-md-3 pl-lg-5 content-container">
+            <!-- Table of contents that is only displayed when printing the page -->
+            <div id="jb-print-docs-body" class="onlyprint">
+                <h1></h1>
+                <!-- Table of contents -->
+                <div id="print-main-content">
+                    <div id="jb-print-toc">
+                        
+                    </div>
+                </div>
+            </div>
+            <main id="main-content" role="main">
+                
+              <div>
+                
+  <h1>Source code for vampy.simulation.Atrium</h1><div class="highlight"><pre>
+<span></span><span class="kn">import</span> <span class="nn">json</span>
+<span class="kn">import</span> <span class="nn">pickle</span>
+<span class="kn">from</span> <span class="nn">os</span> <span class="kn">import</span> <span class="n">makedirs</span>
+<span class="kn">from</span> <span class="nn">pprint</span> <span class="kn">import</span> <span class="n">pprint</span>
+<span class="kn">from</span> <span class="nn">dolfin</span> <span class="kn">import</span> <span class="n">set_log_level</span>
+
+<span class="kn">from</span> <span class="nn">oasis.problems.NSfracStep</span> <span class="kn">import</span> <span class="o">*</span>
+<span class="kn">from</span> <span class="nn">vampy.simulation.Probe</span> <span class="kn">import</span> <span class="n">Probes</span>  <span class="c1"># type: ignore</span>
+<span class="kn">from</span> <span class="nn">vampy.simulation.Womersley</span> <span class="kn">import</span> <span class="n">make_womersley_bcs</span><span class="p">,</span> <span class="n">compute_boundary_geometry_acrn</span>
+<span class="kn">from</span> <span class="nn">vampy.simulation.simulation_common</span> <span class="kn">import</span> <span class="n">store_u_mean</span><span class="p">,</span> <span class="n">get_file_paths</span><span class="p">,</span> <span class="n">print_mesh_information</span>
+
+<span class="c1"># FEniCS specific command to control the desired level of logging, here set to critical errors</span>
+<span class="n">set_log_level</span><span class="p">(</span><span class="mi">50</span><span class="p">)</span>
+
+
+<div class="viewcode-block" id="problem_parameters"><a class="viewcode-back" href="../../../api.html#vampy.simulation.Atrium.problem_parameters">[docs]</a><span class="k">def</span> <span class="nf">problem_parameters</span><span class="p">(</span><span class="n">commandline_kwargs</span><span class="p">,</span> <span class="n">NS_parameters</span><span class="p">,</span> <span class="n">scalar_components</span><span class="p">,</span> <span class="n">Schmidt</span><span class="p">,</span> <span class="n">NS_expressions</span><span class="p">,</span> <span class="o">**</span><span class="n">NS_namespace</span><span class="p">):</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Problem file for running CFD simulation in left atrial models consisting of arbitrary number of pulmonary veins (PV)</span>
+<span class="sd">    (normally 3 to 7), and one outlet being the mitral valve. A Womersley velocity profile is applied at the inlets,</span>
+<span class="sd">    where the total flow rate is split between the area ratio of the PVs. The mitral valve is considered open with a</span>
+<span class="sd">    constant pressure of p=0. Flow rate and flow split values for the inlet condition are computed from the</span>
+<span class="sd">    pre-processing script automatedPreProcessing.py. The simulation is run for two cycles (adjustable), but only the</span>
+<span class="sd">    results/solutions from the second cycle are stored to avoid non-physiological effects from the first cycle.</span>
+<span class="sd">    One cardiac cycle is set to 0.951 s from [1], and scaled by a factor of 1000, hence all parameters are in</span>
+<span class="sd">    [mm] or [ms].</span>
+
+<span class="sd">    [1] Hoi, Yiemeng, et al. &quot;Characterization of volumetric flow rate waveforms at the carotid bifurcations of older</span>
+<span class="sd">        adults.&quot; Physiological measurement 31.3 (2010): 291.</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="k">if</span> <span class="s2">&quot;restart_folder&quot;</span> <span class="ow">in</span> <span class="n">commandline_kwargs</span><span class="o">.</span><span class="n">keys</span><span class="p">():</span>
+        <span class="n">restart_folder</span> <span class="o">=</span> <span class="n">commandline_kwargs</span><span class="p">[</span><span class="s2">&quot;restart_folder&quot;</span><span class="p">]</span>
+        <span class="n">f</span> <span class="o">=</span> <span class="nb">open</span><span class="p">(</span><span class="n">path</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">restart_folder</span><span class="p">,</span> <span class="s1">&#39;params.dat&#39;</span><span class="p">),</span> <span class="s1">&#39;rb&#39;</span><span class="p">)</span>
+        <span class="n">NS_parameters</span><span class="o">.</span><span class="n">update</span><span class="p">(</span><span class="n">pickle</span><span class="o">.</span><span class="n">load</span><span class="p">(</span><span class="n">f</span><span class="p">))</span>
+        <span class="n">NS_parameters</span><span class="p">[</span><span class="s1">&#39;restart_folder&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="n">restart_folder</span>
+    <span class="k">else</span><span class="p">:</span>
+        <span class="c1"># Override some problem specific parameters</span>
+        <span class="c1"># Parameters are in mm and ms</span>
+        <span class="n">cardiac_cycle</span> <span class="o">=</span> <span class="nb">float</span><span class="p">(</span><span class="n">commandline_kwargs</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s2">&quot;cardiac_cycle&quot;</span><span class="p">,</span> <span class="mi">951</span><span class="p">))</span>
+        <span class="n">number_of_cycles</span> <span class="o">=</span> <span class="nb">float</span><span class="p">(</span><span class="n">commandline_kwargs</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s2">&quot;number_of_cycles&quot;</span><span class="p">,</span> <span class="mi">2</span><span class="p">))</span>
+
+        <span class="n">NS_parameters</span><span class="o">.</span><span class="n">update</span><span class="p">(</span>
+            <span class="c1"># Fluid parameters</span>
+            <span class="n">nu</span><span class="o">=</span><span class="mf">3.3018868e-3</span><span class="p">,</span>  <span class="c1"># Viscosity [nu: 0.0035 Pa-s / 1060 kg/m^3 = 3.3018868E-6 m^2/s == 3.3018868E-3 mm^2/ms]</span>
+            <span class="c1"># Geometry parameters</span>
+            <span class="n">id_in</span><span class="o">=</span><span class="p">[],</span>  <span class="c1"># Inlet boundary ID</span>
+            <span class="n">id_out</span><span class="o">=</span><span class="p">[],</span>  <span class="c1"># Outlet boundary IDs</span>
+            <span class="c1"># Simulation parameters</span>
+            <span class="n">cardiac_cycle</span><span class="o">=</span><span class="n">cardiac_cycle</span><span class="p">,</span>  <span class="c1"># Run simulation for 1 cardiac cycles [ms]</span>
+            <span class="n">T</span><span class="o">=</span><span class="n">number_of_cycles</span> <span class="o">*</span> <span class="n">cardiac_cycle</span><span class="p">,</span>  <span class="c1"># Number of cycles</span>
+            <span class="n">dt</span><span class="o">=</span><span class="mf">0.0951</span><span class="p">,</span>  <span class="c1"># # Time step size [ms]</span>
+            <span class="c1"># Frequencies to save data</span>
+            <span class="n">dump_probe_frequency</span><span class="o">=</span><span class="mi">100</span><span class="p">,</span>  <span class="c1"># Dump frequency for sampling velocity &amp; pressure at probes along the centerline</span>
+            <span class="n">save_solution_frequency</span><span class="o">=</span><span class="mi">5</span><span class="p">,</span>  <span class="c1"># Save frequency for velocity and pressure field</span>
+            <span class="n">save_solution_after_cycle</span><span class="o">=</span><span class="mi">0</span><span class="p">,</span>  <span class="c1"># Store solution after 1 cardiac cycle</span>
+            <span class="c1"># Oasis specific parameters</span>
+            <span class="n">checkpoint</span><span class="o">=</span><span class="mi">100</span><span class="p">,</span>  <span class="c1"># Overwrite solution in Checkpoint folder each checkpoint</span>
+            <span class="n">print_intermediate_info</span><span class="o">=</span><span class="mi">100</span><span class="p">,</span>
+            <span class="n">folder</span><span class="o">=</span><span class="s2">&quot;results_atrium&quot;</span><span class="p">,</span>
+            <span class="n">mesh_path</span><span class="o">=</span><span class="n">commandline_kwargs</span><span class="p">[</span><span class="s2">&quot;mesh_path&quot;</span><span class="p">],</span>
+            <span class="c1"># Solver parameters</span>
+            <span class="n">velocity_degree</span><span class="o">=</span><span class="mi">1</span><span class="p">,</span>
+            <span class="n">pressure_degree</span><span class="o">=</span><span class="mi">1</span><span class="p">,</span>
+            <span class="n">use_krylov_solvers</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span>
+            <span class="n">krylov_solvers</span><span class="o">=</span><span class="nb">dict</span><span class="p">(</span><span class="n">monitor_convergence</span><span class="o">=</span><span class="kc">False</span><span class="p">)</span>
+        <span class="p">)</span>
+
+    <span class="n">mesh_file</span> <span class="o">=</span> <span class="n">NS_parameters</span><span class="p">[</span><span class="s2">&quot;mesh_path&quot;</span><span class="p">]</span><span class="o">.</span><span class="n">split</span><span class="p">(</span><span class="s2">&quot;/&quot;</span><span class="p">)[</span><span class="o">-</span><span class="mi">1</span><span class="p">]</span>
+    <span class="n">case_name</span> <span class="o">=</span> <span class="n">mesh_file</span><span class="o">.</span><span class="n">split</span><span class="p">(</span><span class="s2">&quot;.&quot;</span><span class="p">)[</span><span class="mi">0</span><span class="p">]</span>
+    <span class="n">NS_parameters</span><span class="p">[</span><span class="s2">&quot;folder&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="n">path</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">NS_parameters</span><span class="p">[</span><span class="s2">&quot;folder&quot;</span><span class="p">],</span> <span class="n">case_name</span><span class="p">)</span>
+
+    <span class="k">if</span> <span class="n">MPI</span><span class="o">.</span><span class="n">rank</span><span class="p">(</span><span class="n">MPI</span><span class="o">.</span><span class="n">comm_world</span><span class="p">)</span> <span class="o">==</span> <span class="mi">0</span><span class="p">:</span>
+        <span class="nb">print</span><span class="p">(</span><span class="s2">&quot;=== Starting simulation for Atrium.py ===&quot;</span><span class="p">)</span>
+        <span class="nb">print</span><span class="p">(</span><span class="s2">&quot;Running with the following parameters:&quot;</span><span class="p">)</span>
+        <span class="n">pprint</span><span class="p">(</span><span class="n">NS_parameters</span><span class="p">)</span></div>
+
+
+<div class="viewcode-block" id="mesh"><a class="viewcode-back" href="../../../api.html#vampy.simulation.Atrium.mesh">[docs]</a><span class="k">def</span> <span class="nf">mesh</span><span class="p">(</span><span class="n">mesh_path</span><span class="p">,</span> <span class="o">**</span><span class="n">NS_namespace</span><span class="p">):</span>
+    <span class="c1"># Read mesh and print mesh information</span>
+    <span class="n">atrium_mesh</span> <span class="o">=</span> <span class="n">Mesh</span><span class="p">(</span><span class="n">mesh_path</span><span class="p">)</span>
+    <span class="n">print_mesh_information</span><span class="p">(</span><span class="n">atrium_mesh</span><span class="p">)</span>
+
+    <span class="k">return</span> <span class="n">atrium_mesh</span></div>
+
+
+<div class="viewcode-block" id="create_bcs"><a class="viewcode-back" href="../../../api.html#vampy.simulation.Atrium.create_bcs">[docs]</a><span class="k">def</span> <span class="nf">create_bcs</span><span class="p">(</span><span class="n">NS_expressions</span><span class="p">,</span> <span class="n">mesh</span><span class="p">,</span> <span class="n">mesh_path</span><span class="p">,</span> <span class="n">nu</span><span class="p">,</span> <span class="n">t</span><span class="p">,</span> <span class="n">V</span><span class="p">,</span> <span class="n">Q</span><span class="p">,</span> <span class="n">id_in</span><span class="p">,</span> <span class="n">id_out</span><span class="p">,</span> <span class="o">**</span><span class="n">NS_namespace</span><span class="p">):</span>
+    <span class="c1"># Variables needed during the simulation</span>
+    <span class="n">boundary</span> <span class="o">=</span> <span class="n">MeshFunction</span><span class="p">(</span><span class="s2">&quot;size_t&quot;</span><span class="p">,</span> <span class="n">mesh</span><span class="p">,</span> <span class="n">mesh</span><span class="o">.</span><span class="n">geometry</span><span class="p">()</span><span class="o">.</span><span class="n">dim</span><span class="p">()</span> <span class="o">-</span> <span class="mi">1</span><span class="p">,</span> <span class="n">mesh</span><span class="o">.</span><span class="n">domains</span><span class="p">())</span>
+
+    <span class="c1"># Get IDs for inlet(s) and outlet(s)</span>
+    <span class="n">info_path</span> <span class="o">=</span> <span class="n">mesh_path</span><span class="o">.</span><span class="n">split</span><span class="p">(</span><span class="s2">&quot;.xml&quot;</span><span class="p">)[</span><span class="mi">0</span><span class="p">]</span> <span class="o">+</span> <span class="s2">&quot;_info.json&quot;</span>
+    <span class="k">with</span> <span class="nb">open</span><span class="p">(</span><span class="n">info_path</span><span class="p">)</span> <span class="k">as</span> <span class="n">f</span><span class="p">:</span>
+        <span class="n">info</span> <span class="o">=</span> <span class="n">json</span><span class="o">.</span><span class="n">load</span><span class="p">(</span><span class="n">f</span><span class="p">)</span>
+
+    <span class="n">id_in</span><span class="p">[:]</span> <span class="o">=</span> <span class="n">info</span><span class="p">[</span><span class="s1">&#39;inlet_ids&#39;</span><span class="p">]</span>
+    <span class="n">id_out</span><span class="p">[:]</span> <span class="o">=</span> <span class="n">info</span><span class="p">[</span><span class="s1">&#39;outlet_id&#39;</span><span class="p">]</span>
+    <span class="n">id_wall</span> <span class="o">=</span> <span class="nb">min</span><span class="p">(</span><span class="n">id_in</span> <span class="o">+</span> <span class="n">id_out</span><span class="p">)</span> <span class="o">-</span> <span class="mi">1</span>
+
+    <span class="n">Q_mean</span> <span class="o">=</span> <span class="n">info</span><span class="p">[</span><span class="s1">&#39;mean_flow_rate&#39;</span><span class="p">]</span>
+
+    <span class="c1"># Find corresponding areas</span>
+    <span class="n">ds</span> <span class="o">=</span> <span class="n">Measure</span><span class="p">(</span><span class="s2">&quot;ds&quot;</span><span class="p">,</span> <span class="n">domain</span><span class="o">=</span><span class="n">mesh</span><span class="p">,</span> <span class="n">subdomain_data</span><span class="o">=</span><span class="n">boundary</span><span class="p">)</span>
+    <span class="n">area_total</span> <span class="o">=</span> <span class="mi">0</span>
+    <span class="k">for</span> <span class="n">ID</span> <span class="ow">in</span> <span class="n">id_in</span><span class="p">:</span>
+        <span class="n">area_total</span> <span class="o">+=</span> <span class="n">assemble</span><span class="p">(</span><span class="n">Constant</span><span class="p">(</span><span class="mf">1.0</span><span class="p">)</span> <span class="o">*</span> <span class="n">ds</span><span class="p">(</span><span class="n">ID</span><span class="p">))</span>
+
+    <span class="c1"># Load normalized time and flow rate values</span>
+    <span class="n">t_values</span><span class="p">,</span> <span class="n">Q_</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">loadtxt</span><span class="p">(</span><span class="n">path</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">path</span><span class="o">.</span><span class="n">dirname</span><span class="p">(</span><span class="n">path</span><span class="o">.</span><span class="n">abspath</span><span class="p">(</span><span class="vm">__file__</span><span class="p">)),</span> <span class="s2">&quot;PV_values&quot;</span><span class="p">))</span><span class="o">.</span><span class="n">T</span>
+    <span class="n">Q_values</span> <span class="o">=</span> <span class="n">Q_mean</span> <span class="o">*</span> <span class="n">Q_</span>  <span class="c1"># Specific flow rate = Normalized flow wave form * Prescribed flow rate</span>
+    <span class="n">t_values</span> <span class="o">*=</span> <span class="mi">1000</span>  <span class="c1"># Scale time in normalised flow wave form to [ms]</span>
+
+    <span class="k">for</span> <span class="n">ID</span> <span class="ow">in</span> <span class="n">id_in</span><span class="p">:</span>
+        <span class="n">tmp_area</span><span class="p">,</span> <span class="n">tmp_center</span><span class="p">,</span> <span class="n">tmp_radius</span><span class="p">,</span> <span class="n">tmp_normal</span> <span class="o">=</span> <span class="n">compute_boundary_geometry_acrn</span><span class="p">(</span><span class="n">mesh</span><span class="p">,</span> <span class="n">ID</span><span class="p">,</span> <span class="n">boundary</span><span class="p">)</span>
+        <span class="n">Q_scaled</span> <span class="o">=</span> <span class="n">Q_values</span> <span class="o">*</span> <span class="n">tmp_area</span> <span class="o">/</span> <span class="n">area_total</span>
+
+        <span class="c1"># Create Womersley boundary condition at inlet</span>
+        <span class="n">inlet</span> <span class="o">=</span> <span class="n">make_womersley_bcs</span><span class="p">(</span><span class="n">t_values</span><span class="p">,</span> <span class="n">Q_scaled</span><span class="p">,</span> <span class="n">mesh</span><span class="p">,</span> <span class="n">nu</span><span class="p">,</span> <span class="n">tmp_area</span><span class="p">,</span> <span class="n">tmp_center</span><span class="p">,</span> <span class="n">tmp_radius</span><span class="p">,</span> <span class="n">tmp_normal</span><span class="p">,</span>
+                                   <span class="n">V</span><span class="o">.</span><span class="n">ufl_element</span><span class="p">())</span>
+        <span class="n">NS_expressions</span><span class="p">[</span><span class="s2">&quot;inlet_</span><span class="si">{}</span><span class="s2">&quot;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">ID</span><span class="p">)]</span> <span class="o">=</span> <span class="n">inlet</span>
+
+    <span class="c1"># Initial condition</span>
+    <span class="k">for</span> <span class="n">ID</span> <span class="ow">in</span> <span class="n">id_in</span><span class="p">:</span>
+        <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="p">[</span><span class="mi">0</span><span class="p">,</span> <span class="mi">1</span><span class="p">,</span> <span class="mi">2</span><span class="p">]:</span>
+            <span class="n">NS_expressions</span><span class="p">[</span><span class="s2">&quot;inlet_</span><span class="si">{}</span><span class="s2">&quot;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">ID</span><span class="p">)][</span><span class="n">i</span><span class="p">]</span><span class="o">.</span><span class="n">set_t</span><span class="p">(</span><span class="n">t</span><span class="p">)</span>
+
+    <span class="c1"># Create inlet boundary conditions</span>
+    <span class="n">bc_inlets</span> <span class="o">=</span> <span class="p">{}</span>
+    <span class="k">for</span> <span class="n">ID</span> <span class="ow">in</span> <span class="n">id_in</span><span class="p">:</span>
+        <span class="n">bc_inlet</span> <span class="o">=</span> <span class="p">[</span><span class="n">DirichletBC</span><span class="p">(</span><span class="n">V</span><span class="p">,</span> <span class="n">NS_expressions</span><span class="p">[</span><span class="s2">&quot;inlet_</span><span class="si">{}</span><span class="s2">&quot;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">ID</span><span class="p">)][</span><span class="n">i</span><span class="p">],</span> <span class="n">boundary</span><span class="p">,</span> <span class="n">ID</span><span class="p">)</span> <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="mi">3</span><span class="p">)]</span>
+        <span class="n">bc_inlets</span><span class="p">[</span><span class="n">ID</span><span class="p">]</span> <span class="o">=</span> <span class="n">bc_inlet</span>
+
+    <span class="c1"># Set outlet boundary conditions, assuming one outlet (Mitral Valve)</span>
+    <span class="n">bc_p</span> <span class="o">=</span> <span class="p">[</span><span class="n">DirichletBC</span><span class="p">(</span><span class="n">Q</span><span class="p">,</span> <span class="n">Constant</span><span class="p">(</span><span class="mi">0</span><span class="p">),</span> <span class="n">boundary</span><span class="p">,</span> <span class="n">ID</span><span class="p">)</span> <span class="k">for</span> <span class="n">ID</span> <span class="ow">in</span> <span class="n">id_out</span><span class="p">]</span>
+
+    <span class="c1"># No slip on walls</span>
+    <span class="n">bc_wall</span> <span class="o">=</span> <span class="p">[</span><span class="n">DirichletBC</span><span class="p">(</span><span class="n">V</span><span class="p">,</span> <span class="n">Constant</span><span class="p">(</span><span class="mf">0.0</span><span class="p">),</span> <span class="n">boundary</span><span class="p">,</span> <span class="n">id_wall</span><span class="p">)]</span>
+
+    <span class="c1"># Create lists with all velocity boundary conditions</span>
+    <span class="n">bc_u0</span> <span class="o">=</span> <span class="p">[</span><span class="n">bc_inlets</span><span class="p">[</span><span class="n">ID</span><span class="p">][</span><span class="mi">0</span><span class="p">]</span> <span class="k">for</span> <span class="n">ID</span> <span class="ow">in</span> <span class="n">id_in</span><span class="p">]</span> <span class="o">+</span> <span class="n">bc_wall</span>
+    <span class="n">bc_u1</span> <span class="o">=</span> <span class="p">[</span><span class="n">bc_inlets</span><span class="p">[</span><span class="n">ID</span><span class="p">][</span><span class="mi">1</span><span class="p">]</span> <span class="k">for</span> <span class="n">ID</span> <span class="ow">in</span> <span class="n">id_in</span><span class="p">]</span> <span class="o">+</span> <span class="n">bc_wall</span>
+    <span class="n">bc_u2</span> <span class="o">=</span> <span class="p">[</span><span class="n">bc_inlets</span><span class="p">[</span><span class="n">ID</span><span class="p">][</span><span class="mi">2</span><span class="p">]</span> <span class="k">for</span> <span class="n">ID</span> <span class="ow">in</span> <span class="n">id_in</span><span class="p">]</span> <span class="o">+</span> <span class="n">bc_wall</span>
+
+    <span class="k">return</span> <span class="nb">dict</span><span class="p">(</span><span class="n">u0</span><span class="o">=</span><span class="n">bc_u0</span><span class="p">,</span> <span class="n">u1</span><span class="o">=</span><span class="n">bc_u1</span><span class="p">,</span> <span class="n">u2</span><span class="o">=</span><span class="n">bc_u2</span><span class="p">,</span> <span class="n">p</span><span class="o">=</span><span class="n">bc_p</span><span class="p">)</span></div>
+
+
+<div class="viewcode-block" id="pre_solve_hook"><a class="viewcode-back" href="../../../api.html#vampy.simulation.Atrium.pre_solve_hook">[docs]</a><span class="k">def</span> <span class="nf">pre_solve_hook</span><span class="p">(</span><span class="n">V</span><span class="p">,</span> <span class="n">Q</span><span class="p">,</span> <span class="n">cardiac_cycle</span><span class="p">,</span> <span class="n">dt</span><span class="p">,</span> <span class="n">save_solution_after_cycle</span><span class="p">,</span> <span class="n">mesh_path</span><span class="p">,</span> <span class="n">mesh</span><span class="p">,</span> <span class="n">newfolder</span><span class="p">,</span> <span class="n">velocity_degree</span><span class="p">,</span>
+                   <span class="n">restart_folder</span><span class="p">,</span> <span class="o">**</span><span class="n">NS_namespace</span><span class="p">):</span>
+    <span class="c1"># Extract diameter at mitral valve</span>
+    <span class="n">info_path</span> <span class="o">=</span> <span class="n">mesh_path</span><span class="o">.</span><span class="n">split</span><span class="p">(</span><span class="s2">&quot;.xml&quot;</span><span class="p">)[</span><span class="mi">0</span><span class="p">]</span> <span class="o">+</span> <span class="s2">&quot;_info.json&quot;</span>
+    <span class="k">with</span> <span class="nb">open</span><span class="p">(</span><span class="n">info_path</span><span class="p">)</span> <span class="k">as</span> <span class="n">f</span><span class="p">:</span>
+        <span class="n">info</span> <span class="o">=</span> <span class="n">json</span><span class="o">.</span><span class="n">load</span><span class="p">(</span><span class="n">f</span><span class="p">)</span>
+
+    <span class="n">outlet_area</span> <span class="o">=</span> <span class="n">info</span><span class="p">[</span><span class="s1">&#39;outlet_area&#39;</span><span class="p">]</span>
+    <span class="n">D_mitral</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">sqrt</span><span class="p">(</span><span class="mi">4</span> <span class="o">*</span> <span class="n">outlet_area</span> <span class="o">/</span> <span class="n">np</span><span class="o">.</span><span class="n">pi</span><span class="p">)</span>
+
+    <span class="c1"># Create point for evaluation</span>
+    <span class="n">n</span> <span class="o">=</span> <span class="n">FacetNormal</span><span class="p">(</span><span class="n">mesh</span><span class="p">)</span>
+    <span class="n">eval_dict</span> <span class="o">=</span> <span class="p">{}</span>
+    <span class="n">rel_path</span> <span class="o">=</span> <span class="n">mesh_path</span><span class="o">.</span><span class="n">split</span><span class="p">(</span><span class="s2">&quot;.xml&quot;</span><span class="p">)[</span><span class="mi">0</span><span class="p">]</span> <span class="o">+</span> <span class="s2">&quot;_probe_point&quot;</span>
+    <span class="n">probe_points</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">load</span><span class="p">(</span><span class="n">rel_path</span><span class="p">,</span> <span class="n">encoding</span><span class="o">=</span><span class="s1">&#39;latin1&#39;</span><span class="p">,</span> <span class="n">fix_imports</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span> <span class="n">allow_pickle</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
+
+    <span class="c1"># Store points file in checkpoint</span>
+    <span class="k">if</span> <span class="n">MPI</span><span class="o">.</span><span class="n">rank</span><span class="p">(</span><span class="n">MPI</span><span class="o">.</span><span class="n">comm_world</span><span class="p">)</span> <span class="o">==</span> <span class="mi">0</span><span class="p">:</span>
+        <span class="n">probe_points</span><span class="o">.</span><span class="n">dump</span><span class="p">(</span><span class="n">path</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">newfolder</span><span class="p">,</span> <span class="s2">&quot;Checkpoint&quot;</span><span class="p">,</span> <span class="s2">&quot;points&quot;</span><span class="p">))</span>
+
+    <span class="n">eval_dict</span><span class="p">[</span><span class="s2">&quot;centerline_u_x_probes&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="n">Probes</span><span class="p">(</span><span class="n">probe_points</span><span class="o">.</span><span class="n">flatten</span><span class="p">(),</span> <span class="n">V</span><span class="p">)</span>
+    <span class="n">eval_dict</span><span class="p">[</span><span class="s2">&quot;centerline_u_y_probes&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="n">Probes</span><span class="p">(</span><span class="n">probe_points</span><span class="o">.</span><span class="n">flatten</span><span class="p">(),</span> <span class="n">V</span><span class="p">)</span>
+    <span class="n">eval_dict</span><span class="p">[</span><span class="s2">&quot;centerline_u_z_probes&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="n">Probes</span><span class="p">(</span><span class="n">probe_points</span><span class="o">.</span><span class="n">flatten</span><span class="p">(),</span> <span class="n">V</span><span class="p">)</span>
+    <span class="n">eval_dict</span><span class="p">[</span><span class="s2">&quot;centerline_p_probes&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="n">Probes</span><span class="p">(</span><span class="n">probe_points</span><span class="o">.</span><span class="n">flatten</span><span class="p">(),</span> <span class="n">Q</span><span class="p">)</span>
+
+    <span class="k">if</span> <span class="n">restart_folder</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
+        <span class="c1"># Get files to store results</span>
+        <span class="n">files</span> <span class="o">=</span> <span class="n">get_file_paths</span><span class="p">(</span><span class="n">newfolder</span><span class="p">)</span>
+        <span class="n">NS_parameters</span><span class="o">.</span><span class="n">update</span><span class="p">(</span><span class="nb">dict</span><span class="p">(</span><span class="n">files</span><span class="o">=</span><span class="n">files</span><span class="p">))</span>
+    <span class="k">else</span><span class="p">:</span>
+        <span class="n">files</span> <span class="o">=</span> <span class="n">NS_namespace</span><span class="p">[</span><span class="s2">&quot;files&quot;</span><span class="p">]</span>
+
+    <span class="c1"># Save mesh as HDF5 file for post-processing</span>
+    <span class="k">with</span> <span class="n">HDF5File</span><span class="p">(</span><span class="n">MPI</span><span class="o">.</span><span class="n">comm_world</span><span class="p">,</span> <span class="n">files</span><span class="p">[</span><span class="s2">&quot;mesh&quot;</span><span class="p">],</span> <span class="s2">&quot;w&quot;</span><span class="p">)</span> <span class="k">as</span> <span class="n">mesh_file</span><span class="p">:</span>
+        <span class="n">mesh_file</span><span class="o">.</span><span class="n">write</span><span class="p">(</span><span class="n">mesh</span><span class="p">,</span> <span class="s2">&quot;mesh&quot;</span><span class="p">)</span>
+
+    <span class="c1"># Create vector function for storing velocity</span>
+    <span class="n">Vv</span> <span class="o">=</span> <span class="n">VectorFunctionSpace</span><span class="p">(</span><span class="n">mesh</span><span class="p">,</span> <span class="s2">&quot;CG&quot;</span><span class="p">,</span> <span class="n">velocity_degree</span><span class="p">)</span>
+    <span class="n">U</span> <span class="o">=</span> <span class="n">Function</span><span class="p">(</span><span class="n">Vv</span><span class="p">)</span>
+    <span class="n">u_mean</span> <span class="o">=</span> <span class="n">Function</span><span class="p">(</span><span class="n">Vv</span><span class="p">)</span>
+    <span class="n">u_mean0</span> <span class="o">=</span> <span class="n">Function</span><span class="p">(</span><span class="n">V</span><span class="p">)</span>
+    <span class="n">u_mean1</span> <span class="o">=</span> <span class="n">Function</span><span class="p">(</span><span class="n">V</span><span class="p">)</span>
+    <span class="n">u_mean2</span> <span class="o">=</span> <span class="n">Function</span><span class="p">(</span><span class="n">V</span><span class="p">)</span>
+
+    <span class="c1"># Time step when solutions for post-processing should start being saved</span>
+    <span class="n">save_solution_at_tstep</span> <span class="o">=</span> <span class="nb">int</span><span class="p">(</span><span class="n">cardiac_cycle</span> <span class="o">*</span> <span class="n">save_solution_after_cycle</span> <span class="o">/</span> <span class="n">dt</span><span class="p">)</span>
+
+    <span class="k">return</span> <span class="nb">dict</span><span class="p">(</span><span class="n">D_mitral</span><span class="o">=</span><span class="n">D_mitral</span><span class="p">,</span> <span class="n">n</span><span class="o">=</span><span class="n">n</span><span class="p">,</span> <span class="n">eval_dict</span><span class="o">=</span><span class="n">eval_dict</span><span class="p">,</span> <span class="n">U</span><span class="o">=</span><span class="n">U</span><span class="p">,</span> <span class="n">u_mean</span><span class="o">=</span><span class="n">u_mean</span><span class="p">,</span> <span class="n">u_mean0</span><span class="o">=</span><span class="n">u_mean0</span><span class="p">,</span> <span class="n">u_mean1</span><span class="o">=</span><span class="n">u_mean1</span><span class="p">,</span>
+                <span class="n">u_mean2</span><span class="o">=</span><span class="n">u_mean2</span><span class="p">,</span> <span class="n">save_solution_at_tstep</span><span class="o">=</span><span class="n">save_solution_at_tstep</span><span class="p">)</span></div>
+
+
+<div class="viewcode-block" id="temporal_hook"><a class="viewcode-back" href="../../../api.html#vampy.simulation.Atrium.temporal_hook">[docs]</a><span class="k">def</span> <span class="nf">temporal_hook</span><span class="p">(</span><span class="n">mesh</span><span class="p">,</span> <span class="n">dt</span><span class="p">,</span> <span class="n">t</span><span class="p">,</span> <span class="n">save_solution_frequency</span><span class="p">,</span> <span class="n">u_</span><span class="p">,</span> <span class="n">NS_expressions</span><span class="p">,</span> <span class="n">id_in</span><span class="p">,</span> <span class="n">tstep</span><span class="p">,</span> <span class="n">newfolder</span><span class="p">,</span>
+                  <span class="n">eval_dict</span><span class="p">,</span> <span class="n">dump_probe_frequency</span><span class="p">,</span> <span class="n">p_</span><span class="p">,</span> <span class="n">save_solution_at_tstep</span><span class="p">,</span> <span class="n">nu</span><span class="p">,</span> <span class="n">D_mitral</span><span class="p">,</span> <span class="n">U</span><span class="p">,</span> <span class="n">u_mean0</span><span class="p">,</span> <span class="n">u_mean1</span><span class="p">,</span>
+                  <span class="n">u_mean2</span><span class="p">,</span> <span class="o">**</span><span class="n">NS_namespace</span><span class="p">):</span>
+    <span class="c1"># Update inlet condition</span>
+    <span class="k">for</span> <span class="n">ID</span> <span class="ow">in</span> <span class="n">id_in</span><span class="p">:</span>
+        <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="p">[</span><span class="mi">0</span><span class="p">,</span> <span class="mi">1</span><span class="p">,</span> <span class="mi">2</span><span class="p">]:</span>
+            <span class="n">NS_expressions</span><span class="p">[</span><span class="s2">&quot;inlet_</span><span class="si">{}</span><span class="s2">&quot;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">ID</span><span class="p">)][</span><span class="n">i</span><span class="p">]</span><span class="o">.</span><span class="n">set_t</span><span class="p">(</span><span class="n">t</span><span class="p">)</span>
+
+    <span class="c1"># Compute flow rates and updated pressure at outlets, and mean velocity and Reynolds number at inlet</span>
+    <span class="k">if</span> <span class="n">tstep</span> <span class="o">%</span> <span class="mi">10</span> <span class="o">==</span> <span class="mi">0</span><span class="p">:</span>
+        <span class="c1"># Compute and printCFL number</span>
+        <span class="n">DG</span> <span class="o">=</span> <span class="n">FunctionSpace</span><span class="p">(</span><span class="n">mesh</span><span class="p">,</span> <span class="s2">&quot;DG&quot;</span><span class="p">,</span> <span class="mi">0</span><span class="p">)</span>
+        <span class="n">U_vector</span> <span class="o">=</span> <span class="n">project</span><span class="p">(</span><span class="n">sqrt</span><span class="p">(</span><span class="n">inner</span><span class="p">(</span><span class="n">u_</span><span class="p">,</span> <span class="n">u_</span><span class="p">)),</span> <span class="n">DG</span><span class="p">)</span><span class="o">.</span><span class="n">vector</span><span class="p">()</span><span class="o">.</span><span class="n">get_local</span><span class="p">()</span>
+        <span class="n">h</span> <span class="o">=</span> <span class="n">mesh</span><span class="o">.</span><span class="n">hmin</span><span class="p">()</span>
+
+        <span class="n">U_mean</span> <span class="o">=</span> <span class="n">U_vector</span><span class="o">.</span><span class="n">mean</span><span class="p">()</span>
+        <span class="n">U_max</span> <span class="o">=</span> <span class="n">U_vector</span><span class="o">.</span><span class="n">max</span><span class="p">()</span>
+
+        <span class="n">Re_mean</span> <span class="o">=</span> <span class="n">U_mean</span> <span class="o">*</span> <span class="n">D_mitral</span> <span class="o">/</span> <span class="n">nu</span>
+        <span class="n">Re_max</span> <span class="o">=</span> <span class="n">U_max</span> <span class="o">*</span> <span class="n">D_mitral</span> <span class="o">/</span> <span class="n">nu</span>
+
+        <span class="n">CFL_mean</span> <span class="o">=</span> <span class="n">U_mean</span> <span class="o">*</span> <span class="n">dt</span> <span class="o">/</span> <span class="n">h</span>
+        <span class="n">CFL_max</span> <span class="o">=</span> <span class="n">U_max</span> <span class="o">*</span> <span class="n">dt</span> <span class="o">/</span> <span class="n">h</span>
+
+        <span class="k">if</span> <span class="n">MPI</span><span class="o">.</span><span class="n">rank</span><span class="p">(</span><span class="n">MPI</span><span class="o">.</span><span class="n">comm_world</span><span class="p">)</span> <span class="o">==</span> <span class="mi">0</span><span class="p">:</span>
+            <span class="n">info</span> <span class="o">=</span> <span class="s1">&#39;Time = </span><span class="si">{0:2.4e}</span><span class="s1">, timestep = </span><span class="si">{1:6d}</span><span class="s1">, max Reynolds number=</span><span class="si">{2:2.3f}</span><span class="s1">, mean Reynolds number=</span><span class="si">{3:2.3f}</span><span class="s1">&#39;</span> <span class="o">+</span> \
+                   <span class="s1">&#39;, max velocity=</span><span class="si">{4:2.3f}</span><span class="s1">, mean velocity=</span><span class="si">{5:2.3f}</span><span class="s1">, max CFL=</span><span class="si">{6:2.3f}</span><span class="s1">, mean CFL=</span><span class="si">{7:2.3f}</span><span class="s1">&#39;</span>
+            <span class="n">info_green</span><span class="p">(</span><span class="n">info</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">t</span><span class="p">,</span> <span class="n">tstep</span><span class="p">,</span> <span class="n">Re_max</span><span class="p">,</span> <span class="n">Re_mean</span><span class="p">,</span> <span class="n">U_max</span><span class="p">,</span> <span class="n">U_mean</span><span class="p">,</span> <span class="n">CFL_max</span><span class="p">,</span> <span class="n">CFL_mean</span><span class="p">))</span>
+
+    <span class="c1"># Sample velocity and pressure in points/probes</span>
+    <span class="n">eval_dict</span><span class="p">[</span><span class="s2">&quot;centerline_u_x_probes&quot;</span><span class="p">](</span><span class="n">u_</span><span class="p">[</span><span class="mi">0</span><span class="p">])</span>
+    <span class="n">eval_dict</span><span class="p">[</span><span class="s2">&quot;centerline_u_y_probes&quot;</span><span class="p">](</span><span class="n">u_</span><span class="p">[</span><span class="mi">1</span><span class="p">])</span>
+    <span class="n">eval_dict</span><span class="p">[</span><span class="s2">&quot;centerline_u_z_probes&quot;</span><span class="p">](</span><span class="n">u_</span><span class="p">[</span><span class="mi">2</span><span class="p">])</span>
+    <span class="n">eval_dict</span><span class="p">[</span><span class="s2">&quot;centerline_p_probes&quot;</span><span class="p">](</span><span class="n">p_</span><span class="p">)</span>
+
+    <span class="c1"># Store sampled velocity and pressure</span>
+    <span class="k">if</span> <span class="n">tstep</span> <span class="o">%</span> <span class="n">dump_probe_frequency</span> <span class="o">==</span> <span class="mi">0</span><span class="p">:</span>
+        <span class="c1"># Save variables along the centerline for CFD simulation</span>
+        <span class="c1"># diagnostics and light-weight post-processing</span>
+        <span class="n">filepath</span> <span class="o">=</span> <span class="n">path</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">newfolder</span><span class="p">,</span> <span class="s2">&quot;Probes&quot;</span><span class="p">)</span>
+        <span class="k">if</span> <span class="n">MPI</span><span class="o">.</span><span class="n">rank</span><span class="p">(</span><span class="n">MPI</span><span class="o">.</span><span class="n">comm_world</span><span class="p">)</span> <span class="o">==</span> <span class="mi">0</span><span class="p">:</span>
+            <span class="k">if</span> <span class="ow">not</span> <span class="n">path</span><span class="o">.</span><span class="n">exists</span><span class="p">(</span><span class="n">filepath</span><span class="p">):</span>
+                <span class="n">makedirs</span><span class="p">(</span><span class="n">filepath</span><span class="p">)</span>
+
+        <span class="n">arr_u_x</span> <span class="o">=</span> <span class="n">eval_dict</span><span class="p">[</span><span class="s2">&quot;centerline_u_x_probes&quot;</span><span class="p">]</span><span class="o">.</span><span class="n">array</span><span class="p">()</span>
+        <span class="n">arr_u_y</span> <span class="o">=</span> <span class="n">eval_dict</span><span class="p">[</span><span class="s2">&quot;centerline_u_y_probes&quot;</span><span class="p">]</span><span class="o">.</span><span class="n">array</span><span class="p">()</span>
+        <span class="n">arr_u_z</span> <span class="o">=</span> <span class="n">eval_dict</span><span class="p">[</span><span class="s2">&quot;centerline_u_z_probes&quot;</span><span class="p">]</span><span class="o">.</span><span class="n">array</span><span class="p">()</span>
+        <span class="n">arr_p</span> <span class="o">=</span> <span class="n">eval_dict</span><span class="p">[</span><span class="s2">&quot;centerline_p_probes&quot;</span><span class="p">]</span><span class="o">.</span><span class="n">array</span><span class="p">()</span>
+
+        <span class="c1"># Dump stats</span>
+        <span class="k">if</span> <span class="n">MPI</span><span class="o">.</span><span class="n">rank</span><span class="p">(</span><span class="n">MPI</span><span class="o">.</span><span class="n">comm_world</span><span class="p">)</span> <span class="o">==</span> <span class="mi">0</span><span class="p">:</span>
+            <span class="n">arr_u_x</span><span class="o">.</span><span class="n">dump</span><span class="p">(</span><span class="n">path</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">filepath</span><span class="p">,</span> <span class="s2">&quot;u_x_</span><span class="si">%s</span><span class="s2">.probes&quot;</span> <span class="o">%</span> <span class="nb">str</span><span class="p">(</span><span class="n">tstep</span><span class="p">)))</span>
+            <span class="n">arr_u_y</span><span class="o">.</span><span class="n">dump</span><span class="p">(</span><span class="n">path</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">filepath</span><span class="p">,</span> <span class="s2">&quot;u_y_</span><span class="si">%s</span><span class="s2">.probes&quot;</span> <span class="o">%</span> <span class="nb">str</span><span class="p">(</span><span class="n">tstep</span><span class="p">)))</span>
+            <span class="n">arr_u_z</span><span class="o">.</span><span class="n">dump</span><span class="p">(</span><span class="n">path</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">filepath</span><span class="p">,</span> <span class="s2">&quot;u_z_</span><span class="si">%s</span><span class="s2">.probes&quot;</span> <span class="o">%</span> <span class="nb">str</span><span class="p">(</span><span class="n">tstep</span><span class="p">)))</span>
+            <span class="n">arr_p</span><span class="o">.</span><span class="n">dump</span><span class="p">(</span><span class="n">path</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">filepath</span><span class="p">,</span> <span class="s2">&quot;p_</span><span class="si">%s</span><span class="s2">.probes&quot;</span> <span class="o">%</span> <span class="nb">str</span><span class="p">(</span><span class="n">tstep</span><span class="p">)))</span>
+
+        <span class="c1"># Clear stats</span>
+        <span class="n">MPI</span><span class="o">.</span><span class="n">barrier</span><span class="p">(</span><span class="n">MPI</span><span class="o">.</span><span class="n">comm_world</span><span class="p">)</span>
+        <span class="n">eval_dict</span><span class="p">[</span><span class="s2">&quot;centerline_u_x_probes&quot;</span><span class="p">]</span><span class="o">.</span><span class="n">clear</span><span class="p">()</span>
+        <span class="n">eval_dict</span><span class="p">[</span><span class="s2">&quot;centerline_u_y_probes&quot;</span><span class="p">]</span><span class="o">.</span><span class="n">clear</span><span class="p">()</span>
+        <span class="n">eval_dict</span><span class="p">[</span><span class="s2">&quot;centerline_u_z_probes&quot;</span><span class="p">]</span><span class="o">.</span><span class="n">clear</span><span class="p">()</span>
+        <span class="n">eval_dict</span><span class="p">[</span><span class="s2">&quot;centerline_p_probes&quot;</span><span class="p">]</span><span class="o">.</span><span class="n">clear</span><span class="p">()</span>
+
+    <span class="c1"># Save velocity and pressure for post-processing</span>
+    <span class="k">if</span> <span class="n">tstep</span> <span class="o">%</span> <span class="n">save_solution_frequency</span> <span class="o">==</span> <span class="mi">0</span> <span class="ow">and</span> <span class="n">tstep</span> <span class="o">&gt;=</span> <span class="n">save_solution_at_tstep</span><span class="p">:</span>
+        <span class="c1"># Assign velocity components to vector solution</span>
+        <span class="n">assign</span><span class="p">(</span><span class="n">U</span><span class="o">.</span><span class="n">sub</span><span class="p">(</span><span class="mi">0</span><span class="p">),</span> <span class="n">u_</span><span class="p">[</span><span class="mi">0</span><span class="p">])</span>
+        <span class="n">assign</span><span class="p">(</span><span class="n">U</span><span class="o">.</span><span class="n">sub</span><span class="p">(</span><span class="mi">1</span><span class="p">),</span> <span class="n">u_</span><span class="p">[</span><span class="mi">1</span><span class="p">])</span>
+        <span class="n">assign</span><span class="p">(</span><span class="n">U</span><span class="o">.</span><span class="n">sub</span><span class="p">(</span><span class="mi">2</span><span class="p">),</span> <span class="n">u_</span><span class="p">[</span><span class="mi">2</span><span class="p">])</span>
+
+        <span class="c1"># Get save paths</span>
+        <span class="n">files</span> <span class="o">=</span> <span class="n">NS_parameters</span><span class="p">[</span><span class="s1">&#39;files&#39;</span><span class="p">]</span>
+        <span class="n">p_path</span> <span class="o">=</span> <span class="n">files</span><span class="p">[</span><span class="s1">&#39;p&#39;</span><span class="p">]</span>
+        <span class="n">u_path</span> <span class="o">=</span> <span class="n">files</span><span class="p">[</span><span class="s1">&#39;u&#39;</span><span class="p">]</span>
+        <span class="n">file_mode</span> <span class="o">=</span> <span class="s2">&quot;w&quot;</span> <span class="k">if</span> <span class="ow">not</span> <span class="n">path</span><span class="o">.</span><span class="n">exists</span><span class="p">(</span><span class="n">p_path</span><span class="p">)</span> <span class="k">else</span> <span class="s2">&quot;a&quot;</span>
+
+        <span class="c1"># Save pressure</span>
+        <span class="n">viz_p</span> <span class="o">=</span> <span class="n">HDF5File</span><span class="p">(</span><span class="n">MPI</span><span class="o">.</span><span class="n">comm_world</span><span class="p">,</span> <span class="n">p_path</span><span class="p">,</span> <span class="n">file_mode</span><span class="o">=</span><span class="n">file_mode</span><span class="p">)</span>
+        <span class="n">viz_p</span><span class="o">.</span><span class="n">write</span><span class="p">(</span><span class="n">p_</span><span class="p">,</span> <span class="s2">&quot;/pressure&quot;</span><span class="p">,</span> <span class="n">tstep</span><span class="p">)</span>
+        <span class="n">viz_p</span><span class="o">.</span><span class="n">close</span><span class="p">()</span>
+
+        <span class="c1"># Save velocity</span>
+        <span class="n">viz_u</span> <span class="o">=</span> <span class="n">HDF5File</span><span class="p">(</span><span class="n">MPI</span><span class="o">.</span><span class="n">comm_world</span><span class="p">,</span> <span class="n">u_path</span><span class="p">,</span> <span class="n">file_mode</span><span class="o">=</span><span class="n">file_mode</span><span class="p">)</span>
+        <span class="n">viz_u</span><span class="o">.</span><span class="n">write</span><span class="p">(</span><span class="n">U</span><span class="p">,</span> <span class="s2">&quot;/velocity&quot;</span><span class="p">,</span> <span class="n">tstep</span><span class="p">)</span>
+        <span class="n">viz_u</span><span class="o">.</span><span class="n">close</span><span class="p">()</span>
+
+        <span class="c1"># Accumulate velocity</span>
+        <span class="n">u_mean0</span><span class="o">.</span><span class="n">vector</span><span class="p">()</span><span class="o">.</span><span class="n">axpy</span><span class="p">(</span><span class="mi">1</span><span class="p">,</span> <span class="n">u_</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span><span class="o">.</span><span class="n">vector</span><span class="p">())</span>
+        <span class="n">u_mean1</span><span class="o">.</span><span class="n">vector</span><span class="p">()</span><span class="o">.</span><span class="n">axpy</span><span class="p">(</span><span class="mi">1</span><span class="p">,</span> <span class="n">u_</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span><span class="o">.</span><span class="n">vector</span><span class="p">())</span>
+        <span class="n">u_mean2</span><span class="o">.</span><span class="n">vector</span><span class="p">()</span><span class="o">.</span><span class="n">axpy</span><span class="p">(</span><span class="mi">1</span><span class="p">,</span> <span class="n">u_</span><span class="p">[</span><span class="mi">2</span><span class="p">]</span><span class="o">.</span><span class="n">vector</span><span class="p">())</span></div>
+
+
+<span class="c1"># Oasis hook called after the simulation has finished</span>
+<div class="viewcode-block" id="theend_hook"><a class="viewcode-back" href="../../../api.html#vampy.simulation.Atrium.theend_hook">[docs]</a><span class="k">def</span> <span class="nf">theend_hook</span><span class="p">(</span><span class="n">u_mean</span><span class="p">,</span> <span class="n">u_mean0</span><span class="p">,</span> <span class="n">u_mean1</span><span class="p">,</span> <span class="n">u_mean2</span><span class="p">,</span> <span class="n">T</span><span class="p">,</span> <span class="n">dt</span><span class="p">,</span> <span class="n">save_solution_at_tstep</span><span class="p">,</span> <span class="n">save_solution_frequency</span><span class="p">,</span>
+                <span class="o">**</span><span class="n">NS_namespace</span><span class="p">):</span>
+    <span class="n">store_u_mean</span><span class="p">(</span><span class="n">T</span><span class="p">,</span> <span class="n">dt</span><span class="p">,</span> <span class="n">save_solution_at_tstep</span><span class="p">,</span> <span class="n">save_solution_frequency</span><span class="p">,</span> <span class="n">u_mean</span><span class="p">,</span> <span class="n">u_mean0</span><span class="p">,</span> <span class="n">u_mean1</span><span class="p">,</span> <span class="n">u_mean2</span><span class="p">,</span>
+                 <span class="n">NS_parameters</span><span class="p">)</span></div>
+</pre></div>
+
+              </div>
+              
+            </main>
+            <footer class="footer-article noprint">
+                
+    <!-- Previous / next buttons -->
+<div class='prev-next-area'>
+</div>
+            </footer>
+        </div>
+    </div>
+    <div class="footer-content row">
+        <footer class="col footer"><p>
+  
+    By Henrik A. Kjeldsberg<br/>
+  
+      &copy; Copyright 2023.<br/>
+</p>
+        </footer>
+    </div>
+    
+</div>
+
+
+      </div>
+    </div>
+  
+  <!-- Scripts loaded after <body> so the DOM is not blocked -->
+  <script src="../../../_static/scripts/pydata-sphinx-theme.js?digest=1999514e3f237ded88cf"></script>
+
+
+  </body>
+</html>

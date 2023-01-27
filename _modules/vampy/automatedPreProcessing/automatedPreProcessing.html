@@ -348,11 +348,11 @@ title="Open an issue"
     <span class="n">make_voronoi_diagram</span><span class="p">,</span> <span class="n">add_flow_extension</span><span class="p">,</span> <span class="n">write_mesh</span><span class="p">,</span> <span class="n">mesh_alternative</span><span class="p">,</span> <span class="n">generate_mesh</span><span class="p">,</span> <span class="n">find_boundaries</span><span class="p">,</span> \
     <span class="n">compute_flow_rate</span><span class="p">,</span> <span class="n">setup_model_network</span>
 <span class="kn">from</span> <span class="nn">vampy.automatedPreProcessing.simulate</span> <span class="kn">import</span> <span class="n">run_simulation</span>
-<span class="kn">from</span> <span class="nn">vampy.automatedPreProcessing.visualize</span> <span class="kn">import</span> <span class="n">visualize</span>
+<span class="kn">from</span> <span class="nn">vampy.automatedPreProcessing.visualize</span> <span class="kn">import</span> <span class="n">visualize_model</span>
 
 
-<div class="viewcode-block" id="run_pre_processing"><a class="viewcode-back" href="../../../api.html#vampy.automatedPreProcessing.automatedPreProcessing.run_pre_processing">[docs]</a><span class="k">def</span> <span class="nf">run_pre_processing</span><span class="p">(</span><span class="n">filename_model</span><span class="p">,</span> <span class="n">verbose_print</span><span class="p">,</span> <span class="n">smoothing_method</span><span class="p">,</span> <span class="n">smoothing_factor</span><span class="p">,</span> <span class="n">meshing_method</span><span class="p">,</span>
-                       <span class="n">refine_region</span><span class="p">,</span> <span class="n">is_atrium</span><span class="p">,</span> <span class="n">create_flow_extensions</span><span class="p">,</span> <span class="n">viz</span><span class="p">,</span> <span class="n">config_path</span><span class="p">,</span> <span class="n">coarsening_factor</span><span class="p">,</span>
+<div class="viewcode-block" id="run_pre_processing"><a class="viewcode-back" href="../../../api.html#vampy.automatedPreProcessing.automatedPreProcessing.run_pre_processing">[docs]</a><span class="k">def</span> <span class="nf">run_pre_processing</span><span class="p">(</span><span class="n">input_model</span><span class="p">,</span> <span class="n">verbose_print</span><span class="p">,</span> <span class="n">smoothing_method</span><span class="p">,</span> <span class="n">smoothing_factor</span><span class="p">,</span> <span class="n">meshing_method</span><span class="p">,</span>
+                       <span class="n">refine_region</span><span class="p">,</span> <span class="n">is_atrium</span><span class="p">,</span> <span class="n">add_flow_extensions</span><span class="p">,</span> <span class="n">visualize</span><span class="p">,</span> <span class="n">config_path</span><span class="p">,</span> <span class="n">coarsening_factor</span><span class="p">,</span>
                        <span class="n">inlet_flow_extension_length</span><span class="p">,</span> <span class="n">outlet_flow_extension_length</span><span class="p">,</span> <span class="n">edge_length</span><span class="p">,</span> <span class="n">region_points</span><span class="p">,</span>
                        <span class="n">compress_mesh</span><span class="p">):</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
@@ -362,15 +362,15 @@ title="Open an issue"
 <span class="sd">    Runs simulation of meshed case on a remote ssh server if server configuration is provided.</span>
 
 <span class="sd">    Args:</span>
-<span class="sd">        filename_model (str): Name of case</span>
+<span class="sd">        input_model (str): Name of case</span>
 <span class="sd">        verbose_print (bool): Toggles verbose mode</span>
 <span class="sd">        smoothing_method (str): Method for surface smoothing</span>
 <span class="sd">        smoothing_factor (float): Smoothing parameter</span>
 <span class="sd">        meshing_method (str): Method for meshing</span>
 <span class="sd">        refine_region (bool): Refines selected region of input if True</span>
 <span class="sd">        is_atrium (bool): Determines whether this is an atrium case</span>
-<span class="sd">        create_flow_extensions (bool): Adds flow extensions to mesh if True</span>
-<span class="sd">        viz (bool): Visualize resulting surface model with flow rates</span>
+<span class="sd">        add_flow_extensions (bool): Adds flow extensions to mesh if True</span>
+<span class="sd">        visualize (bool): Visualize resulting surface model with flow rates</span>
 <span class="sd">        config_path (str): Path to configuration file for remote simulation</span>
 <span class="sd">        coarsening_factor (float): Refine or coarsen the standard mesh size with given factor</span>
 <span class="sd">        region_points (list): User defined points to define which region to refine</span>
@@ -380,8 +380,8 @@ title="Open an issue"
 <span class="sd">        compress_mesh (bool): Compresses finalized mesh if True</span>
 <span class="sd">    &quot;&quot;&quot;</span>
     <span class="c1"># Get paths</span>
-    <span class="n">case_name</span> <span class="o">=</span> <span class="n">filename_model</span><span class="o">.</span><span class="n">rsplit</span><span class="p">(</span><span class="n">path</span><span class="o">.</span><span class="n">sep</span><span class="p">,</span> <span class="mi">1</span><span class="p">)[</span><span class="o">-</span><span class="mi">1</span><span class="p">]</span><span class="o">.</span><span class="n">rsplit</span><span class="p">(</span><span class="s1">&#39;.&#39;</span><span class="p">)[</span><span class="mi">0</span><span class="p">]</span>
-    <span class="n">dir_path</span> <span class="o">=</span> <span class="n">filename_model</span><span class="o">.</span><span class="n">rsplit</span><span class="p">(</span><span class="n">path</span><span class="o">.</span><span class="n">sep</span><span class="p">,</span> <span class="mi">1</span><span class="p">)[</span><span class="mi">0</span><span class="p">]</span>
+    <span class="n">case_name</span> <span class="o">=</span> <span class="n">input_model</span><span class="o">.</span><span class="n">rsplit</span><span class="p">(</span><span class="n">path</span><span class="o">.</span><span class="n">sep</span><span class="p">,</span> <span class="mi">1</span><span class="p">)[</span><span class="o">-</span><span class="mi">1</span><span class="p">]</span><span class="o">.</span><span class="n">rsplit</span><span class="p">(</span><span class="s1">&#39;.&#39;</span><span class="p">)[</span><span class="mi">0</span><span class="p">]</span>
+    <span class="n">dir_path</span> <span class="o">=</span> <span class="n">input_model</span><span class="o">.</span><span class="n">rsplit</span><span class="p">(</span><span class="n">path</span><span class="o">.</span><span class="n">sep</span><span class="p">,</span> <span class="mi">1</span><span class="p">)[</span><span class="mi">0</span><span class="p">]</span>
 
     <span class="c1"># Naming conventions</span>
     <span class="n">file_name_centerlines</span> <span class="o">=</span> <span class="n">path</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">dir_path</span><span class="p">,</span> <span class="n">case_name</span> <span class="o">+</span> <span class="s2">&quot;_centerlines.vtp&quot;</span><span class="p">)</span>
@@ -405,7 +405,7 @@ title="Open an issue"
 
     <span class="c1"># Open the surface file.</span>
     <span class="nb">print</span><span class="p">(</span><span class="s2">&quot;--- Load model file</span><span class="se">\n</span><span class="s2">&quot;</span><span class="p">)</span>
-    <span class="n">surface</span> <span class="o">=</span> <span class="n">read_polydata</span><span class="p">(</span><span class="n">filename_model</span><span class="p">)</span>
+    <span class="n">surface</span> <span class="o">=</span> <span class="n">read_polydata</span><span class="p">(</span><span class="n">input_model</span><span class="p">)</span>
 
     <span class="c1"># Check if surface is closed and uncapps model if True</span>
     <span class="k">if</span> <span class="n">is_surface_capped</span><span class="p">(</span><span class="n">surface</span><span class="p">)[</span><span class="mi">0</span><span class="p">]</span> <span class="ow">and</span> <span class="n">smoothing_method</span> <span class="o">!=</span> <span class="s2">&quot;voronoi&quot;</span><span class="p">:</span>
@@ -543,7 +543,7 @@ title="Open an issue"
             <span class="n">surface</span> <span class="o">=</span> <span class="n">surface_uncapped</span>
 
             <span class="c1"># Smoothing to improve the quality of the elements</span>
-            <span class="c1"># Consider to add a subdivision here as well.</span>
+            <span class="c1"># Consider adding a subdivision here as well.</span>
             <span class="n">surface</span> <span class="o">=</span> <span class="n">vmtk_smooth_surface</span><span class="p">(</span><span class="n">surface</span><span class="p">,</span> <span class="s2">&quot;laplace&quot;</span><span class="p">,</span> <span class="n">iterations</span><span class="o">=</span><span class="mi">200</span><span class="p">)</span>
 
             <span class="c1"># Write surface</span>
@@ -567,7 +567,7 @@ title="Open an issue"
         <span class="nb">print</span><span class="p">(</span><span class="s2">&quot;--- No smoothing of surface</span><span class="se">\n</span><span class="s2">&quot;</span><span class="p">)</span>
 
     <span class="c1"># Add flow extensions</span>
-    <span class="k">if</span> <span class="n">create_flow_extensions</span><span class="p">:</span>
+    <span class="k">if</span> <span class="n">add_flow_extensions</span><span class="p">:</span>
         <span class="k">if</span> <span class="ow">not</span> <span class="n">path</span><span class="o">.</span><span class="n">isfile</span><span class="p">(</span><span class="n">file_name_model_flow_ext</span><span class="p">):</span>
             <span class="nb">print</span><span class="p">(</span><span class="s2">&quot;--- Adding flow extensions</span><span class="se">\n</span><span class="s2">&quot;</span><span class="p">)</span>
             <span class="c1"># Add extension normal on boundary for atrium models</span>
@@ -589,7 +589,7 @@ title="Open an issue"
     <span class="n">capped_surface</span> <span class="o">=</span> <span class="n">vmtk_cap_polydata</span><span class="p">(</span><span class="n">surface_extended</span><span class="p">)</span>
 
     <span class="c1"># Get new centerlines with the flow extensions</span>
-    <span class="k">if</span> <span class="n">create_flow_extensions</span><span class="p">:</span>
+    <span class="k">if</span> <span class="n">add_flow_extensions</span><span class="p">:</span>
         <span class="k">if</span> <span class="ow">not</span> <span class="n">path</span><span class="o">.</span><span class="n">isfile</span><span class="p">(</span><span class="n">file_name_flow_centerlines</span><span class="p">):</span>
             <span class="nb">print</span><span class="p">(</span><span class="s2">&quot;--- Compute the model centerlines with flow extension.</span><span class="se">\n</span><span class="s2">&quot;</span><span class="p">)</span>
             <span class="c1"># Compute the centerlines.</span>
@@ -659,10 +659,10 @@ title="Open an issue"
     <span class="n">find_boundaries</span><span class="p">(</span><span class="n">path</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">dir_path</span><span class="p">,</span> <span class="n">case_name</span><span class="p">),</span> <span class="n">mean_inflow_rate</span><span class="p">,</span> <span class="n">network</span><span class="p">,</span> <span class="n">mesh</span><span class="p">,</span> <span class="n">verbose_print</span><span class="p">,</span> <span class="n">is_atrium</span><span class="p">)</span>
 
     <span class="c1"># Display the flow split at the outlets, inlet flow rate, and probes.</span>
-    <span class="k">if</span> <span class="n">viz</span><span class="p">:</span>
+    <span class="k">if</span> <span class="n">visualize</span><span class="p">:</span>
         <span class="nb">print</span><span class="p">(</span><span class="s2">&quot;--- Visualizing flow split at outlets, inlet flow rate, and probes in VTK render window. &quot;</span><span class="p">)</span>
         <span class="nb">print</span><span class="p">(</span><span class="s2">&quot;--- Press &#39;q&#39; inside the render window to exit.&quot;</span><span class="p">)</span>
-        <span class="n">visualize</span><span class="p">(</span><span class="n">network</span><span class="o">.</span><span class="n">elements</span><span class="p">,</span> <span class="n">probe_points</span><span class="p">,</span> <span class="n">surface_extended</span><span class="p">,</span> <span class="n">mean_inflow_rate</span><span class="p">)</span>
+        <span class="n">visualize_model</span><span class="p">(</span><span class="n">network</span><span class="o">.</span><span class="n">elements</span><span class="p">,</span> <span class="n">probe_points</span><span class="p">,</span> <span class="n">surface_extended</span><span class="p">,</span> <span class="n">mean_inflow_rate</span><span class="p">)</span>
 
     <span class="c1"># Start simulation though ssh, without password</span>
     <span class="k">if</span> <span class="n">config_path</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
@@ -701,66 +701,62 @@ title="Open an issue"
                    <span class="n">default</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span>
                    <span class="n">help</span><span class="o">=</span><span class="s2">&quot;Activates the verbose mode.&quot;</span><span class="p">)</span>
 
-    <span class="n">parser</span><span class="o">.</span><span class="n">add_argument</span><span class="p">(</span><span class="s1">&#39;-i&#39;</span><span class="p">,</span> <span class="s1">&#39;--inputModel&#39;</span><span class="p">,</span>
+    <span class="n">parser</span><span class="o">.</span><span class="n">add_argument</span><span class="p">(</span><span class="s1">&#39;-i&#39;</span><span class="p">,</span> <span class="s1">&#39;--input-model&#39;</span><span class="p">,</span>
                         <span class="nb">type</span><span class="o">=</span><span class="nb">str</span><span class="p">,</span>
                         <span class="n">required</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span>
-                        <span class="n">dest</span><span class="o">=</span><span class="s1">&#39;fileNameModel&#39;</span><span class="p">,</span>
-                        <span class="n">help</span><span class="o">=</span><span class="s2">&quot;Input file containing the 3D model.&quot;</span><span class="p">)</span>
+                        <span class="n">help</span><span class="o">=</span><span class="s2">&quot;Path to input model containing the 3D model. Expected format is VTK/VTP or STL.&quot;</span><span class="p">)</span>
 
-    <span class="n">parser</span><span class="o">.</span><span class="n">add_argument</span><span class="p">(</span><span class="s1">&#39;-cM&#39;</span><span class="p">,</span> <span class="s1">&#39;--compress-mesh&#39;</span><span class="p">,</span>
+    <span class="n">parser</span><span class="o">.</span><span class="n">add_argument</span><span class="p">(</span><span class="s1">&#39;-cm&#39;</span><span class="p">,</span> <span class="s1">&#39;--compress-mesh&#39;</span><span class="p">,</span>
                         <span class="nb">type</span><span class="o">=</span><span class="n">str2bool</span><span class="p">,</span>
                         <span class="n">required</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span>
-                        <span class="n">dest</span><span class="o">=</span><span class="s1">&#39;compressMesh&#39;</span><span class="p">,</span>
                         <span class="n">default</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span>
                         <span class="n">help</span><span class="o">=</span><span class="s2">&quot;Compress output mesh after generation.&quot;</span><span class="p">)</span>
 
-    <span class="n">parser</span><span class="o">.</span><span class="n">add_argument</span><span class="p">(</span><span class="s1">&#39;-sM&#39;</span><span class="p">,</span> <span class="s1">&#39;--smoothingMethod&#39;</span><span class="p">,</span>
+    <span class="n">parser</span><span class="o">.</span><span class="n">add_argument</span><span class="p">(</span><span class="s1">&#39;-sm&#39;</span><span class="p">,</span> <span class="s1">&#39;--smoothing-method&#39;</span><span class="p">,</span>
                         <span class="nb">type</span><span class="o">=</span><span class="nb">str</span><span class="p">,</span>
                         <span class="n">required</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span>
-                        <span class="n">dest</span><span class="o">=</span><span class="s1">&#39;smoothingMethod&#39;</span><span class="p">,</span>
                         <span class="n">default</span><span class="o">=</span><span class="s2">&quot;no_smooth&quot;</span><span class="p">,</span>
                         <span class="n">choices</span><span class="o">=</span><span class="p">[</span><span class="s2">&quot;voronoi&quot;</span><span class="p">,</span> <span class="s2">&quot;no_smooth&quot;</span><span class="p">,</span> <span class="s2">&quot;laplace&quot;</span><span class="p">,</span> <span class="s2">&quot;taubin&quot;</span><span class="p">],</span>
                         <span class="n">help</span><span class="o">=</span><span class="s2">&quot;Smoothing method, for now only Voronoi smoothing is available.&quot;</span> <span class="o">+</span>
-                             <span class="s2">&quot; For Voronoi smoothing you can also control smoothingFactor&quot;</span> <span class="o">+</span>
-                             <span class="s2">&quot; (default = 0.25).&quot;</span><span class="p">)</span>
+                             <span class="s2">&quot; For Voronoi smoothing you can also control the smoothing factor with &quot;</span> <span class="o">+</span>
+                             <span class="s2">&quot;--smoothing-factor (default = 0.25).&quot;</span><span class="p">)</span>
 
-    <span class="n">parser</span><span class="o">.</span><span class="n">add_argument</span><span class="p">(</span><span class="s1">&#39;-c&#39;</span><span class="p">,</span> <span class="s1">&#39;--coarseningFactor&#39;</span><span class="p">,</span>
+    <span class="n">parser</span><span class="o">.</span><span class="n">add_argument</span><span class="p">(</span><span class="s1">&#39;-c&#39;</span><span class="p">,</span> <span class="s1">&#39;--coarsening-factor&#39;</span><span class="p">,</span>
                         <span class="nb">type</span><span class="o">=</span><span class="nb">float</span><span class="p">,</span>
                         <span class="n">required</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span>
-                        <span class="n">dest</span><span class="o">=</span><span class="s1">&#39;coarseningFactor&#39;</span><span class="p">,</span>
                         <span class="n">default</span><span class="o">=</span><span class="mf">1.0</span><span class="p">,</span>
                         <span class="n">help</span><span class="o">=</span><span class="s2">&quot;Refine or coarsen the standard mesh size. The higher the value the coarser the mesh.&quot;</span><span class="p">)</span>
 
-    <span class="n">parser</span><span class="o">.</span><span class="n">add_argument</span><span class="p">(</span><span class="s1">&#39;-sF&#39;</span><span class="p">,</span> <span class="s1">&#39;--smoothingFactor&#39;</span><span class="p">,</span>
+    <span class="n">parser</span><span class="o">.</span><span class="n">add_argument</span><span class="p">(</span><span class="s1">&#39;-sf&#39;</span><span class="p">,</span> <span class="s1">&#39;--smoothing-factor&#39;</span><span class="p">,</span>
                         <span class="nb">type</span><span class="o">=</span><span class="nb">float</span><span class="p">,</span>
                         <span class="n">required</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span>
-                        <span class="n">dest</span><span class="o">=</span><span class="s1">&#39;smoothingFactor&#39;</span><span class="p">,</span>
                         <span class="n">default</span><span class="o">=</span><span class="mf">0.25</span><span class="p">,</span>
-                        <span class="n">help</span><span class="o">=</span><span class="s2">&quot;smoothingFactor for VoronoiSmoothing, removes all spheres which&quot;</span> <span class="o">+</span>
+                        <span class="n">help</span><span class="o">=</span><span class="s2">&quot;Smoothing factor for Voronoi smoothing, removes all spheres which&quot;</span> <span class="o">+</span>
                              <span class="s2">&quot; has a radius &lt; MISR*(1-0.25), where MISR varying along the centerline.&quot;</span><span class="p">)</span>
 
-    <span class="n">parser</span><span class="o">.</span><span class="n">add_argument</span><span class="p">(</span><span class="s1">&#39;-m&#39;</span><span class="p">,</span> <span class="s1">&#39;--meshingMethod&#39;</span><span class="p">,</span>
-                        <span class="n">dest</span><span class="o">=</span><span class="s2">&quot;meshingMethod&quot;</span><span class="p">,</span>
+    <span class="n">parser</span><span class="o">.</span><span class="n">add_argument</span><span class="p">(</span><span class="s1">&#39;-m&#39;</span><span class="p">,</span> <span class="s1">&#39;--meshing-method&#39;</span><span class="p">,</span>
                         <span class="nb">type</span><span class="o">=</span><span class="nb">str</span><span class="p">,</span>
                         <span class="n">choices</span><span class="o">=</span><span class="p">[</span><span class="s2">&quot;diameter&quot;</span><span class="p">,</span> <span class="s2">&quot;curvature&quot;</span><span class="p">,</span> <span class="s2">&quot;constant&quot;</span><span class="p">],</span>
-                        <span class="n">default</span><span class="o">=</span><span class="s2">&quot;diameter&quot;</span><span class="p">)</span>
+                        <span class="n">default</span><span class="o">=</span><span class="s2">&quot;diameter&quot;</span><span class="p">,</span>
+                        <span class="n">help</span><span class="o">=</span><span class="s2">&quot;Determines method of meshing. The method &#39;constant&#39; is supplied with a constant edge &quot;</span> <span class="o">+</span>
+                             <span class="s2">&quot;length controlled by the -el argument, resulting in a constant density mesh. &quot;</span> <span class="o">+</span>
+                             <span class="s2">&quot;The &#39;curvature&#39; method and &#39;diameter&#39; method produces a variable density mesh,&quot;</span> <span class="o">+</span>
+                             <span class="s2">&quot; based on the surface curvature and the distance from the &quot;</span> <span class="o">+</span>
+                             <span class="s2">&quot;centerline to the surface, respectively.&quot;</span><span class="p">)</span>
 
     <span class="n">parser</span><span class="o">.</span><span class="n">add_argument</span><span class="p">(</span><span class="s1">&#39;-el&#39;</span><span class="p">,</span> <span class="s1">&#39;--edge-length&#39;</span><span class="p">,</span>
-                        <span class="n">dest</span><span class="o">=</span><span class="s2">&quot;edgeLength&quot;</span><span class="p">,</span>
                         <span class="n">default</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
                         <span class="nb">type</span><span class="o">=</span><span class="nb">float</span><span class="p">,</span>
-                        <span class="n">help</span><span class="o">=</span><span class="s2">&quot;Characteristic edge length used for meshing.&quot;</span><span class="p">)</span>
+                        <span class="n">help</span><span class="o">=</span><span class="s2">&quot;Characteristic edge length used for the &#39;constant&#39; meshing method.&quot;</span><span class="p">)</span>
 
     <span class="n">refine_region</span> <span class="o">=</span> <span class="n">parser</span><span class="o">.</span><span class="n">add_mutually_exclusive_group</span><span class="p">(</span><span class="n">required</span><span class="o">=</span><span class="kc">False</span><span class="p">)</span>
     <span class="n">refine_region</span><span class="o">.</span><span class="n">add_argument</span><span class="p">(</span><span class="s1">&#39;-r&#39;</span><span class="p">,</span> <span class="s1">&#39;--refine-region&#39;</span><span class="p">,</span>
                                <span class="n">action</span><span class="o">=</span><span class="s1">&#39;store_true&#39;</span><span class="p">,</span>
-                               <span class="n">dest</span><span class="o">=</span><span class="s2">&quot;refineRegion&quot;</span><span class="p">,</span>
                                <span class="n">default</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span>
                                <span class="n">help</span><span class="o">=</span><span class="s2">&quot;Determine whether or not to refine a specific region of &quot;</span> <span class="o">+</span>
                                     <span class="s2">&quot;the input model&quot;</span><span class="p">)</span>
 
     <span class="n">parser</span><span class="o">.</span><span class="n">add_argument</span><span class="p">(</span><span class="s1">&#39;-rp&#39;</span><span class="p">,</span> <span class="s1">&#39;--region-points&#39;</span><span class="p">,</span>
-                        <span class="n">dest</span><span class="o">=</span><span class="s2">&quot;regionPoints&quot;</span><span class="p">,</span>
                         <span class="nb">type</span><span class="o">=</span><span class="nb">float</span><span class="p">,</span>
                         <span class="n">nargs</span><span class="o">=</span><span class="s2">&quot;+&quot;</span><span class="p">,</span>
                         <span class="n">default</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
@@ -770,39 +766,33 @@ title="Open an issue"
                              <span class="s2">&quot; --region-points 0.1 5 -1 1 5.24 3.21&quot;</span><span class="p">)</span>
 
     <span class="n">atrium</span> <span class="o">=</span> <span class="n">parser</span><span class="o">.</span><span class="n">add_mutually_exclusive_group</span><span class="p">(</span><span class="n">required</span><span class="o">=</span><span class="kc">False</span><span class="p">)</span>
-    <span class="n">atrium</span><span class="o">.</span><span class="n">add_argument</span><span class="p">(</span><span class="s1">&#39;-at&#39;</span><span class="p">,</span> <span class="s1">&#39;--atrium&#39;</span><span class="p">,</span>
-                        <span class="n">dest</span><span class="o">=</span><span class="s2">&quot;isAtrium&quot;</span><span class="p">,</span>
+    <span class="n">atrium</span><span class="o">.</span><span class="n">add_argument</span><span class="p">(</span><span class="s1">&#39;-at&#39;</span><span class="p">,</span> <span class="s1">&#39;--is-atrium&#39;</span><span class="p">,</span>
                         <span class="n">action</span><span class="o">=</span><span class="s2">&quot;store_true&quot;</span><span class="p">,</span>
                         <span class="n">default</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span>
-                        <span class="n">help</span><span class="o">=</span><span class="s2">&quot;Determine whether or not the model is an Atrium model.&quot;</span><span class="p">)</span>
+                        <span class="n">help</span><span class="o">=</span><span class="s2">&quot;Determine whether or not the model is an atrium model.&quot;</span><span class="p">)</span>
 
-    <span class="n">parser</span><span class="o">.</span><span class="n">add_argument</span><span class="p">(</span><span class="s1">&#39;-f&#39;</span><span class="p">,</span> <span class="s1">&#39;--flowext&#39;</span><span class="p">,</span>
-                        <span class="n">dest</span><span class="o">=</span><span class="s2">&quot;flowExtension&quot;</span><span class="p">,</span>
+    <span class="n">parser</span><span class="o">.</span><span class="n">add_argument</span><span class="p">(</span><span class="s1">&#39;-f&#39;</span><span class="p">,</span> <span class="s1">&#39;--add-flowextensions&#39;</span><span class="p">,</span>
                         <span class="n">default</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span>
                         <span class="nb">type</span><span class="o">=</span><span class="n">str2bool</span><span class="p">,</span>
                         <span class="n">help</span><span class="o">=</span><span class="s2">&quot;Add flow extensions to to the model.&quot;</span><span class="p">)</span>
 
-    <span class="n">parser</span><span class="o">.</span><span class="n">add_argument</span><span class="p">(</span><span class="s1">&#39;-fli&#39;</span><span class="p">,</span> <span class="s1">&#39;--inletFlowext&#39;</span><span class="p">,</span>
-                        <span class="n">dest</span><span class="o">=</span><span class="s2">&quot;inletFlowExtLen&quot;</span><span class="p">,</span>
+    <span class="n">parser</span><span class="o">.</span><span class="n">add_argument</span><span class="p">(</span><span class="s1">&#39;-fli&#39;</span><span class="p">,</span> <span class="s1">&#39;--inlet-flowextension&#39;</span><span class="p">,</span>
                         <span class="n">default</span><span class="o">=</span><span class="mi">5</span><span class="p">,</span>
                         <span class="nb">type</span><span class="o">=</span><span class="nb">float</span><span class="p">,</span>
                         <span class="n">help</span><span class="o">=</span><span class="s2">&quot;Length of flow extensions at inlet(s).&quot;</span><span class="p">)</span>
 
-    <span class="n">parser</span><span class="o">.</span><span class="n">add_argument</span><span class="p">(</span><span class="s1">&#39;-flo&#39;</span><span class="p">,</span> <span class="s1">&#39;--outletFlowext&#39;</span><span class="p">,</span>
-                        <span class="n">dest</span><span class="o">=</span><span class="s2">&quot;outletFlowExtLen&quot;</span><span class="p">,</span>
+    <span class="n">parser</span><span class="o">.</span><span class="n">add_argument</span><span class="p">(</span><span class="s1">&#39;-flo&#39;</span><span class="p">,</span> <span class="s1">&#39;--outlet-flowextension&#39;</span><span class="p">,</span>
                         <span class="n">default</span><span class="o">=</span><span class="mi">5</span><span class="p">,</span>
                         <span class="nb">type</span><span class="o">=</span><span class="nb">float</span><span class="p">,</span>
                         <span class="n">help</span><span class="o">=</span><span class="s2">&quot;Length of flow extensions at outlet(s).&quot;</span><span class="p">)</span>
 
-    <span class="n">parser</span><span class="o">.</span><span class="n">add_argument</span><span class="p">(</span><span class="s1">&#39;-vz&#39;</span><span class="p">,</span> <span class="s1">&#39;--visualize&#39;</span><span class="p">,</span>
-                        <span class="n">dest</span><span class="o">=</span><span class="s2">&quot;viz&quot;</span><span class="p">,</span>
+    <span class="n">parser</span><span class="o">.</span><span class="n">add_argument</span><span class="p">(</span><span class="s1">&#39;-viz&#39;</span><span class="p">,</span> <span class="s1">&#39;--visualize&#39;</span><span class="p">,</span>
                         <span class="n">default</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span>
                         <span class="nb">type</span><span class="o">=</span><span class="n">str2bool</span><span class="p">,</span>
                         <span class="n">help</span><span class="o">=</span><span class="s2">&quot;Visualize surface, inlet, outlet and probes after meshing.&quot;</span><span class="p">)</span>
 
-    <span class="n">parser</span><span class="o">.</span><span class="n">add_argument</span><span class="p">(</span><span class="s1">&#39;-sc&#39;</span><span class="p">,</span> <span class="s1">&#39;--simulation-config&#39;</span><span class="p">,</span>
+    <span class="n">parser</span><span class="o">.</span><span class="n">add_argument</span><span class="p">(</span><span class="s1">&#39;-cp&#39;</span><span class="p">,</span> <span class="s1">&#39;--config-path&#39;</span><span class="p">,</span>
                         <span class="nb">type</span><span class="o">=</span><span class="nb">str</span><span class="p">,</span>
-                        <span class="n">dest</span><span class="o">=</span><span class="s2">&quot;config&quot;</span><span class="p">,</span>
                         <span class="n">default</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
                         <span class="n">help</span><span class="o">=</span><span class="s1">&#39;Path to configuration file for remote simulation. &#39;</span> <span class="o">+</span>
                              <span class="s1">&#39;See example/ssh_config.json for details&#39;</span><span class="p">)</span>
@@ -827,13 +817,13 @@ title="Open an issue"
 
     <span class="n">verbose_print</span><span class="p">(</span><span class="n">args</span><span class="p">)</span>
 
-    <span class="k">return</span> <span class="nb">dict</span><span class="p">(</span><span class="n">filename_model</span><span class="o">=</span><span class="n">args</span><span class="o">.</span><span class="n">fileNameModel</span><span class="p">,</span> <span class="n">verbose_print</span><span class="o">=</span><span class="n">verbose_print</span><span class="p">,</span> <span class="n">smoothing_method</span><span class="o">=</span><span class="n">args</span><span class="o">.</span><span class="n">smoothingMethod</span><span class="p">,</span>
-                <span class="n">smoothing_factor</span><span class="o">=</span><span class="n">args</span><span class="o">.</span><span class="n">smoothingFactor</span><span class="p">,</span> <span class="n">meshing_method</span><span class="o">=</span><span class="n">args</span><span class="o">.</span><span class="n">meshingMethod</span><span class="p">,</span>
-                <span class="n">refine_region</span><span class="o">=</span><span class="n">args</span><span class="o">.</span><span class="n">refineRegion</span><span class="p">,</span> <span class="n">is_atrium</span><span class="o">=</span><span class="n">args</span><span class="o">.</span><span class="n">isAtrium</span><span class="p">,</span> <span class="n">create_flow_extensions</span><span class="o">=</span><span class="n">args</span><span class="o">.</span><span class="n">flowExtension</span><span class="p">,</span>
-                <span class="n">viz</span><span class="o">=</span><span class="n">args</span><span class="o">.</span><span class="n">viz</span><span class="p">,</span> <span class="n">config_path</span><span class="o">=</span><span class="n">args</span><span class="o">.</span><span class="n">config</span><span class="p">,</span> <span class="n">coarsening_factor</span><span class="o">=</span><span class="n">args</span><span class="o">.</span><span class="n">coarseningFactor</span><span class="p">,</span>
-                <span class="n">inlet_flow_extension_length</span><span class="o">=</span><span class="n">args</span><span class="o">.</span><span class="n">inletFlowExtLen</span><span class="p">,</span> <span class="n">edge_length</span><span class="o">=</span><span class="n">args</span><span class="o">.</span><span class="n">edgeLength</span><span class="p">,</span>
-                <span class="n">region_points</span><span class="o">=</span><span class="n">args</span><span class="o">.</span><span class="n">regionPoints</span><span class="p">,</span> <span class="n">compress_mesh</span><span class="o">=</span><span class="n">args</span><span class="o">.</span><span class="n">compressMesh</span><span class="p">,</span>
-                <span class="n">outlet_flow_extension_length</span><span class="o">=</span><span class="n">args</span><span class="o">.</span><span class="n">outletFlowExtLen</span><span class="p">)</span></div>
+    <span class="k">return</span> <span class="nb">dict</span><span class="p">(</span><span class="n">input_model</span><span class="o">=</span><span class="n">args</span><span class="o">.</span><span class="n">input_model</span><span class="p">,</span> <span class="n">verbose_print</span><span class="o">=</span><span class="n">verbose_print</span><span class="p">,</span> <span class="n">smoothing_method</span><span class="o">=</span><span class="n">args</span><span class="o">.</span><span class="n">smoothing_method</span><span class="p">,</span>
+                <span class="n">smoothing_factor</span><span class="o">=</span><span class="n">args</span><span class="o">.</span><span class="n">smoothing_factor</span><span class="p">,</span> <span class="n">meshing_method</span><span class="o">=</span><span class="n">args</span><span class="o">.</span><span class="n">meshing_method</span><span class="p">,</span>
+                <span class="n">refine_region</span><span class="o">=</span><span class="n">args</span><span class="o">.</span><span class="n">refine_region</span><span class="p">,</span> <span class="n">is_atrium</span><span class="o">=</span><span class="n">args</span><span class="o">.</span><span class="n">is_atrium</span><span class="p">,</span> <span class="n">add_flow_extensions</span><span class="o">=</span><span class="n">args</span><span class="o">.</span><span class="n">add_flowextensions</span><span class="p">,</span>
+                <span class="n">visualize</span><span class="o">=</span><span class="n">args</span><span class="o">.</span><span class="n">visualize</span><span class="p">,</span> <span class="n">config_path</span><span class="o">=</span><span class="n">args</span><span class="o">.</span><span class="n">config_path</span><span class="p">,</span> <span class="n">coarsening_factor</span><span class="o">=</span><span class="n">args</span><span class="o">.</span><span class="n">coarsening_factor</span><span class="p">,</span>
+                <span class="n">inlet_flow_extension_length</span><span class="o">=</span><span class="n">args</span><span class="o">.</span><span class="n">inlet_flowextension</span><span class="p">,</span> <span class="n">edge_length</span><span class="o">=</span><span class="n">args</span><span class="o">.</span><span class="n">edge_length</span><span class="p">,</span>
+                <span class="n">region_points</span><span class="o">=</span><span class="n">args</span><span class="o">.</span><span class="n">region_points</span><span class="p">,</span> <span class="n">compress_mesh</span><span class="o">=</span><span class="n">args</span><span class="o">.</span><span class="n">compress_mesh</span><span class="p">,</span>
+                <span class="n">outlet_flow_extension_length</span><span class="o">=</span><span class="n">args</span><span class="o">.</span><span class="n">outlet_flowextension</span><span class="p">)</span></div>
 
 
 <div class="viewcode-block" id="main_meshing"><a class="viewcode-back" href="../../../api.html#vampy.automatedPreProcessing.automatedPreProcessing.main_meshing">[docs]</a><span class="k">def</span> <span class="nf">main_meshing</span><span class="p">():</span>
