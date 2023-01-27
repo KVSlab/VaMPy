@@ -424,7 +424,7 @@ username information, cluster project, and FEniCS module location, all
 highlighted in the example job script. Then, to perform pre-processing,
 CFD simulation, and post-processing through a single script, run the
 following command:</p>
-<div class="highlight-console notranslate"><div class="highlight"><pre><span></span><span class="gp">$ </span>vampy-mesh<span class="w"> </span>-m<span class="w"> </span>diameter<span class="w"> </span>-i<span class="w"> </span>tests/Case_test_artery/artery.vtp<span class="w"> </span>-c<span class="w"> </span><span class="m">1</span>.3<span class="w"> </span>-sc<span class="w"> </span>src/vampy/automatedPreProcessing/ssh_config.json<span class="w"> </span>-vz<span class="w"> </span>False
+<div class="highlight-console notranslate"><div class="highlight"><pre><span></span><span class="gp">$ </span>vampy-mesh<span class="w"> </span>-m<span class="w"> </span>diameter<span class="w"> </span>-i<span class="w"> </span>tests/Case_test_artery/artery.vtp<span class="w"> </span>-c<span class="w"> </span><span class="m">1</span>.3<span class="w"> </span>-cp<span class="w"> </span>src/vampy/automatedPreProcessing/ssh_config.json<span class="w"> </span>-viz<span class="w"> </span>False
 </pre></div>
 </div>
 <p>If the script is successful, it should output:</p>

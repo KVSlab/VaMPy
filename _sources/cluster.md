@@ -48,7 +48,7 @@ CFD simulation, and post-processing through a single script, run the
 following command:
 
 ``` console
-$ vampy-mesh -m diameter -i tests/Case_test_artery/artery.vtp -c 1.3 -sc src/vampy/automatedPreProcessing/ssh_config.json -vz False
+$ vampy-mesh -m diameter -i tests/Case_test_artery/artery.vtp -c 1.3 -cp src/vampy/automatedPreProcessing/ssh_config.json -viz False
 ```
 
 If the script is successful, it should output:

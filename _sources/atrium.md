@@ -44,7 +44,7 @@ geometry, the user may provide the `--refine-region True` flag, or
 run the following command:
 
 ``` console
-$ vampy-mesh -m constant -i LA_Endo/5/LA_Endo_5.vtp -r True -el 1.5 -bl False -fli 1 -flo 3 -at True
+$ vampy-mesh -m constant -i LA_Endo/5/LA_Endo_5.vtp -r True -el 1.5 -bl False -fli 1 -flo 3 -at 
 ```
 
 Here, the `-fli` and `-flo` flags determine the length of the flow
@@ -64,7 +64,7 @@ surface, it will stick to the closest surface point. For the point shown
 in {numref}`seed`, this would correspond to running the following command:
 
 ``` console
-$ vampy-mesh -m constant -i LA_Endo/5/LA_Endo_5.vtp -r True -rp 29.8 28.7 66.5 -el 1.5 -bl False -fli 1 -flo 3 -at True
+$ vampy-mesh -m constant -i LA_Endo/5/LA_Endo_5.vtp -r True -rp 29.8 28.7 66.5 -el 1.5 -bl False -fli 1 -flo 3 -at 
 ```
 ```{figure} figures/la_vmtk.png
 ---
