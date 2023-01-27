@@ -51,7 +51,7 @@ cd $VAMPY_PREFIX
 pip3 install --prefix=$VAMPY_PREFIX .
 
 # Move VaMPy directory to SCRATCH
-cp -r /cluster/home/USERNAME/VaMPy $SCRATCH
+cp -r /cluster/home/$USERNAME/VaMPy $SCRATCH
 
 ## Move results after simulation
 cleanup "cp -r $SCRATCH/VaMPy/src/vampy/simulation/results_artery $USERWORK/results_artery"
@@ -60,7 +60,7 @@ cleanup "cp -r $SCRATCH/VaMPy/src/vampy/simulation/results_artery $USERWORK/resu
 cd $SCRATCH/VaMPy/src/vampy/simulation
 
 # Define mesh path
-mesh_path=/cluster/home/$USERNAME/Oasis/oasis/mesh/artery.xml.gz
+mesh_path=/cluster/home/$USERNAME/VaMPy/src/vampy/simulation/artery.xml.gz
 
 ## Run Oasis
 mpirun -np $SLURM_NTASKS oasis NSfracStep problem=Artery mesh_path=$mesh_path
