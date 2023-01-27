@@ -387,7 +387,7 @@ title="Print to PDF"
   </a>
  </li>
  <li class="toc-h2 nav-item toc-entry">
-  <a class="reference internal nav-link" href="#module-vampy.simulation.Artery">
+  <a class="reference internal nav-link" href="#cfd-simulation-scripts">
    CFD simulation scripts
   </a>
  </li>
@@ -421,7 +421,7 @@ title="Print to PDF"
   </a>
  </li>
  <li class="toc-h2 nav-item toc-entry">
-  <a class="reference internal nav-link" href="#module-vampy.simulation.Artery">
+  <a class="reference internal nav-link" href="#cfd-simulation-scripts">
    CFD simulation scripts
   </a>
  </li>
@@ -1695,186 +1695,8 @@ Assuming results are in mm/s.</p>
 </dd></dl>
 
 </section>
-<section id="module-vampy.simulation.Artery">
-<span id="cfd-simulation-scripts"></span><h2>CFD simulation scripts<a class="headerlink" href="#module-vampy.simulation.Artery" title="Permalink to this headline">#</a></h2>
-<dl class="py function">
-<dt class="sig sig-object py" id="vampy.simulation.Artery.beta">
-<span class="sig-prename descclassname"><span class="pre">vampy.simulation.Artery.</span></span><span class="sig-name descname"><span class="pre">beta</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">err</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">p</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/vampy/simulation/Artery.html#beta"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#vampy.simulation.Artery.beta" title="Permalink to this definition">#</a></dt>
-<dd><p>Adjusted choice of beta for the dual-pressure boundary condition.
-Ramped up to desired value if flow rate error (err) increases</p>
-<dl class="field-list simple">
-<dt class="field-odd">Parameters</dt>
-<dd class="field-odd"><ul class="simple">
-<li><p><strong>err</strong> (<em>float</em>) – Flow split error</p></li>
-<li><p><strong>p</strong> (<em>float</em>) – Pressure value</p></li>
-</ul>
-</dd>
-<dt class="field-even">Returns</dt>
-<dd class="field-even"><p>Variable factor in flow split method</p>
-</dd>
-<dt class="field-odd">Return type</dt>
-<dd class="field-odd"><p>beta (float)</p>
-</dd>
-</dl>
-</dd></dl>
-
-<dl class="py function">
-<dt class="sig sig-object py" id="vampy.simulation.Artery.create_bcs">
-<span class="sig-prename descclassname"><span class="pre">vampy.simulation.Artery.</span></span><span class="sig-name descname"><span class="pre">create_bcs</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">t</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">NS_expressions</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">V</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">Q</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">area_ratio</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">area_inlet</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">mesh</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">mesh_path</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">nu</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">id_in</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">id_out</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">pressure_degree</span></span></em>, <em class="sig-param"><span class="o"><span class="pre">**</span></span><span class="n"><span class="pre">NS_namespace</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/vampy/simulation/Artery.html#create_bcs"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#vampy.simulation.Artery.create_bcs" title="Permalink to this definition">#</a></dt>
-<dd></dd></dl>
-
-<dl class="py function">
-<dt class="sig sig-object py" id="vampy.simulation.Artery.mesh">
-<span class="sig-prename descclassname"><span class="pre">vampy.simulation.Artery.</span></span><span class="sig-name descname"><span class="pre">mesh</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">mesh_path</span></span></em>, <em class="sig-param"><span class="o"><span class="pre">**</span></span><span class="n"><span class="pre">NS_namespace</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/vampy/simulation/Artery.html#mesh"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#vampy.simulation.Artery.mesh" title="Permalink to this definition">#</a></dt>
-<dd></dd></dl>
-
-<dl class="py function">
-<dt class="sig sig-object py" id="vampy.simulation.Artery.pre_solve_hook">
-<span class="sig-prename descclassname"><span class="pre">vampy.simulation.Artery.</span></span><span class="sig-name descname"><span class="pre">pre_solve_hook</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">mesh</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">V</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">Q</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">newfolder</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">mesh_path</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">restart_folder</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">velocity_degree</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">cardiac_cycle</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">save_solution_after_cycle</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">dt</span></span></em>, <em class="sig-param"><span class="o"><span class="pre">**</span></span><span class="n"><span class="pre">NS_namespace</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/vampy/simulation/Artery.html#pre_solve_hook"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#vampy.simulation.Artery.pre_solve_hook" title="Permalink to this definition">#</a></dt>
-<dd></dd></dl>
-
-<dl class="py function">
-<dt class="sig sig-object py" id="vampy.simulation.Artery.problem_parameters">
-<span class="sig-prename descclassname"><span class="pre">vampy.simulation.Artery.</span></span><span class="sig-name descname"><span class="pre">problem_parameters</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">commandline_kwargs</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">NS_parameters</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">NS_expressions</span></span></em>, <em class="sig-param"><span class="o"><span class="pre">**</span></span><span class="n"><span class="pre">NS_namespace</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/vampy/simulation/Artery.html#problem_parameters"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#vampy.simulation.Artery.problem_parameters" title="Permalink to this definition">#</a></dt>
-<dd><p>Problem file for running CFD simulation in arterial models consisting of one inlet, and two or more outlets.
-A Womersley velocity profile is applied at the inlet, and a flow split pressure condition is applied at the outlets,
-following [1]. Flow rate for the inlet condition, and flow split values for the outlets are computed from the
-pre-processing script automatedPreProcessing.py. The simulation is run for two cycles (adjustable), but only the
-results/solutions from the second cycle are stored to avoid non-physiological effects from the first cycle.
-One cardiac cycle is set to 0.951 s from [2], and scaled by a factor of 1000, hence all parameters are in [mm] or
-[ms].</p>
-<dl class="simple">
-<dt>[1] Gin, Ron, Anthony G. Straatman, and David A. Steinman. “A dual-pressure boundary condition for use in</dt><dd><p>simulations of bifurcating conduits.” J. Biomech. Eng. 124.5 (2002): 617-619.</p>
-</dd>
-<dt>[2] Hoi, Yiemeng, et al. “Characterization of volumetric flow rate waveforms at the carotid bifurcations of older</dt><dd><p>adults.” Physiological measurement 31.3 (2010): 291.</p>
-</dd>
-</dl>
-</dd></dl>
-
-<dl class="py function">
-<dt class="sig sig-object py" id="vampy.simulation.Artery.temporal_hook">
-<span class="sig-prename descclassname"><span class="pre">vampy.simulation.Artery.</span></span><span class="sig-name descname"><span class="pre">temporal_hook</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">u_</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">p_</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">mesh</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">tstep</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">dump_probe_frequency</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">eval_dict</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">newfolder</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">id_in</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">id_out</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">boundary</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">n</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">save_solution_frequency</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">NS_parameters</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">NS_expressions</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">area_ratio</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">t</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">save_solution_at_tstep</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">U</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">area_inlet</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">nu</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">u_mean0</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">u_mean1</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">u_mean2</span></span></em>, <em class="sig-param"><span class="o"><span class="pre">**</span></span><span class="n"><span class="pre">NS_namespace</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/vampy/simulation/Artery.html#temporal_hook"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#vampy.simulation.Artery.temporal_hook" title="Permalink to this definition">#</a></dt>
-<dd></dd></dl>
-
-<dl class="py function">
-<dt class="sig sig-object py" id="vampy.simulation.Artery.theend_hook">
-<span class="sig-prename descclassname"><span class="pre">vampy.simulation.Artery.</span></span><span class="sig-name descname"><span class="pre">theend_hook</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">u_mean</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">u_mean0</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">u_mean1</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">u_mean2</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">T</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">dt</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">save_solution_at_tstep</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">save_solution_frequency</span></span></em>, <em class="sig-param"><span class="o"><span class="pre">**</span></span><span class="n"><span class="pre">NS_namespace</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/vampy/simulation/Artery.html#theend_hook"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#vampy.simulation.Artery.theend_hook" title="Permalink to this definition">#</a></dt>
-<dd></dd></dl>
-
-<dl class="py function">
-<dt class="sig sig-object py" id="vampy.simulation.Artery.update_pressure_condition">
-<span class="sig-prename descclassname"><span class="pre">vampy.simulation.Artery.</span></span><span class="sig-name descname"><span class="pre">update_pressure_condition</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">NS_expressions</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">area_ratio</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">boundary</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">id_in</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">id_out</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">mesh</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">n</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">tstep</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">u_</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/vampy/simulation/Artery.html#update_pressure_condition"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#vampy.simulation.Artery.update_pressure_condition" title="Permalink to this definition">#</a></dt>
-<dd><p>Use a dual-pressure boundary condition as pressure condition at outlet.</p>
-</dd></dl>
-
-<span class="target" id="module-vampy.simulation.Atrium"></span><dl class="py function">
-<dt class="sig sig-object py" id="vampy.simulation.Atrium.create_bcs">
-<span class="sig-prename descclassname"><span class="pre">vampy.simulation.Atrium.</span></span><span class="sig-name descname"><span class="pre">create_bcs</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">NS_expressions</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">mesh</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">mesh_path</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">nu</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">t</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">V</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">Q</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">id_in</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">id_out</span></span></em>, <em class="sig-param"><span class="o"><span class="pre">**</span></span><span class="n"><span class="pre">NS_namespace</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/vampy/simulation/Atrium.html#create_bcs"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#vampy.simulation.Atrium.create_bcs" title="Permalink to this definition">#</a></dt>
-<dd></dd></dl>
-
-<dl class="py function">
-<dt class="sig sig-object py" id="vampy.simulation.Atrium.mesh">
-<span class="sig-prename descclassname"><span class="pre">vampy.simulation.Atrium.</span></span><span class="sig-name descname"><span class="pre">mesh</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">mesh_path</span></span></em>, <em class="sig-param"><span class="o"><span class="pre">**</span></span><span class="n"><span class="pre">NS_namespace</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/vampy/simulation/Atrium.html#mesh"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#vampy.simulation.Atrium.mesh" title="Permalink to this definition">#</a></dt>
-<dd></dd></dl>
-
-<dl class="py function">
-<dt class="sig sig-object py" id="vampy.simulation.Atrium.pre_solve_hook">
-<span class="sig-prename descclassname"><span class="pre">vampy.simulation.Atrium.</span></span><span class="sig-name descname"><span class="pre">pre_solve_hook</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">V</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">Q</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">cardiac_cycle</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">dt</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">save_solution_after_cycle</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">mesh_path</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">mesh</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">newfolder</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">velocity_degree</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">restart_folder</span></span></em>, <em class="sig-param"><span class="o"><span class="pre">**</span></span><span class="n"><span class="pre">NS_namespace</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/vampy/simulation/Atrium.html#pre_solve_hook"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#vampy.simulation.Atrium.pre_solve_hook" title="Permalink to this definition">#</a></dt>
-<dd></dd></dl>
-
-<dl class="py function">
-<dt class="sig sig-object py" id="vampy.simulation.Atrium.problem_parameters">
-<span class="sig-prename descclassname"><span class="pre">vampy.simulation.Atrium.</span></span><span class="sig-name descname"><span class="pre">problem_parameters</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">commandline_kwargs</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">NS_parameters</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">scalar_components</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">Schmidt</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">NS_expressions</span></span></em>, <em class="sig-param"><span class="o"><span class="pre">**</span></span><span class="n"><span class="pre">NS_namespace</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/vampy/simulation/Atrium.html#problem_parameters"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#vampy.simulation.Atrium.problem_parameters" title="Permalink to this definition">#</a></dt>
-<dd><p>Problem file for running CFD simulation in left atrial models consisting of arbitrary number of pulmonary veins (PV)
-(normally 3 to 7), and one outlet being the mitral valve. A Womersley velocity profile is applied at the inlets,
-where the total flow rate is split between the area ratio of the PVs. The mitral valve is considered open with a
-constant pressure of p=0. Flow rate and flow split values for the inlet condition are computed from the
-pre-processing script automatedPreProcessing.py. The simulation is run for two cycles (adjustable), but only the
-results/solutions from the second cycle are stored to avoid non-physiological effects from the first cycle.
-One cardiac cycle is set to 0.951 s from [1], and scaled by a factor of 1000, hence all parameters are in
-[mm] or [ms].</p>
-<dl class="simple">
-<dt>[1] Hoi, Yiemeng, et al. “Characterization of volumetric flow rate waveforms at the carotid bifurcations of older</dt><dd><p>adults.” Physiological measurement 31.3 (2010): 291.</p>
-</dd>
-</dl>
-</dd></dl>
-
-<dl class="py function">
-<dt class="sig sig-object py" id="vampy.simulation.Atrium.temporal_hook">
-<span class="sig-prename descclassname"><span class="pre">vampy.simulation.Atrium.</span></span><span class="sig-name descname"><span class="pre">temporal_hook</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">mesh</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">dt</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">t</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">save_solution_frequency</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">u_</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">NS_expressions</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">id_in</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">tstep</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">newfolder</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">eval_dict</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">dump_probe_frequency</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">p_</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">save_solution_at_tstep</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">nu</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">D_mitral</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">U</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">u_mean0</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">u_mean1</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">u_mean2</span></span></em>, <em class="sig-param"><span class="o"><span class="pre">**</span></span><span class="n"><span class="pre">NS_namespace</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/vampy/simulation/Atrium.html#temporal_hook"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#vampy.simulation.Atrium.temporal_hook" title="Permalink to this definition">#</a></dt>
-<dd></dd></dl>
-
-<dl class="py function">
-<dt class="sig sig-object py" id="vampy.simulation.Atrium.theend_hook">
-<span class="sig-prename descclassname"><span class="pre">vampy.simulation.Atrium.</span></span><span class="sig-name descname"><span class="pre">theend_hook</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">u_mean</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">u_mean0</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">u_mean1</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">u_mean2</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">T</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">dt</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">save_solution_at_tstep</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">save_solution_frequency</span></span></em>, <em class="sig-param"><span class="o"><span class="pre">**</span></span><span class="n"><span class="pre">NS_namespace</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/vampy/simulation/Atrium.html#theend_hook"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#vampy.simulation.Atrium.theend_hook" title="Permalink to this definition">#</a></dt>
-<dd></dd></dl>
-
-<span class="target" id="module-vampy.simulation.Womersley"></span><dl class="py class">
-<dt class="sig sig-object py" id="vampy.simulation.Womersley.WomersleyComponent">
-<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">vampy.simulation.Womersley.</span></span><span class="sig-name descname"><span class="pre">WomersleyComponent</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">radius</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">center</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">normal</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">normal_component</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">period</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">nu</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">element</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">Q</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">V</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/vampy/simulation/Womersley.html#WomersleyComponent"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#vampy.simulation.Womersley.WomersleyComponent" title="Permalink to this definition">#</a></dt>
-<dd><p>Bases: <code class="xref py py-class docutils literal notranslate"><span class="pre">dolfin.function.expression.UserExpression</span></code></p>
-<dl class="py method">
-<dt class="sig sig-object py" id="vampy.simulation.Womersley.WomersleyComponent.eval">
-<span class="sig-name descname"><span class="pre">eval</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">value</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">x</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/vampy/simulation/Womersley.html#WomersleyComponent.eval"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#vampy.simulation.Womersley.WomersleyComponent.eval" title="Permalink to this definition">#</a></dt>
-<dd></dd></dl>
-
-<dl class="py method">
-<dt class="sig sig-object py" id="vampy.simulation.Womersley.WomersleyComponent.set_t">
-<span class="sig-name descname"><span class="pre">set_t</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">t</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/vampy/simulation/Womersley.html#WomersleyComponent.set_t"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#vampy.simulation.Womersley.WomersleyComponent.set_t" title="Permalink to this definition">#</a></dt>
-<dd></dd></dl>
-
-</dd></dl>
-
-<dl class="py function">
-<dt class="sig sig-object py" id="vampy.simulation.Womersley.compute_area">
-<span class="sig-prename descclassname"><span class="pre">vampy.simulation.Womersley.</span></span><span class="sig-name descname"><span class="pre">compute_area</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">mesh</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">ind</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">facet_domains</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/vampy/simulation/Womersley.html#compute_area"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#vampy.simulation.Womersley.compute_area" title="Permalink to this definition">#</a></dt>
-<dd></dd></dl>
-
-<dl class="py function">
-<dt class="sig sig-object py" id="vampy.simulation.Womersley.compute_boundary_geometry_acrn">
-<span class="sig-prename descclassname"><span class="pre">vampy.simulation.Womersley.</span></span><span class="sig-name descname"><span class="pre">compute_boundary_geometry_acrn</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">mesh</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">ind</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">facet_domains</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/vampy/simulation/Womersley.html#compute_boundary_geometry_acrn"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#vampy.simulation.Womersley.compute_boundary_geometry_acrn" title="Permalink to this definition">#</a></dt>
-<dd></dd></dl>
-
-<dl class="py function">
-<dt class="sig sig-object py" id="vampy.simulation.Womersley.compute_radius">
-<span class="sig-prename descclassname"><span class="pre">vampy.simulation.Womersley.</span></span><span class="sig-name descname"><span class="pre">compute_radius</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">mesh</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">facet_domains</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">ind</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">center</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/vampy/simulation/Womersley.html#compute_radius"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#vampy.simulation.Womersley.compute_radius" title="Permalink to this definition">#</a></dt>
-<dd></dd></dl>
-
-<dl class="py function">
-<dt class="sig sig-object py" id="vampy.simulation.Womersley.fourier_coefficients">
-<span class="sig-prename descclassname"><span class="pre">vampy.simulation.Womersley.</span></span><span class="sig-name descname"><span class="pre">fourier_coefficients</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">x</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">y</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">T</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">N</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/vampy/simulation/Womersley.html#fourier_coefficients"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#vampy.simulation.Womersley.fourier_coefficients" title="Permalink to this definition">#</a></dt>
-<dd><p>From x-array and y-spline and period T, calculate N complex Fourier coefficients.</p>
-</dd></dl>
-
-<dl class="py function">
-<dt class="sig sig-object py" id="vampy.simulation.Womersley.make_womersley_bcs">
-<span class="sig-prename descclassname"><span class="pre">vampy.simulation.Womersley.</span></span><span class="sig-name descname"><span class="pre">make_womersley_bcs</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">t</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">Q</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">mesh</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">nu</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">area</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">center</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">radius</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">normal</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">element</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">scale_to</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">coeffstype</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">'Q'</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">N</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">1001</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">num_fourier_coefficients</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">20</span></span></em>, <em class="sig-param"><span class="o"><span class="pre">**</span></span><span class="n"><span class="pre">NS_namespace</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/vampy/simulation/Womersley.html#make_womersley_bcs"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#vampy.simulation.Womersley.make_womersley_bcs" title="Permalink to this definition">#</a></dt>
-<dd><p>Generate a list of expressions for the components of a Womersley profile.</p>
-</dd></dl>
-
-<dl class="py function">
-<dt class="sig sig-object py" id="vampy.simulation.Womersley.x_to_r2">
-<span class="sig-prename descclassname"><span class="pre">vampy.simulation.Womersley.</span></span><span class="sig-name descname"><span class="pre">x_to_r2</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">x</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">c</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">n</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/vampy/simulation/Womersley.html#x_to_r2"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#vampy.simulation.Womersley.x_to_r2" title="Permalink to this definition">#</a></dt>
-<dd><p>Compute r**2 from a coordinate x, center point c, and normal vector n.</p>
-<p>r is defined as the distance from c to x’, where x’ is
-the projection of x onto the plane defined by c and n.</p>
-</dd></dl>
-
-<span class="target" id="module-vampy.simulation.simulation_common"></span><dl class="py function">
-<dt class="sig sig-object py" id="vampy.simulation.simulation_common.get_file_paths">
-<span class="sig-prename descclassname"><span class="pre">vampy.simulation.simulation_common.</span></span><span class="sig-name descname"><span class="pre">get_file_paths</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">folder</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/vampy/simulation/simulation_common.html#get_file_paths"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#vampy.simulation.simulation_common.get_file_paths" title="Permalink to this definition">#</a></dt>
-<dd></dd></dl>
-
-<dl class="py function">
-<dt class="sig sig-object py" id="vampy.simulation.simulation_common.print_mesh_information">
-<span class="sig-prename descclassname"><span class="pre">vampy.simulation.simulation_common.</span></span><span class="sig-name descname"><span class="pre">print_mesh_information</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">mesh</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/vampy/simulation/simulation_common.html#print_mesh_information"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#vampy.simulation.simulation_common.print_mesh_information" title="Permalink to this definition">#</a></dt>
-<dd></dd></dl>
-
-<dl class="py function">
-<dt class="sig sig-object py" id="vampy.simulation.simulation_common.store_u_mean">
-<span class="sig-prename descclassname"><span class="pre">vampy.simulation.simulation_common.</span></span><span class="sig-name descname"><span class="pre">store_u_mean</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">T</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">dt</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">save_solution_at_tstep</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">save_solution_frequency</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">u_mean</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">u_mean0</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">u_mean1</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">u_mean2</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">NS_parameters</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/vampy/simulation/simulation_common.html#store_u_mean"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#vampy.simulation.simulation_common.store_u_mean" title="Permalink to this definition">#</a></dt>
-<dd></dd></dl>
-
+<section id="cfd-simulation-scripts">
+<h2>CFD simulation scripts<a class="headerlink" href="#cfd-simulation-scripts" title="Permalink to this headline">#</a></h2>
 </section>
 </section>
 
