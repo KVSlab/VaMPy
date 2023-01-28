@@ -28,18 +28,19 @@ bibliography: paper.bib
 Cardiovascular diseases are overwhelming the healthcare systems, and the
 costs are anticipated to increase in the years to come [@Murray1997],
 not to the mention the personal tragedy for those affected [@gage1996effect].
-Systemic risk factors are well known to correlate with cardiovascular diseases in general,
-but, for instance, arterial plaques and brain aneurysms are focalized, highlighting
-the role of local hemodynamics. Furthermore, blood-flow induced wall shear stress (WSS) is
-known to contribute to vessel wall adaption and remodeling [@Malek1999b; @morbiducci2016atherosclerosis],
-but is challenging to measure *in-vivo*. On the other hand, medical images are routinely available and have
-been extensively used in combination with computational fluid dynamics to
-study the initiation, progression, and outcome of vascular pathologies [@taylor2010image].
 
-![voronoi centerline](./figure1.png)\
+# Statement of Need
 
-**Figure 1:** 
-   A visualization of the Voronoi diagram (left) and the centerline (right) of a surface.
+VaMPy is needed...
+
+Figures can be included like this:
+![Caption for example figure.\label{fig:example}](figure.png)
+and referenced from text using \autoref{fig:example}.
+
+Figure sizes can be customized by adding an optional second parameter:
+![Caption for example figure.](figure.png){ width=20% }
+
+# Statement of Field / Related Work
 
 - A summary describing the high-level functionality and purpose of the software for a diverse, non-specialist audience.
 - A clear statement of need that illustrates the purpose of the software.
