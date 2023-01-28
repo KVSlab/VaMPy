@@ -42,7 +42,7 @@ def run_simulation(config_path, local_dir, case_name):
         job_script = config['job_script']
     except KeyError:
         raise ValueError('Invalid configuration file')
-    
+
     # Use case folder if local folder is blank
     local_dir = local_dir if local_mesh_folder == '' else local_mesh_folder
 
