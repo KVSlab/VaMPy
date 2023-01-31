@@ -516,9 +516,9 @@ only real difference from the artery problem from eariler is that
 instead of running the <code class="docutils literal notranslate"><span class="pre">Artery.py</span></code> problem file, we here will be solving
 the problem defined in <code class="docutils literal notranslate"><span class="pre">Atrium.py</span></code>, also located in the <code class="docutils literal notranslate"><span class="pre">simulation</span></code>
 folder.
-Thus, running a left atrial CFD simulation can be performed by executing the
-following command:</p>
-<div class="highlight-console notranslate"><div class="highlight"><pre><span></span><span class="gp">$ </span>vampy-oasis<span class="w"> </span><span class="nv">problem</span><span class="o">=</span>Atrium<span class="w"> </span><span class="nv">mesh_path</span><span class="o">=</span>../LA_Endo/5/LA_5_Endo.xml.gz<span class="w"> </span><span class="nv">T</span><span class="o">=</span><span class="m">951</span><span class="w"> </span><span class="nv">dt</span><span class="o">=</span><span class="m">0</span>.951<span class="w"> </span><span class="nv">save_solution_after_cycle</span><span class="o">=</span><span class="m">0</span>
+Thus, running a left atrial CFD simulation can be performed by navigating to the <code class="docutils literal notranslate"><span class="pre">src/vampy/simulation</span></code> folder and
+executing the following command:</p>
+<div class="highlight-console notranslate"><div class="highlight"><pre><span></span><span class="gp">$ </span>oasis<span class="w"> </span>NSfracStep<span class="w"> </span><span class="nv">problem</span><span class="o">=</span>Atrium<span class="w"> </span><span class="nv">mesh_path</span><span class="o">=</span>../../../LA_Endo/5/LA_5_Endo.xml.gz<span class="w"> </span><span class="nv">T</span><span class="o">=</span><span class="m">951</span><span class="w"> </span><span class="nv">dt</span><span class="o">=</span><span class="m">0</span>.951<span class="w"> </span><span class="nv">save_solution_after_cycle</span><span class="o">=</span><span class="m">0</span>
 </pre></div>
 </div>
 <p>Running the simulations will create the result folder <code class="docutils literal notranslate"><span class="pre">results_atrium</span></code>,

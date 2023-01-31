@@ -94,11 +94,11 @@ only real difference from the artery problem from eariler is that
 instead of running the `Artery.py` problem file, we here will be solving
 the problem defined in `Atrium.py`, also located in the `simulation`
 folder. 
-Thus, running a left atrial CFD simulation can be performed by executing the
-following command:
+Thus, running a left atrial CFD simulation can be performed by navigating to the `src/vampy/simulation` folder and
+executing the following command:
 
 ``` console
-$ vampy-oasis problem=Atrium mesh_path=../LA_Endo/5/LA_5_Endo.xml.gz T=951 dt=0.951 save_solution_after_cycle=0
+$ oasis NSfracStep problem=Atrium mesh_path=../../../LA_Endo/5/LA_5_Endo.xml.gz T=951 dt=0.951 save_solution_after_cycle=0
 ```
 
 Running the simulations will create the result folder `results_atrium`,
