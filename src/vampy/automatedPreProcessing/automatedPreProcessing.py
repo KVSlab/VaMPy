@@ -7,7 +7,6 @@ from morphman import is_surface_capped, get_uncapped_surface, write_polydata, ge
     vtk_triangulate_surface, write_parameters, vmtk_cap_polydata, compute_centerlines, get_centerline_tolerance, \
     get_vtk_point_locator, extract_single_line, vtk_merge_polydata, get_point_data_array, smooth_voronoi_diagram, \
     create_new_surface, compute_centers, vmtk_smooth_surface, str2bool
-
 # Local imports
 from vampy.automatedPreProcessing import ToolRepairSTL
 from vampy.automatedPreProcessing.preprocessing_common import read_polydata, get_centers_for_meshing, \
@@ -21,7 +20,7 @@ from vampy.automatedPreProcessing.visualize import visualize_model
 def run_pre_processing(input_model, verbose_print, smoothing_method, smoothing_factor, meshing_method,
                        refine_region, is_atrium, add_flow_extensions, visualize, config_path, coarsening_factor,
                        inlet_flow_extension_length, outlet_flow_extension_length, edge_length, region_points,
-                       compress_mesh):
+                       compress_mesh, add_boundary_layer):
     """
     Automatically generate mesh of surface model in .vtu and .xml format, including prescribed
     flow rates at inlet and outlet based on flow network model.
@@ -45,6 +44,7 @@ def run_pre_processing(input_model, verbose_print, smoothing_method, smoothing_f
         inlet_flow_extension_length (float): Factor defining length of flow extensions at the inlet(s)
         outlet_flow_extension_length (float): Factor defining length of flow extensions at the outlet(s)
         compress_mesh (bool): Compresses finalized mesh if True
+        add_boundary_layer (bool): Adds boundary layers to walls if true
     """
     # Get paths
     case_name = input_model.rsplit(path.sep, 1)[-1].rsplit('.')[0]
@@ -297,14 +297,14 @@ def run_pre_processing(input_model, verbose_print, smoothing_method, smoothing_f
     if not path.isfile(file_name_vtu_mesh):
         try:
             print("--- Computing mesh\n")
-            mesh, remeshed_surface = generate_mesh(distance_to_sphere)
+            mesh, remeshed_surface = generate_mesh(distance_to_sphere, add_boundary_layer)
             assert remeshed_surface.GetNumberOfPoints() > 0, \
                 "No points in surface mesh, try to remesh"
             assert mesh.GetNumberOfPoints() > 0, "No points in mesh, try to remesh"
 
         except Exception:
             distance_to_sphere = mesh_alternative(distance_to_sphere)
-            mesh, remeshed_surface = generate_mesh(distance_to_sphere)
+            mesh, remeshed_surface = generate_mesh(distance_to_sphere, add_boundary_layer)
             assert mesh.GetNumberOfPoints() > 0, "No points in mesh, after remeshing"
             assert remeshed_surface.GetNumberOfPoints() > 0, \
                 "No points in surface mesh, try to remesh"
@@ -464,6 +464,11 @@ def read_command_line(input_path=None):
                         help='Path to configuration file for remote simulation. ' +
                              'See example/ssh_config.json for details')
 
+    parser.add_argument('-bl', '--add-boundary-layer',
+                        default=True,
+                        type=str2bool,
+                        help="Adds boundary layers along geometry wall if true.")
+
     # Parse path to get default values
     if required:
         args = parser.parse_args()
@@ -490,7 +495,7 @@ def read_command_line(input_path=None):
                 visualize=args.visualize, config_path=args.config_path, coarsening_factor=args.coarsening_factor,
                 inlet_flow_extension_length=args.inlet_flowextension, edge_length=args.edge_length,
                 region_points=args.region_points, compress_mesh=args.compress_mesh,
-                outlet_flow_extension_length=args.outlet_flowextension)
+                outlet_flow_extension_length=args.outlet_flowextension, add_boundary_layer=args.add_boundary_layer)
 
 
 def main_meshing():
