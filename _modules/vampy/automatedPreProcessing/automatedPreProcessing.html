@@ -340,7 +340,6 @@ title="Open an issue"
     <span class="n">vtk_triangulate_surface</span><span class="p">,</span> <span class="n">write_parameters</span><span class="p">,</span> <span class="n">vmtk_cap_polydata</span><span class="p">,</span> <span class="n">compute_centerlines</span><span class="p">,</span> <span class="n">get_centerline_tolerance</span><span class="p">,</span> \
     <span class="n">get_vtk_point_locator</span><span class="p">,</span> <span class="n">extract_single_line</span><span class="p">,</span> <span class="n">vtk_merge_polydata</span><span class="p">,</span> <span class="n">get_point_data_array</span><span class="p">,</span> <span class="n">smooth_voronoi_diagram</span><span class="p">,</span> \
     <span class="n">create_new_surface</span><span class="p">,</span> <span class="n">compute_centers</span><span class="p">,</span> <span class="n">vmtk_smooth_surface</span><span class="p">,</span> <span class="n">str2bool</span>
-
 <span class="c1"># Local imports</span>
 <span class="kn">from</span> <span class="nn">vampy.automatedPreProcessing</span> <span class="kn">import</span> <span class="n">ToolRepairSTL</span>
 <span class="kn">from</span> <span class="nn">vampy.automatedPreProcessing.preprocessing_common</span> <span class="kn">import</span> <span class="n">read_polydata</span><span class="p">,</span> <span class="n">get_centers_for_meshing</span><span class="p">,</span> \
@@ -354,7 +353,7 @@ title="Open an issue"
 <div class="viewcode-block" id="run_pre_processing"><a class="viewcode-back" href="../../../api.html#vampy.automatedPreProcessing.automatedPreProcessing.run_pre_processing">[docs]</a><span class="k">def</span> <span class="nf">run_pre_processing</span><span class="p">(</span><span class="n">input_model</span><span class="p">,</span> <span class="n">verbose_print</span><span class="p">,</span> <span class="n">smoothing_method</span><span class="p">,</span> <span class="n">smoothing_factor</span><span class="p">,</span> <span class="n">meshing_method</span><span class="p">,</span>
                        <span class="n">refine_region</span><span class="p">,</span> <span class="n">is_atrium</span><span class="p">,</span> <span class="n">add_flow_extensions</span><span class="p">,</span> <span class="n">visualize</span><span class="p">,</span> <span class="n">config_path</span><span class="p">,</span> <span class="n">coarsening_factor</span><span class="p">,</span>
                        <span class="n">inlet_flow_extension_length</span><span class="p">,</span> <span class="n">outlet_flow_extension_length</span><span class="p">,</span> <span class="n">edge_length</span><span class="p">,</span> <span class="n">region_points</span><span class="p">,</span>
-                       <span class="n">compress_mesh</span><span class="p">):</span>
+                       <span class="n">compress_mesh</span><span class="p">,</span> <span class="n">add_boundary_layer</span><span class="p">):</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">    Automatically generate mesh of surface model in .vtu and .xml format, including prescribed</span>
 <span class="sd">    flow rates at inlet and outlet based on flow network model.</span>
@@ -378,6 +377,7 @@ title="Open an issue"
 <span class="sd">        inlet_flow_extension_length (float): Factor defining length of flow extensions at the inlet(s)</span>
 <span class="sd">        outlet_flow_extension_length (float): Factor defining length of flow extensions at the outlet(s)</span>
 <span class="sd">        compress_mesh (bool): Compresses finalized mesh if True</span>
+<span class="sd">        add_boundary_layer (bool): Adds boundary layers to walls if True</span>
 <span class="sd">    &quot;&quot;&quot;</span>
     <span class="c1"># Get paths</span>
     <span class="n">case_name</span> <span class="o">=</span> <span class="n">input_model</span><span class="o">.</span><span class="n">rsplit</span><span class="p">(</span><span class="n">path</span><span class="o">.</span><span class="n">sep</span><span class="p">,</span> <span class="mi">1</span><span class="p">)[</span><span class="o">-</span><span class="mi">1</span><span class="p">]</span><span class="o">.</span><span class="n">rsplit</span><span class="p">(</span><span class="s1">&#39;.&#39;</span><span class="p">)[</span><span class="mi">0</span><span class="p">]</span>
@@ -630,14 +630,14 @@ title="Open an issue"
     <span class="k">if</span> <span class="ow">not</span> <span class="n">path</span><span class="o">.</span><span class="n">isfile</span><span class="p">(</span><span class="n">file_name_vtu_mesh</span><span class="p">):</span>
         <span class="k">try</span><span class="p">:</span>
             <span class="nb">print</span><span class="p">(</span><span class="s2">&quot;--- Computing mesh</span><span class="se">\n</span><span class="s2">&quot;</span><span class="p">)</span>
-            <span class="n">mesh</span><span class="p">,</span> <span class="n">remeshed_surface</span> <span class="o">=</span> <span class="n">generate_mesh</span><span class="p">(</span><span class="n">distance_to_sphere</span><span class="p">)</span>
+            <span class="n">mesh</span><span class="p">,</span> <span class="n">remeshed_surface</span> <span class="o">=</span> <span class="n">generate_mesh</span><span class="p">(</span><span class="n">distance_to_sphere</span><span class="p">,</span> <span class="n">add_boundary_layer</span><span class="p">)</span>
             <span class="k">assert</span> <span class="n">remeshed_surface</span><span class="o">.</span><span class="n">GetNumberOfPoints</span><span class="p">()</span> <span class="o">&gt;</span> <span class="mi">0</span><span class="p">,</span> \
                 <span class="s2">&quot;No points in surface mesh, try to remesh&quot;</span>
             <span class="k">assert</span> <span class="n">mesh</span><span class="o">.</span><span class="n">GetNumberOfPoints</span><span class="p">()</span> <span class="o">&gt;</span> <span class="mi">0</span><span class="p">,</span> <span class="s2">&quot;No points in mesh, try to remesh&quot;</span>
 
         <span class="k">except</span> <span class="ne">Exception</span><span class="p">:</span>
             <span class="n">distance_to_sphere</span> <span class="o">=</span> <span class="n">mesh_alternative</span><span class="p">(</span><span class="n">distance_to_sphere</span><span class="p">)</span>
-            <span class="n">mesh</span><span class="p">,</span> <span class="n">remeshed_surface</span> <span class="o">=</span> <span class="n">generate_mesh</span><span class="p">(</span><span class="n">distance_to_sphere</span><span class="p">)</span>
+            <span class="n">mesh</span><span class="p">,</span> <span class="n">remeshed_surface</span> <span class="o">=</span> <span class="n">generate_mesh</span><span class="p">(</span><span class="n">distance_to_sphere</span><span class="p">,</span> <span class="n">add_boundary_layer</span><span class="p">)</span>
             <span class="k">assert</span> <span class="n">mesh</span><span class="o">.</span><span class="n">GetNumberOfPoints</span><span class="p">()</span> <span class="o">&gt;</span> <span class="mi">0</span><span class="p">,</span> <span class="s2">&quot;No points in mesh, after remeshing&quot;</span>
             <span class="k">assert</span> <span class="n">remeshed_surface</span><span class="o">.</span><span class="n">GetNumberOfPoints</span><span class="p">()</span> <span class="o">&gt;</span> <span class="mi">0</span><span class="p">,</span> \
                 <span class="s2">&quot;No points in surface mesh, try to remesh&quot;</span>
@@ -797,6 +797,11 @@ title="Open an issue"
                         <span class="n">help</span><span class="o">=</span><span class="s1">&#39;Path to configuration file for remote simulation. &#39;</span> <span class="o">+</span>
                              <span class="s1">&#39;See example/ssh_config.json for details&#39;</span><span class="p">)</span>
 
+    <span class="n">parser</span><span class="o">.</span><span class="n">add_argument</span><span class="p">(</span><span class="s1">&#39;-bl&#39;</span><span class="p">,</span> <span class="s1">&#39;--add-boundary-layer&#39;</span><span class="p">,</span>
+                        <span class="n">default</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span>
+                        <span class="nb">type</span><span class="o">=</span><span class="n">str2bool</span><span class="p">,</span>
+                        <span class="n">help</span><span class="o">=</span><span class="s2">&quot;Adds boundary layers along geometry wall if true.&quot;</span><span class="p">)</span>
+
     <span class="c1"># Parse path to get default values</span>
     <span class="k">if</span> <span class="n">required</span><span class="p">:</span>
         <span class="n">args</span> <span class="o">=</span> <span class="n">parser</span><span class="o">.</span><span class="n">parse_args</span><span class="p">()</span>
@@ -823,7 +828,7 @@ title="Open an issue"
                 <span class="n">visualize</span><span class="o">=</span><span class="n">args</span><span class="o">.</span><span class="n">visualize</span><span class="p">,</span> <span class="n">config_path</span><span class="o">=</span><span class="n">args</span><span class="o">.</span><span class="n">config_path</span><span class="p">,</span> <span class="n">coarsening_factor</span><span class="o">=</span><span class="n">args</span><span class="o">.</span><span class="n">coarsening_factor</span><span class="p">,</span>
                 <span class="n">inlet_flow_extension_length</span><span class="o">=</span><span class="n">args</span><span class="o">.</span><span class="n">inlet_flowextension</span><span class="p">,</span> <span class="n">edge_length</span><span class="o">=</span><span class="n">args</span><span class="o">.</span><span class="n">edge_length</span><span class="p">,</span>
                 <span class="n">region_points</span><span class="o">=</span><span class="n">args</span><span class="o">.</span><span class="n">region_points</span><span class="p">,</span> <span class="n">compress_mesh</span><span class="o">=</span><span class="n">args</span><span class="o">.</span><span class="n">compress_mesh</span><span class="p">,</span>
-                <span class="n">outlet_flow_extension_length</span><span class="o">=</span><span class="n">args</span><span class="o">.</span><span class="n">outlet_flowextension</span><span class="p">)</span></div>
+                <span class="n">outlet_flow_extension_length</span><span class="o">=</span><span class="n">args</span><span class="o">.</span><span class="n">outlet_flowextension</span><span class="p">,</span> <span class="n">add_boundary_layer</span><span class="o">=</span><span class="n">args</span><span class="o">.</span><span class="n">add_boundary_layer</span><span class="p">)</span></div>
 
 
 <div class="viewcode-block" id="main_meshing"><a class="viewcode-back" href="../../../api.html#vampy.automatedPreProcessing.automatedPreProcessing.main_meshing">[docs]</a><span class="k">def</span> <span class="nf">main_meshing</span><span class="p">():</span>

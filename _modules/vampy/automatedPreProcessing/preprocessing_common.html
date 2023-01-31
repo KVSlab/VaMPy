@@ -877,7 +877,7 @@ title="Open an issue"
     <span class="k">return</span> <span class="n">surface</span></div>
 
 
-<div class="viewcode-block" id="generate_mesh"><a class="viewcode-back" href="../../../api.html#vampy.automatedPreProcessing.preprocessing_common.generate_mesh">[docs]</a><span class="k">def</span> <span class="nf">generate_mesh</span><span class="p">(</span><span class="n">surface</span><span class="p">):</span>
+<div class="viewcode-block" id="generate_mesh"><a class="viewcode-back" href="../../../api.html#vampy.automatedPreProcessing.preprocessing_common.generate_mesh">[docs]</a><span class="k">def</span> <span class="nf">generate_mesh</span><span class="p">(</span><span class="n">surface</span><span class="p">,</span> <span class="n">add_boundary_layer</span><span class="p">):</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">    Generates a mesh suitable for CFD from a input surface model.</span>
 
@@ -893,14 +893,18 @@ title="Open an issue"
     <span class="n">meshGenerator</span><span class="o">.</span><span class="n">Surface</span> <span class="o">=</span> <span class="n">surface</span>
     <span class="n">meshGenerator</span><span class="o">.</span><span class="n">ElementSizeMode</span> <span class="o">=</span> <span class="s2">&quot;edgelengtharray&quot;</span>  <span class="c1"># Variable size mesh</span>
     <span class="n">meshGenerator</span><span class="o">.</span><span class="n">TargetEdgeLengthArrayName</span> <span class="o">=</span> <span class="s2">&quot;Size&quot;</span>  <span class="c1"># Variable size mesh</span>
-    <span class="n">meshGenerator</span><span class="o">.</span><span class="n">BoundaryLayer</span> <span class="o">=</span> <span class="mi">1</span>
-    <span class="n">meshGenerator</span><span class="o">.</span><span class="n">NumberOfSubLayers</span> <span class="o">=</span> <span class="mi">4</span>
-    <span class="n">meshGenerator</span><span class="o">.</span><span class="n">BoundaryLayerOnCaps</span> <span class="o">=</span> <span class="mi">0</span>
-    <span class="n">meshGenerator</span><span class="o">.</span><span class="n">BoundaryLayerThicknessFactor</span> <span class="o">=</span> <span class="mf">0.85</span>
-    <span class="n">meshGenerator</span><span class="o">.</span><span class="n">SubLayerRatio</span> <span class="o">=</span> <span class="mf">0.75</span>
-    <span class="n">meshGenerator</span><span class="o">.</span><span class="n">Tetrahedralize</span> <span class="o">=</span> <span class="mi">1</span>
-    <span class="n">meshGenerator</span><span class="o">.</span><span class="n">VolumeElementScaleFactor</span> <span class="o">=</span> <span class="mf">0.8</span>
-    <span class="n">meshGenerator</span><span class="o">.</span><span class="n">EndcapsEdgeLengthFactor</span> <span class="o">=</span> <span class="mf">1.0</span>
+    <span class="k">if</span> <span class="n">add_boundary_layer</span><span class="p">:</span>
+        <span class="n">meshGenerator</span><span class="o">.</span><span class="n">BoundaryLayer</span> <span class="o">=</span> <span class="mi">1</span>
+        <span class="n">meshGenerator</span><span class="o">.</span><span class="n">NumberOfSubLayers</span> <span class="o">=</span> <span class="mi">4</span>
+        <span class="n">meshGenerator</span><span class="o">.</span><span class="n">BoundaryLayerOnCaps</span> <span class="o">=</span> <span class="mi">0</span>
+        <span class="n">meshGenerator</span><span class="o">.</span><span class="n">BoundaryLayerThicknessFactor</span> <span class="o">=</span> <span class="mf">0.85</span>
+        <span class="n">meshGenerator</span><span class="o">.</span><span class="n">SubLayerRatio</span> <span class="o">=</span> <span class="mf">0.75</span>
+        <span class="n">meshGenerator</span><span class="o">.</span><span class="n">Tetrahedralize</span> <span class="o">=</span> <span class="mi">1</span>
+        <span class="n">meshGenerator</span><span class="o">.</span><span class="n">VolumeElementScaleFactor</span> <span class="o">=</span> <span class="mf">0.8</span>
+        <span class="n">meshGenerator</span><span class="o">.</span><span class="n">EndcapsEdgeLengthFactor</span> <span class="o">=</span> <span class="mf">1.0</span>
+    <span class="k">else</span><span class="p">:</span>
+        <span class="n">meshGenerator</span><span class="o">.</span><span class="n">BoundaryLayer</span> <span class="o">=</span> <span class="mi">0</span>
+        <span class="n">meshGenerator</span><span class="o">.</span><span class="n">BoundaryLayerOnCaps</span> <span class="o">=</span> <span class="mi">1</span>
 
     <span class="c1"># Mesh</span>
     <span class="n">meshGenerator</span><span class="o">.</span><span class="n">Execute</span><span class="p">()</span>
