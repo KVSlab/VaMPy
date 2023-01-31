@@ -44,7 +44,7 @@ def run_pre_processing(input_model, verbose_print, smoothing_method, smoothing_f
         inlet_flow_extension_length (float): Factor defining length of flow extensions at the inlet(s)
         outlet_flow_extension_length (float): Factor defining length of flow extensions at the outlet(s)
         compress_mesh (bool): Compresses finalized mesh if True
-        add_boundary_layer (bool): Adds boundary layers to walls if true
+        add_boundary_layer (bool): Adds boundary layers to walls if True
     """
     # Get paths
     case_name = input_model.rsplit(path.sep, 1)[-1].rsplit('.')[0]
