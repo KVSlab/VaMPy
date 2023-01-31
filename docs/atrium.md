@@ -9,10 +9,12 @@ dataset, representing the inner left atrium wall. The tutorial is meant
 to demonstrate that VaMPy is also applicable to other vascular domains,
 not only tubular structures.
 
-> **Note**: Because VaMPy relies on `vtkPolyData` as input, the `.vtk` model needs
+```{attention} 
+Because VaMPy relies on `vtkPolyData` as input, the `.vtk` model needs
 to be converted to `.vtp` (or `.stl`) format, which can quicly be done in ParaView
 by using the `Extract Surface` filter, and saving the data as
 `LA_Endo_5.vtp`.
+```
 
 ## Meshing an atrium with appendage refinement
 

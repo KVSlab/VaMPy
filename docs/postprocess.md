@@ -10,8 +10,10 @@ named `FlowMetrics`. Converting velocity and pressure to viewable `.xdmf`-format
 script `compute_velocity_and_pressure.py` through the VaMPy-command `vampy-convert`. Finally, visualization of the
 velocity and pressure at the probes is implemented in `visualize_probes.py` and run through the `vampy-probe` command.
 
-> **Note**: In the following examples, we assume the user is working from the root directory of VaMPy, and 
-> that the solution files produced by VaMPy (`u.h5`, `p.h5`, `mesh.h5`) are located inside the `Solutions` folder.
+```{attention} 
+In the following examples, we assume the user is working from the root directory of VaMPy, and 
+that the solution files produced by VaMPy (`u.h5`, `p.h5`, `mesh.h5`) are located inside the `Solutions` folder.
+```
 
 ## Hemodynamic indices
 
