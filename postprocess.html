@@ -467,10 +467,11 @@ script <code class="docutils literal notranslate"><span class="pre">compute_flow
 named <code class="docutils literal notranslate"><span class="pre">FlowMetrics</span></code>. Converting velocity and pressure to viewable <code class="docutils literal notranslate"><span class="pre">.xdmf</span></code>-format is performed in the
 script <code class="docutils literal notranslate"><span class="pre">compute_velocity_and_pressure.py</span></code> through the VaMPy-command <code class="docutils literal notranslate"><span class="pre">vampy-convert</span></code>. Finally, visualization of the
 velocity and pressure at the probes is implemented in <code class="docutils literal notranslate"><span class="pre">visualize_probes.py</span></code> and run through the <code class="docutils literal notranslate"><span class="pre">vampy-probe</span></code> command.</p>
-<blockquote>
-<div><p><strong>Note</strong>: In the following examples, we assume the user is working from the root directory of VaMPy, and
+<div class="admonition attention">
+<p class="admonition-title">Attention</p>
+<p>In the following examples, we assume the user is working from the root directory of VaMPy, and
 that the solution files produced by VaMPy (<code class="docutils literal notranslate"><span class="pre">u.h5</span></code>, <code class="docutils literal notranslate"><span class="pre">p.h5</span></code>, <code class="docutils literal notranslate"><span class="pre">mesh.h5</span></code>) are located inside the <code class="docutils literal notranslate"><span class="pre">Solutions</span></code> folder.</p>
-</div></blockquote>
+</div>
 <section id="hemodynamic-indices">
 <h2>Hemodynamic indices<a class="headerlink" href="#hemodynamic-indices" title="Permalink to this headline">#</a></h2>
 <p>To start with we can compute the wall shear stress, oscillatory shear index (OSI) and other hemodynamic indices by

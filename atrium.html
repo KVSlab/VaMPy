@@ -437,12 +437,13 @@ we selected the endocardium model labeled <code class="docutils literal notransl
 dataset, representing the inner left atrium wall. The tutorial is meant
 to demonstrate that VaMPy is also applicable to other vascular domains,
 not only tubular structures.</p>
-<blockquote>
-<div><p><strong>Note</strong>: Because VaMPy relies on <code class="docutils literal notranslate"><span class="pre">vtkPolyData</span></code> as input, the <code class="docutils literal notranslate"><span class="pre">.vtk</span></code> model needs
+<div class="admonition attention">
+<p class="admonition-title">Attention</p>
+<p>Because VaMPy relies on <code class="docutils literal notranslate"><span class="pre">vtkPolyData</span></code> as input, the <code class="docutils literal notranslate"><span class="pre">.vtk</span></code> model needs
 to be converted to <code class="docutils literal notranslate"><span class="pre">.vtp</span></code> (or <code class="docutils literal notranslate"><span class="pre">.stl</span></code>) format, which can quicly be done in ParaView
 by using the <code class="docutils literal notranslate"><span class="pre">Extract</span> <span class="pre">Surface</span></code> filter, and saving the data as
 <code class="docutils literal notranslate"><span class="pre">LA_Endo_5.vtp</span></code>.</p>
-</div></blockquote>
+</div>
 <section id="meshing-an-atrium-with-appendage-refinement">
 <h2>Meshing an atrium with appendage refinement<a class="headerlink" href="#meshing-an-atrium-with-appendage-refinement" title="Permalink to this headline">#</a></h2>
 <p>The morphology of the left atrium is shown in <a class="reference internal" href="#atrium"><span class="std std-numref">Fig. 14</span></a>, and typically
