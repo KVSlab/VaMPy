@@ -49,8 +49,8 @@ def run_pre_processing(filename_model, verbose_print, smoothing_method, smoothin
     file_name_clipped_model = path.join(dir_path, case_name + "_clippedmodel.vtp")
     file_name_flow_centerlines = path.join(dir_path, case_name + "_flow_cl.vtp")
     file_name_surface_name = path.join(dir_path, case_name + "_remeshed_surface.vtp")
-    file_name_xml_mesh = path.join(dir_path, case_name + ".xml")
-    file_name_vtu_mesh = path.join(dir_path, case_name + ".vtu")
+    file_name_xml_mesh = path.join(dir_path, case_name + "_fsi.xml")
+    file_name_vtu_mesh = path.join(dir_path, case_name + "_fsi.vtu")
     file_name_run_script = path.join(dir_path, case_name + ".sh")
 
     print("\n--- Working on case:", case_name, "\n")
@@ -350,7 +350,7 @@ def read_command_line():
                         type=str2bool,
                         required=False,
                         dest='compressMesh',
-                        default=True,
+                        default=False,
                         help="Compress output mesh after generation.")
 
     parser.add_argument('-sM', '--smoothingMethod',
