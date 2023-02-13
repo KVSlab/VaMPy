@@ -5,7 +5,7 @@ from vampy.automatedPostprocessing.compute_velocity_and_pressure import compute_
 
 def test_compute_velocity_and_pressure():
     # Path to test results and params
-    results_path = "tests/test_results/1/Solutions"
+    results_path = "tests/test_data/results/Solutions"
     dt = 0.951
     velocity_degree = 1
     pressure_degree = 1
