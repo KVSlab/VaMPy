@@ -10,7 +10,6 @@ number_pattern = r"(\d+.\d+)"
 def test_run_artery_problem(num_processors):
     # Path to test mesh relative to 'simulation' folder
     mesh_path = "../../../tests/test_data/mesh/artery/mesh.xml"
-    mesh_path = "tests/test_data/mesh/artery/mesh.xml"
 
     # Simulation parameters
     dt = 0.0951
@@ -30,6 +29,16 @@ def test_run_artery_problem(num_processors):
 
     d = subprocess.check_output(cmd.format(num_processors, T, mesh_path), shell=True)
     print(str(d))
+    cmd = (
+        "cd src/vampy/simulation;" + "ls -la {}".format(mesh_path.replace("mesh.xml", ""))
+    )
+    print(str(mesh_path))
+    print(str(d))
+    #  "mpirun -np {} oasis NSfracStep T={} problem=Artery mesh_path={}"
+
+    d = subprocess.check_output(cmd.format(num_processors, T, mesh_path), shell=True)
+    print(str(d))
+
     # Expected pressure split
     expected_pressure_0 = 0.607958
     expected_pressure_1 = 0.392042
