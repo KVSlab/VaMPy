@@ -18,7 +18,7 @@ def test_run_artery_problem(num_processors):
 
     # Command to run oasis with Artery.py problem
     cmd = (
-            "ls -la"
+        "ls -la"
     )
 
     d = subprocess.check_output(cmd, shell=True)
