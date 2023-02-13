@@ -23,7 +23,7 @@ def test_run_artery_problem(num_processors):
 
     try:
         d = subprocess.check_output(cmd.format(num_processors, T, mesh_path), shell=True)
-    except subprocess.CalledProcessError as e:
+    except Exception as e:
         print(e.returncode)
         print(e.output)
 
