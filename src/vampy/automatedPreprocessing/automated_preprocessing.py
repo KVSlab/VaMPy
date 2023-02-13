@@ -7,6 +7,7 @@ from morphman import is_surface_capped, get_uncapped_surface, write_polydata, ge
     vtk_triangulate_surface, write_parameters, vmtk_cap_polydata, compute_centerlines, get_centerline_tolerance, \
     get_vtk_point_locator, extract_single_line, vtk_merge_polydata, get_point_data_array, smooth_voronoi_diagram, \
     create_new_surface, compute_centers, vmtk_smooth_surface, str2bool
+
 # Local imports
 from vampy.automatedPreprocessing import ToolRepairSTL
 from vampy.automatedPreprocessing.preprocessing_common import read_polydata, get_centers_for_meshing, \
@@ -317,7 +318,7 @@ def run_pre_processing(input_model, verbose_print, smoothing_method, smoothing_f
 
     network, probe_points = setup_model_network(centerlines, file_name_probe_points, region_center, verbose_print)
 
-    # BSL method for mean inlet flow rate.
+    # Load updated parameters following meshing
     parameters = get_parameters(path.join(dir_path, case_name))
 
     print("--- Computing flow rates and flow split, and setting boundary IDs\n")

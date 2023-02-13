@@ -645,6 +645,9 @@ class Element(object):
     def GetBeta(self):
         return self.beta
 
+    def GetGamma(self):
+        return self.gamma
+
     def GetMeanRadius(self):
         return self.meanRadius
 

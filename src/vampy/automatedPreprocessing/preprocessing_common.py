@@ -617,9 +617,9 @@ def find_boundaries(model_path, mean_inflow_rate, network, mesh, verbose_print, 
             verbose_print(network.elements[closest].GetInPointsx0()[0])
             ids.insert(0, [cellEntityId, mean_inflow_rate])
         else:
-            beta = network.elements[closest].GetBeta()
-            ids.append([cellEntityId, beta])
-            verbose_print(beta)
+            gamma = network.elements[closest].GetGamma()
+            ids.append([cellEntityId, gamma])
+            verbose_print(gamma)
             verbose_print(network.elements[closest].GetOutPointsx1()[0])
         verbose_print('CellEntityId: %d\n' % cellEntityId)
         verbose_print('meshPoint: %f, %f, %f\n' % (meshPoint[0], meshPoint[1], meshPoint[2]))
@@ -683,7 +683,7 @@ def setup_model_network(centerlines, file_name_probe_points, region_center, verb
     # Compute the outlet boundary condition percentages.
     flowSplitting = FlowSplitting()
     flowSplitting.ComputeAlphas(network, verbose_print)
-    flowSplitting.ComputeBetas(network, verbose_print)
+    flowSplitting.ComputeGammas(network, verbose_print)
     flowSplitting.CheckTotalFlowRate(network, verbose_print)
 
     return network, probe_points
