@@ -18,6 +18,12 @@ def test_run_artery_problem(num_processors):
 
     # Command to run oasis with Artery.py problem
     cmd = (
+            "ls -la"
+    )
+
+    d = subprocess.check_output(cmd, shell=True)
+    print(str(d))
+    cmd = (
         "cd src/vampy/simulation;" +
         "mpirun -np {} oasis NSfracStep T={} problem=Artery mesh_path={}"
     )
