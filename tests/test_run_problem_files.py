@@ -17,8 +17,8 @@ def test_run_artery_problem(num_processors):
 
     # Command to run oasis with Artery.py problem
     cmd = (
-            "cd src/vampy/simulation;" +
-            "mpirun -np {} oasis NSfracStep T={} problem=Artery mesh_path={}"
+        "cd src/vampy/simulation;" +
+        "mpirun -np {} oasis NSfracStep T={} problem=Artery mesh_path={}"
     )
 
     d = subprocess.check_output(cmd.format(num_processors, T, mesh_path), shell=True)
@@ -64,8 +64,8 @@ def test_run_atrium_problem(num_processors):
 
     # Command to run oasis with Artery.py problem
     cmd = (
-            "cd src/vampy/simulation;" +
-            "mpirun -np {} oasis NSfracStep T={} problem=Atrium mesh_path={}"
+        "cd src/vampy/simulation;" +
+        "mpirun -np {} oasis NSfracStep T={} problem=Atrium mesh_path={}"
     )
 
     d = subprocess.check_output(cmd.format(num_processors, T, mesh_path), shell=True)
