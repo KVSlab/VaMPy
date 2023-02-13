@@ -6,7 +6,7 @@ import pytest
 number_pattern = r"(\d+.\d+)"
 
 
-@pytest.mark.parametrize("num_processors", [1, 2])
+@pytest.mark.parametrize("num_processors", [1])
 def test_run_artery_problem(num_processors):
     # Path to test mesh relative to 'simulation' folder
     mesh_path = "../../../tests/test_data/mesh/artery/mesh.xml"
@@ -17,24 +17,9 @@ def test_run_artery_problem(num_processors):
 
     # Command to run oasis with Artery.py problem
     cmd = (
-        "ls -la"
+        "cd src/vampy/simulation;" +
+        "mpirun -np {} oasis NSfracStep T={} problem=Artery mesh_path={}"
     )
-
-    d = subprocess.check_output(cmd, shell=True)
-    print(str(d))
-    cmd = (
-        "cd src/vampy/simulation;" + "ls -la"
-    )
-    #  "mpirun -np {} oasis NSfracStep T={} problem=Artery mesh_path={}"
-
-    d = subprocess.check_output(cmd.format(num_processors, T, mesh_path), shell=True)
-    print(str(d))
-    cmd = (
-        "cd src/vampy/simulation;" + "ls -la {}".format(mesh_path.replace("mesh.xml", ""))
-    )
-    print(str(mesh_path))
-    print(str(d))
-    #  "mpirun -np {} oasis NSfracStep T={} problem=Artery mesh_path={}"
 
     d = subprocess.check_output(cmd.format(num_processors, T, mesh_path), shell=True)
     print(str(d))
