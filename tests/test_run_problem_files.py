@@ -10,6 +10,7 @@ number_pattern = r"(\d+.\d+)"
 def test_run_artery_problem(num_processors):
     # Path to test mesh relative to 'simulation' folder
     mesh_path = "../../../tests/test_data/mesh/artery/mesh.xml"
+    mesh_path = "tests/test_data/mesh/artery/mesh.xml"
 
     # Simulation parameters
     dt = 0.0951
