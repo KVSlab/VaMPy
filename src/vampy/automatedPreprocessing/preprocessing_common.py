@@ -524,7 +524,7 @@ def compute_distance_to_sphere(surface, center_sphere, radius_sphere=0.0, distan
     return surface
 
 
-def generate_mesh(surface):
+def generate_mesh(surface, add_boundary_layer):
     """
     Generates a mesh suitable for CFD from a input surface model.
 
@@ -540,14 +540,18 @@ def generate_mesh(surface):
     meshGenerator.Surface = surface
     meshGenerator.ElementSizeMode = "edgelengtharray"  # Variable size mesh
     meshGenerator.TargetEdgeLengthArrayName = "Size"  # Variable size mesh
-    meshGenerator.BoundaryLayer = 1
-    meshGenerator.NumberOfSubLayers = 4
-    meshGenerator.BoundaryLayerOnCaps = 0
-    meshGenerator.BoundaryLayerThicknessFactor = 0.85
-    meshGenerator.SubLayerRatio = 0.75
-    meshGenerator.Tetrahedralize = 1
-    meshGenerator.VolumeElementScaleFactor = 0.8
-    meshGenerator.EndcapsEdgeLengthFactor = 1.0
+    if add_boundary_layer:
+        meshGenerator.BoundaryLayer = 1
+        meshGenerator.NumberOfSubLayers = 4
+        meshGenerator.BoundaryLayerOnCaps = 0
+        meshGenerator.BoundaryLayerThicknessFactor = 0.85
+        meshGenerator.SubLayerRatio = 0.75
+        meshGenerator.Tetrahedralize = 1
+        meshGenerator.VolumeElementScaleFactor = 0.8
+        meshGenerator.EndcapsEdgeLengthFactor = 1.0
+    else:
+        meshGenerator.BoundaryLayer = 0
+        meshGenerator.BoundaryLayerOnCaps = 1
 
     # Mesh
     meshGenerator.Execute()

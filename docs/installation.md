@@ -54,7 +54,7 @@ A `Dockerfile` is supplied in the root directory of the repository, which can bu
 dependencies installed. The Docker-image can be built with the following command:
 
 ``` console
-$ docker build -t name_of_image -f Dockerfile .
+$ docker build -t name_of_image -f docker/Dockerfile .
 ```
 
 A Docker-container can then be started with the following command:
