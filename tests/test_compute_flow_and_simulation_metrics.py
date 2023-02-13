@@ -1,7 +1,7 @@
 import shutil
 from os import path, remove
 
-from vampy.automatedPostProcessing.compute_flow_and_simulation_metrics import compute_flow_and_simulation_metrics
+from vampy.automatedPostprocessing.compute_flow_and_simulation_metrics import compute_flow_and_simulation_metrics
 
 
 def test_compute_flow_and_simulation_metrics_for_full_cycle():

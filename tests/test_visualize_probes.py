@@ -1,6 +1,6 @@
 from os import path, remove
 
-from vampy.automatedPostProcessing.visualize_probes import visualize_probes
+from vampy.automatedPostprocessing.visualize_probes import visualize_probes
 
 
 def test_visualize_probes():

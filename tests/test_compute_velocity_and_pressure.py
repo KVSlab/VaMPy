@@ -1,6 +1,6 @@
 from os import path, remove
 
-from vampy.automatedPostProcessing.compute_velocity_and_pressure import compute_velocity_and_pressure
+from vampy.automatedPostprocessing.compute_velocity_and_pressure import compute_velocity_and_pressure
 
 
 def test_compute_velocity_and_pressure():

@@ -1,7 +1,7 @@
 import shutil
 from os import path
 
-from vampy.automatedPostProcessing.compute_hemodynamic_indices import compute_hemodynamic_indices
+from vampy.automatedPostprocessing.compute_hemodynamic_indices import compute_hemodynamic_indices
 
 
 def test_compute_hemodynamic_indices():
