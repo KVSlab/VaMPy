@@ -97,5 +97,3 @@ def run_atrium_problem(num_processors):
 if __name__ == '__main__':
     test_run_artery_problem(1)
     test_run_artery_problem(2)
-    test_run_atrium_problem(1)
-    test_run_atrium_problem(2)
