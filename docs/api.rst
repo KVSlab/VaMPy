@@ -4,48 +4,48 @@ API Reference
 Pre-processing scripts
 ----------------------
 
-.. automodule:: vampy.automatedPreProcessing.automatedPreProcessing
+.. automodule:: vampy.automatedPreprocessing.automated_preprocessing
    :members:
    :undoc-members:
    :show-inheritance:
 
 
-.. automodule:: vampy.automatedPreProcessing.preprocessing_common
+.. automodule:: vampy.automatedPreprocessing.preprocessing_common
    :members:
    :undoc-members:
    :show-inheritance:
 
-.. automodule:: vampy.automatedPreProcessing.DisplayData
+.. automodule:: vampy.automatedPreprocessing.DisplayData
    :members:
    :undoc-members:
    :show-inheritance:
 
-.. automodule:: vampy.automatedPreProcessing.ImportData
+.. automodule:: vampy.automatedPreprocessing.ImportData
    :members:
    :undoc-members:
    :show-inheritance:
 
-.. automodule:: vampy.automatedPreProcessing.NetworkBoundaryConditions
+.. automodule:: vampy.automatedPreprocessing.NetworkBoundaryConditions
    :members:
    :undoc-members:
    :show-inheritance:
 
-.. automodule:: vampy.automatedPreProcessing.ToolRepairSTL
+.. automodule:: vampy.automatedPreprocessing.ToolRepairSTL
    :members:
    :undoc-members:
    :show-inheritance:
 
-.. automodule:: vampy.automatedPreProcessing.simulate
+.. automodule:: vampy.automatedPreprocessing.simulate
    :members:
    :undoc-members:
    :show-inheritance:
 
-.. automodule:: vampy.automatedPreProcessing.visualize
+.. automodule:: vampy.automatedPreprocessing.visualize
    :members:
    :undoc-members:
    :show-inheritance:
 
-.. automodule:: vampy.automatedPreProcessing.vmtkpointselector
+.. automodule:: vampy.automatedPreprocessing.vmtkpointselector
    :members:
    :undoc-members:
    :show-inheritance:
@@ -54,31 +54,31 @@ Pre-processing scripts
 Post-processing scripts
 -----------------------
 
-.. automodule:: vampy.automatedPostProcessing.compute_flow_and_simulation_metrics
+.. automodule:: vampy.automatedPostprocessing.compute_flow_and_simulation_metrics
    :members:
    :undoc-members:
    :show-inheritance:
 
 
-.. automodule:: vampy.automatedPostProcessing.compute_hemodynamic_indices
+.. automodule:: vampy.automatedPostprocessing.compute_hemodynamic_indices
    :members:
    :undoc-members:
    :show-inheritance:
 
 
-.. automodule:: vampy.automatedPostProcessing.compute_velocity_and_pressure
+.. automodule:: vampy.automatedPostprocessing.compute_velocity_and_pressure
    :members:
    :undoc-members:
    :show-inheritance:
 
 
-.. automodule:: vampy.automatedPostProcessing.postprocessing_common
+.. automodule:: vampy.automatedPostprocessing.postprocessing_common
    :members:
    :undoc-members:
    :show-inheritance:
 
 
-.. automodule:: vampy.automatedPostProcessing.visualize_probes
+.. automodule:: vampy.automatedPostprocessing.visualize_probes
    :members:
    :undoc-members:
    :show-inheritance:

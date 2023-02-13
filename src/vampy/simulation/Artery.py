@@ -1,6 +1,6 @@
 import json
 import pickle
-from os import makedirs, path
+from os import makedirs
 from pprint import pprint
 from dolfin import set_log_level
 

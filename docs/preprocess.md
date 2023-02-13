@@ -8,7 +8,7 @@ the software may be readily used for other tubular or vascular shapes.
 
 The first step of using the Vascular Modeling Pypeline is
 pre-processing. The pre-processing scripts are located inside the
-`automatedPreProcessing` folder, and can be run by using the `vampy-mesh` command in the terminal. The script generates a mesh, boundary conditions, and probes for velocity and pressure sampling. Here we will perform pre-processing for the artery case located in the `tests` folder. In this example we pass the input model path (`-i`) and mesh coarsening factor (`-c`) command-line arguments: 
+`automatedPreprocessing` folder, and can be run by using the `vampy-mesh` command in the terminal. The script generates a mesh, boundary conditions, and probes for velocity and pressure sampling. Here we will perform pre-processing for the artery case located in the `tests` folder. In this example we pass the input model path (`-i`) and mesh coarsening factor (`-c`) command-line arguments: 
 
 ``` console
 $ vampy-mesh -i tests/Case_test_artery/artery.vtp -c 1.3

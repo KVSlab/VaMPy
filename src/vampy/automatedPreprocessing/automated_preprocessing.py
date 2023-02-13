@@ -9,13 +9,13 @@ from morphman import is_surface_capped, get_uncapped_surface, write_polydata, ge
     create_new_surface, compute_centers, vmtk_smooth_surface, str2bool
 
 # Local imports
-from vampy.automatedPreProcessing import ToolRepairSTL
-from vampy.automatedPreProcessing.preprocessing_common import read_polydata, get_centers_for_meshing, \
-    dist_sphere_diam, dist_sphere_curvature, dist_sphere_constant, get_regions_to_refine, radiusArrayName, \
-    make_voronoi_diagram, add_flow_extension, write_mesh, mesh_alternative, generate_mesh, find_boundaries, \
-    compute_flow_rate, setup_model_network
-from vampy.automatedPreProcessing.simulate import run_simulation
-from vampy.automatedPreProcessing.visualize import visualize_model
+from vampy.automatedPreprocessing import ToolRepairSTL
+from vampy.automatedPreprocessing.preprocessing_common import read_polydata, get_centers_for_meshing, \
+    dist_sphere_diam, dist_sphere_curvature, dist_sphere_constant, get_regions_to_refine, make_voronoi_diagram, \
+    add_flow_extension, write_mesh, mesh_alternative, generate_mesh, find_boundaries, \
+    compute_flow_rate, setup_model_network, radiusArrayName
+from vampy.automatedPreprocessing.simulate import run_simulation
+from vampy.automatedPreprocessing.visualize import visualize_model
 
 
 def run_pre_processing(input_model, verbose_print, smoothing_method, smoothing_factor, meshing_method,
@@ -127,8 +127,8 @@ def run_pre_processing(input_model, verbose_print, smoothing_method, smoothing_f
             print("--- Region to refine ({}): {:.3f} {:.3f} {:.3f}"
                   .format(i + 1, regions[3 * i], regions[3 * i + 1], regions[3 * i + 2]))
 
-        centerlineAnu, _, _ = compute_centerlines(source, regions, file_name_refine_region_centerlines, capped_surface,
-                                                  resampling=0.1)
+        centerline_region, _, _ = compute_centerlines(source, regions, file_name_refine_region_centerlines,
+                                                      capped_surface, resampling=0.1)
 
         # Extract the region centerline
         refine_region_centerline = []
@@ -138,7 +138,7 @@ def run_pre_processing(input_model, verbose_print, smoothing_method, smoothing_f
         # Compute mean distance between points
         for i in range(num_anu):
             if not path.isfile(file_name_region_centerlines.format(i)):
-                line = extract_single_line(centerlineAnu, i)
+                line = extract_single_line(centerline_region, i)
                 locator = get_vtk_point_locator(centerlines)
                 for j in range(line.GetNumberOfPoints() - 1, 0, -1):
                     point = line.GetPoints().GetPoint(j)

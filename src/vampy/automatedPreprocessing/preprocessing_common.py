@@ -6,35 +6,14 @@ from morphman import vtk_clean_polydata, vtk_triangulate_surface, get_parameters
     get_distance, get_number_of_arrays, vmtk_smooth_surface, get_point_data_array, create_vtk_array, \
     get_vtk_point_locator, vtk_extract_feature_edges, get_uncapped_surface, vtk_compute_connectivity, \
     vtk_compute_mass_properties, extract_single_line, get_centerline_tolerance
-from vampy.automatedPreProcessing import ImportData
-from vampy.automatedPreProcessing.NetworkBoundaryConditions import FlowSplitting
-from vampy.automatedPreProcessing.vmtkpointselector import vmtkPickPointSeedSelector
+
+from vampy.automatedPreprocessing import ImportData
+from vampy.automatedPreprocessing.NetworkBoundaryConditions import FlowSplitting
+from vampy.automatedPreprocessing.vmtk_pointselector import vmtkPickPointSeedSelector
 
 # Global array names
-radiusArrayName = 'MaximumInscribedSphereRadius'
-parallelTransportNormalsArrayName = 'ParallelTransportNormals'
-groupIDsArrayName = "GroupIds"
-abscissasArrayName = 'Abscissas'
-clippingArrayName = 'ClippingArray'
-branchClippingArrayName = 'BranchClippingArray'
-distanceToTubeArrayName = 'DistanceToTubeFunction'
-closedArrayName = 'ClosedSection'
-eikonalSolutionArrayName = 'EikonalSolutionArray'
-edgeArrayName = 'EdgeArray'
-edgePCoordArrayName = 'EdgePCoordArray'
-costFunctionArrayName = 'CostFunctionArray'
 distanceToSpheresArrayName = "DistanceToSpheres"
-
-# Options not available from commandline
-divergingRatioToSpacingTolerance = 2.0
-interpolationHalfSize = 3
-voronoiCoreCutOffThreshold = 0.75
-numberOfSplineAnalyzedPoints = 40
-phiValues = [float(i) for i in range(2, 43, 2)]
-thetaStep = 2.0
-
-# Shortcuts
-version = vtk.vtkVersion().GetVTKMajorVersion()
+radiusArrayName = 'MaximumInscribedSphereRadius'
 
 
 def get_regions_to_refine(surface, provided_points, dir_path):
@@ -351,7 +330,7 @@ def dist_sphere_curvature(surface, centerlines, region_center, misr_max, save_pa
     # Multiple the surface
     curvatureSurface = curvatureFilter.Surface
     curvatureArray = get_point_data_array("Curvature", curvatureSurface)
-    distance_to_sphere_array = get_point_data_array("DistanceToSpheres", distance_to_sphere)
+    distance_to_sphere_array = get_point_data_array(distanceToSpheresArrayName, distance_to_sphere)
     size_array = curvatureArray * distance_to_sphere_array * factor
 
     size_vtk_array = create_vtk_array(size_array, "Size")
@@ -398,7 +377,7 @@ def dist_sphere_constant(surface, centerlines, region_center, misr_max, save_pat
 
     element_size = edge_length + np.zeros((surface.GetNumberOfPoints(), 1))
     if len(region_center) != 0:
-        distance_to_spheres_array = get_point_data_array("DistanceToSpheres", distance_to_sphere)
+        distance_to_spheres_array = get_point_data_array(distanceToSpheresArrayName, distance_to_sphere)
         element_size = np.minimum(element_size, distance_to_spheres_array)
 
     vtk_array = create_vtk_array(element_size, "Size")
@@ -454,7 +433,7 @@ def dist_sphere_diam(surface, centerlines, region_center, misr_max, save_path, f
     if len(region_center) == 0:
         element_size *= factor
     else:
-        distance_to_spheres_array = get_point_data_array("DistanceToSpheres", distance_to_sphere)
+        distance_to_spheres_array = get_point_data_array(distanceToSpheresArrayName, distance_to_sphere)
         element_size = np.minimum(element_size, distance_to_spheres_array) * factor
 
     vtk_array = create_vtk_array(element_size, "Size")
@@ -505,6 +484,7 @@ def compute_distance_to_sphere(surface, center_sphere, radius_sphere=0.0, distan
         surface (vtkPolyData): Modified surface model with distances
     """
     # Check if there allready exists a distance to spheres
+
     N = surface.GetNumberOfPoints()
     number, names = get_number_of_arrays(surface)
     add = False
@@ -516,7 +496,7 @@ def compute_distance_to_sphere(surface, center_sphere, radius_sphere=0.0, distan
         dist_array = get_vtk_array(distanceToSpheresArrayName, 1, N)
         surface.GetPointData().AddArray(dist_array)
     else:
-        dist_array = surface.GetPointData().GetArray("DistanceToSpheres")
+        dist_array = surface.GetPointData().GetArray(distanceToSpheresArrayName)
 
     # Compute distance
     for i in range(N):

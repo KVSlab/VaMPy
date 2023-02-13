@@ -5,7 +5,15 @@ from dolfin import MPI, assemble, Constant, assign, HDF5File, Measure
 
 
 def get_file_paths(folder):
-    # Create folder where data and solutions (velocity, mesh, pressure) is stored
+    """
+    Create folder where data and solutions (velocity, mesh, pressure) is stored
+
+    Args:
+        folder (str): Path to data storage location
+
+    Returns:
+        files (dict): Contains filepaths for respective solution files
+    """
     common_path = path.join(folder, "Solutions")
     if MPI.rank(MPI.comm_world) == 0:
         if not path.exists(common_path):
@@ -21,7 +29,12 @@ def get_file_paths(folder):
 
 
 def print_mesh_information(mesh):
-    # Print geometric information about the volumetric mesh
+    """
+    Print geometric information about the volumetric mesh
+
+    Args:
+        mesh (dolfin.cpp.mesh.Mesh): Volumetric mesh
+    """
     dx = Measure("dx", domain=mesh)
     comm = MPI.comm_world
     local_xmin = mesh.coordinates()[:, 0].min()
@@ -66,6 +79,19 @@ def print_mesh_information(mesh):
 
 def store_u_mean(T, dt, save_solution_at_tstep, save_solution_frequency, u_mean, u_mean0, u_mean1, u_mean2,
                  NS_parameters):
+    """
+    Store the time averaged velocity into file u_mean
+
+    Args:
+        T (float): End time
+        dt (float): Time step size
+        save_solution_at_tstep (int): Time step when solution is to be saved
+        save_solution_frequency (int): Frequency of solution saving
+        u_mean (Function): Vector function for storing vector solution of average velocity
+        u_mean0 (Function): Function storing x-component
+        u_mean1 (Function): Function storing y-component
+        u_mean2 (Function): Function storing z-component
+    """
     # Get the file path
     files = NS_parameters['files']
     u_mean_path = files["u_mean"]

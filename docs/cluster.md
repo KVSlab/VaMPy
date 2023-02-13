@@ -7,7 +7,7 @@ tutorial, we have used the supercomputer
 starting point.
 
 The automated procedure for running simulations on a cluster is part of
-the preprocessing script `automatedPreProcessing.py` or `vampy-mesh` command. The
+the preprocessing script `automated_preprocessing.py` or `vampy-mesh` command. The
 script includes the `--simulation-config` flag (`-sc` for short), which
 should be followed by the path to a configuration file for the remote
 simulation. As a template, we have included the configuration file

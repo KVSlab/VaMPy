@@ -3,7 +3,7 @@ from os import path
 from dolfin import Function, VectorFunctionSpace, FunctionSpace, parameters, MPI, HDF5File, Mesh, XDMFFile, \
     BoundaryMesh, project, inner
 
-from vampy.automatedPostProcessing.postprocessing_common import STRESS, read_command_line, get_dataset_names
+from vampy.automatedPostprocessing.postprocessing_common import STRESS, read_command_line, get_dataset_names
 
 try:
     parameters["reorder_dofs_serial"] = False
