@@ -21,7 +21,11 @@ def test_run_artery_problem(num_processors):
         "mpirun -np {} oasis NSfracStep T={} problem=Artery mesh_path={}"
     )
 
-    d = subprocess.check_output(cmd.format(num_processors, T, mesh_path), shell=True)
+    try:
+        d = subprocess.check_output(cmd.format(num_processors, T, mesh_path), shell=True)
+    except subprocess.CalledProcessError as e:
+        print(e.returncode)
+        print(e.output)
 
     # Expected pressure split
     expected_pressure_0 = 0.607958
