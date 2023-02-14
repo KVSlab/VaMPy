@@ -6,22 +6,22 @@ import numpy as np
 from morphman import is_surface_capped, get_uncapped_surface, write_polydata, get_parameters, vtk_clean_polydata, \
     vtk_triangulate_surface, write_parameters, vmtk_cap_polydata, compute_centerlines, get_centerline_tolerance, \
     get_vtk_point_locator, extract_single_line, vtk_merge_polydata, get_point_data_array, smooth_voronoi_diagram, \
-    create_new_surface, compute_centers, vmtk_smooth_surface, str2bool
-
+    create_new_surface, compute_centers, vmtk_smooth_surface, str2bool, vmtk_compute_voronoi_diagram, \
+    prepare_output_surface
 # Local imports
 from vampy.automatedPreprocessing import ToolRepairSTL
 from vampy.automatedPreprocessing.preprocessing_common import read_polydata, get_centers_for_meshing, \
-    dist_sphere_diam, dist_sphere_curvature, dist_sphere_constant, get_regions_to_refine, make_voronoi_diagram, \
-    add_flow_extension, write_mesh, mesh_alternative, generate_mesh, find_boundaries, \
+    dist_sphere_diam, dist_sphere_curvature, dist_sphere_constant, get_regions_to_refine, add_flow_extension, \
+    write_mesh, mesh_alternative, generate_mesh, find_boundaries, \
     compute_flow_rate, setup_model_network, radiusArrayName
 from vampy.automatedPreprocessing.simulate import run_simulation
 from vampy.automatedPreprocessing.visualize import visualize_model
 
 
-def run_pre_processing(input_model, verbose_print, smoothing_method, smoothing_factor, meshing_method,
-                       refine_region, is_atrium, add_flow_extensions, visualize, config_path, coarsening_factor,
-                       inlet_flow_extension_length, outlet_flow_extension_length, edge_length, region_points,
-                       compress_mesh, add_boundary_layer):
+def run_pre_processing(input_model, verbose_print, smoothing_method, smoothing_factor, smoothing_iterations,
+                       meshing_method, refine_region, is_atrium, add_flow_extensions, visualize, config_path,
+                       coarsening_factor, inlet_flow_extension_length, outlet_flow_extension_length, edge_length,
+                       region_points, compress_mesh, add_boundary_layer):
     """
     Automatically generate mesh of surface model in .vtu and .xml format, including prescribed
     flow rates at inlet and outlet based on flow network model.
@@ -32,8 +32,9 @@ def run_pre_processing(input_model, verbose_print, smoothing_method, smoothing_f
         input_model (str): Name of case
         verbose_print (bool): Toggles verbose mode
         smoothing_method (str): Method for surface smoothing
-        smoothing_factor (float): Smoothing parameter
-        meshing_method (str): Method for meshing
+        smoothing_factor (float): Smoothing factor of Voronoi smoothing
+        smoothing_iterations (int): Number of smoothing iterations for Taubin and Laplace smoothing
+        meshing_method (str): Determines what the density of the volumetric mesh depends upon
         refine_region (bool): Refines selected region of input if True
         is_atrium (bool): Determines whether this is an atrium case
         add_flow_extensions (bool): Adds flow extensions to mesh if True
@@ -50,6 +51,7 @@ def run_pre_processing(input_model, verbose_print, smoothing_method, smoothing_f
     # Get paths
     case_name = input_model.rsplit(path.sep, 1)[-1].rsplit('.')[0]
     dir_path = input_model.rsplit(path.sep, 1)[0]
+    print("\n--- Working on case:", case_name, "\n")
 
     # Naming conventions
     file_name_centerlines = path.join(dir_path, case_name + "_centerlines.vtp")
@@ -61,6 +63,7 @@ def run_pre_processing(input_model, verbose_print, smoothing_method, smoothing_f
     file_name_probe_points = path.join(dir_path, case_name + "_probe_point")
     file_name_voronoi = path.join(dir_path, case_name + "_voronoi.vtp")
     file_name_voronoi_smooth = path.join(dir_path, case_name + "_voronoi_smooth.vtp")
+    file_name_voronoi_surface = path.join(dir_path, case_name + "_voronoi_surface.vtp")
     file_name_surface_smooth = path.join(dir_path, case_name + "_smooth.vtp")
     file_name_model_flow_ext = path.join(dir_path, case_name + "_flowext.vtp")
     file_name_clipped_model = path.join(dir_path, case_name + "_clippedmodel.vtp")
@@ -68,21 +71,19 @@ def run_pre_processing(input_model, verbose_print, smoothing_method, smoothing_f
     file_name_surface_name = path.join(dir_path, case_name + "_remeshed_surface.vtp")
     file_name_xml_mesh = path.join(dir_path, case_name + ".xml")
     file_name_vtu_mesh = path.join(dir_path, case_name + ".vtu")
-
-    print("\n--- Working on case:", case_name, "\n")
+    region_centerlines = None
 
     # Open the surface file.
     print("--- Load model file\n")
     surface = read_polydata(input_model)
 
     # Check if surface is closed and uncapps model if True
-    if is_surface_capped(surface)[0] and smoothing_method != "voronoi":
+    if is_surface_capped(surface)[0]:
         if not path.isfile(file_name_clipped_model):
             print("--- Clipping the models inlets and outlets.\n")
-            # TODO: Add input parameters as input to automatedPreProcessing
             # Value of gradients_limit should be generally low, to detect flat surfaces corresponding
             # to closed boundaries. Area_limit will set an upper limit of the detected area, may vary between models.
-            # The circleness_limit parameters determines the detected regions similarity to a circle, often assumed
+            # The circleness_limit parameters determines the detected regions' similarity to a circle, often assumed
             # to be close to a circle.
             surface = get_uncapped_surface(surface, gradients_limit=0.01, area_limit=20, circleness_limit=5)
             write_polydata(surface, file_name_clipped_model)
@@ -115,7 +116,7 @@ def run_pre_processing(input_model, verbose_print, smoothing_method, smoothing_f
     source = outlets if is_atrium else inlet
     target = inlet if is_atrium else outlets
 
-    centerlines, _, _ = compute_centerlines(source, target, file_name_centerlines, capped_surface, resampling=0.1)
+    centerlines, voronoi, _ = compute_centerlines(source, target, file_name_centerlines, capped_surface, resampling=0.1)
     tol = get_centerline_tolerance(centerlines)
 
     # Get 'center' and 'radius' of the regions(s)
@@ -173,34 +174,32 @@ def run_pre_processing(input_model, verbose_print, smoothing_method, smoothing_f
         if not path.isfile(file_name_surface_smooth):
             # Get Voronoi diagram
             if not path.isfile(file_name_voronoi):
-                voronoi = make_voronoi_diagram(surface, file_name_voronoi)
+                voronoi = vmtk_compute_voronoi_diagram(capped_surface, file_name_voronoi)
                 write_polydata(voronoi, file_name_voronoi)
             else:
                 voronoi = read_polydata(file_name_voronoi)
 
             # Get smooth Voronoi diagram
             if not path.isfile(file_name_voronoi_smooth):
-                if refine_region:
-                    smooth_voronoi = smooth_voronoi_diagram(voronoi, centerlines, smoothing_factor, region_centerlines)
-                else:
-                    smooth_voronoi = smooth_voronoi_diagram(voronoi, centerlines, smoothing_factor)
-
-                write_polydata(smooth_voronoi, file_name_voronoi_smooth)
+                voronoi_smoothed = smooth_voronoi_diagram(voronoi, centerlines, smoothing_factor,
+                                                          no_smooth_cl=region_centerlines)
+                write_polydata(voronoi_smoothed, file_name_voronoi_smooth)
             else:
-                smooth_voronoi = read_polydata(file_name_voronoi_smooth)
+                voronoi_smoothed = read_polydata(file_name_voronoi_smooth)
 
-            # Envelope the smooth surface
-            surface = create_new_surface(smooth_voronoi)
+            # Create new surface from the smoothed Voronoi
+            surface_smoothed = create_new_surface(voronoi_smoothed)
 
             # Uncapp the surface
-            surface_uncapped = get_uncapped_surface(surface)
+            surface_uncapped = prepare_output_surface(surface_smoothed, surface, centerlines, file_name_voronoi_surface,
+                                                      test_merge=True)
 
             # Check if there has been added new outlets
             num_outlets = centerlines.GetNumberOfLines()
-            num_outlets_after = compute_centers(surface_uncapped, is_atrium, test_capped=True)[1]
+            inlets, outlets = compute_centers(surface_uncapped)
+            num_outlets_after = len(outlets) // 3
 
             if num_outlets != num_outlets_after:
-                surface = vmtk_smooth_surface(surface, "laplace", iterations=200)
                 write_polydata(surface, file_name_surface_smooth)
                 print(("ERROR: Automatic clipping failed. You have to open {} and " +
                        "manually clipp the branch which still is capped. " +
@@ -211,8 +210,7 @@ def run_pre_processing(input_model, verbose_print, smoothing_method, smoothing_f
             surface = surface_uncapped
 
             # Smoothing to improve the quality of the elements
-            # Consider adding a subdivision here as well.
-            surface = vmtk_smooth_surface(surface, "laplace", iterations=200)
+            surface = vmtk_smooth_surface(surface, "laplace", iterations=smoothing_iterations)
 
             # Write surface
             write_polydata(surface, file_name_surface_smooth)
@@ -223,11 +221,11 @@ def run_pre_processing(input_model, verbose_print, smoothing_method, smoothing_f
     elif smoothing_method in ["laplace", "taubin"]:
         print("--- Smooth surface: {} smoothing\n".format(smoothing_method.capitalize()))
         if not path.isfile(file_name_surface_smooth):
-            surface = vmtk_smooth_surface(surface, smoothing_method, iterations=400)
+            surface = vmtk_smooth_surface(surface, smoothing_method, iterations=smoothing_iterations, passband=0.1,
+                                          relaxation=0.01)
 
             # Save the smoothed surface
             write_polydata(surface, file_name_surface_smooth)
-
         else:
             surface = read_polydata(file_name_surface_smooth)
 
@@ -263,7 +261,7 @@ def run_pre_processing(input_model, verbose_print, smoothing_method, smoothing_f
             # Compute the centerlines.
             inlet, outlets = get_centers_for_meshing(surface_extended, is_atrium, path.join(dir_path, case_name),
                                                      use_flow_extensions=True)
-            # FIXME: There are several inlets and one outlet for atrium case
+            # Flip outlets and inlets for atrium models
             source = outlets if is_atrium else inlet
             target = inlet if is_atrium else outlets
             centerlines, _, _ = compute_centerlines(source, target, file_name_flow_centerlines, capped_surface,
@@ -338,11 +336,12 @@ def run_pre_processing(input_model, verbose_print, smoothing_method, smoothing_f
         run_simulation(config_path, dir_path, case_name)
 
     print("--- Removing unused pre-processing files")
-    files_to_remove = [file_name_centerlines, file_name_refine_region_centerlines, file_name_region_centerlines,
-                       file_name_distance_to_sphere_diam, file_name_distance_to_sphere_const,
-                       file_name_distance_to_sphere_curv, file_name_voronoi, file_name_voronoi_smooth,
-                       file_name_surface_smooth, file_name_model_flow_ext, file_name_clipped_model,
-                       file_name_flow_centerlines, file_name_surface_name]
+    files_to_remove = [
+        file_name_centerlines, file_name_refine_region_centerlines, file_name_region_centerlines,
+        file_name_distance_to_sphere_diam, file_name_distance_to_sphere_const, file_name_distance_to_sphere_curv,
+        file_name_voronoi, file_name_voronoi_smooth, file_name_voronoi_surface, file_name_surface_smooth,
+        file_name_model_flow_ext, file_name_clipped_model, file_name_flow_centerlines, file_name_surface_name
+    ]
     for file in files_to_remove:
         if path.exists(file):
             remove(file)
@@ -385,9 +384,10 @@ def read_command_line(input_path=None):
                         required=False,
                         default="no_smooth",
                         choices=["voronoi", "no_smooth", "laplace", "taubin"],
-                        help="Smoothing method, for now only Voronoi smoothing is available." +
-                             " For Voronoi smoothing you can also control the smoothing factor with " +
-                             "--smoothing-factor (default = 0.25).")
+                        help="Determines smoothing method for surface smoothing. For Voronoi smoothing you can " +
+                             "control the smoothing factor with --smoothing-factor (default = 0.25). For Laplace " +
+                             "and Taubin smoothing, you can controll the amount of smoothing iterations with " +
+                             "--smothing-iterations (default = 200).")
 
     parser.add_argument('-c', '--coarsening-factor',
                         type=float,
@@ -401,6 +401,12 @@ def read_command_line(input_path=None):
                         default=0.25,
                         help="Smoothing factor for Voronoi smoothing, removes all spheres which" +
                              " has a radius < MISR*(1-0.25), where MISR varying along the centerline.")
+
+    parser.add_argument('-si', '--smoothing-iterations',
+                        type=int,
+                        required=False,
+                        default=200,
+                        help="Number of smoothing iterations for Laplace and Taubin type smoothing.")
 
     parser.add_argument('-m', '--meshing-method',
                         type=str,
@@ -476,6 +482,13 @@ def read_command_line(input_path=None):
     else:
         args = parser.parse_args(["-i" + input_path])
 
+    if args.meshing_method == "constant" and args.edge_length is None:
+        raise ValueError("ERROR: Please provide the edge length for uniform density meshing using --edge-length.")
+
+    if args.refine_region and args.region_points is not None:
+        if len(args.region_points) % 3 != 0:
+            raise ValueError("ERROR: Please provide the region points as a multiple of 3.")
+
     if args.verbosity:
         print()
         print("--- VERBOSE MODE ACTIVATED ---")
@@ -491,11 +504,11 @@ def read_command_line(input_path=None):
     verbose_print(args)
 
     return dict(input_model=args.input_model, verbose_print=verbose_print, smoothing_method=args.smoothing_method,
-                smoothing_factor=args.smoothing_factor, meshing_method=args.meshing_method,
-                refine_region=args.refine_region, is_atrium=args.is_atrium, add_flow_extensions=args.add_flowextensions,
-                visualize=args.visualize, config_path=args.config_path, coarsening_factor=args.coarsening_factor,
-                inlet_flow_extension_length=args.inlet_flowextension, edge_length=args.edge_length,
-                region_points=args.region_points, compress_mesh=args.compress_mesh,
+                smoothing_factor=args.smoothing_factor, smoothing_iterations=args.smoothing_iterations,
+                meshing_method=args.meshing_method, refine_region=args.refine_region, is_atrium=args.is_atrium,
+                add_flow_extensions=args.add_flowextensions, config_path=args.config_path, edge_length=args.edge_length,
+                coarsening_factor=args.coarsening_factor, inlet_flow_extension_length=args.inlet_flowextension,
+                visualize=args.visualize, region_points=args.region_points, compress_mesh=args.compress_mesh,
                 outlet_flow_extension_length=args.outlet_flowextension, add_boundary_layer=args.add_boundary_layer)
 
 

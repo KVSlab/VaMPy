@@ -1,6 +1,6 @@
 (tutorial:atrium)=
 
-# CFD simulation in the left atrium
+# Hemodynamic simulation in the left atrium and left atrial appendage
 
 The second tutorial focuses on a left atrium geometry, collected from a published public dataset by Roney et
 al.{cite}`roney2021constructing`, located
@@ -76,7 +76,7 @@ view of the left atrial appendage, clipped to display the refinement and
 four boundary layers.
 ```
 
-## CFD simulation of the left atrium
+## CFD simulation in the left atrium model
 
 The resulting mesh from the previous section is now used as input to the CFD simulation, followed by computation of the
 hemodynamic indices. The only real difference from the artery problem from eariler is that instead of running

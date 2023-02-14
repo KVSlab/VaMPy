@@ -1,5 +1,6 @@
 from os import path
 
+from IPython import embed
 from dolfin import Mesh
 
 from vampy.automatedPreprocessing.automated_preprocessing import read_command_line, \
@@ -35,8 +36,8 @@ def test_pre_processing():
     mesh_vtu = read_polydata(mesh_path_vtu)
     mesh_xml = Mesh(mesh_path_xml)
 
-    num_points = 5585
-    num_cells = 30504
+    num_points = 5533
+    num_cells = 30248
 
     assert mesh_vtu.GetNumberOfPoints() == num_points
     assert mesh_xml.num_cells() == num_cells
