@@ -8,7 +8,7 @@ from vampy.automatedPreprocessing.preprocessing_common import read_polydata
 
 
 def test_pre_processing():
-    model_path = "tests/Case_test_tiny_artery/tiny_artery.stl"
+    model_path = "tests/test_data/model/model.stl"
     # Get default input parameters
     common_input = read_command_line(model_path)
     common_input.update(dict(meshing_method="diameter",
