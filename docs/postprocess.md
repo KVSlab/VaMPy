@@ -1,5 +1,4 @@
 (overview:post)=
-
 # Post-processing
 
 Following the CFD simulations, the last step of the Vascular Modeling Pypeline is post-processing of the results.

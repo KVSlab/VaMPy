@@ -45,7 +45,7 @@ Pre-processing scripts
    :undoc-members:
    :show-inheritance:
 
-.. automodule:: vampy.automatedPreprocessing.vmtkpointselector
+.. automodule:: vampy.automatedPreprocessing.vmtk_pointselector
    :members:
    :undoc-members:
    :show-inheritance:

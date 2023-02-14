@@ -1,4 +1,5 @@
 # Installation
+
 ## Installing VaMPy using `conda`
 
 We recommend installing `VaMPy` and its dependencies through `conda`.  
@@ -21,7 +22,7 @@ Next, can now activate your environment by running::
 $ conda activate your_environment
 ```
 
-Finally, install `VaMPy` inside your `conda` environment using `pip`: 
+Finally, install `VaMPy` inside your `conda` environment using `pip`:
 
 ``` console
 $ python3 -m pip install .
@@ -50,8 +51,8 @@ reflected directly in your environment.
 
 ## Running VaMPy using Docker
 
-A `Dockerfile` is supplied in the root directory of the repository, which can build a docker-image with all
-dependencies installed. The Docker-image can be built with the following command:
+A `Dockerfile` is supplied in the root directory of the repository, which can build a docker-image with all dependencies
+installed. The Docker-image can be built with the following command:
 
 ``` console
 $ docker build -t name_of_image -f docker/Dockerfile .

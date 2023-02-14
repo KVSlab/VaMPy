@@ -3,6 +3,6 @@
   "username": "YOUR_USERNAME",
   "password": "YOUR_PASSWORD",
   "remote_vampy_folder": "VaMPy",
-  "local_mesh_folder": "tests/Case_test_artery",
+  "local_mesh_folder": "models/artery",
   "job_script": "artery_job.sh"
 }
