@@ -36,7 +36,7 @@ A more rigorous approach is to mesh the vascular model based on its surface curv
 for models which harbour many regions of high curvature. An example of such models are complex geometries such as
 aneurysms or carotid siphons, where it is recommended to have a denser mesh in the vicinity of the complex morphology.
 Meshing based on the surface curvature is performed by supplying the `-m curvature` flag, and optionally the
-`--coarseningFactor` flag, or `-c` for short. The `--coarseningFactor`
+`--coarsening-factor` flag, or `-c` for short. The `--coarsening-factor`
 flag determines the coarseness or fineness of the mesh, where values \> 1.0 will coarsen the mesh, and vice versa, with
 a default value of 1.0. To generate a variable density mesh based on the surface curvature, run the following command:
 
@@ -73,7 +73,7 @@ maximum inscribed sphere diameter.
 ```
 
 Meshing based on the centerline diameter is performed by supplying the
-`-m diameter` flag, and optionally the `--coarseningFactor` flag, as above. To generate a variable density mesh based on
+`-m diameter` flag, and optionally the `--coarsening-factor` flag, as above. To generate a variable density mesh based on
 the centerline diameter, run the following command:
 
 ``` console

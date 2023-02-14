@@ -8,8 +8,9 @@ we will demonstrate different approaches for meshing and pre-processing of the m
 the Oasis software, before post-processing the results. For the left atrium model, we will investigate local refinement
 in a user-defined region, also followed by CFD simulation and post-processing of the results.
 
-We assume that you have VaMPy installed, meaning you have a working version of *morphMan* and *Oasis* on your computer.
-It is also beneficial, but not necessary, that you are familiar with the [ParaView](https://www.paraview.org/)
+We assume that you have VaMPy installed, meaning you have a working version
+of [morphMan](https://github.com/KVSlab/morphMan) and [Oasis](https://github.com/mikaem/Oasis) on your computer. It is
+also beneficial, but not necessary, that you are familiar with the [ParaView](https://www.paraview.org/)
 visualization software, which we will frequently be using to visualize the geometries and results.
 
 ## Link to tutorials

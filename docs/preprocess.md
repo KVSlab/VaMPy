@@ -11,7 +11,7 @@ The first step of using the Vascular Modeling Pypeline is pre-processing. The pr
 the
 `automatedPreprocessing` folder, and can be run by using the `vampy-mesh` command in the terminal. The script generates
 a mesh, boundary conditions, and probes for velocity and pressure sampling. Here we will perform pre-processing for the
-artery case located in the `tests` folder. In this example we pass the input model path (`-i`) and mesh coarsening
+artery case located in the `models` folder. In this example we pass the input model path (`-i`) and mesh coarsening
 factor (`-c`) command-line arguments:
 
 ``` console

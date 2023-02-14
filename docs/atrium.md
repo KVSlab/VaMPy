@@ -1,6 +1,6 @@
 (tutorial:atrium)=
 
-# Hemodynamics simulation on a left atrium
+# CFD simulation in the left atrium
 
 The second tutorial focuses on a left atrium geometry, collected from a published public dataset by Roney et
 al.{cite}`roney2021constructing`, located
