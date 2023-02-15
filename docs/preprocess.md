@@ -30,31 +30,19 @@ name: render
 Visualization of the meshed artery model by running `vampy-mesh`.
 ```
 
-```{attention} VaMPy has been developed for models that are originally segmented from medical images, where the units are
-often in millimeters (mm). Hence, the current implementation assumes that the input model has been scaled accordinly (to
-mm). It is also preferable that the model is uncapped (open), although there is some experimental methods for uncapping
-a surface model in case it is capped (closed). 
+## Dimensions and scaling
 
-Scaling your model can simply be done by using `vmtksurfacescaling`. For
-instance, scaling from m to mm is performed by running the following command:
+VaMPy has been developed for models that are originally segmented from medical images, where the units are often in
+millimeters (mm). Hence, the current implementation assumes that the input model is in mm. It is also preferable that
+the model is uncapped (open), although there is some experimental methods for uncapping a surface model in case it is
+capped (closed).
+
+If your input model is not in mm, you may scale it by adding the `--scale-factor` argument, which takes a numerical
+value. To scale your model from m to mm you can run the following command:
 
 ``` console
-$ vmtksurfacescaling -ifile model.vtp -ofile model.vtp -scale 1000 
+$ vampy-mesh -i models/artery/artery.vtp -c 1.3 --scaling-factor 1000
 ```
-
-## Mething method
-
-There are currently three meshing methods to chose between, which determine the local mesh density. The methods are
-selected throught command line argument `--meshing-method` (`-m`), and can be set to either `constant`, `diameter`,
-or `curvature`. The three methods are further examined in the [artery tutorial](tutorial:artery).
-
-## Refinement
-
-Mesh generation may be performed with refinement of a particlar region. To manually refine a region on a geometry, the
-user may provide the `--refine-region` flag, or `-r` for short. In addition, the user may provide
-the `--region-points` (`-rp`) argument, followed by three numbers representing the $x, y$, and $z$ coordinates of a
-point on the surface to be refined. If the point is located slightly off the surface, it will stick to the closest
-surface point. And example of this feature is shown in the [atrium tutorial](tutorial:atrium).
 
 ## Smoothing
 
@@ -79,30 +67,6 @@ included the original model for reference (in red).
 name: smoothing
 ---
 From left to right: the original artery model in red, and a comparison of the three smoothing methods; Laplace, Taubin and Voronoi smoothing, against the original model (red). 
-```
-
-## Boundary layers
-
-In fluid flows where the Reynolds numbers are large, flow simulations will cause strong gradients near the wall,
-requiring fine resolution of the solution close to the boundary. In this situation it is essential to refine the finite
-element mesh isotropically to capture strong gradients. This is also relevant when computing hemodynamic indices on the
-domain boundary, such as the wall shear stress, which is demonstrated in the [post-processing](overview:post) section.
-Therefore, VaMPy adds four boundary layers to the computational domain by default. However, these can be turned off by
-setting the `--add-boundary-layer` (`-bl`) argument to `False`. Thus, to skip adding boundary layers for the artery
-model, we may run the following command:
-
-``` console
-$ vampy-mesh -i models/artery/artery.vtp -c 1.3 --add-boundary-layer False
-```
-
-In {numref}`bl` we demonstrate the qualitative difference when adding or removing boundary layers to the volumetric
-mesh.
-
-```{figure} figures/boundary_layers.png
----
-name: bl
----
-On the left, a volumetric mesh with no boundary layer. On the right, a volumetric mesh with four boundary layers, which is the default in VaMPy.
 ```
 
 ## Flow extensions
@@ -131,3 +95,40 @@ name: flowext
 On the left, the original model with no flow extensions. The remining models harbor flow extensions of varying length, based on the local radius at the outlet and inlet boundary. 
 ```
 
+## Boundary layers
+
+In fluid flows where the Reynolds numbers are large, flow simulations will cause strong gradients near the wall,
+requiring fine resolution of the solution close to the boundary. In this situation it is essential to refine the finite
+element mesh isotropically to capture strong gradients. This is also relevant when computing hemodynamic indices on the
+domain boundary, such as the wall shear stress, which is demonstrated in the [post-processing](overview:post) section.
+Therefore, VaMPy adds four boundary layers to the computational domain by default. However, these can be turned off by
+setting the `--add-boundary-layer` (`-bl`) argument to `False`. Thus, to skip adding boundary layers for the artery
+model, we may run the following command:
+
+``` console
+$ vampy-mesh -i models/artery/artery.vtp -c 1.3 --add-boundary-layer False
+```
+
+In {numref}`bl` we demonstrate the qualitative difference when adding or removing boundary layers to the volumetric
+mesh.
+
+```{figure} figures/boundary_layers.png
+---
+name: bl
+---
+On the left, a volumetric mesh with no boundary layer. On the right, a volumetric mesh with four boundary layers, which is the default in VaMPy.
+```
+
+## Refinement
+
+Mesh generation may be performed with refinement of a particlar region. To manually refine a region on a geometry, the
+user may provide the `--refine-region` flag, or `-r` for short. In addition, the user may provide
+the `--region-points` (`-rp`) argument, followed by three numbers representing the $x, y$, and $z$ coordinates of a
+point on the surface to be refined. If the point is located slightly off the surface, it will stick to the closest
+surface point. And example of this feature is shown in the [atrium tutorial](tutorial:atrium).
+
+## Mething method
+
+There are currently three meshing methods to chose between, which determine the local mesh density. The methods are
+selected throught command line argument `--meshing-method` (`-m`), and can be set to either `constant`, `diameter`,
+or `curvature`. The three methods are further examined in the [artery tutorial](tutorial:artery).
