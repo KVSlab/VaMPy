@@ -512,7 +512,7 @@ instance, scaling from m to mm is performed by running the following command:</p
 <h2>Mething method<a class="headerlink" href="#mething-method" title="Permalink to this headline">#</a></h2>
 <p>There are currently three meshing methods to chose between, which determine the local mesh density. The methods are
 selected throught command line argument <code class="docutils literal notranslate"><span class="pre">--meshing-method</span></code> (<code class="docutils literal notranslate"><span class="pre">-m</span></code>), and can be set to either <code class="docutils literal notranslate"><span class="pre">constant</span></code>, <code class="docutils literal notranslate"><span class="pre">diameter</span></code>,
-or <code class="docutils literal notranslate"><span class="pre">curvature</span></code>. The three methods are further examined in the <a class="reference internal" href="artery.html#tutorial-artery"><span class="std std-ref">artery tutorial</span></a>.</p>
+or <code class="docutils literal notranslate"><span class="pre">curvature</span></code>. By default, the <code class="docutils literal notranslate"><span class="pre">diameter</span></code> method is selected. The three methods are further examined in the <a class="reference internal" href="artery.html#tutorial-artery"><span class="std std-ref">artery tutorial</span></a>.</p>
 </section>
 <section id="refinement">
 <h2>Refinement<a class="headerlink" href="#refinement" title="Permalink to this headline">#</a></h2>
@@ -530,7 +530,7 @@ Laplacian (<code class="docutils literal notranslate"><span class="pre">laplace<
 Taubin smoothing, the user may select the number of smoothing iterations, controlled by
 the <code class="docutils literal notranslate"><span class="pre">--smoothing-iterations</span></code> (<code class="docutils literal notranslate"><span class="pre">-si</span></code>)
 argument. Similarly, the intensity of the Voronoi diagram smoothing method may be controlled by
-the <code class="docutils literal notranslate"><span class="pre">--smoothing-factor</span></code> (<code class="docutils literal notranslate"><span class="pre">-sf</span></code>) argument, which ranges between 0 and 1, corresponding to 0 and 100%, respectively. To
+the <code class="docutils literal notranslate"><span class="pre">--smoothing-factor</span></code> (<code class="docutils literal notranslate"><span class="pre">-sf</span></code>) argument, which ranges between 0 and 1, corresponding to 0 and 100%, respectively. By default, no smoothing is performed. To
 perform Laplacian smoothing using the artery model, we may run the following command:</p>
 <div class="highlight-console notranslate"><div class="highlight"><pre><span></span><span class="gp">$ </span>vampy-mesh<span class="w"> </span>-i<span class="w"> </span>models/artery/artery.vtp<span class="w"> </span>-c<span class="w"> </span><span class="m">1</span>.3<span class="w"> </span>--smoothing-method<span class="w"> </span>laplace<span class="w"> </span>-si<span class="w"> </span><span class="m">800</span>
 </pre></div>
