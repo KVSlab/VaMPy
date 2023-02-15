@@ -35,8 +35,8 @@ and the mitral valve.
 
 To ensure that the hemodynamics are captured sufficiently inside the left atrial appendage, we will perform mesh
 generation with refinement of this particular region. To manually refine a region on the geometry, the user may provide
-the `--refine-region True` flag, or
-`-r True` for short. Thus, to include a user-defined area of refinement, run the following command:
+the `--refine-region` flag, or
+`-r` for short. Thus, to include a user-defined area of refinement, run the following command:
 
 ``` console
 $ vampy-mesh -m constant -i LA_Endo/5/LA_Endo_5.vtp -r True -el 1.5 -bl False -fli 1 -flo 3 -at 

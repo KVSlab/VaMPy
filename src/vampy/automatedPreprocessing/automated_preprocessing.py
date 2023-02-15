@@ -210,7 +210,7 @@ def run_pre_processing(input_model, verbose_print, smoothing_method, smoothing_f
             surface = surface_uncapped
 
             # Smoothing to improve the quality of the elements
-            surface = vmtk_smooth_surface(surface, "laplace", iterations=smoothing_iterations)
+            surface = vmtk_smooth_surface(surface, "laplace", iterations=200)
 
             # Write surface
             write_polydata(surface, file_name_surface_smooth)
@@ -387,7 +387,7 @@ def read_command_line(input_path=None):
                         help="Determines smoothing method for surface smoothing. For Voronoi smoothing you can " +
                              "control the smoothing factor with --smoothing-factor (default = 0.25). For Laplace " +
                              "and Taubin smoothing, you can controll the amount of smoothing iterations with " +
-                             "--smothing-iterations (default = 200).")
+                             "--smothing-iterations (default = 800).")
 
     parser.add_argument('-c', '--coarsening-factor',
                         type=float,
@@ -405,7 +405,7 @@ def read_command_line(input_path=None):
     parser.add_argument('-si', '--smoothing-iterations',
                         type=int,
                         required=False,
-                        default=200,
+                        default=800,
                         help="Number of smoothing iterations for Laplace and Taubin type smoothing.")
 
     parser.add_argument('-m', '--meshing-method',
