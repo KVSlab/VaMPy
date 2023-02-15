@@ -30,6 +30,18 @@ name: render
 Visualization of the meshed artery model by running `vampy-mesh`.
 ```
 
+```{attention} VaMPy has been developed for models that are originally segmented from medical images, where the units are
+often in millimeters (mm). Hence, the current implementation assumes that the input model has been scaled accordinly (to
+mm). It is also preferable that the model is uncapped (open), although there is some experimental methods for uncapping
+a surface model in case it is capped (closed). 
+
+Scaling your model can simply be done by using `vmtksurfacescaling`. For
+instance, scaling from m to mm is performed by running the following command:
+
+``` console
+$ vmtksurfacescaling -ifile model.vtp -ofile model.vtp -scale 1000 
+```
+
 ## Mething method
 
 There are currently three meshing methods to chose between, which determine the local mesh density. The methods are
