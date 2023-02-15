@@ -681,7 +681,6 @@ def setup_model_network(centerlines, file_name_probe_points, region_center, verb
     # Set the flow split and inlet boundary condition
     # Compute the outlet boundary condition percentages.
     flowSplitting = FlowSplitting()
-    flowSplitting.ComputeAlphas(network, verbose_print)
     flowSplitting.ComputeGammas(network, verbose_print)
     flowSplitting.CheckTotalFlowRate(network, verbose_print)
 
