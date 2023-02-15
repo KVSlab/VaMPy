@@ -1,8 +1,6 @@
 from os import path
 
-from IPython import embed
 from dolfin import Mesh
-
 from vampy.automatedPreprocessing.automated_preprocessing import read_command_line, \
     run_pre_processing
 from vampy.automatedPreprocessing.preprocessing_common import read_polydata
