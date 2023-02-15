@@ -46,7 +46,7 @@ $ vmtksurfacescaling -ifile model.vtp -ofile model.vtp -scale 1000
 
 There are currently three meshing methods to chose between, which determine the local mesh density. The methods are
 selected throught command line argument `--meshing-method` (`-m`), and can be set to either `constant`, `diameter`,
-or `curvature`. The three methods are further examined in the [artery tutorial](tutorial:artery).
+or `curvature`. By default, the `diameter` method is selected. The three methods are further examined in the [artery tutorial](tutorial:artery).
 
 ## Refinement
 
@@ -64,7 +64,7 @@ Laplacian (`laplace`), Taubin (`taubin`), and Voronoi diagram smoothing (`vorono
 Taubin smoothing, the user may select the number of smoothing iterations, controlled by
 the `--smoothing-iterations` (`-si`)
 argument. Similarly, the intensity of the Voronoi diagram smoothing method may be controlled by
-the `--smoothing-factor` (`-sf`) argument, which ranges between 0 and 1, corresponding to 0 and 100\%, respectively. To
+the `--smoothing-factor` (`-sf`) argument, which ranges between 0 and 1, corresponding to 0 and 100\%, respectively. By default, no smoothing is performed. To
 perform Laplacian smoothing using the artery model, we may run the following command:
 
 ``` console
