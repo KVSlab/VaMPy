@@ -14,11 +14,11 @@ dependencies = [
 ]
 
 [project.scripts]
-vampy-mesh = "vampy.automatedPreProcessing.automatedPreProcessing:main_meshing"
-vampy-hemo = "vampy.automatedPostProcessing.compute_hemodynamic_indices:main_hemo"
-vampy-metrics = "vampy.automatedPostProcessing.compute_flow_and_simulation_metrics:main_metrics"
-vampy-convert = "vampy.automatedPostProcessing.compute_velocity_and_pressure:main_convert"
-vampy-probe = "vampy.automatedPostProcessing.visualize_probes:main_probe"
+vampy-mesh = "vampy.automatedPreprocessing.automated_preprocessing:main_meshing"
+vampy-hemo = "vampy.automatedPostprocessing.compute_hemodynamic_indices:main_hemo"
+vampy-metrics = "vampy.automatedPostprocessing.compute_flow_and_simulation_metrics:main_metrics"
+vampy-convert = "vampy.automatedPostprocessing.compute_velocity_and_pressure:main_convert"
+vampy-probe = "vampy.automatedPostprocessing.visualize_probes:main_probe"
 
 [project.optional-dependencies]
 test = [

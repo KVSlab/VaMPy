@@ -1,6 +1,6 @@
 import vtk
 
-from vampy.automatedPreProcessing.DisplayData import DisplayModel, VtkPointCloud
+from vampy.automatedPreprocessing.DisplayData import DisplayModel, VtkPointCloud
 
 version = vtk.vtkVersion().GetVTKMajorVersion()
 
@@ -23,7 +23,7 @@ def visualize_model(network_elements, probe_points, output_surface, mean_inflow_
         if not (element.IsAnOutlet()):
             continue
         points.InsertNextPoint(element.GetOutPointsx1()[0])
-        scalar.InsertNextValue(100.0 * element.GetBeta())
+        scalar.InsertNextValue(100.0 * element.GetGamma())
     polydata = vtk.vtkPolyData()
     polydata.SetPoints(points)
     polydata.GetPointData().SetScalars(scalar)

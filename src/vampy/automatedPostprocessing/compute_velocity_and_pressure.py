@@ -1,10 +1,8 @@
-from __future__ import print_function
-
 from pathlib import Path
 
 from dolfin import parameters, FunctionSpace, XDMFFile, MPI, VectorFunctionSpace, HDF5File, Mesh, Function
 
-from vampy.automatedPostProcessing.postprocessing_common import read_command_line
+from vampy.automatedPostprocessing.postprocessing_common import read_command_line
 
 try:
     parameters["reorder_dofs_serial"] = False

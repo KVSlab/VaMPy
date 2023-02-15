@@ -14,7 +14,7 @@ import math
 
 import vtk
 
-from vampy.automatedPreProcessing.ImportData import loadFile
+from vampy.automatedPreprocessing.ImportData import loadFile
 
 
 def isNaN(num):

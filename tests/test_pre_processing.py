@@ -1,12 +1,13 @@
 from os import path
 
-from vampy.automatedPreProcessing.automatedPreProcessing import read_command_line, \
+from dolfin import Mesh
+from vampy.automatedPreprocessing.automated_preprocessing import read_command_line, \
     run_pre_processing
-from vampy.automatedPreProcessing.preprocessing_common import read_polydata
+from vampy.automatedPreprocessing.preprocessing_common import read_polydata
 
 
 def test_pre_processing():
-    model_path = "tests/Case_test_tiny_artery/tiny_artery.stl"
+    model_path = "tests/test_data/model/model.stl"
     # Get default input parameters
     common_input = read_command_line(model_path)
     common_input.update(dict(meshing_method="diameter",
@@ -23,14 +24,21 @@ def test_pre_processing():
     run_pre_processing(**common_input)
 
     # Check that mesh is created
-    mesh_path = model_path.replace("stl", "vtu")
+    mesh_path_vtu = model_path.replace("stl", "vtu")
+    mesh_path_xml = model_path.replace("stl", "xml")
 
-    assert path.isfile(mesh_path)
+    assert path.isfile(mesh_path_vtu)
+    assert path.isfile(mesh_path_xml)
 
-    # Check that mesh is not empty
-    mesh = read_polydata(mesh_path)
+    # Check that mesh is not empty with VTK/morphMan and FEniCS and contains correct amount of points and cells
+    mesh_vtu = read_polydata(mesh_path_vtu)
+    mesh_xml = Mesh(mesh_path_xml)
 
-    assert mesh.GetNumberOfPoints() > 0
+    num_points = 5508
+    num_cells = 30136
+
+    assert mesh_vtu.GetNumberOfPoints() == num_points
+    assert mesh_xml.num_cells() == num_cells
 
 
 if __name__ == "__main__":
