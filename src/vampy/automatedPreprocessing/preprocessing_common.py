@@ -6,7 +6,6 @@ from morphman import vtk_clean_polydata, vtk_triangulate_surface, get_parameters
     get_distance, get_number_of_arrays, vmtk_smooth_surface, get_point_data_array, create_vtk_array, \
     get_vtk_point_locator, vtk_extract_feature_edges, get_uncapped_surface, vtk_compute_connectivity, \
     vtk_compute_mass_properties, extract_single_line, get_centerline_tolerance
-
 from vampy.automatedPreprocessing import ImportData
 from vampy.automatedPreprocessing.NetworkBoundaryConditions import FlowSplitting
 from vampy.automatedPreprocessing.vmtk_pointselector import vmtkPickPointSeedSelector
@@ -798,3 +797,25 @@ def add_flow_extension(surface, centerlines, include_outlet, extension_length=2.
     surface_extended = flowExtensionsFilter.GetOutput()
 
     return surface_extended
+
+
+def scale_surface(surface, scale_factor):
+    """
+    Scale the input surface by a factor scale_factor.
+
+    Args:
+        surface (vtkPolyData): Input surface to be scaled
+        scale_factor (float): Scaling factor
+
+    Returns:
+        scaled_surface (vtkPolyData): Scaled input surface
+    """
+    surface_scaler = vmtkscripts.vmtkSurfaceScaling()
+    surface_scaler.Surface = surface
+    surface_scaler.ScaleFactor = scale_factor
+    surface_scaler.Execute()
+
+    # Get scaled surface
+    scaled_surface = surface_scaler.Surface
+
+    return scaled_surface

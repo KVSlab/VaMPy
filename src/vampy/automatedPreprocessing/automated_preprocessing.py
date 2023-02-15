@@ -13,7 +13,7 @@ from vampy.automatedPreprocessing import ToolRepairSTL
 from vampy.automatedPreprocessing.preprocessing_common import read_polydata, get_centers_for_meshing, \
     dist_sphere_diam, dist_sphere_curvature, dist_sphere_constant, get_regions_to_refine, add_flow_extension, \
     write_mesh, mesh_alternative, generate_mesh, find_boundaries, \
-    compute_flow_rate, setup_model_network, radiusArrayName
+    compute_flow_rate, setup_model_network, radiusArrayName, scale_surface
 from vampy.automatedPreprocessing.simulate import run_simulation
 from vampy.automatedPreprocessing.visualize import visualize_model
 
@@ -21,7 +21,7 @@ from vampy.automatedPreprocessing.visualize import visualize_model
 def run_pre_processing(input_model, verbose_print, smoothing_method, smoothing_factor, smoothing_iterations,
                        meshing_method, refine_region, is_atrium, add_flow_extensions, visualize, config_path,
                        coarsening_factor, inlet_flow_extension_length, outlet_flow_extension_length, edge_length,
-                       region_points, compress_mesh, add_boundary_layer):
+                       region_points, compress_mesh, add_boundary_layer, scale_factor):
     """
     Automatically generate mesh of surface model in .vtu and .xml format, including prescribed
     flow rates at inlet and outlet based on flow network model.
@@ -47,6 +47,7 @@ def run_pre_processing(input_model, verbose_print, smoothing_method, smoothing_f
         outlet_flow_extension_length (float): Factor defining length of flow extensions at the outlet(s)
         compress_mesh (bool): Compresses finalized mesh if True
         add_boundary_layer (bool): Adds boundary layers to walls if True
+        scale_factor (float): Scale input model by this factor
     """
     # Get paths
     case_name = input_model.rsplit(path.sep, 1)[-1].rsplit('.')[0]
@@ -76,6 +77,10 @@ def run_pre_processing(input_model, verbose_print, smoothing_method, smoothing_f
     # Open the surface file.
     print("--- Load model file\n")
     surface = read_polydata(input_model)
+
+    # Scale surface
+    if scale_factor is not None:
+        surface = scale_surface(surface, scale_factor)
 
     # Check if surface is closed and uncapps model if True
     if is_surface_capped(surface)[0]:
@@ -469,12 +474,17 @@ def read_command_line(input_path=None):
                         type=str,
                         default=None,
                         help='Path to configuration file for remote simulation. ' +
-                             'See example/ssh_config.json for details')
+                             'See ssh_config.json for details')
 
     parser.add_argument('-bl', '--add-boundary-layer',
                         default=True,
                         type=str2bool,
                         help="Adds boundary layers along geometry wall if true.")
+
+    parser.add_argument('-sc', '--scale-factor',
+                        default=None,
+                        type=float,
+                        help="Scale input model by this factor. Used to scale model to [mm].")
 
     # Parse path to get default values
     if required:
@@ -509,7 +519,8 @@ def read_command_line(input_path=None):
                 add_flow_extensions=args.add_flowextensions, config_path=args.config_path, edge_length=args.edge_length,
                 coarsening_factor=args.coarsening_factor, inlet_flow_extension_length=args.inlet_flowextension,
                 visualize=args.visualize, region_points=args.region_points, compress_mesh=args.compress_mesh,
-                outlet_flow_extension_length=args.outlet_flowextension, add_boundary_layer=args.add_boundary_layer)
+                outlet_flow_extension_length=args.outlet_flowextension, add_boundary_layer=args.add_boundary_layer,
+                scale_factor=args.scale_factor)
 
 
 def main_meshing():
