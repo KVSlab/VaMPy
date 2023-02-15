@@ -803,6 +803,7 @@ def write_mesh(compress_mesh, file_name_surface_name, file_name_vtu_mesh, file_n
     meshWriter.Mesh = mesh
     meshWriter.Mode = "ascii"
     meshWriter.Compressed = compress_mesh
+    meshWriter.WriteRegionMarkers = 1
     meshWriter.OutputFileName = file_name_xml_mesh
     meshWriter.Execute()
 
