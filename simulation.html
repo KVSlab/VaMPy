@@ -185,7 +185,7 @@ const thebe_selector_output = ".output, .cell_output"
  </li>
  <li class="toctree-l1">
   <a class="reference internal" href="atrium.html">
-   Hemodynamics simulation on a left atrium
+   Hemodynamic simulation in the left atrium and left atrial appendage
   </a>
  </li>
 </ul>
@@ -440,22 +440,26 @@ title="Print to PDF"
 <h1>Computational fluid dynamics<a class="headerlink" href="#computational-fluid-dynamics" title="Permalink to this headline">#</a></h1>
 <section id="simulations-in-oasis">
 <h2>Simulations in <code class="docutils literal notranslate"><span class="pre">Oasis</span></code><a class="headerlink" href="#simulations-in-oasis" title="Permalink to this headline">#</a></h2>
-<p>Following pre-processing, the next step of using the Vascular Modeling Pypeline is performing the computational fluid dynamics (CFD) simulations with <code class="docutils literal notranslate"><span class="pre">oasis</span></code>.
-Assuming <code class="docutils literal notranslate"><span class="pre">oasis</span></code> has been installed, start by navigating to the <code class="docutils literal notranslate"><span class="pre">simulation</span></code> folder:</p>
+<p>Following pre-processing, the next step of using the Vascular Modeling Pypeline is performing the computational fluid
+dynamics (CFD) simulations with <code class="docutils literal notranslate"><span class="pre">oasis</span></code>. Assuming <code class="docutils literal notranslate"><span class="pre">oasis</span></code> has been installed, start by navigating to the <code class="docutils literal notranslate"><span class="pre">simulation</span></code>
+folder:</p>
 <div class="highlight-console notranslate"><div class="highlight"><pre><span></span><span class="gp">$ </span><span class="nb">cd</span><span class="w"> </span>src/vampy/simulation
 </pre></div>
 </div>
-<p>We can now perform a CFD simulation for two cycles with 10 000 time steps per cycle and default parameters by executing the following command:</p>
-<div class="highlight-console notranslate"><div class="highlight"><pre><span></span><span class="gp">$ </span>oasis<span class="w"> </span>NSfracStep<span class="w"> </span><span class="nv">problem</span><span class="o">=</span>Artery<span class="w"> </span><span class="nv">mesh_path</span><span class="o">=</span>../../../tests/Case_test_artery/artery.xml.gz<span class="w"> </span><span class="nv">save_solution_after_cycle</span><span class="o">=</span><span class="m">0</span>
+<p>We can now perform a CFD simulation for two cycles with 10 000 time steps per cycle and default parameters by executing
+the following command:</p>
+<div class="highlight-console notranslate"><div class="highlight"><pre><span></span><span class="gp">$ </span>oasis<span class="w"> </span>NSfracStep<span class="w"> </span><span class="nv">problem</span><span class="o">=</span>Artery<span class="w"> </span><span class="nv">mesh_path</span><span class="o">=</span>../../../models/artery/artery.xml.gz<span class="w"> </span><span class="nv">save_solution_after_cycle</span><span class="o">=</span><span class="m">0</span>
 </pre></div>
 </div>
-<p>Running the simulations will create the result folder <code class="docutils literal notranslate"><span class="pre">results_artery</span></code> (specific to the <code class="docutils literal notranslate"><span class="pre">Artery.py</span></code> problem) located inside <code class="docutils literal notranslate"><span class="pre">src/vampy/simulation</span></code>, with the results and corresponding mesh saved compactly in HDF5 format.</p>
+<p>Running the simulations will create the result folder <code class="docutils literal notranslate"><span class="pre">results_artery</span></code> (specific to the <code class="docutils literal notranslate"><span class="pre">Artery.py</span></code> problem) located
+inside <code class="docutils literal notranslate"><span class="pre">src/vampy/simulation</span></code>, with the results and corresponding mesh saved compactly in HDF5 format.</p>
 </section>
 <section id="adjusting-simulation-parameters">
 <h2>Adjusting simulation parameters<a class="headerlink" href="#adjusting-simulation-parameters" title="Permalink to this headline">#</a></h2>
-<p>The default parameters for CFD simulation have been chosen based on the authors’ experience and clinically reported hemodynamic parameters.
-However, changing any of the parameters is simply done by adding them as command line arguments.
-To demonstrate, consider the following Python snippet showing an overview of the parameters used for the <code class="docutils literal notranslate"><span class="pre">Artery.py</span></code> problem:</p>
+<p>The default parameters for CFD simulation have been chosen based on the authors’ experience and clinically reported
+hemodynamic parameters. However, changing any of the parameters is simply done by adding them as command line arguments.
+To demonstrate, consider the following Python snippet showing an overview of the parameters used for the <code class="docutils literal notranslate"><span class="pre">Artery.py</span></code>
+problem:</p>
 <div class="highlight-Python notranslate"><div class="highlight"><pre><span></span><span class="c1"># Parameters are in mm and ms</span>
 <span class="n">cardiac_cycle</span> <span class="o">=</span> <span class="nb">float</span><span class="p">(</span><span class="n">commandline_kwargs</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s2">&quot;cardiac_cycle&quot;</span><span class="p">,</span> <span class="mi">951</span><span class="p">))</span>
 <span class="n">number_of_cycles</span> <span class="o">=</span> <span class="nb">float</span><span class="p">(</span><span class="n">commandline_kwargs</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s2">&quot;number_of_cycles&quot;</span><span class="p">,</span> <span class="mi">2</span><span class="p">))</span>
@@ -488,8 +492,9 @@ To demonstrate, consider the following Python snippet showing an overview of the
 <span class="p">)</span>
 </pre></div>
 </div>
-<p>To start a simulation that runs for five cardiac cycles, use a coarser time step, and saves the solution less frequent we can run the following command:</p>
-<div class="highlight-console notranslate"><div class="highlight"><pre><span></span><span class="gp">$ </span>oasis<span class="w"> </span>NSfracStep<span class="w"> </span><span class="nv">problem</span><span class="o">=</span>Artery<span class="w"> </span><span class="nv">mesh_path</span><span class="o">=</span>../../../tests/Case_test_artery/artery.xml.gz<span class="w"> </span><span class="nv">number_of_cycles</span><span class="o">=</span><span class="m">5</span><span class="w"> </span><span class="nv">dt</span><span class="o">=</span><span class="m">0</span>.951<span class="w"> </span><span class="nv">save_solution_frequency</span><span class="o">=</span><span class="m">20</span>
+<p>To start a simulation that runs for five cardiac cycles, use a coarser time step, and saves the solution less frequent
+we can run the following command:</p>
+<div class="highlight-console notranslate"><div class="highlight"><pre><span></span><span class="gp">$ </span>oasis<span class="w"> </span>NSfracStep<span class="w"> </span><span class="nv">problem</span><span class="o">=</span>Artery<span class="w"> </span><span class="nv">mesh_path</span><span class="o">=</span>../../../models/artery/artery.xml.gz<span class="w"> </span><span class="nv">number_of_cycles</span><span class="o">=</span><span class="m">5</span><span class="w"> </span><span class="nv">dt</span><span class="o">=</span><span class="m">0</span>.951<span class="w"> </span><span class="nv">save_solution_frequency</span><span class="o">=</span><span class="m">20</span>
 </pre></div>
 </div>
 </section>
@@ -507,7 +512,7 @@ To demonstrate, consider the following Python snippet showing an overview of the
             mode: "python"
         },
         kernelOptions: {
-            kernelName: "python3",
+            name: "python3",
             path: "./."
         },
         predefinedOutput: true

@@ -5,7 +5,7 @@
   <head>
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>vampy.automatedPreProcessing.vmtkpointselector &#8212; VaMPy</title>
+    <title>vampy.automatedPreprocessing.vmtk_pointselector &#8212; VaMPy</title>
     
   <!-- Loaded before other Sphinx assets -->
   <link href="../../../_static/styles/theme.css?digest=1999514e3f237ded88cf" rel="stylesheet">
@@ -182,7 +182,7 @@ const thebe_selector_output = ".output, .cell_output"
  </li>
  <li class="toctree-l1">
   <a class="reference internal" href="../../../atrium.html">
-   Hemodynamics simulation on a left atrium
+   Hemodynamic simulation in the left atrium and left atrial appendage
   </a>
  </li>
 </ul>
@@ -287,7 +287,7 @@ title="Source repository"
       </li>
       
       <li>
-        <a href="https://kvslab.github.io/VaMPy//issues/new?title=Issue%20on%20page%20%2F_modules/vampy/automatedPreProcessing/vmtkpointselector.html&body=Your%20issue%20content%20here."
+        <a href="https://kvslab.github.io/VaMPy//issues/new?title=Issue%20on%20page%20%2F_modules/vampy/automatedPreprocessing/vmtk_pointselector.html&body=Your%20issue%20content%20here."
    class="headerbtn"
    data-toggle="tooltip"
 data-placement="left"
@@ -330,7 +330,7 @@ title="Open an issue"
                 
               <div>
                 
-  <h1>Source code for vampy.automatedPreProcessing.vmtkpointselector</h1><div class="highlight"><pre>
+  <h1>Source code for vampy.automatedPreprocessing.vmtk_pointselector</h1><div class="highlight"><pre>
 <span></span><span class="ch">#!/usr/bin/env python</span>
 
 <span class="kn">import</span> <span class="nn">vtk</span>
@@ -339,7 +339,7 @@ title="Open an issue"
 <span class="n">version</span> <span class="o">=</span> <span class="n">vtk</span><span class="o">.</span><span class="n">vtkVersion</span><span class="p">()</span><span class="o">.</span><span class="n">GetVTKMajorVersion</span><span class="p">()</span>
 
 
-<div class="viewcode-block" id="VtkText"><a class="viewcode-back" href="../../../api.html#vampy.automatedPreProcessing.vmtkpointselector.VtkText">[docs]</a><span class="k">class</span> <span class="nc">VtkText</span><span class="p">:</span>
+<div class="viewcode-block" id="VtkText"><a class="viewcode-back" href="../../../api.html#vampy.automatedPreprocessing.vmtk_pointselector.VtkText">[docs]</a><span class="k">class</span> <span class="nc">VtkText</span><span class="p">:</span>
     <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">guiText</span><span class="o">=</span><span class="s2">&quot;&quot;</span><span class="p">):</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">text</span> <span class="o">=</span> <span class="n">vtk</span><span class="o">.</span><span class="n">vtkTextActor</span><span class="p">()</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">text</span><span class="o">.</span><span class="n">SetInput</span><span class="p">(</span><span class="n">guiText</span><span class="p">)</span>
@@ -349,26 +349,26 @@ title="Open an issue"
         <span class="bp">self</span><span class="o">.</span><span class="n">text</span><span class="o">.</span><span class="n">SetDisplayPosition</span><span class="p">(</span><span class="mi">10</span><span class="p">,</span> <span class="mi">2</span><span class="p">)</span></div>
 
 
-<div class="viewcode-block" id="vmtkSeedSelector"><a class="viewcode-back" href="../../../api.html#vampy.automatedPreProcessing.vmtkpointselector.vmtkSeedSelector">[docs]</a><span class="k">class</span> <span class="nc">vmtkSeedSelector</span><span class="p">():</span>
+<div class="viewcode-block" id="vmtkSeedSelector"><a class="viewcode-back" href="../../../api.html#vampy.automatedPreprocessing.vmtk_pointselector.vmtkSeedSelector">[docs]</a><span class="k">class</span> <span class="nc">vmtkSeedSelector</span><span class="p">():</span>
     <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">_Surface</span> <span class="o">=</span> <span class="kc">None</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">_SeedIds</span> <span class="o">=</span> <span class="kc">None</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">_TargetSeedIds</span> <span class="o">=</span> <span class="n">vtk</span><span class="o">.</span><span class="n">vtkIdList</span><span class="p">()</span>
 
-<div class="viewcode-block" id="vmtkSeedSelector.SetSurface"><a class="viewcode-back" href="../../../api.html#vampy.automatedPreProcessing.vmtkpointselector.vmtkSeedSelector.SetSurface">[docs]</a>    <span class="k">def</span> <span class="nf">SetSurface</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">surface</span><span class="p">):</span>
+<div class="viewcode-block" id="vmtkSeedSelector.SetSurface"><a class="viewcode-back" href="../../../api.html#vampy.automatedPreprocessing.vmtk_pointselector.vmtkSeedSelector.SetSurface">[docs]</a>    <span class="k">def</span> <span class="nf">SetSurface</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">surface</span><span class="p">):</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">_Surface</span> <span class="o">=</span> <span class="n">surface</span></div>
 
-<div class="viewcode-block" id="vmtkSeedSelector.GetSurface"><a class="viewcode-back" href="../../../api.html#vampy.automatedPreProcessing.vmtkpointselector.vmtkSeedSelector.GetSurface">[docs]</a>    <span class="k">def</span> <span class="nf">GetSurface</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+<div class="viewcode-block" id="vmtkSeedSelector.GetSurface"><a class="viewcode-back" href="../../../api.html#vampy.automatedPreprocessing.vmtk_pointselector.vmtkSeedSelector.GetSurface">[docs]</a>    <span class="k">def</span> <span class="nf">GetSurface</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
         <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_Surface</span></div>
 
-<div class="viewcode-block" id="vmtkSeedSelector.GetTargetSeedIds"><a class="viewcode-back" href="../../../api.html#vampy.automatedPreProcessing.vmtkpointselector.vmtkSeedSelector.GetTargetSeedIds">[docs]</a>    <span class="k">def</span> <span class="nf">GetTargetSeedIds</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+<div class="viewcode-block" id="vmtkSeedSelector.GetTargetSeedIds"><a class="viewcode-back" href="../../../api.html#vampy.automatedPreprocessing.vmtk_pointselector.vmtkSeedSelector.GetTargetSeedIds">[docs]</a>    <span class="k">def</span> <span class="nf">GetTargetSeedIds</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
         <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_TargetSeedIds</span></div>
 
-<div class="viewcode-block" id="vmtkSeedSelector.Execute"><a class="viewcode-back" href="../../../api.html#vampy.automatedPreProcessing.vmtkpointselector.vmtkSeedSelector.Execute">[docs]</a>    <span class="k">def</span> <span class="nf">Execute</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+<div class="viewcode-block" id="vmtkSeedSelector.Execute"><a class="viewcode-back" href="../../../api.html#vampy.automatedPreprocessing.vmtk_pointselector.vmtkSeedSelector.Execute">[docs]</a>    <span class="k">def</span> <span class="nf">Execute</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
         <span class="k">pass</span></div></div>
 
 
-<div class="viewcode-block" id="vmtkPickPointSeedSelector"><a class="viewcode-back" href="../../../api.html#vampy.automatedPreProcessing.vmtkpointselector.vmtkPickPointSeedSelector">[docs]</a><span class="k">class</span> <span class="nc">vmtkPickPointSeedSelector</span><span class="p">(</span><span class="n">vmtkSeedSelector</span><span class="p">):</span>
+<div class="viewcode-block" id="vmtkPickPointSeedSelector"><a class="viewcode-back" href="../../../api.html#vampy.automatedPreprocessing.vmtk_pointselector.vmtkPickPointSeedSelector">[docs]</a><span class="k">class</span> <span class="nc">vmtkPickPointSeedSelector</span><span class="p">(</span><span class="n">vmtkSeedSelector</span><span class="p">):</span>
     <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
         <span class="n">vmtkSeedSelector</span><span class="o">.</span><span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">PickedSeedIds</span> <span class="o">=</span> <span class="n">vtk</span><span class="o">.</span><span class="n">vtkIdList</span><span class="p">()</span>
@@ -377,12 +377,12 @@ title="Open an issue"
         <span class="bp">self</span><span class="o">.</span><span class="n">OwnRenderer</span> <span class="o">=</span> <span class="mi">0</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">Script</span> <span class="o">=</span> <span class="kc">None</span>
 
-<div class="viewcode-block" id="vmtkPickPointSeedSelector.UndoCallback"><a class="viewcode-back" href="../../../api.html#vampy.automatedPreProcessing.vmtkpointselector.vmtkPickPointSeedSelector.UndoCallback">[docs]</a>    <span class="k">def</span> <span class="nf">UndoCallback</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">obj</span><span class="p">):</span>
+<div class="viewcode-block" id="vmtkPickPointSeedSelector.UndoCallback"><a class="viewcode-back" href="../../../api.html#vampy.automatedPreprocessing.vmtk_pointselector.vmtkPickPointSeedSelector.UndoCallback">[docs]</a>    <span class="k">def</span> <span class="nf">UndoCallback</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">obj</span><span class="p">):</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">InitializeSeeds</span><span class="p">()</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">PickedSeeds</span><span class="o">.</span><span class="n">Modified</span><span class="p">()</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">vmtkRenderer</span><span class="o">.</span><span class="n">RenderWindow</span><span class="o">.</span><span class="n">Render</span><span class="p">()</span></div>
 
-<div class="viewcode-block" id="vmtkPickPointSeedSelector.PickCallback"><a class="viewcode-back" href="../../../api.html#vampy.automatedPreProcessing.vmtkpointselector.vmtkPickPointSeedSelector.PickCallback">[docs]</a>    <span class="k">def</span> <span class="nf">PickCallback</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">obj</span><span class="p">):</span>
+<div class="viewcode-block" id="vmtkPickPointSeedSelector.PickCallback"><a class="viewcode-back" href="../../../api.html#vampy.automatedPreprocessing.vmtk_pointselector.vmtkPickPointSeedSelector.PickCallback">[docs]</a>    <span class="k">def</span> <span class="nf">PickCallback</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">obj</span><span class="p">):</span>
         <span class="n">picker</span> <span class="o">=</span> <span class="n">vtk</span><span class="o">.</span><span class="n">vtkCellPicker</span><span class="p">()</span>
         <span class="n">picker</span><span class="o">.</span><span class="n">SetTolerance</span><span class="p">(</span><span class="mf">1E-4</span> <span class="o">*</span> <span class="bp">self</span><span class="o">.</span><span class="n">_Surface</span><span class="o">.</span><span class="n">GetLength</span><span class="p">())</span>
         <span class="n">eventPosition</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">vmtkRenderer</span><span class="o">.</span><span class="n">RenderWindowInteractor</span><span class="o">.</span><span class="n">GetEventPosition</span><span class="p">()</span>
@@ -407,13 +407,13 @@ title="Open an issue"
         <span class="bp">self</span><span class="o">.</span><span class="n">PickedSeeds</span><span class="o">.</span><span class="n">Modified</span><span class="p">()</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">vmtkRenderer</span><span class="o">.</span><span class="n">RenderWindow</span><span class="o">.</span><span class="n">Render</span><span class="p">()</span></div>
 
-<div class="viewcode-block" id="vmtkPickPointSeedSelector.InitializeSeeds"><a class="viewcode-back" href="../../../api.html#vampy.automatedPreProcessing.vmtkpointselector.vmtkPickPointSeedSelector.InitializeSeeds">[docs]</a>    <span class="k">def</span> <span class="nf">InitializeSeeds</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+<div class="viewcode-block" id="vmtkPickPointSeedSelector.InitializeSeeds"><a class="viewcode-back" href="../../../api.html#vampy.automatedPreprocessing.vmtk_pointselector.vmtkPickPointSeedSelector.InitializeSeeds">[docs]</a>    <span class="k">def</span> <span class="nf">InitializeSeeds</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">PickedSeedIds</span><span class="o">.</span><span class="n">Initialize</span><span class="p">()</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">PickedSeeds</span><span class="o">.</span><span class="n">Initialize</span><span class="p">()</span>
         <span class="n">seedPoints</span> <span class="o">=</span> <span class="n">vtk</span><span class="o">.</span><span class="n">vtkPoints</span><span class="p">()</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">PickedSeeds</span><span class="o">.</span><span class="n">SetPoints</span><span class="p">(</span><span class="n">seedPoints</span><span class="p">)</span></div>
 
-<div class="viewcode-block" id="vmtkPickPointSeedSelector.Execute"><a class="viewcode-back" href="../../../api.html#vampy.automatedPreProcessing.vmtkpointselector.vmtkPickPointSeedSelector.Execute">[docs]</a>    <span class="k">def</span> <span class="nf">Execute</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+<div class="viewcode-block" id="vmtkPickPointSeedSelector.Execute"><a class="viewcode-back" href="../../../api.html#vampy.automatedPreprocessing.vmtk_pointselector.vmtkPickPointSeedSelector.Execute">[docs]</a>    <span class="k">def</span> <span class="nf">Execute</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
         <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">_Surface</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
             <span class="bp">self</span><span class="o">.</span><span class="n">PrintError</span><span class="p">(</span><span class="s1">&#39;vmtkPickPointSeedSelector Error: Surface not set.&#39;</span><span class="p">)</span>
             <span class="k">return</span>

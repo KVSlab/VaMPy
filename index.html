@@ -184,7 +184,7 @@ const thebe_selector_output = ".output, .cell_output"
  </li>
  <li class="toctree-l1">
   <a class="reference internal" href="atrium.html">
-   Hemodynamics simulation on a left atrium
+   Hemodynamic simulation in the left atrium and left atrial appendage
   </a>
  </li>
 </ul>
@@ -421,11 +421,13 @@ title="Print to PDF"
                 
   <section class="tex2jax_ignore mathjax_ignore" id="the-vascular-modeling-pypeline">
 <h1>The Vascular Modeling Pypeline<a class="headerlink" href="#the-vascular-modeling-pypeline" title="Permalink to this headline">#</a></h1>
-<p>The <a class="reference external" href="https://github.com/KVSlab/vampy">Vascular Modeling Pypeline</a> (VaMPy) is a collection of automated scripts to prepare, run, and analyze vascular morphologies.
-This includes pre-processing scripts for generating a volumetric mesh, defining physiological boundary conditions, and
-inserting probes for sampling velocity and pressure. For the computational fluid dynamics (CFD) simulation, we have
-included two <a class="reference external" href="https://github.com/mikaem/Oasis">Oasis</a> problem files for simulating flow in the <a class="reference external" href="https://en.wikipedia.org/wiki/Internal_carotid_artery">internal carotid artery</a> and the <a class="reference external" href="https://en.wikipedia.org/wiki/Atrium_(heart)">left atrium</a>.
-There are also a variety of post-processing scripts, which computes wall shear stress-based metrics, more advanced turbulence metrics, and a variety of geometric parameters.</p>
+<p>The <a class="reference external" href="https://github.com/KVSlab/vampy">Vascular Modeling Pypeline</a> (VaMPy) is a collection of automated scripts to
+prepare, run, and analyze vascular morphologies. This includes pre-processing scripts for generating a volumetric mesh,
+defining physiological boundary conditions, and inserting probes for sampling velocity and pressure. For the
+computational fluid dynamics (CFD) simulation, we have included two <a class="reference external" href="https://github.com/mikaem/Oasis">Oasis</a> problem
+files for simulating flow in the <a class="reference external" href="https://en.wikipedia.org/wiki/Internal_carotid_artery">internal carotid artery</a> and
+the <a class="reference external" href="https://en.wikipedia.org/wiki/Atrium_(heart)">left atrium</a>. There are also a variety of post-processing scripts,
+which computes wall shear stress-based metrics, more advanced turbulence metrics, and a variety of geometric parameters.</p>
 <section id="contents">
 <h2>Contents<a class="headerlink" href="#contents" title="Permalink to this headline">#</a></h2>
 <div class="toctree-wrapper compound">
@@ -451,7 +453,7 @@ There are also a variety of post-processing scripts, which computes wall shear s
 <ul>
 <li class="toctree-l1"><a class="reference internal" href="tutorials.html">Tutorials</a></li>
 <li class="toctree-l1"><a class="reference internal" href="artery.html">High-resolution CFD simulation in the internal carotid artery</a></li>
-<li class="toctree-l1"><a class="reference internal" href="atrium.html">Hemodynamics simulation on a left atrium</a></li>
+<li class="toctree-l1"><a class="reference internal" href="atrium.html">Hemodynamic simulation in the left atrium and left atrial appendage</a></li>
 </ul>
 </div>
 <div class="toctree-wrapper compound">
@@ -475,7 +477,7 @@ There are also a variety of post-processing scripts, which computes wall shear s
             mode: "python"
         },
         kernelOptions: {
-            kernelName: "python3",
+            name: "python3",
             path: "./."
         },
         predefinedOutput: true

@@ -139,7 +139,7 @@ averaged over each cycle in the format `[QUANTITY]_cycle_[#CYCLE].xdmf`. To demo
 cycle, we have simulated an open-source model of the [left atrium](https://en.wikipedia.org/wiki/Atrium_(heart)),
 particularly [Case 7]([here](https://zenodo.org/record/3764917#.YyHwsuxByDV)) from Roney et
 al.{cite}`roney2021constructing`
-The model is simulated with `Atrium.py` over five cycles, and is postprocessed with the following command:
+The model is simulated with `Atrium.py` over five cycles, and is post-processed with the following command:
 
 ``` console
 $ vampy-metrics --case src/vampy/simulation/results_atrium/atrium/data/[RUN_NUMBER]/Solutions --start-cycle 1 --dt 0.951 --average-over-cycles

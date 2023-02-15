@@ -5,7 +5,7 @@
   <head>
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>vampy.automatedPreProcessing.ImportData &#8212; VaMPy</title>
+    <title>vampy.automatedPreprocessing.ImportData &#8212; VaMPy</title>
     
   <!-- Loaded before other Sphinx assets -->
   <link href="../../../_static/styles/theme.css?digest=1999514e3f237ded88cf" rel="stylesheet">
@@ -182,7 +182,7 @@ const thebe_selector_output = ".output, .cell_output"
  </li>
  <li class="toctree-l1">
   <a class="reference internal" href="../../../atrium.html">
-   Hemodynamics simulation on a left atrium
+   Hemodynamic simulation in the left atrium and left atrial appendage
   </a>
  </li>
 </ul>
@@ -287,7 +287,7 @@ title="Source repository"
       </li>
       
       <li>
-        <a href="https://kvslab.github.io/VaMPy//issues/new?title=Issue%20on%20page%20%2F_modules/vampy/automatedPreProcessing/ImportData.html&body=Your%20issue%20content%20here."
+        <a href="https://kvslab.github.io/VaMPy//issues/new?title=Issue%20on%20page%20%2F_modules/vampy/automatedPreprocessing/ImportData.html&body=Your%20issue%20content%20here."
    class="headerbtn"
    data-toggle="tooltip"
 data-placement="left"
@@ -330,7 +330,7 @@ title="Open an issue"
                 
               <div>
                 
-  <h1>Source code for vampy.automatedPreProcessing.ImportData</h1><div class="highlight"><pre>
+  <h1>Source code for vampy.automatedPreprocessing.ImportData</h1><div class="highlight"><pre>
 <span></span><span class="ch">#!/usr/bin/env python</span>
 
 <span class="c1"># Program:   AneuTools</span>
@@ -354,7 +354,7 @@ title="Open an issue"
 <span class="n">SECTIONARRAYNAME</span> <span class="o">=</span> <span class="s1">&#39;CenterlineSectionArea&#39;</span>
 
 
-<div class="viewcode-block" id="loadFile"><a class="viewcode-back" href="../../../api.html#vampy.automatedPreProcessing.ImportData.loadFile">[docs]</a><span class="k">def</span> <span class="nf">loadFile</span><span class="p">(</span><span class="n">fileName</span><span class="p">):</span>
+<div class="viewcode-block" id="loadFile"><a class="viewcode-back" href="../../../api.html#vampy.automatedPreprocessing.ImportData.loadFile">[docs]</a><span class="k">def</span> <span class="nf">loadFile</span><span class="p">(</span><span class="n">fileName</span><span class="p">):</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;Load the given file, and return a vtkPolyData object for it. &quot;&quot;&quot;</span>
     <span class="n">fileType</span> <span class="o">=</span> <span class="n">fileName</span><span class="p">[</span><span class="o">-</span><span class="mi">3</span><span class="p">:]</span>
     <span class="k">if</span> <span class="n">fileType</span> <span class="o">==</span> <span class="s1">&#39;&#39;</span><span class="p">:</span>
@@ -377,7 +377,7 @@ title="Open an issue"
     <span class="k">return</span> <span class="n">polyData</span></div>
 
 
-<div class="viewcode-block" id="GetMaxGroupId"><a class="viewcode-back" href="../../../api.html#vampy.automatedPreProcessing.ImportData.GetMaxGroupId">[docs]</a><span class="k">def</span> <span class="nf">GetMaxGroupId</span><span class="p">(</span><span class="n">centerline</span><span class="p">):</span>
+<div class="viewcode-block" id="GetMaxGroupId"><a class="viewcode-back" href="../../../api.html#vampy.automatedPreprocessing.ImportData.GetMaxGroupId">[docs]</a><span class="k">def</span> <span class="nf">GetMaxGroupId</span><span class="p">(</span><span class="n">centerline</span><span class="p">):</span>
     <span class="n">maxGroupId</span> <span class="o">=</span> <span class="mi">0</span>
     <span class="n">groupIdsArray</span> <span class="o">=</span> <span class="n">centerline</span><span class="o">.</span><span class="n">GetCellData</span><span class="p">()</span><span class="o">.</span><span class="n">GetArray</span><span class="p">(</span><span class="n">GROUPIDSARRAYNAME</span><span class="p">)</span>
     <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="n">centerline</span><span class="o">.</span><span class="n">GetNumberOfCells</span><span class="p">()):</span>
@@ -388,7 +388,7 @@ title="Open an issue"
     <span class="k">return</span> <span class="n">maxGroupId</span></div>
 
 
-<div class="viewcode-block" id="GetBlankedGroupsIdList"><a class="viewcode-back" href="../../../api.html#vampy.automatedPreProcessing.ImportData.GetBlankedGroupsIdList">[docs]</a><span class="k">def</span> <span class="nf">GetBlankedGroupsIdList</span><span class="p">(</span><span class="n">centerline</span><span class="p">):</span>
+<div class="viewcode-block" id="GetBlankedGroupsIdList"><a class="viewcode-back" href="../../../api.html#vampy.automatedPreprocessing.ImportData.GetBlankedGroupsIdList">[docs]</a><span class="k">def</span> <span class="nf">GetBlankedGroupsIdList</span><span class="p">(</span><span class="n">centerline</span><span class="p">):</span>
     <span class="n">blankedGroupdsArray</span> <span class="o">=</span> <span class="p">[]</span>
     <span class="n">idx</span> <span class="o">=</span> <span class="mi">0</span>
     <span class="n">groupIdsArray</span> <span class="o">=</span> <span class="n">centerline</span><span class="o">.</span><span class="n">GetCellData</span><span class="p">()</span><span class="o">.</span><span class="n">GetArray</span><span class="p">(</span><span class="n">GROUPIDSARRAYNAME</span><span class="p">)</span>
@@ -403,7 +403,7 @@ title="Open an issue"
     <span class="k">return</span> <span class="n">blankedGroupdsArray</span></div>
 
 
-<div class="viewcode-block" id="GetRedundantBlankedIdList"><a class="viewcode-back" href="../../../api.html#vampy.automatedPreProcessing.ImportData.GetRedundantBlankedIdList">[docs]</a><span class="k">def</span> <span class="nf">GetRedundantBlankedIdList</span><span class="p">(</span><span class="n">centerline</span><span class="p">,</span> <span class="n">blankedGroupsIdList</span><span class="p">):</span>
+<div class="viewcode-block" id="GetRedundantBlankedIdList"><a class="viewcode-back" href="../../../api.html#vampy.automatedPreprocessing.ImportData.GetRedundantBlankedIdList">[docs]</a><span class="k">def</span> <span class="nf">GetRedundantBlankedIdList</span><span class="p">(</span><span class="n">centerline</span><span class="p">,</span> <span class="n">blankedGroupsIdList</span><span class="p">):</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot; Get the redundant blanked segments.</span>
 
 <span class="sd">    Nominally, the x0 and x1 coordinates should be the same. Thus, the</span>
@@ -455,7 +455,7 @@ title="Open an issue"
     <span class="k">return</span> <span class="n">redundantBranchesIndex</span></div>
 
 
-<div class="viewcode-block" id="IsArrayDefined"><a class="viewcode-back" href="../../../api.html#vampy.automatedPreProcessing.ImportData.IsArrayDefined">[docs]</a><span class="k">def</span> <span class="nf">IsArrayDefined</span><span class="p">(</span><span class="n">centerline</span><span class="p">,</span> <span class="n">arrayName</span><span class="p">):</span>
+<div class="viewcode-block" id="IsArrayDefined"><a class="viewcode-back" href="../../../api.html#vampy.automatedPreprocessing.ImportData.IsArrayDefined">[docs]</a><span class="k">def</span> <span class="nf">IsArrayDefined</span><span class="p">(</span><span class="n">centerline</span><span class="p">,</span> <span class="n">arrayName</span><span class="p">):</span>
     <span class="n">nPointDataArrays</span> <span class="o">=</span> <span class="n">centerline</span><span class="o">.</span><span class="n">GetPointData</span><span class="p">()</span><span class="o">.</span><span class="n">GetNumberOfArrays</span><span class="p">()</span>
     <span class="n">found</span> <span class="o">=</span> <span class="kc">False</span>
     <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="n">nPointDataArrays</span><span class="p">):</span>
@@ -471,7 +471,7 @@ title="Open an issue"
     <span class="k">return</span> <span class="n">found</span></div>
 
 
-<div class="viewcode-block" id="ComputeGeometricTolerance"><a class="viewcode-back" href="../../../api.html#vampy.automatedPreProcessing.ImportData.ComputeGeometricTolerance">[docs]</a><span class="k">def</span> <span class="nf">ComputeGeometricTolerance</span><span class="p">(</span><span class="n">centerline</span><span class="p">):</span>
+<div class="viewcode-block" id="ComputeGeometricTolerance"><a class="viewcode-back" href="../../../api.html#vampy.automatedPreprocessing.ImportData.ComputeGeometricTolerance">[docs]</a><span class="k">def</span> <span class="nf">ComputeGeometricTolerance</span><span class="p">(</span><span class="n">centerline</span><span class="p">):</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;Return the min and max length for branches.</span>
 
 <span class="sd">    This routine compute the delta x minimum and maximum in the network.</span>
@@ -499,7 +499,7 @@ title="Open an issue"
     <span class="k">return</span> <span class="n">minLength</span><span class="p">,</span> <span class="n">maxLength</span></div>
 
 
-<div class="viewcode-block" id="ComputeGroupLength"><a class="viewcode-back" href="../../../api.html#vampy.automatedPreProcessing.ImportData.ComputeGroupLength">[docs]</a><span class="k">def</span> <span class="nf">ComputeGroupLength</span><span class="p">(</span><span class="n">centerline</span><span class="p">,</span> <span class="n">branchGroupId</span><span class="p">):</span>
+<div class="viewcode-block" id="ComputeGroupLength"><a class="viewcode-back" href="../../../api.html#vampy.automatedPreprocessing.ImportData.ComputeGroupLength">[docs]</a><span class="k">def</span> <span class="nf">ComputeGroupLength</span><span class="p">(</span><span class="n">centerline</span><span class="p">,</span> <span class="n">branchGroupId</span><span class="p">):</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;Return the mean length for branches of branchGroupId.&quot;&quot;&quot;</span>
 
     <span class="n">groupLength</span> <span class="o">=</span> <span class="mf">0.0</span>
@@ -518,7 +518,7 @@ title="Open an issue"
     <span class="k">return</span> <span class="n">groupLength</span></div>
 
 
-<div class="viewcode-block" id="ComputeBranchLength"><a class="viewcode-back" href="../../../api.html#vampy.automatedPreProcessing.ImportData.ComputeBranchLength">[docs]</a><span class="k">def</span> <span class="nf">ComputeBranchLength</span><span class="p">(</span><span class="n">centerline</span><span class="p">,</span> <span class="n">branchId</span><span class="p">):</span>
+<div class="viewcode-block" id="ComputeBranchLength"><a class="viewcode-back" href="../../../api.html#vampy.automatedPreprocessing.ImportData.ComputeBranchLength">[docs]</a><span class="k">def</span> <span class="nf">ComputeBranchLength</span><span class="p">(</span><span class="n">centerline</span><span class="p">,</span> <span class="n">branchId</span><span class="p">):</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;Return the length for the branch of index branchId.&quot;&quot;&quot;</span>
 
     <span class="n">length</span> <span class="o">=</span> <span class="mf">0.0</span>
@@ -533,7 +533,7 @@ title="Open an issue"
     <span class="k">return</span> <span class="n">length</span></div>
 
 
-<div class="viewcode-block" id="ComputeGroupRadius"><a class="viewcode-back" href="../../../api.html#vampy.automatedPreProcessing.ImportData.ComputeGroupRadius">[docs]</a><span class="k">def</span> <span class="nf">ComputeGroupRadius</span><span class="p">(</span><span class="n">centerline</span><span class="p">,</span> <span class="n">branchGroupId</span><span class="p">):</span>
+<div class="viewcode-block" id="ComputeGroupRadius"><a class="viewcode-back" href="../../../api.html#vampy.automatedPreprocessing.ImportData.ComputeGroupRadius">[docs]</a><span class="k">def</span> <span class="nf">ComputeGroupRadius</span><span class="p">(</span><span class="n">centerline</span><span class="p">,</span> <span class="n">branchGroupId</span><span class="p">):</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;Return the mean radius of a group.</span>
 
 <span class="sd">    The mean radius is computed using the hydraulic resistance for</span>
@@ -555,7 +555,7 @@ title="Open an issue"
     <span class="k">return</span> <span class="n">groupRadius</span></div>
 
 
-<div class="viewcode-block" id="ComputeBranchRadius"><a class="viewcode-back" href="../../../api.html#vampy.automatedPreProcessing.ImportData.ComputeBranchRadius">[docs]</a><span class="k">def</span> <span class="nf">ComputeBranchRadius</span><span class="p">(</span><span class="n">centerline</span><span class="p">,</span> <span class="n">branchId</span><span class="p">):</span>
+<div class="viewcode-block" id="ComputeBranchRadius"><a class="viewcode-back" href="../../../api.html#vampy.automatedPreprocessing.ImportData.ComputeBranchRadius">[docs]</a><span class="k">def</span> <span class="nf">ComputeBranchRadius</span><span class="p">(</span><span class="n">centerline</span><span class="p">,</span> <span class="n">branchId</span><span class="p">):</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;Return the radius for a branch with index branchId. &quot;&quot;&quot;</span>
     <span class="n">length</span> <span class="o">=</span> <span class="mf">0.0</span>
     <span class="n">resistance</span> <span class="o">=</span> <span class="mf">0.0</span>
@@ -575,7 +575,7 @@ title="Open an issue"
     <span class="k">return</span> <span class="n">branchRadius</span></div>
 
 
-<div class="viewcode-block" id="GetListsUniqueBlankedBranches"><a class="viewcode-back" href="../../../api.html#vampy.automatedPreProcessing.ImportData.GetListsUniqueBlankedBranches">[docs]</a><span class="k">def</span> <span class="nf">GetListsUniqueBlankedBranches</span><span class="p">(</span><span class="n">blankedGroupsIdList</span><span class="p">,</span> <span class="n">redundantBlankedBranchesIdList</span><span class="p">):</span>
+<div class="viewcode-block" id="GetListsUniqueBlankedBranches"><a class="viewcode-back" href="../../../api.html#vampy.automatedPreprocessing.ImportData.GetListsUniqueBlankedBranches">[docs]</a><span class="k">def</span> <span class="nf">GetListsUniqueBlankedBranches</span><span class="p">(</span><span class="n">blankedGroupsIdList</span><span class="p">,</span> <span class="n">redundantBlankedBranchesIdList</span><span class="p">):</span>
     <span class="n">blankedGroupsIndex</span> <span class="o">=</span> <span class="p">[]</span>
     <span class="n">blankedUniqueBranchesIndex</span> <span class="o">=</span> <span class="p">[]</span>
     <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="nb">len</span><span class="p">(</span><span class="n">blankedGroupsIdList</span><span class="p">)):</span>
@@ -587,7 +587,7 @@ title="Open an issue"
     <span class="k">return</span> <span class="n">blankedGroupsIndex</span><span class="p">,</span> <span class="n">blankedUniqueBranchesIndex</span></div>
 
 
-<div class="viewcode-block" id="SetNetworkStructure"><a class="viewcode-back" href="../../../api.html#vampy.automatedPreProcessing.ImportData.SetNetworkStructure">[docs]</a><span class="k">def</span> <span class="nf">SetNetworkStructure</span><span class="p">(</span><span class="n">centerline</span><span class="p">,</span> <span class="n">network</span><span class="p">,</span> <span class="n">verboseprint</span><span class="p">,</span>
+<div class="viewcode-block" id="SetNetworkStructure"><a class="viewcode-back" href="../../../api.html#vampy.automatedPreprocessing.ImportData.SetNetworkStructure">[docs]</a><span class="k">def</span> <span class="nf">SetNetworkStructure</span><span class="p">(</span><span class="n">centerline</span><span class="p">,</span> <span class="n">network</span><span class="p">,</span> <span class="n">verboseprint</span><span class="p">,</span>
                         <span class="n">isConnectivityNeeded</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span> <span class="n">isRadiusInletNeeded</span><span class="o">=</span><span class="kc">True</span><span class="p">):</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;Fills a network structure with a vtkPolyData object.</span>
 
@@ -697,7 +697,7 @@ title="Open an issue"
     <span class="k">return</span> <span class="n">centerline</span></div>
 
 
-<div class="viewcode-block" id="ComputeConnectivity"><a class="viewcode-back" href="../../../api.html#vampy.automatedPreProcessing.ImportData.ComputeConnectivity">[docs]</a><span class="k">def</span> <span class="nf">ComputeConnectivity</span><span class="p">(</span><span class="n">network</span><span class="p">,</span> <span class="n">tolerance</span><span class="p">,</span> <span class="n">verboseprint</span><span class="p">):</span>
+<div class="viewcode-block" id="ComputeConnectivity"><a class="viewcode-back" href="../../../api.html#vampy.automatedPreprocessing.ImportData.ComputeConnectivity">[docs]</a><span class="k">def</span> <span class="nf">ComputeConnectivity</span><span class="p">(</span><span class="n">network</span><span class="p">,</span> <span class="n">tolerance</span><span class="p">,</span> <span class="n">verboseprint</span><span class="p">):</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;Compute the branches connectivity in the network.</span>
 
 <span class="sd">    It is assumed that the first element is the inlet. In case of several</span>
@@ -747,7 +747,7 @@ title="Open an issue"
                 <span class="n">treatedBranch</span><span class="o">.</span><span class="n">GetId</span><span class="p">()</span> <span class="o">+</span> <span class="mi">2</span><span class="p">)</span></div>
 
 
-<div class="viewcode-block" id="SetRadiusX0"><a class="viewcode-back" href="../../../api.html#vampy.automatedPreProcessing.ImportData.SetRadiusX0">[docs]</a><span class="k">def</span> <span class="nf">SetRadiusX0</span><span class="p">(</span><span class="n">centerline</span><span class="p">,</span> <span class="n">network</span><span class="p">,</span> <span class="n">verboseprint</span><span class="p">):</span>
+<div class="viewcode-block" id="SetRadiusX0"><a class="viewcode-back" href="../../../api.html#vampy.automatedPreprocessing.ImportData.SetRadiusX0">[docs]</a><span class="k">def</span> <span class="nf">SetRadiusX0</span><span class="p">(</span><span class="n">centerline</span><span class="p">,</span> <span class="n">network</span><span class="p">,</span> <span class="n">verboseprint</span><span class="p">):</span>
     <span class="k">for</span> <span class="n">branch</span> <span class="ow">in</span> <span class="n">network</span><span class="o">.</span><span class="n">elements</span><span class="p">:</span>
         <span class="n">cellID</span> <span class="o">=</span> <span class="n">branch</span><span class="o">.</span><span class="n">GetVtkCellIdList</span><span class="p">()</span>
         <span class="n">radiusArray</span> <span class="o">=</span> <span class="n">centerline</span><span class="o">.</span><span class="n">GetPointData</span><span class="p">()</span><span class="o">.</span><span class="n">GetArray</span><span class="p">(</span><span class="n">RADIUSARRAYNAME</span><span class="p">)</span>
@@ -755,7 +755,7 @@ title="Open an issue"
         <span class="n">branch</span><span class="o">.</span><span class="n">SetInletRadius</span><span class="p">(</span><span class="n">r</span><span class="p">)</span></div>
 
 
-<div class="viewcode-block" id="ComputeInletAverageRadius"><a class="viewcode-back" href="../../../api.html#vampy.automatedPreProcessing.ImportData.ComputeInletAverageRadius">[docs]</a><span class="k">def</span> <span class="nf">ComputeInletAverageRadius</span><span class="p">(</span><span class="n">centerline</span><span class="p">,</span> <span class="n">desiredLength</span><span class="p">,</span> <span class="n">verboseprint</span><span class="p">):</span>
+<div class="viewcode-block" id="ComputeInletAverageRadius"><a class="viewcode-back" href="../../../api.html#vampy.automatedPreprocessing.ImportData.ComputeInletAverageRadius">[docs]</a><span class="k">def</span> <span class="nf">ComputeInletAverageRadius</span><span class="p">(</span><span class="n">centerline</span><span class="p">,</span> <span class="n">desiredLength</span><span class="p">,</span> <span class="n">verboseprint</span><span class="p">):</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;Compute the inlet radius as an averaged radius.</span>
 
 <span class="sd">    Computes an average radius over a certain length of the ICA. The mean</span>
@@ -788,7 +788,7 @@ title="Open an issue"
     <span class="k">return</span> <span class="n">branchMeanRadius</span></div>
 
 
-<div class="viewcode-block" id="ComputeInletAverageCrossSectionArea"><a class="viewcode-back" href="../../../api.html#vampy.automatedPreProcessing.ImportData.ComputeInletAverageCrossSectionArea">[docs]</a><span class="k">def</span> <span class="nf">ComputeInletAverageCrossSectionArea</span><span class="p">(</span><span class="n">centerline</span><span class="p">,</span> <span class="n">desiredLength</span><span class="p">,</span> <span class="n">verboseprint</span><span class="p">):</span>
+<div class="viewcode-block" id="ComputeInletAverageCrossSectionArea"><a class="viewcode-back" href="../../../api.html#vampy.automatedPreprocessing.ImportData.ComputeInletAverageCrossSectionArea">[docs]</a><span class="k">def</span> <span class="nf">ComputeInletAverageCrossSectionArea</span><span class="p">(</span><span class="n">centerline</span><span class="p">,</span> <span class="n">desiredLength</span><span class="p">,</span> <span class="n">verboseprint</span><span class="p">):</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;Compute the inlet radius as an averaged radius.</span>
 
 <span class="sd">    Computes an average radius over a certain length of the ICA. The mean</span>
@@ -825,7 +825,7 @@ title="Open an issue"
     <span class="k">return</span> <span class="n">branchMeanRadius</span></div>
 
 
-<div class="viewcode-block" id="GetIndexCenterlineForADefinedLength"><a class="viewcode-back" href="../../../api.html#vampy.automatedPreProcessing.ImportData.GetIndexCenterlineForADefinedLength">[docs]</a><span class="k">def</span> <span class="nf">GetIndexCenterlineForADefinedLength</span><span class="p">(</span><span class="n">centerline</span><span class="p">,</span> <span class="n">branchId</span><span class="p">,</span> <span class="n">desiredLength</span><span class="p">,</span>
+<div class="viewcode-block" id="GetIndexCenterlineForADefinedLength"><a class="viewcode-back" href="../../../api.html#vampy.automatedPreprocessing.ImportData.GetIndexCenterlineForADefinedLength">[docs]</a><span class="k">def</span> <span class="nf">GetIndexCenterlineForADefinedLength</span><span class="p">(</span><span class="n">centerline</span><span class="p">,</span> <span class="n">branchId</span><span class="p">,</span> <span class="n">desiredLength</span><span class="p">,</span>
                                         <span class="n">verboseprint</span><span class="p">):</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;Get the index of the point such as the desired distance between the index and</span>
 <span class="sd">    the beginning of the branch is reached. &quot;&quot;&quot;</span>
@@ -852,7 +852,7 @@ title="Open an issue"
     <span class="k">return</span> <span class="n">index</span></div>
 
 
-<div class="viewcode-block" id="GetListProbePoints"><a class="viewcode-back" href="../../../api.html#vampy.automatedPreProcessing.ImportData.GetListProbePoints">[docs]</a><span class="k">def</span> <span class="nf">GetListProbePoints</span><span class="p">(</span><span class="n">centerline</span><span class="p">,</span> <span class="n">network</span><span class="p">,</span> <span class="n">verboseprint</span><span class="p">):</span>
+<div class="viewcode-block" id="GetListProbePoints"><a class="viewcode-back" href="../../../api.html#vampy.automatedPreprocessing.ImportData.GetListProbePoints">[docs]</a><span class="k">def</span> <span class="nf">GetListProbePoints</span><span class="p">(</span><span class="n">centerline</span><span class="p">,</span> <span class="n">network</span><span class="p">,</span> <span class="n">verboseprint</span><span class="p">):</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;Get points on a centerline spaced by the inlet diameter. &quot;&quot;&quot;</span>
 
     <span class="n">diameterInlet</span> <span class="o">=</span> <span class="mf">2.0</span> <span class="o">*</span> <span class="n">network</span><span class="o">.</span><span class="n">GetNetworkInletRadius</span><span class="p">()</span>
@@ -880,7 +880,7 @@ title="Open an issue"
     <span class="k">return</span> <span class="p">(</span><span class="n">pointsList</span><span class="p">)</span></div>
 
 
-<div class="viewcode-block" id="Element"><a class="viewcode-back" href="../../../api.html#vampy.automatedPreProcessing.ImportData.Element">[docs]</a><span class="k">class</span> <span class="nc">Element</span><span class="p">(</span><span class="nb">object</span><span class="p">):</span>
+<div class="viewcode-block" id="Element"><a class="viewcode-back" href="../../../api.html#vampy.automatedPreprocessing.ImportData.Element">[docs]</a><span class="k">class</span> <span class="nc">Element</span><span class="p">(</span><span class="nb">object</span><span class="p">):</span>
 
     <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">Id</span><span class="p">):</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">Id</span> <span class="o">=</span> <span class="n">Id</span>
@@ -904,114 +904,117 @@ title="Open an issue"
         <span class="bp">self</span><span class="o">.</span><span class="n">beta</span> <span class="o">=</span> <span class="mf">0.0</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">gamma</span> <span class="o">=</span> <span class="mf">0.0</span>
 
-<div class="viewcode-block" id="Element.SetLength"><a class="viewcode-back" href="../../../api.html#vampy.automatedPreProcessing.ImportData.Element.SetLength">[docs]</a>    <span class="k">def</span> <span class="nf">SetLength</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">length</span><span class="p">):</span>
+<div class="viewcode-block" id="Element.SetLength"><a class="viewcode-back" href="../../../api.html#vampy.automatedPreprocessing.ImportData.Element.SetLength">[docs]</a>    <span class="k">def</span> <span class="nf">SetLength</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">length</span><span class="p">):</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">length</span> <span class="o">=</span> <span class="n">length</span></div>
 
-<div class="viewcode-block" id="Element.SetAlpha"><a class="viewcode-back" href="../../../api.html#vampy.automatedPreProcessing.ImportData.Element.SetAlpha">[docs]</a>    <span class="k">def</span> <span class="nf">SetAlpha</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">alpha</span><span class="p">):</span>
+<div class="viewcode-block" id="Element.SetAlpha"><a class="viewcode-back" href="../../../api.html#vampy.automatedPreprocessing.ImportData.Element.SetAlpha">[docs]</a>    <span class="k">def</span> <span class="nf">SetAlpha</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">alpha</span><span class="p">):</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">alpha</span> <span class="o">=</span> <span class="n">alpha</span></div>
 
-<div class="viewcode-block" id="Element.SetBeta"><a class="viewcode-back" href="../../../api.html#vampy.automatedPreProcessing.ImportData.Element.SetBeta">[docs]</a>    <span class="k">def</span> <span class="nf">SetBeta</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">beta</span><span class="p">):</span>
+<div class="viewcode-block" id="Element.SetBeta"><a class="viewcode-back" href="../../../api.html#vampy.automatedPreprocessing.ImportData.Element.SetBeta">[docs]</a>    <span class="k">def</span> <span class="nf">SetBeta</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">beta</span><span class="p">):</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">beta</span> <span class="o">=</span> <span class="n">beta</span></div>
 
-<div class="viewcode-block" id="Element.SetGamma"><a class="viewcode-back" href="../../../api.html#vampy.automatedPreProcessing.ImportData.Element.SetGamma">[docs]</a>    <span class="k">def</span> <span class="nf">SetGamma</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">gamma</span><span class="p">):</span>
+<div class="viewcode-block" id="Element.SetGamma"><a class="viewcode-back" href="../../../api.html#vampy.automatedPreprocessing.ImportData.Element.SetGamma">[docs]</a>    <span class="k">def</span> <span class="nf">SetGamma</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">gamma</span><span class="p">):</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">gamma</span> <span class="o">=</span> <span class="n">gamma</span></div>
 
-<div class="viewcode-block" id="Element.SetBehindSegment"><a class="viewcode-back" href="../../../api.html#vampy.automatedPreProcessing.ImportData.Element.SetBehindSegment">[docs]</a>    <span class="k">def</span> <span class="nf">SetBehindSegment</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="nb">id</span><span class="p">):</span>
+<div class="viewcode-block" id="Element.SetBehindSegment"><a class="viewcode-back" href="../../../api.html#vampy.automatedPreprocessing.ImportData.Element.SetBehindSegment">[docs]</a>    <span class="k">def</span> <span class="nf">SetBehindSegment</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="nb">id</span><span class="p">):</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">behindSegment</span> <span class="o">=</span> <span class="nb">id</span></div>
 
-<div class="viewcode-block" id="Element.SetFrontSegment"><a class="viewcode-back" href="../../../api.html#vampy.automatedPreProcessing.ImportData.Element.SetFrontSegment">[docs]</a>    <span class="k">def</span> <span class="nf">SetFrontSegment</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="nb">id</span><span class="p">):</span>
+<div class="viewcode-block" id="Element.SetFrontSegment"><a class="viewcode-back" href="../../../api.html#vampy.automatedPreprocessing.ImportData.Element.SetFrontSegment">[docs]</a>    <span class="k">def</span> <span class="nf">SetFrontSegment</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="nb">id</span><span class="p">):</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">frontSegment</span> <span class="o">=</span> <span class="nb">id</span></div>
 
-<div class="viewcode-block" id="Element.SetVtkGroupIdList"><a class="viewcode-back" href="../../../api.html#vampy.automatedPreProcessing.ImportData.Element.SetVtkGroupIdList">[docs]</a>    <span class="k">def</span> <span class="nf">SetVtkGroupIdList</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">VtkGroupIdList</span><span class="p">):</span>
+<div class="viewcode-block" id="Element.SetVtkGroupIdList"><a class="viewcode-back" href="../../../api.html#vampy.automatedPreprocessing.ImportData.Element.SetVtkGroupIdList">[docs]</a>    <span class="k">def</span> <span class="nf">SetVtkGroupIdList</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">VtkGroupIdList</span><span class="p">):</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">vtkGroupIdList</span> <span class="o">=</span> <span class="n">VtkGroupIdList</span></div>
 
-<div class="viewcode-block" id="Element.SetVtkCellIdList"><a class="viewcode-back" href="../../../api.html#vampy.automatedPreProcessing.ImportData.Element.SetVtkCellIdList">[docs]</a>    <span class="k">def</span> <span class="nf">SetVtkCellIdList</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">vtkCellIdList</span><span class="p">):</span>
+<div class="viewcode-block" id="Element.SetVtkCellIdList"><a class="viewcode-back" href="../../../api.html#vampy.automatedPreprocessing.ImportData.Element.SetVtkCellIdList">[docs]</a>    <span class="k">def</span> <span class="nf">SetVtkCellIdList</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">vtkCellIdList</span><span class="p">):</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">vtkCellIdList</span> <span class="o">=</span> <span class="n">vtkCellIdList</span></div>
 
-<div class="viewcode-block" id="Element.SetMeanRadius"><a class="viewcode-back" href="../../../api.html#vampy.automatedPreProcessing.ImportData.Element.SetMeanRadius">[docs]</a>    <span class="k">def</span> <span class="nf">SetMeanRadius</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">radius</span><span class="p">):</span>
+<div class="viewcode-block" id="Element.SetMeanRadius"><a class="viewcode-back" href="../../../api.html#vampy.automatedPreprocessing.ImportData.Element.SetMeanRadius">[docs]</a>    <span class="k">def</span> <span class="nf">SetMeanRadius</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">radius</span><span class="p">):</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">meanRadius</span> <span class="o">=</span> <span class="n">radius</span></div>
 
-<div class="viewcode-block" id="Element.SetInletRadius"><a class="viewcode-back" href="../../../api.html#vampy.automatedPreProcessing.ImportData.Element.SetInletRadius">[docs]</a>    <span class="k">def</span> <span class="nf">SetInletRadius</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">radius</span><span class="p">):</span>
+<div class="viewcode-block" id="Element.SetInletRadius"><a class="viewcode-back" href="../../../api.html#vampy.automatedPreprocessing.ImportData.Element.SetInletRadius">[docs]</a>    <span class="k">def</span> <span class="nf">SetInletRadius</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">radius</span><span class="p">):</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">inletRadius</span> <span class="o">=</span> <span class="n">radius</span></div>
 
-<div class="viewcode-block" id="Element.SetOutletRadius"><a class="viewcode-back" href="../../../api.html#vampy.automatedPreProcessing.ImportData.Element.SetOutletRadius">[docs]</a>    <span class="k">def</span> <span class="nf">SetOutletRadius</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">radius</span><span class="p">):</span>
+<div class="viewcode-block" id="Element.SetOutletRadius"><a class="viewcode-back" href="../../../api.html#vampy.automatedPreprocessing.ImportData.Element.SetOutletRadius">[docs]</a>    <span class="k">def</span> <span class="nf">SetOutletRadius</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">radius</span><span class="p">):</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">outletRadius</span> <span class="o">=</span> <span class="n">radius</span></div>
 
-<div class="viewcode-block" id="Element.SetBlanking"><a class="viewcode-back" href="../../../api.html#vampy.automatedPreProcessing.ImportData.Element.SetBlanking">[docs]</a>    <span class="k">def</span> <span class="nf">SetBlanking</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">blanking</span><span class="p">):</span>
+<div class="viewcode-block" id="Element.SetBlanking"><a class="viewcode-back" href="../../../api.html#vampy.automatedPreprocessing.ImportData.Element.SetBlanking">[docs]</a>    <span class="k">def</span> <span class="nf">SetBlanking</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">blanking</span><span class="p">):</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">blanking</span> <span class="o">=</span> <span class="n">blanking</span></div>
 
-<div class="viewcode-block" id="Element.SetIfInlet"><a class="viewcode-back" href="../../../api.html#vampy.automatedPreProcessing.ImportData.Element.SetIfInlet">[docs]</a>    <span class="k">def</span> <span class="nf">SetIfInlet</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">inlet</span><span class="p">):</span>
+<div class="viewcode-block" id="Element.SetIfInlet"><a class="viewcode-back" href="../../../api.html#vampy.automatedPreprocessing.ImportData.Element.SetIfInlet">[docs]</a>    <span class="k">def</span> <span class="nf">SetIfInlet</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">inlet</span><span class="p">):</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">inlet</span> <span class="o">=</span> <span class="n">inlet</span></div>
 
-<div class="viewcode-block" id="Element.SetIfOutlet"><a class="viewcode-back" href="../../../api.html#vampy.automatedPreProcessing.ImportData.Element.SetIfOutlet">[docs]</a>    <span class="k">def</span> <span class="nf">SetIfOutlet</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">outlet</span><span class="p">):</span>
+<div class="viewcode-block" id="Element.SetIfOutlet"><a class="viewcode-back" href="../../../api.html#vampy.automatedPreprocessing.ImportData.Element.SetIfOutlet">[docs]</a>    <span class="k">def</span> <span class="nf">SetIfOutlet</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">outlet</span><span class="p">):</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">outlet</span> <span class="o">=</span> <span class="n">outlet</span></div>
 
-<div class="viewcode-block" id="Element.SetInOutPointsCoordinates"><a class="viewcode-back" href="../../../api.html#vampy.automatedPreProcessing.ImportData.Element.SetInOutPointsCoordinates">[docs]</a>    <span class="k">def</span> <span class="nf">SetInOutPointsCoordinates</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">x0</span><span class="p">,</span> <span class="n">x1</span><span class="p">):</span>
+<div class="viewcode-block" id="Element.SetInOutPointsCoordinates"><a class="viewcode-back" href="../../../api.html#vampy.automatedPreprocessing.ImportData.Element.SetInOutPointsCoordinates">[docs]</a>    <span class="k">def</span> <span class="nf">SetInOutPointsCoordinates</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">x0</span><span class="p">,</span> <span class="n">x1</span><span class="p">):</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">x0</span> <span class="o">=</span> <span class="n">x0</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">x1</span> <span class="o">=</span> <span class="n">x1</span></div>
 
-<div class="viewcode-block" id="Element.SetInOutPointsIds"><a class="viewcode-back" href="../../../api.html#vampy.automatedPreProcessing.ImportData.Element.SetInOutPointsIds">[docs]</a>    <span class="k">def</span> <span class="nf">SetInOutPointsIds</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">x0Id</span><span class="p">,</span> <span class="n">x1Id</span><span class="p">):</span>
+<div class="viewcode-block" id="Element.SetInOutPointsIds"><a class="viewcode-back" href="../../../api.html#vampy.automatedPreprocessing.ImportData.Element.SetInOutPointsIds">[docs]</a>    <span class="k">def</span> <span class="nf">SetInOutPointsIds</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">x0Id</span><span class="p">,</span> <span class="n">x1Id</span><span class="p">):</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">x0Id</span> <span class="o">=</span> <span class="n">x0Id</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">x1Id</span> <span class="o">=</span> <span class="n">x1Id</span></div>
 
-<div class="viewcode-block" id="Element.GetId"><a class="viewcode-back" href="../../../api.html#vampy.automatedPreProcessing.ImportData.Element.GetId">[docs]</a>    <span class="k">def</span> <span class="nf">GetId</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+<div class="viewcode-block" id="Element.GetId"><a class="viewcode-back" href="../../../api.html#vampy.automatedPreprocessing.ImportData.Element.GetId">[docs]</a>    <span class="k">def</span> <span class="nf">GetId</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
         <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">Id</span></div>
 
-<div class="viewcode-block" id="Element.GetBehindSegment"><a class="viewcode-back" href="../../../api.html#vampy.automatedPreProcessing.ImportData.Element.GetBehindSegment">[docs]</a>    <span class="k">def</span> <span class="nf">GetBehindSegment</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+<div class="viewcode-block" id="Element.GetBehindSegment"><a class="viewcode-back" href="../../../api.html#vampy.automatedPreprocessing.ImportData.Element.GetBehindSegment">[docs]</a>    <span class="k">def</span> <span class="nf">GetBehindSegment</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
         <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">behindSegment</span></div>
 
-<div class="viewcode-block" id="Element.GetFrontSegment"><a class="viewcode-back" href="../../../api.html#vampy.automatedPreProcessing.ImportData.Element.GetFrontSegment">[docs]</a>    <span class="k">def</span> <span class="nf">GetFrontSegment</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+<div class="viewcode-block" id="Element.GetFrontSegment"><a class="viewcode-back" href="../../../api.html#vampy.automatedPreprocessing.ImportData.Element.GetFrontSegment">[docs]</a>    <span class="k">def</span> <span class="nf">GetFrontSegment</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
         <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">frontSegment</span></div>
 
-<div class="viewcode-block" id="Element.GetVtkCellIdList"><a class="viewcode-back" href="../../../api.html#vampy.automatedPreProcessing.ImportData.Element.GetVtkCellIdList">[docs]</a>    <span class="k">def</span> <span class="nf">GetVtkCellIdList</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+<div class="viewcode-block" id="Element.GetVtkCellIdList"><a class="viewcode-back" href="../../../api.html#vampy.automatedPreprocessing.ImportData.Element.GetVtkCellIdList">[docs]</a>    <span class="k">def</span> <span class="nf">GetVtkCellIdList</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
         <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">vtkCellIdList</span></div>
 
-<div class="viewcode-block" id="Element.GetVtkGroupIdList"><a class="viewcode-back" href="../../../api.html#vampy.automatedPreProcessing.ImportData.Element.GetVtkGroupIdList">[docs]</a>    <span class="k">def</span> <span class="nf">GetVtkGroupIdList</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+<div class="viewcode-block" id="Element.GetVtkGroupIdList"><a class="viewcode-back" href="../../../api.html#vampy.automatedPreprocessing.ImportData.Element.GetVtkGroupIdList">[docs]</a>    <span class="k">def</span> <span class="nf">GetVtkGroupIdList</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
         <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">vtkGroupIdList</span></div>
 
-<div class="viewcode-block" id="Element.GetLength"><a class="viewcode-back" href="../../../api.html#vampy.automatedPreProcessing.ImportData.Element.GetLength">[docs]</a>    <span class="k">def</span> <span class="nf">GetLength</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+<div class="viewcode-block" id="Element.GetLength"><a class="viewcode-back" href="../../../api.html#vampy.automatedPreprocessing.ImportData.Element.GetLength">[docs]</a>    <span class="k">def</span> <span class="nf">GetLength</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
         <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">length</span></div>
 
-<div class="viewcode-block" id="Element.GetAlpha"><a class="viewcode-back" href="../../../api.html#vampy.automatedPreProcessing.ImportData.Element.GetAlpha">[docs]</a>    <span class="k">def</span> <span class="nf">GetAlpha</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+<div class="viewcode-block" id="Element.GetAlpha"><a class="viewcode-back" href="../../../api.html#vampy.automatedPreprocessing.ImportData.Element.GetAlpha">[docs]</a>    <span class="k">def</span> <span class="nf">GetAlpha</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
         <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">alpha</span></div>
 
-<div class="viewcode-block" id="Element.GetBeta"><a class="viewcode-back" href="../../../api.html#vampy.automatedPreProcessing.ImportData.Element.GetBeta">[docs]</a>    <span class="k">def</span> <span class="nf">GetBeta</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+<div class="viewcode-block" id="Element.GetBeta"><a class="viewcode-back" href="../../../api.html#vampy.automatedPreprocessing.ImportData.Element.GetBeta">[docs]</a>    <span class="k">def</span> <span class="nf">GetBeta</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
         <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">beta</span></div>
 
-<div class="viewcode-block" id="Element.GetMeanRadius"><a class="viewcode-back" href="../../../api.html#vampy.automatedPreProcessing.ImportData.Element.GetMeanRadius">[docs]</a>    <span class="k">def</span> <span class="nf">GetMeanRadius</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+<div class="viewcode-block" id="Element.GetGamma"><a class="viewcode-back" href="../../../api.html#vampy.automatedPreprocessing.ImportData.Element.GetGamma">[docs]</a>    <span class="k">def</span> <span class="nf">GetGamma</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">gamma</span></div>
+
+<div class="viewcode-block" id="Element.GetMeanRadius"><a class="viewcode-back" href="../../../api.html#vampy.automatedPreprocessing.ImportData.Element.GetMeanRadius">[docs]</a>    <span class="k">def</span> <span class="nf">GetMeanRadius</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
         <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">meanRadius</span></div>
 
-<div class="viewcode-block" id="Element.GetInletRadius"><a class="viewcode-back" href="../../../api.html#vampy.automatedPreProcessing.ImportData.Element.GetInletRadius">[docs]</a>    <span class="k">def</span> <span class="nf">GetInletRadius</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+<div class="viewcode-block" id="Element.GetInletRadius"><a class="viewcode-back" href="../../../api.html#vampy.automatedPreprocessing.ImportData.Element.GetInletRadius">[docs]</a>    <span class="k">def</span> <span class="nf">GetInletRadius</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
         <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">inletRadius</span></div>
 
-<div class="viewcode-block" id="Element.GetMeanArea"><a class="viewcode-back" href="../../../api.html#vampy.automatedPreProcessing.ImportData.Element.GetMeanArea">[docs]</a>    <span class="k">def</span> <span class="nf">GetMeanArea</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+<div class="viewcode-block" id="Element.GetMeanArea"><a class="viewcode-back" href="../../../api.html#vampy.automatedPreprocessing.ImportData.Element.GetMeanArea">[docs]</a>    <span class="k">def</span> <span class="nf">GetMeanArea</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
         <span class="n">meanArea</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">pi</span> <span class="o">*</span> <span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">meanRadius</span> <span class="o">**</span> <span class="mf">2.0</span><span class="p">)</span>
         <span class="k">return</span> <span class="n">meanArea</span></div>
 
-<div class="viewcode-block" id="Element.GetInPointsx0"><a class="viewcode-back" href="../../../api.html#vampy.automatedPreProcessing.ImportData.Element.GetInPointsx0">[docs]</a>    <span class="k">def</span> <span class="nf">GetInPointsx0</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+<div class="viewcode-block" id="Element.GetInPointsx0"><a class="viewcode-back" href="../../../api.html#vampy.automatedPreprocessing.ImportData.Element.GetInPointsx0">[docs]</a>    <span class="k">def</span> <span class="nf">GetInPointsx0</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
         <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">x0</span></div>
 
-<div class="viewcode-block" id="Element.GetOutPointsx1"><a class="viewcode-back" href="../../../api.html#vampy.automatedPreProcessing.ImportData.Element.GetOutPointsx1">[docs]</a>    <span class="k">def</span> <span class="nf">GetOutPointsx1</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+<div class="viewcode-block" id="Element.GetOutPointsx1"><a class="viewcode-back" href="../../../api.html#vampy.automatedPreprocessing.ImportData.Element.GetOutPointsx1">[docs]</a>    <span class="k">def</span> <span class="nf">GetOutPointsx1</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
         <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">x1</span></div>
 
-<div class="viewcode-block" id="Element.GetInPointsx0Id"><a class="viewcode-back" href="../../../api.html#vampy.automatedPreProcessing.ImportData.Element.GetInPointsx0Id">[docs]</a>    <span class="k">def</span> <span class="nf">GetInPointsx0Id</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+<div class="viewcode-block" id="Element.GetInPointsx0Id"><a class="viewcode-back" href="../../../api.html#vampy.automatedPreprocessing.ImportData.Element.GetInPointsx0Id">[docs]</a>    <span class="k">def</span> <span class="nf">GetInPointsx0Id</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
         <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">x0Id</span></div>
 
-<div class="viewcode-block" id="Element.GetOutPointsx1Id"><a class="viewcode-back" href="../../../api.html#vampy.automatedPreProcessing.ImportData.Element.GetOutPointsx1Id">[docs]</a>    <span class="k">def</span> <span class="nf">GetOutPointsx1Id</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+<div class="viewcode-block" id="Element.GetOutPointsx1Id"><a class="viewcode-back" href="../../../api.html#vampy.automatedPreprocessing.ImportData.Element.GetOutPointsx1Id">[docs]</a>    <span class="k">def</span> <span class="nf">GetOutPointsx1Id</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
         <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">x1Id</span></div>
 
-<div class="viewcode-block" id="Element.IsBlanked"><a class="viewcode-back" href="../../../api.html#vampy.automatedPreProcessing.ImportData.Element.IsBlanked">[docs]</a>    <span class="k">def</span> <span class="nf">IsBlanked</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+<div class="viewcode-block" id="Element.IsBlanked"><a class="viewcode-back" href="../../../api.html#vampy.automatedPreprocessing.ImportData.Element.IsBlanked">[docs]</a>    <span class="k">def</span> <span class="nf">IsBlanked</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;Returns True if the element is part of a branch division.&quot;&quot;&quot;</span>
         <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">blanking</span></div>
 
-<div class="viewcode-block" id="Element.IsAnInlet"><a class="viewcode-back" href="../../../api.html#vampy.automatedPreProcessing.ImportData.Element.IsAnInlet">[docs]</a>    <span class="k">def</span> <span class="nf">IsAnInlet</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+<div class="viewcode-block" id="Element.IsAnInlet"><a class="viewcode-back" href="../../../api.html#vampy.automatedPreprocessing.ImportData.Element.IsAnInlet">[docs]</a>    <span class="k">def</span> <span class="nf">IsAnInlet</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
         <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">inlet</span></div>
 
-<div class="viewcode-block" id="Element.IsAnOutlet"><a class="viewcode-back" href="../../../api.html#vampy.automatedPreProcessing.ImportData.Element.IsAnOutlet">[docs]</a>    <span class="k">def</span> <span class="nf">IsAnOutlet</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+<div class="viewcode-block" id="Element.IsAnOutlet"><a class="viewcode-back" href="../../../api.html#vampy.automatedPreprocessing.ImportData.Element.IsAnOutlet">[docs]</a>    <span class="k">def</span> <span class="nf">IsAnOutlet</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
         <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">outlet</span></div></div>
 
 
-<div class="viewcode-block" id="Network"><a class="viewcode-back" href="../../../api.html#vampy.automatedPreProcessing.ImportData.Network">[docs]</a><span class="k">class</span> <span class="nc">Network</span><span class="p">(</span><span class="nb">object</span><span class="p">):</span>
+<div class="viewcode-block" id="Network"><a class="viewcode-back" href="../../../api.html#vampy.automatedPreprocessing.ImportData.Network">[docs]</a><span class="k">class</span> <span class="nc">Network</span><span class="p">(</span><span class="nb">object</span><span class="p">):</span>
 
     <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">elements</span> <span class="o">=</span> <span class="p">[]</span>
@@ -1020,35 +1023,35 @@ title="Open an issue"
         <span class="bp">self</span><span class="o">.</span><span class="n">numberOfOutlets</span> <span class="o">=</span> <span class="mi">0</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">networkInletRadius</span> <span class="o">=</span> <span class="mf">0.0</span>
 
-<div class="viewcode-block" id="Network.AddElement"><a class="viewcode-back" href="../../../api.html#vampy.automatedPreProcessing.ImportData.Network.AddElement">[docs]</a>    <span class="k">def</span> <span class="nf">AddElement</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">x</span><span class="p">):</span>
+<div class="viewcode-block" id="Network.AddElement"><a class="viewcode-back" href="../../../api.html#vampy.automatedPreprocessing.ImportData.Network.AddElement">[docs]</a>    <span class="k">def</span> <span class="nf">AddElement</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">x</span><span class="p">):</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">elements</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">x</span><span class="p">)</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">numberOfElements</span> <span class="o">+=</span> <span class="mi">1</span></div>
 
-<div class="viewcode-block" id="Network.SetNetworkInletRadius"><a class="viewcode-back" href="../../../api.html#vampy.automatedPreProcessing.ImportData.Network.SetNetworkInletRadius">[docs]</a>    <span class="k">def</span> <span class="nf">SetNetworkInletRadius</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">radius</span><span class="p">):</span>
+<div class="viewcode-block" id="Network.SetNetworkInletRadius"><a class="viewcode-back" href="../../../api.html#vampy.automatedPreprocessing.ImportData.Network.SetNetworkInletRadius">[docs]</a>    <span class="k">def</span> <span class="nf">SetNetworkInletRadius</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">radius</span><span class="p">):</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">networkInletRadius</span> <span class="o">=</span> <span class="n">radius</span></div>
 
-<div class="viewcode-block" id="Network.GetNumberOfElements"><a class="viewcode-back" href="../../../api.html#vampy.automatedPreProcessing.ImportData.Network.GetNumberOfElements">[docs]</a>    <span class="k">def</span> <span class="nf">GetNumberOfElements</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+<div class="viewcode-block" id="Network.GetNumberOfElements"><a class="viewcode-back" href="../../../api.html#vampy.automatedPreprocessing.ImportData.Network.GetNumberOfElements">[docs]</a>    <span class="k">def</span> <span class="nf">GetNumberOfElements</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
         <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">numberOfElements</span></div>
 
-<div class="viewcode-block" id="Network.GetNumberOfBifBranches"><a class="viewcode-back" href="../../../api.html#vampy.automatedPreProcessing.ImportData.Network.GetNumberOfBifBranches">[docs]</a>    <span class="k">def</span> <span class="nf">GetNumberOfBifBranches</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+<div class="viewcode-block" id="Network.GetNumberOfBifBranches"><a class="viewcode-back" href="../../../api.html#vampy.automatedPreprocessing.ImportData.Network.GetNumberOfBifBranches">[docs]</a>    <span class="k">def</span> <span class="nf">GetNumberOfBifBranches</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
         <span class="n">nBlanked</span> <span class="o">=</span> <span class="mi">0</span>
         <span class="k">for</span> <span class="n">el</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">elements</span><span class="p">:</span>
             <span class="n">nBlanked</span> <span class="o">+=</span> <span class="n">el</span><span class="o">.</span><span class="n">IsBlanked</span><span class="p">()</span>
         <span class="k">return</span> <span class="n">nBlanked</span></div>
 
-<div class="viewcode-block" id="Network.GetNumberOfInlet"><a class="viewcode-back" href="../../../api.html#vampy.automatedPreProcessing.ImportData.Network.GetNumberOfInlet">[docs]</a>    <span class="k">def</span> <span class="nf">GetNumberOfInlet</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+<div class="viewcode-block" id="Network.GetNumberOfInlet"><a class="viewcode-back" href="../../../api.html#vampy.automatedPreprocessing.ImportData.Network.GetNumberOfInlet">[docs]</a>    <span class="k">def</span> <span class="nf">GetNumberOfInlet</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
         <span class="n">nInlet</span> <span class="o">=</span> <span class="mi">0</span>
         <span class="k">for</span> <span class="n">el</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">elements</span><span class="p">:</span>
             <span class="n">nInlet</span> <span class="o">+=</span> <span class="n">el</span><span class="o">.</span><span class="n">IsAnInlet</span><span class="p">()</span>
         <span class="k">return</span> <span class="n">nInlet</span></div>
 
-<div class="viewcode-block" id="Network.GetNumberOfOutlet"><a class="viewcode-back" href="../../../api.html#vampy.automatedPreProcessing.ImportData.Network.GetNumberOfOutlet">[docs]</a>    <span class="k">def</span> <span class="nf">GetNumberOfOutlet</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+<div class="viewcode-block" id="Network.GetNumberOfOutlet"><a class="viewcode-back" href="../../../api.html#vampy.automatedPreprocessing.ImportData.Network.GetNumberOfOutlet">[docs]</a>    <span class="k">def</span> <span class="nf">GetNumberOfOutlet</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
         <span class="n">nOutlet</span> <span class="o">=</span> <span class="mi">0</span>
         <span class="k">for</span> <span class="n">el</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">elements</span><span class="p">:</span>
             <span class="n">nOutlet</span> <span class="o">+=</span> <span class="n">el</span><span class="o">.</span><span class="n">IsAnOutlet</span><span class="p">()</span>
         <span class="k">return</span> <span class="n">nOutlet</span></div>
 
-<div class="viewcode-block" id="Network.GetNetworkInletRadius"><a class="viewcode-back" href="../../../api.html#vampy.automatedPreProcessing.ImportData.Network.GetNetworkInletRadius">[docs]</a>    <span class="k">def</span> <span class="nf">GetNetworkInletRadius</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+<div class="viewcode-block" id="Network.GetNetworkInletRadius"><a class="viewcode-back" href="../../../api.html#vampy.automatedPreprocessing.ImportData.Network.GetNetworkInletRadius">[docs]</a>    <span class="k">def</span> <span class="nf">GetNetworkInletRadius</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
         <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">networkInletRadius</span></div></div>
 </pre></div>
 

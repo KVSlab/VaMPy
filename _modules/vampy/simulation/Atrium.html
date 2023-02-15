@@ -182,7 +182,7 @@ const thebe_selector_output = ".output, .cell_output"
  </li>
  <li class="toctree-l1">
   <a class="reference internal" href="../../../atrium.html">
-   Hemodynamics simulation on a left atrium
+   Hemodynamic simulation in the left atrium and left atrial appendage
   </a>
  </li>
 </ul>
@@ -335,15 +335,18 @@ title="Open an issue"
 <span class="kn">import</span> <span class="nn">pickle</span>
 <span class="kn">from</span> <span class="nn">os</span> <span class="kn">import</span> <span class="n">makedirs</span>
 <span class="kn">from</span> <span class="nn">pprint</span> <span class="kn">import</span> <span class="n">pprint</span>
-<span class="kn">from</span> <span class="nn">dolfin</span> <span class="kn">import</span> <span class="n">set_log_level</span>
+<span class="kn">from</span> <span class="nn">dolfin</span> <span class="kn">import</span> <span class="n">set_log_level</span><span class="p">,</span> <span class="n">MPI</span>
 
+<span class="kn">import</span> <span class="nn">numpy</span> <span class="k">as</span> <span class="nn">np</span>
 <span class="kn">from</span> <span class="nn">oasis.problems.NSfracStep</span> <span class="kn">import</span> <span class="o">*</span>
+
 <span class="kn">from</span> <span class="nn">vampy.simulation.Probe</span> <span class="kn">import</span> <span class="n">Probes</span>  <span class="c1"># type: ignore</span>
 <span class="kn">from</span> <span class="nn">vampy.simulation.Womersley</span> <span class="kn">import</span> <span class="n">make_womersley_bcs</span><span class="p">,</span> <span class="n">compute_boundary_geometry_acrn</span>
 <span class="kn">from</span> <span class="nn">vampy.simulation.simulation_common</span> <span class="kn">import</span> <span class="n">store_u_mean</span><span class="p">,</span> <span class="n">get_file_paths</span><span class="p">,</span> <span class="n">print_mesh_information</span>
 
 <span class="c1"># FEniCS specific command to control the desired level of logging, here set to critical errors</span>
 <span class="n">set_log_level</span><span class="p">(</span><span class="mi">50</span><span class="p">)</span>
+<span class="n">comm</span> <span class="o">=</span> <span class="n">MPI</span><span class="o">.</span><span class="n">comm_world</span>
 
 
 <div class="viewcode-block" id="problem_parameters"><a class="viewcode-back" href="../../../api.html#vampy.simulation.Atrium.problem_parameters">[docs]</a><span class="k">def</span> <span class="nf">problem_parameters</span><span class="p">(</span><span class="n">commandline_kwargs</span><span class="p">,</span> <span class="n">NS_parameters</span><span class="p">,</span> <span class="n">scalar_components</span><span class="p">,</span> <span class="n">Schmidt</span><span class="p">,</span> <span class="n">NS_expressions</span><span class="p">,</span> <span class="o">**</span><span class="n">NS_namespace</span><span class="p">):</span>
@@ -541,19 +544,25 @@ title="Open an issue"
         <span class="n">U_vector</span> <span class="o">=</span> <span class="n">project</span><span class="p">(</span><span class="n">sqrt</span><span class="p">(</span><span class="n">inner</span><span class="p">(</span><span class="n">u_</span><span class="p">,</span> <span class="n">u_</span><span class="p">)),</span> <span class="n">DG</span><span class="p">)</span><span class="o">.</span><span class="n">vector</span><span class="p">()</span><span class="o">.</span><span class="n">get_local</span><span class="p">()</span>
         <span class="n">h</span> <span class="o">=</span> <span class="n">mesh</span><span class="o">.</span><span class="n">hmin</span><span class="p">()</span>
 
-        <span class="n">U_mean</span> <span class="o">=</span> <span class="n">U_vector</span><span class="o">.</span><span class="n">mean</span><span class="p">()</span>
-        <span class="n">U_max</span> <span class="o">=</span> <span class="n">U_vector</span><span class="o">.</span><span class="n">max</span><span class="p">()</span>
+        <span class="c1"># Collect velocities in parallel</span>
+        <span class="n">local_U_mean</span> <span class="o">=</span> <span class="n">U_vector</span><span class="o">.</span><span class="n">mean</span><span class="p">()</span>
+        <span class="n">local_U_max</span> <span class="o">=</span> <span class="n">U_vector</span><span class="o">.</span><span class="n">max</span><span class="p">()</span>
 
-        <span class="n">Re_mean</span> <span class="o">=</span> <span class="n">U_mean</span> <span class="o">*</span> <span class="n">D_mitral</span> <span class="o">/</span> <span class="n">nu</span>
-        <span class="n">Re_max</span> <span class="o">=</span> <span class="n">U_max</span> <span class="o">*</span> <span class="n">D_mitral</span> <span class="o">/</span> <span class="n">nu</span>
-
-        <span class="n">CFL_mean</span> <span class="o">=</span> <span class="n">U_mean</span> <span class="o">*</span> <span class="n">dt</span> <span class="o">/</span> <span class="n">h</span>
-        <span class="n">CFL_max</span> <span class="o">=</span> <span class="n">U_max</span> <span class="o">*</span> <span class="n">dt</span> <span class="o">/</span> <span class="n">h</span>
+        <span class="n">U_mean</span> <span class="o">=</span> <span class="n">comm</span><span class="o">.</span><span class="n">gather</span><span class="p">(</span><span class="n">local_U_mean</span><span class="p">,</span> <span class="mi">0</span><span class="p">)</span>
+        <span class="n">U_max</span> <span class="o">=</span> <span class="n">comm</span><span class="o">.</span><span class="n">gather</span><span class="p">(</span><span class="n">local_U_max</span><span class="p">,</span> <span class="mi">0</span><span class="p">)</span>
 
         <span class="k">if</span> <span class="n">MPI</span><span class="o">.</span><span class="n">rank</span><span class="p">(</span><span class="n">MPI</span><span class="o">.</span><span class="n">comm_world</span><span class="p">)</span> <span class="o">==</span> <span class="mi">0</span><span class="p">:</span>
+            <span class="n">u_mean</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">mean</span><span class="p">(</span><span class="n">U_mean</span><span class="p">)</span>
+            <span class="n">u_max</span> <span class="o">=</span> <span class="nb">max</span><span class="p">(</span><span class="n">U_max</span><span class="p">)</span>
+
+            <span class="n">Re_mean</span> <span class="o">=</span> <span class="n">u_mean</span> <span class="o">*</span> <span class="n">D_mitral</span> <span class="o">/</span> <span class="n">nu</span>
+            <span class="n">Re_max</span> <span class="o">=</span> <span class="n">u_max</span> <span class="o">*</span> <span class="n">D_mitral</span> <span class="o">/</span> <span class="n">nu</span>
+
+            <span class="n">CFL_mean</span> <span class="o">=</span> <span class="n">u_mean</span> <span class="o">*</span> <span class="n">dt</span> <span class="o">/</span> <span class="n">h</span>
+            <span class="n">CFL_max</span> <span class="o">=</span> <span class="n">u_max</span> <span class="o">*</span> <span class="n">dt</span> <span class="o">/</span> <span class="n">h</span>
             <span class="n">info</span> <span class="o">=</span> <span class="s1">&#39;Time = </span><span class="si">{0:2.4e}</span><span class="s1">, timestep = </span><span class="si">{1:6d}</span><span class="s1">, max Reynolds number=</span><span class="si">{2:2.3f}</span><span class="s1">, mean Reynolds number=</span><span class="si">{3:2.3f}</span><span class="s1">&#39;</span> <span class="o">+</span> \
                    <span class="s1">&#39;, max velocity=</span><span class="si">{4:2.3f}</span><span class="s1">, mean velocity=</span><span class="si">{5:2.3f}</span><span class="s1">, max CFL=</span><span class="si">{6:2.3f}</span><span class="s1">, mean CFL=</span><span class="si">{7:2.3f}</span><span class="s1">&#39;</span>
-            <span class="n">info_green</span><span class="p">(</span><span class="n">info</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">t</span><span class="p">,</span> <span class="n">tstep</span><span class="p">,</span> <span class="n">Re_max</span><span class="p">,</span> <span class="n">Re_mean</span><span class="p">,</span> <span class="n">U_max</span><span class="p">,</span> <span class="n">U_mean</span><span class="p">,</span> <span class="n">CFL_max</span><span class="p">,</span> <span class="n">CFL_mean</span><span class="p">))</span>
+            <span class="n">info_green</span><span class="p">(</span><span class="n">info</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">t</span><span class="p">,</span> <span class="n">tstep</span><span class="p">,</span> <span class="n">Re_max</span><span class="p">,</span> <span class="n">Re_mean</span><span class="p">,</span> <span class="n">u_max</span><span class="p">,</span> <span class="n">u_mean</span><span class="p">,</span> <span class="n">CFL_max</span><span class="p">,</span> <span class="n">CFL_mean</span><span class="p">))</span>
 
     <span class="c1"># Sample velocity and pressure in points/probes</span>
     <span class="n">eval_dict</span><span class="p">[</span><span class="s2">&quot;centerline_u_x_probes&quot;</span><span class="p">](</span><span class="n">u_</span><span class="p">[</span><span class="mi">0</span><span class="p">])</span>

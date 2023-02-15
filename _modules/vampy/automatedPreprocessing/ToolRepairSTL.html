@@ -5,7 +5,7 @@
   <head>
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>vampy.automatedPreProcessing.ToolRepairSTL &#8212; VaMPy</title>
+    <title>vampy.automatedPreprocessing.ToolRepairSTL &#8212; VaMPy</title>
     
   <!-- Loaded before other Sphinx assets -->
   <link href="../../../_static/styles/theme.css?digest=1999514e3f237ded88cf" rel="stylesheet">
@@ -182,7 +182,7 @@ const thebe_selector_output = ".output, .cell_output"
  </li>
  <li class="toctree-l1">
   <a class="reference internal" href="../../../atrium.html">
-   Hemodynamics simulation on a left atrium
+   Hemodynamic simulation in the left atrium and left atrial appendage
   </a>
  </li>
 </ul>
@@ -287,7 +287,7 @@ title="Source repository"
       </li>
       
       <li>
-        <a href="https://kvslab.github.io/VaMPy//issues/new?title=Issue%20on%20page%20%2F_modules/vampy/automatedPreProcessing/ToolRepairSTL.html&body=Your%20issue%20content%20here."
+        <a href="https://kvslab.github.io/VaMPy//issues/new?title=Issue%20on%20page%20%2F_modules/vampy/automatedPreprocessing/ToolRepairSTL.html&body=Your%20issue%20content%20here."
    class="headerbtn"
    data-toggle="tooltip"
 data-placement="left"
@@ -330,7 +330,7 @@ title="Open an issue"
                 
               <div>
                 
-  <h1>Source code for vampy.automatedPreProcessing.ToolRepairSTL</h1><div class="highlight"><pre>
+  <h1>Source code for vampy.automatedPreprocessing.ToolRepairSTL</h1><div class="highlight"><pre>
 <span></span><span class="ch">#!/usr/bin/env python</span>
 
 <span class="c1"># Program:   AneuTool</span>
@@ -347,14 +347,14 @@ title="Open an issue"
 
 <span class="kn">import</span> <span class="nn">vtk</span>
 
-<span class="kn">from</span> <span class="nn">vampy.automatedPreProcessing.ImportData</span> <span class="kn">import</span> <span class="n">loadFile</span>
+<span class="kn">from</span> <span class="nn">vampy.automatedPreprocessing.ImportData</span> <span class="kn">import</span> <span class="n">loadFile</span>
 
 
-<div class="viewcode-block" id="isNaN"><a class="viewcode-back" href="../../../api.html#vampy.automatedPreProcessing.ToolRepairSTL.isNaN">[docs]</a><span class="k">def</span> <span class="nf">isNaN</span><span class="p">(</span><span class="n">num</span><span class="p">):</span>
+<div class="viewcode-block" id="isNaN"><a class="viewcode-back" href="../../../api.html#vampy.automatedPreprocessing.ToolRepairSTL.isNaN">[docs]</a><span class="k">def</span> <span class="nf">isNaN</span><span class="p">(</span><span class="n">num</span><span class="p">):</span>
     <span class="k">return</span> <span class="n">num</span> <span class="o">!=</span> <span class="n">num</span></div>
 
 
-<div class="viewcode-block" id="computeQualityMesh"><a class="viewcode-back" href="../../../api.html#vampy.automatedPreProcessing.ToolRepairSTL.computeQualityMesh">[docs]</a><span class="k">def</span> <span class="nf">computeQualityMesh</span><span class="p">(</span><span class="n">mesh</span><span class="p">,</span> <span class="n">measure</span><span class="p">):</span>
+<div class="viewcode-block" id="computeQualityMesh"><a class="viewcode-back" href="../../../api.html#vampy.automatedPreprocessing.ToolRepairSTL.computeQualityMesh">[docs]</a><span class="k">def</span> <span class="nf">computeQualityMesh</span><span class="p">(</span><span class="n">mesh</span><span class="p">,</span> <span class="n">measure</span><span class="p">):</span>
     <span class="n">quality</span> <span class="o">=</span> <span class="n">vtk</span><span class="o">.</span><span class="n">vtkMeshQuality</span><span class="p">()</span>
     <span class="n">quality</span><span class="o">.</span><span class="n">SetInput</span><span class="p">(</span><span class="n">mesh</span><span class="p">)</span>
     <span class="c1"># quality.SetTetQualityMeasure(measure) # TODO, test if 3d</span>
@@ -364,7 +364,7 @@ title="Open an issue"
     <span class="k">return</span> <span class="n">quality</span></div>
 
 
-<div class="viewcode-block" id="DumpQualityStats"><a class="viewcode-back" href="../../../api.html#vampy.automatedPreProcessing.ToolRepairSTL.DumpQualityStats">[docs]</a><span class="k">def</span> <span class="nf">DumpQualityStats</span><span class="p">(</span><span class="n">iq</span><span class="p">,</span> <span class="n">arrayname</span><span class="p">):</span>
+<div class="viewcode-block" id="DumpQualityStats"><a class="viewcode-back" href="../../../api.html#vampy.automatedPreprocessing.ToolRepairSTL.DumpQualityStats">[docs]</a><span class="k">def</span> <span class="nf">DumpQualityStats</span><span class="p">(</span><span class="n">iq</span><span class="p">,</span> <span class="n">arrayname</span><span class="p">):</span>
     <span class="n">an</span> <span class="o">=</span> <span class="n">iq</span><span class="o">.</span><span class="n">GetOutput</span><span class="p">()</span><span class="o">.</span><span class="n">GetFieldData</span><span class="p">()</span><span class="o">.</span><span class="n">GetArray</span><span class="p">(</span><span class="n">arrayname</span><span class="p">)</span>
     <span class="n">cardinality</span> <span class="o">=</span> <span class="n">an</span><span class="o">.</span><span class="n">GetComponent</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="mi">4</span><span class="p">)</span>
     <span class="nb">range</span> <span class="o">=</span> <span class="nb">list</span><span class="p">()</span>
@@ -380,7 +380,7 @@ title="Open an issue"
     <span class="k">return</span> <span class="n">outStr</span></div>
 
 
-<div class="viewcode-block" id="surfaceOverview"><a class="viewcode-back" href="../../../api.html#vampy.automatedPreProcessing.ToolRepairSTL.surfaceOverview">[docs]</a><span class="k">def</span> <span class="nf">surfaceOverview</span><span class="p">(</span><span class="n">mesh</span><span class="p">):</span>
+<div class="viewcode-block" id="surfaceOverview"><a class="viewcode-back" href="../../../api.html#vampy.automatedPreprocessing.ToolRepairSTL.surfaceOverview">[docs]</a><span class="k">def</span> <span class="nf">surfaceOverview</span><span class="p">(</span><span class="n">mesh</span><span class="p">):</span>
     <span class="n">nTriangles</span> <span class="o">=</span> <span class="n">mesh</span><span class="o">.</span><span class="n">GetNumberOfCells</span><span class="p">()</span>
     <span class="n">nPoints</span> <span class="o">=</span> <span class="n">mesh</span><span class="o">.</span><span class="n">GetNumberOfPoints</span><span class="p">()</span>
     <span class="nb">print</span><span class="p">(</span><span class="s2">&quot;&gt; --- Surface overview:&quot;</span><span class="p">)</span>
@@ -389,7 +389,7 @@ title="Open an issue"
     <span class="nb">print</span><span class="p">(</span><span class="s2">&quot;&gt;&quot;</span><span class="p">)</span></div>
 
 
-<div class="viewcode-block" id="foundAndDeleteNaNTriangles"><a class="viewcode-back" href="../../../api.html#vampy.automatedPreProcessing.ToolRepairSTL.foundAndDeleteNaNTriangles">[docs]</a><span class="k">def</span> <span class="nf">foundAndDeleteNaNTriangles</span><span class="p">(</span><span class="n">mesh</span><span class="p">):</span>
+<div class="viewcode-block" id="foundAndDeleteNaNTriangles"><a class="viewcode-back" href="../../../api.html#vampy.automatedPreprocessing.ToolRepairSTL.foundAndDeleteNaNTriangles">[docs]</a><span class="k">def</span> <span class="nf">foundAndDeleteNaNTriangles</span><span class="p">(</span><span class="n">mesh</span><span class="p">):</span>
     <span class="n">ctrNaN</span> <span class="o">=</span> <span class="mi">0</span>
     <span class="n">foundNaN</span> <span class="o">=</span> <span class="kc">False</span>
     <span class="n">nTriangles</span> <span class="o">=</span> <span class="n">mesh</span><span class="o">.</span><span class="n">GetNumberOfCells</span><span class="p">()</span>
@@ -418,7 +418,7 @@ title="Open an issue"
     <span class="k">return</span> <span class="n">foundNaN</span></div>
 
 
-<div class="viewcode-block" id="cleanTheSurface"><a class="viewcode-back" href="../../../api.html#vampy.automatedPreProcessing.ToolRepairSTL.cleanTheSurface">[docs]</a><span class="k">def</span> <span class="nf">cleanTheSurface</span><span class="p">(</span><span class="n">mesh</span><span class="p">):</span>
+<div class="viewcode-block" id="cleanTheSurface"><a class="viewcode-back" href="../../../api.html#vampy.automatedPreprocessing.ToolRepairSTL.cleanTheSurface">[docs]</a><span class="k">def</span> <span class="nf">cleanTheSurface</span><span class="p">(</span><span class="n">mesh</span><span class="p">):</span>
     <span class="nb">print</span><span class="p">(</span><span class="s2">&quot;&gt; --- Cleaning the surface.&quot;</span><span class="p">)</span>
     <span class="n">cleanPolyData</span> <span class="o">=</span> <span class="n">vtk</span><span class="o">.</span><span class="n">vtkCleanPolyData</span><span class="p">()</span>
     <span class="k">if</span> <span class="n">vtk</span><span class="o">.</span><span class="n">VTK_MAJOR_VERSION</span> <span class="o">&lt;=</span> <span class="mi">5</span><span class="p">:</span>
@@ -444,7 +444,7 @@ title="Open an issue"
     <span class="k">return</span> <span class="p">(</span><span class="n">outputPolyData</span><span class="p">)</span></div>
 
 
-<div class="viewcode-block" id="closeAllTheHolesOnTheSurface"><a class="viewcode-back" href="../../../api.html#vampy.automatedPreProcessing.ToolRepairSTL.closeAllTheHolesOnTheSurface">[docs]</a><span class="k">def</span> <span class="nf">closeAllTheHolesOnTheSurface</span><span class="p">(</span><span class="n">mesh</span><span class="p">):</span>
+<div class="viewcode-block" id="closeAllTheHolesOnTheSurface"><a class="viewcode-back" href="../../../api.html#vampy.automatedPreprocessing.ToolRepairSTL.closeAllTheHolesOnTheSurface">[docs]</a><span class="k">def</span> <span class="nf">closeAllTheHolesOnTheSurface</span><span class="p">(</span><span class="n">mesh</span><span class="p">):</span>
     <span class="nb">print</span><span class="p">(</span><span class="s2">&quot;&gt; --- Closing the surface.&quot;</span><span class="p">)</span>
     <span class="n">fillHolesFilter</span> <span class="o">=</span> <span class="n">vtk</span><span class="o">.</span><span class="n">vtkFillHolesFilter</span><span class="p">()</span>
     <span class="k">if</span> <span class="n">vtk</span><span class="o">.</span><span class="n">VTK_MAJOR_VERSION</span> <span class="o">&lt;=</span> <span class="mi">5</span><span class="p">:</span>
@@ -461,7 +461,7 @@ title="Open an issue"
     <span class="k">return</span> <span class="p">(</span><span class="n">outputPolyData</span><span class="p">)</span></div>
 
 
-<div class="viewcode-block" id="cleanTheSurfaceUnstructGrid"><a class="viewcode-back" href="../../../api.html#vampy.automatedPreProcessing.ToolRepairSTL.cleanTheSurfaceUnstructGrid">[docs]</a><span class="k">def</span> <span class="nf">cleanTheSurfaceUnstructGrid</span><span class="p">(</span><span class="n">mesh</span><span class="p">):</span>
+<div class="viewcode-block" id="cleanTheSurfaceUnstructGrid"><a class="viewcode-back" href="../../../api.html#vampy.automatedPreprocessing.ToolRepairSTL.cleanTheSurfaceUnstructGrid">[docs]</a><span class="k">def</span> <span class="nf">cleanTheSurfaceUnstructGrid</span><span class="p">(</span><span class="n">mesh</span><span class="p">):</span>
     <span class="nb">print</span><span class="p">(</span><span class="s2">&quot;&gt; --- Cleaning the surface.&quot;</span><span class="p">)</span>
     <span class="n">cleanPolyData</span> <span class="o">=</span> <span class="n">vtk</span><span class="o">.</span><span class="n">vtkCleanUnstructuredGrid</span><span class="p">()</span>
     <span class="k">if</span> <span class="n">vtk</span><span class="o">.</span><span class="n">VTK_MAJOR_VERSION</span> <span class="o">&lt;=</span> <span class="mi">5</span><span class="p">:</span>
@@ -477,7 +477,7 @@ title="Open an issue"
     <span class="k">return</span> <span class="p">(</span><span class="n">outputPolyData</span><span class="p">)</span></div>
 
 
-<div class="viewcode-block" id="writeSTLfile"><a class="viewcode-back" href="../../../api.html#vampy.automatedPreProcessing.ToolRepairSTL.writeSTLfile">[docs]</a><span class="k">def</span> <span class="nf">writeSTLfile</span><span class="p">(</span><span class="n">outputPolyData</span><span class="p">,</span> <span class="n">outputFileName</span><span class="p">,</span> <span class="n">ascii</span><span class="p">):</span>
+<div class="viewcode-block" id="writeSTLfile"><a class="viewcode-back" href="../../../api.html#vampy.automatedPreprocessing.ToolRepairSTL.writeSTLfile">[docs]</a><span class="k">def</span> <span class="nf">writeSTLfile</span><span class="p">(</span><span class="n">outputPolyData</span><span class="p">,</span> <span class="n">outputFileName</span><span class="p">,</span> <span class="n">ascii</span><span class="p">):</span>
     <span class="nb">print</span><span class="p">(</span><span class="s2">&quot;&gt; --- Write the clean STL file as:&quot;</span><span class="p">,</span> <span class="n">outputFileName</span><span class="p">)</span>
     <span class="nb">print</span><span class="p">(</span><span class="s2">&quot;&gt;&quot;</span><span class="p">)</span>
     <span class="n">stlWriter</span> <span class="o">=</span> <span class="n">vtk</span><span class="o">.</span><span class="n">vtkSTLWriter</span><span class="p">()</span>
@@ -491,7 +491,7 @@ title="Open an issue"
     <span class="n">stlWriter</span><span class="o">.</span><span class="n">Write</span><span class="p">()</span></div>
 
 
-<div class="viewcode-block" id="checkIfThereIsHoles"><a class="viewcode-back" href="../../../api.html#vampy.automatedPreProcessing.ToolRepairSTL.checkIfThereIsHoles">[docs]</a><span class="k">def</span> <span class="nf">checkIfThereIsHoles</span><span class="p">(</span><span class="n">outputBisPolyData</span><span class="p">):</span>
+<div class="viewcode-block" id="checkIfThereIsHoles"><a class="viewcode-back" href="../../../api.html#vampy.automatedPreprocessing.ToolRepairSTL.checkIfThereIsHoles">[docs]</a><span class="k">def</span> <span class="nf">checkIfThereIsHoles</span><span class="p">(</span><span class="n">outputBisPolyData</span><span class="p">):</span>
     <span class="n">featureEdges</span> <span class="o">=</span> <span class="n">vtk</span><span class="o">.</span><span class="n">vtkFeatureEdges</span><span class="p">()</span>
     <span class="n">featureEdges</span><span class="o">.</span><span class="n">FeatureEdgesOff</span><span class="p">()</span>
     <span class="n">featureEdges</span><span class="o">.</span><span class="n">BoundaryEdgesOn</span><span class="p">()</span>
@@ -506,7 +506,7 @@ title="Open an issue"
     <span class="nb">print</span><span class="p">(</span><span class="s2">&quot;&gt;&quot;</span><span class="p">)</span></div>
 
 
-<div class="viewcode-block" id="checkIfThereIsNonTriangleCells"><a class="viewcode-back" href="../../../api.html#vampy.automatedPreProcessing.ToolRepairSTL.checkIfThereIsNonTriangleCells">[docs]</a><span class="k">def</span> <span class="nf">checkIfThereIsNonTriangleCells</span><span class="p">(</span><span class="n">outputBisPolyData</span><span class="p">):</span>
+<div class="viewcode-block" id="checkIfThereIsNonTriangleCells"><a class="viewcode-back" href="../../../api.html#vampy.automatedPreprocessing.ToolRepairSTL.checkIfThereIsNonTriangleCells">[docs]</a><span class="k">def</span> <span class="nf">checkIfThereIsNonTriangleCells</span><span class="p">(</span><span class="n">outputBisPolyData</span><span class="p">):</span>
     <span class="n">ctr</span> <span class="o">=</span> <span class="mi">0</span>
     <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="n">outputBisPolyData</span><span class="o">.</span><span class="n">GetNumberOfCells</span><span class="p">()):</span>
         <span class="k">if</span> <span class="n">outputBisPolyData</span><span class="o">.</span><span class="n">GetCellType</span><span class="p">(</span><span class="n">i</span><span class="p">)</span> <span class="o">!=</span> <span class="mi">5</span><span class="p">:</span>
@@ -515,7 +515,7 @@ title="Open an issue"
         <span class="nb">print</span><span class="p">(</span><span class="s2">&quot;&gt; ERROR: There are elements that are not triangles&quot;</span><span class="p">)</span></div>
 
 
-<div class="viewcode-block" id="repairSTL"><a class="viewcode-back" href="../../../api.html#vampy.automatedPreProcessing.ToolRepairSTL.repairSTL">[docs]</a><span class="k">def</span> <span class="nf">repairSTL</span><span class="p">(</span><span class="n">inputFileName</span><span class="p">,</span> <span class="n">outputFileName</span><span class="p">,</span> <span class="n">closeHoles</span><span class="p">,</span> <span class="n">checkHoles</span><span class="p">,</span> <span class="n">checkQuality</span><span class="p">,</span> <span class="n">ascii</span><span class="p">):</span>
+<div class="viewcode-block" id="repairSTL"><a class="viewcode-back" href="../../../api.html#vampy.automatedPreprocessing.ToolRepairSTL.repairSTL">[docs]</a><span class="k">def</span> <span class="nf">repairSTL</span><span class="p">(</span><span class="n">inputFileName</span><span class="p">,</span> <span class="n">outputFileName</span><span class="p">,</span> <span class="n">closeHoles</span><span class="p">,</span> <span class="n">checkHoles</span><span class="p">,</span> <span class="n">checkQuality</span><span class="p">,</span> <span class="n">ascii</span><span class="p">):</span>
     <span class="c1"># Open file.</span>
     <span class="n">mesh</span> <span class="o">=</span> <span class="n">loadFile</span><span class="p">(</span><span class="n">inputFileName</span><span class="p">)</span>
 

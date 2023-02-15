@@ -5,7 +5,7 @@
   <head>
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>vampy.automatedPostProcessing.postprocessing_common &#8212; VaMPy</title>
+    <title>vampy.automatedPostprocessing.postprocessing_common &#8212; VaMPy</title>
     
   <!-- Loaded before other Sphinx assets -->
   <link href="../../../_static/styles/theme.css?digest=1999514e3f237ded88cf" rel="stylesheet">
@@ -182,7 +182,7 @@ const thebe_selector_output = ".output, .cell_output"
  </li>
  <li class="toctree-l1">
   <a class="reference internal" href="../../../atrium.html">
-   Hemodynamics simulation on a left atrium
+   Hemodynamic simulation in the left atrium and left atrial appendage
   </a>
  </li>
 </ul>
@@ -287,7 +287,7 @@ title="Source repository"
       </li>
       
       <li>
-        <a href="https://kvslab.github.io/VaMPy//issues/new?title=Issue%20on%20page%20%2F_modules/vampy/automatedPostProcessing/postprocessing_common.html&body=Your%20issue%20content%20here."
+        <a href="https://kvslab.github.io/VaMPy//issues/new?title=Issue%20on%20page%20%2F_modules/vampy/automatedPostprocessing/postprocessing_common.html&body=Your%20issue%20content%20here."
    class="headerbtn"
    data-toggle="tooltip"
 data-placement="left"
@@ -330,7 +330,7 @@ title="Open an issue"
                 
               <div>
                 
-  <h1>Source code for vampy.automatedPostProcessing.postprocessing_common</h1><div class="highlight"><pre>
+  <h1>Source code for vampy.automatedPostprocessing.postprocessing_common</h1><div class="highlight"><pre>
 <span></span><span class="kn">import</span> <span class="nn">argparse</span>
 <span class="kn">from</span> <span class="nn">time</span> <span class="kn">import</span> <span class="n">time</span>
 
@@ -343,7 +343,7 @@ title="Open an issue"
     <span class="k">pass</span>
 
 
-<div class="viewcode-block" id="read_command_line"><a class="viewcode-back" href="../../../api.html#vampy.automatedPostProcessing.postprocessing_common.read_command_line">[docs]</a><span class="k">def</span> <span class="nf">read_command_line</span><span class="p">():</span>
+<div class="viewcode-block" id="read_command_line"><a class="viewcode-back" href="../../../api.html#vampy.automatedPostprocessing.postprocessing_common.read_command_line">[docs]</a><span class="k">def</span> <span class="nf">read_command_line</span><span class="p">():</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;Read arguments from commandline&quot;&quot;&quot;</span>
     <span class="n">parser</span> <span class="o">=</span> <span class="n">argparse</span><span class="o">.</span><span class="n">ArgumentParser</span><span class="p">(</span><span class="n">formatter_class</span><span class="o">=</span><span class="n">argparse</span><span class="o">.</span><span class="n">ArgumentDefaultsHelpFormatter</span><span class="p">,</span>
                                      <span class="n">description</span><span class="o">=</span><span class="s2">&quot;Automated post-processing for vascular modeling.&quot;</span><span class="p">)</span>
@@ -422,7 +422,7 @@ title="Open an issue"
         <span class="n">args</span><span class="o">.</span><span class="n">average_over_cycles</span></div>
 
 
-<div class="viewcode-block" id="epsilon"><a class="viewcode-back" href="../../../api.html#vampy.automatedPostProcessing.postprocessing_common.epsilon">[docs]</a><span class="k">def</span> <span class="nf">epsilon</span><span class="p">(</span><span class="n">u</span><span class="p">):</span>
+<div class="viewcode-block" id="epsilon"><a class="viewcode-back" href="../../../api.html#vampy.automatedPostprocessing.postprocessing_common.epsilon">[docs]</a><span class="k">def</span> <span class="nf">epsilon</span><span class="p">(</span><span class="n">u</span><span class="p">):</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">    Computes the strain-rate tensor</span>
 <span class="sd">    Args:</span>
@@ -435,7 +435,7 @@ title="Open an issue"
     <span class="k">return</span> <span class="mf">0.5</span> <span class="o">*</span> <span class="p">(</span><span class="n">grad</span><span class="p">(</span><span class="n">u</span><span class="p">)</span> <span class="o">+</span> <span class="n">grad</span><span class="p">(</span><span class="n">u</span><span class="p">)</span><span class="o">.</span><span class="n">T</span><span class="p">)</span></div>
 
 
-<div class="viewcode-block" id="STRESS"><a class="viewcode-back" href="../../../api.html#vampy.automatedPostProcessing.postprocessing_common.STRESS">[docs]</a><span class="k">class</span> <span class="nc">STRESS</span><span class="p">:</span>
+<div class="viewcode-block" id="STRESS"><a class="viewcode-back" href="../../../api.html#vampy.automatedPostprocessing.postprocessing_common.STRESS">[docs]</a><span class="k">class</span> <span class="nc">STRESS</span><span class="p">:</span>
     <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">u</span><span class="p">,</span> <span class="n">p</span><span class="p">,</span> <span class="n">nu</span><span class="p">,</span> <span class="n">mesh</span><span class="p">):</span>
         <span class="n">ds</span> <span class="o">=</span> <span class="n">Measure</span><span class="p">(</span><span class="s2">&quot;ds&quot;</span><span class="p">,</span> <span class="n">domain</span><span class="o">=</span><span class="n">mesh</span><span class="p">)</span>
         <span class="n">boundary_mesh</span> <span class="o">=</span> <span class="n">BoundaryMesh</span><span class="p">(</span><span class="n">mesh</span><span class="p">,</span> <span class="s1">&#39;exterior&#39;</span><span class="p">)</span>
@@ -483,7 +483,7 @@ title="Open an issue"
 
         <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">Ftv_bm</span>
 
-<div class="viewcode-block" id="STRESS.norm_l2"><a class="viewcode-back" href="../../../api.html#vampy.automatedPostProcessing.postprocessing_common.STRESS.norm_l2">[docs]</a>    <span class="k">def</span> <span class="nf">norm_l2</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">u</span><span class="p">):</span>
+<div class="viewcode-block" id="STRESS.norm_l2"><a class="viewcode-back" href="../../../api.html#vampy.automatedPostprocessing.postprocessing_common.STRESS.norm_l2">[docs]</a>    <span class="k">def</span> <span class="nf">norm_l2</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">u</span><span class="p">):</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">        Compute norm of vector u in expression form</span>
 <span class="sd">        Args:</span>
@@ -495,7 +495,7 @@ title="Open an issue"
         <span class="k">return</span> <span class="nb">pow</span><span class="p">(</span><span class="n">inner</span><span class="p">(</span><span class="n">u</span><span class="p">,</span> <span class="n">u</span><span class="p">),</span> <span class="mf">0.5</span><span class="p">)</span></div></div>
 
 
-<div class="viewcode-block" id="get_dataset_names"><a class="viewcode-back" href="../../../api.html#vampy.automatedPostProcessing.postprocessing_common.get_dataset_names">[docs]</a><span class="k">def</span> <span class="nf">get_dataset_names</span><span class="p">(</span><span class="n">data_file</span><span class="p">,</span> <span class="n">num_files</span><span class="o">=</span><span class="mi">100000</span><span class="p">,</span> <span class="n">step</span><span class="o">=</span><span class="mi">1</span><span class="p">,</span> <span class="n">start</span><span class="o">=</span><span class="mi">1</span><span class="p">,</span> <span class="n">print_info</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span>
+<div class="viewcode-block" id="get_dataset_names"><a class="viewcode-back" href="../../../api.html#vampy.automatedPostprocessing.postprocessing_common.get_dataset_names">[docs]</a><span class="k">def</span> <span class="nf">get_dataset_names</span><span class="p">(</span><span class="n">data_file</span><span class="p">,</span> <span class="n">num_files</span><span class="o">=</span><span class="mi">100000</span><span class="p">,</span> <span class="n">step</span><span class="o">=</span><span class="mi">1</span><span class="p">,</span> <span class="n">start</span><span class="o">=</span><span class="mi">1</span><span class="p">,</span> <span class="n">print_info</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span>
                       <span class="n">vector_filename</span><span class="o">=</span><span class="s2">&quot;/velocity/vector_</span><span class="si">%d</span><span class="s2">&quot;</span><span class="p">):</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">    Read velocity fields datasets and extract names of files</span>

@@ -5,7 +5,7 @@
   <head>
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>vampy.automatedPreProcessing.visualize &#8212; VaMPy</title>
+    <title>vampy.automatedPreprocessing.visualize &#8212; VaMPy</title>
     
   <!-- Loaded before other Sphinx assets -->
   <link href="../../../_static/styles/theme.css?digest=1999514e3f237ded88cf" rel="stylesheet">
@@ -182,7 +182,7 @@ const thebe_selector_output = ".output, .cell_output"
  </li>
  <li class="toctree-l1">
   <a class="reference internal" href="../../../atrium.html">
-   Hemodynamics simulation on a left atrium
+   Hemodynamic simulation in the left atrium and left atrial appendage
   </a>
  </li>
 </ul>
@@ -287,7 +287,7 @@ title="Source repository"
       </li>
       
       <li>
-        <a href="https://kvslab.github.io/VaMPy//issues/new?title=Issue%20on%20page%20%2F_modules/vampy/automatedPreProcessing/visualize.html&body=Your%20issue%20content%20here."
+        <a href="https://kvslab.github.io/VaMPy//issues/new?title=Issue%20on%20page%20%2F_modules/vampy/automatedPreprocessing/visualize.html&body=Your%20issue%20content%20here."
    class="headerbtn"
    data-toggle="tooltip"
 data-placement="left"
@@ -330,15 +330,15 @@ title="Open an issue"
                 
               <div>
                 
-  <h1>Source code for vampy.automatedPreProcessing.visualize</h1><div class="highlight"><pre>
+  <h1>Source code for vampy.automatedPreprocessing.visualize</h1><div class="highlight"><pre>
 <span></span><span class="kn">import</span> <span class="nn">vtk</span>
 
-<span class="kn">from</span> <span class="nn">vampy.automatedPreProcessing.DisplayData</span> <span class="kn">import</span> <span class="n">DisplayModel</span><span class="p">,</span> <span class="n">VtkPointCloud</span>
+<span class="kn">from</span> <span class="nn">vampy.automatedPreprocessing.DisplayData</span> <span class="kn">import</span> <span class="n">DisplayModel</span><span class="p">,</span> <span class="n">VtkPointCloud</span>
 
 <span class="n">version</span> <span class="o">=</span> <span class="n">vtk</span><span class="o">.</span><span class="n">vtkVersion</span><span class="p">()</span><span class="o">.</span><span class="n">GetVTKMajorVersion</span><span class="p">()</span>
 
 
-<div class="viewcode-block" id="visualize_model"><a class="viewcode-back" href="../../../api.html#vampy.automatedPreProcessing.visualize.visualize_model">[docs]</a><span class="k">def</span> <span class="nf">visualize_model</span><span class="p">(</span><span class="n">network_elements</span><span class="p">,</span> <span class="n">probe_points</span><span class="p">,</span> <span class="n">output_surface</span><span class="p">,</span> <span class="n">mean_inflow_rate</span><span class="p">):</span>
+<div class="viewcode-block" id="visualize_model"><a class="viewcode-back" href="../../../api.html#vampy.automatedPreprocessing.visualize.visualize_model">[docs]</a><span class="k">def</span> <span class="nf">visualize_model</span><span class="p">(</span><span class="n">network_elements</span><span class="p">,</span> <span class="n">probe_points</span><span class="p">,</span> <span class="n">output_surface</span><span class="p">,</span> <span class="n">mean_inflow_rate</span><span class="p">):</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">    Visualize surface model / mesh with distributed flow rates at each inlet/outlet</span>
 <span class="sd">    in an interactive VTK window.</span>
@@ -356,7 +356,7 @@ title="Open an issue"
         <span class="k">if</span> <span class="ow">not</span> <span class="p">(</span><span class="n">element</span><span class="o">.</span><span class="n">IsAnOutlet</span><span class="p">()):</span>
             <span class="k">continue</span>
         <span class="n">points</span><span class="o">.</span><span class="n">InsertNextPoint</span><span class="p">(</span><span class="n">element</span><span class="o">.</span><span class="n">GetOutPointsx1</span><span class="p">()[</span><span class="mi">0</span><span class="p">])</span>
-        <span class="n">scalar</span><span class="o">.</span><span class="n">InsertNextValue</span><span class="p">(</span><span class="mf">100.0</span> <span class="o">*</span> <span class="n">element</span><span class="o">.</span><span class="n">GetBeta</span><span class="p">())</span>
+        <span class="n">scalar</span><span class="o">.</span><span class="n">InsertNextValue</span><span class="p">(</span><span class="mf">100.0</span> <span class="o">*</span> <span class="n">element</span><span class="o">.</span><span class="n">GetGamma</span><span class="p">())</span>
     <span class="n">polydata</span> <span class="o">=</span> <span class="n">vtk</span><span class="o">.</span><span class="n">vtkPolyData</span><span class="p">()</span>
     <span class="n">polydata</span><span class="o">.</span><span class="n">SetPoints</span><span class="p">(</span><span class="n">points</span><span class="p">)</span>
     <span class="n">polydata</span><span class="o">.</span><span class="n">GetPointData</span><span class="p">()</span><span class="o">.</span><span class="n">SetScalars</span><span class="p">(</span><span class="n">scalar</span><span class="p">)</span>

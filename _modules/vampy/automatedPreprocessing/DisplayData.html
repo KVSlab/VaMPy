@@ -5,7 +5,7 @@
   <head>
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>vampy.automatedPreProcessing.DisplayData &#8212; VaMPy</title>
+    <title>vampy.automatedPreprocessing.DisplayData &#8212; VaMPy</title>
     
   <!-- Loaded before other Sphinx assets -->
   <link href="../../../_static/styles/theme.css?digest=1999514e3f237ded88cf" rel="stylesheet">
@@ -182,7 +182,7 @@ const thebe_selector_output = ".output, .cell_output"
  </li>
  <li class="toctree-l1">
   <a class="reference internal" href="../../../atrium.html">
-   Hemodynamics simulation on a left atrium
+   Hemodynamic simulation in the left atrium and left atrial appendage
   </a>
  </li>
 </ul>
@@ -287,7 +287,7 @@ title="Source repository"
       </li>
       
       <li>
-        <a href="https://kvslab.github.io/VaMPy//issues/new?title=Issue%20on%20page%20%2F_modules/vampy/automatedPreProcessing/DisplayData.html&body=Your%20issue%20content%20here."
+        <a href="https://kvslab.github.io/VaMPy//issues/new?title=Issue%20on%20page%20%2F_modules/vampy/automatedPreprocessing/DisplayData.html&body=Your%20issue%20content%20here."
    class="headerbtn"
    data-toggle="tooltip"
 data-placement="left"
@@ -330,7 +330,7 @@ title="Open an issue"
                 
               <div>
                 
-  <h1>Source code for vampy.automatedPreProcessing.DisplayData</h1><div class="highlight"><pre>
+  <h1>Source code for vampy.automatedPreprocessing.DisplayData</h1><div class="highlight"><pre>
 <span></span><span class="ch">#!/usr/bin/env python</span>
 
 <span class="c1"># Program:   AneuTools</span>
@@ -345,7 +345,7 @@ title="Open an issue"
 <span class="kn">import</span> <span class="nn">vtk</span>
 
 
-<div class="viewcode-block" id="VtkPointCloud"><a class="viewcode-back" href="../../../api.html#vampy.automatedPreProcessing.DisplayData.VtkPointCloud">[docs]</a><span class="k">class</span> <span class="nc">VtkPointCloud</span><span class="p">:</span>
+<div class="viewcode-block" id="VtkPointCloud"><a class="viewcode-back" href="../../../api.html#vampy.automatedPreprocessing.DisplayData.VtkPointCloud">[docs]</a><span class="k">class</span> <span class="nc">VtkPointCloud</span><span class="p">:</span>
 
     <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">maxNumPoints</span><span class="o">=</span><span class="mf">1e6</span><span class="p">):</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">maxNumPoints</span> <span class="o">=</span> <span class="n">maxNumPoints</span>
@@ -358,7 +358,7 @@ title="Open an issue"
         <span class="bp">self</span><span class="o">.</span><span class="n">vtkActor</span><span class="o">.</span><span class="n">GetProperty</span><span class="p">()</span><span class="o">.</span><span class="n">SetPointSize</span><span class="p">(</span><span class="mf">9.</span><span class="p">)</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">vtkActor</span><span class="o">.</span><span class="n">GetProperty</span><span class="p">()</span><span class="o">.</span><span class="n">SetColor</span><span class="p">(</span><span class="mf">1.</span><span class="p">,</span> <span class="mf">.0</span><span class="p">,</span> <span class="mf">.0</span><span class="p">)</span>
 
-<div class="viewcode-block" id="VtkPointCloud.addPoint"><a class="viewcode-back" href="../../../api.html#vampy.automatedPreProcessing.DisplayData.VtkPointCloud.addPoint">[docs]</a>    <span class="k">def</span> <span class="nf">addPoint</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">point</span><span class="p">):</span>
+<div class="viewcode-block" id="VtkPointCloud.addPoint"><a class="viewcode-back" href="../../../api.html#vampy.automatedPreprocessing.DisplayData.VtkPointCloud.addPoint">[docs]</a>    <span class="k">def</span> <span class="nf">addPoint</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">point</span><span class="p">):</span>
         <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">vtkPoints</span><span class="o">.</span><span class="n">GetNumberOfPoints</span><span class="p">()</span> <span class="o">&lt;</span> <span class="bp">self</span><span class="o">.</span><span class="n">maxNumPoints</span><span class="p">:</span>
             <span class="n">pointId</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">vtkPoints</span><span class="o">.</span><span class="n">InsertNextPoint</span><span class="p">(</span><span class="n">point</span><span class="p">[:])</span>
             <span class="bp">self</span><span class="o">.</span><span class="n">vtkCells</span><span class="o">.</span><span class="n">InsertNextCell</span><span class="p">(</span><span class="mi">1</span><span class="p">)</span>
@@ -368,14 +368,14 @@ title="Open an issue"
         <span class="bp">self</span><span class="o">.</span><span class="n">vtkCells</span><span class="o">.</span><span class="n">Modified</span><span class="p">()</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">vtkPoints</span><span class="o">.</span><span class="n">Modified</span><span class="p">()</span></div>
 
-<div class="viewcode-block" id="VtkPointCloud.clearPoints"><a class="viewcode-back" href="../../../api.html#vampy.automatedPreProcessing.DisplayData.VtkPointCloud.clearPoints">[docs]</a>    <span class="k">def</span> <span class="nf">clearPoints</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+<div class="viewcode-block" id="VtkPointCloud.clearPoints"><a class="viewcode-back" href="../../../api.html#vampy.automatedPreprocessing.DisplayData.VtkPointCloud.clearPoints">[docs]</a>    <span class="k">def</span> <span class="nf">clearPoints</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">vtkPoints</span> <span class="o">=</span> <span class="n">vtk</span><span class="o">.</span><span class="n">vtkPoints</span><span class="p">()</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">vtkCells</span> <span class="o">=</span> <span class="n">vtk</span><span class="o">.</span><span class="n">vtkCellArray</span><span class="p">()</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">vtkPolyData</span><span class="o">.</span><span class="n">SetPoints</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">vtkPoints</span><span class="p">)</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">vtkPolyData</span><span class="o">.</span><span class="n">SetVerts</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">vtkCells</span><span class="p">)</span></div></div>
 
 
-<div class="viewcode-block" id="VtkText"><a class="viewcode-back" href="../../../api.html#vampy.automatedPreProcessing.DisplayData.VtkText">[docs]</a><span class="k">class</span> <span class="nc">VtkText</span><span class="p">:</span>
+<div class="viewcode-block" id="VtkText"><a class="viewcode-back" href="../../../api.html#vampy.automatedPreprocessing.DisplayData.VtkText">[docs]</a><span class="k">class</span> <span class="nc">VtkText</span><span class="p">:</span>
 
     <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">guiText</span><span class="o">=</span><span class="s2">&quot;&quot;</span><span class="p">):</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">text</span> <span class="o">=</span> <span class="n">vtk</span><span class="o">.</span><span class="n">vtkTextActor</span><span class="p">()</span>
@@ -386,9 +386,9 @@ title="Open an issue"
         <span class="bp">self</span><span class="o">.</span><span class="n">text</span><span class="o">.</span><span class="n">SetDisplayPosition</span><span class="p">(</span><span class="mi">20</span><span class="p">,</span> <span class="mi">30</span><span class="p">)</span></div>
 
 
-<div class="viewcode-block" id="DisplayModel"><a class="viewcode-back" href="../../../api.html#vampy.automatedPreProcessing.DisplayData.DisplayModel">[docs]</a><span class="k">class</span> <span class="nc">DisplayModel</span><span class="p">(</span><span class="nb">object</span><span class="p">):</span>
+<div class="viewcode-block" id="DisplayModel"><a class="viewcode-back" href="../../../api.html#vampy.automatedPreprocessing.DisplayData.DisplayModel">[docs]</a><span class="k">class</span> <span class="nc">DisplayModel</span><span class="p">(</span><span class="nb">object</span><span class="p">):</span>
 
-<div class="viewcode-block" id="DisplayModel.polyDataToActor"><a class="viewcode-back" href="../../../api.html#vampy.automatedPreProcessing.DisplayData.DisplayModel.polyDataToActor">[docs]</a>    <span class="k">def</span> <span class="nf">polyDataToActor</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">polyData</span><span class="p">,</span> <span class="n">opacity</span><span class="o">=</span><span class="mf">1.0</span><span class="p">):</span>
+<div class="viewcode-block" id="DisplayModel.polyDataToActor"><a class="viewcode-back" href="../../../api.html#vampy.automatedPreprocessing.DisplayData.DisplayModel.polyDataToActor">[docs]</a>    <span class="k">def</span> <span class="nf">polyDataToActor</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">polyData</span><span class="p">,</span> <span class="n">opacity</span><span class="o">=</span><span class="mf">1.0</span><span class="p">):</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;Wrap the provided vtkPolyData object in a mapper and an actor,</span>
 <span class="sd">        returning the actor. &quot;&quot;&quot;</span>
         <span class="n">mapper</span> <span class="o">=</span> <span class="n">vtk</span><span class="o">.</span><span class="n">vtkPolyDataMapper</span><span class="p">()</span>
@@ -402,7 +402,7 @@ title="Open an issue"
 
         <span class="k">return</span> <span class="p">(</span><span class="n">actor</span><span class="p">)</span></div>
 
-<div class="viewcode-block" id="DisplayModel.setLight"><a class="viewcode-back" href="../../../api.html#vampy.automatedPreProcessing.DisplayData.DisplayModel.setLight">[docs]</a>    <span class="k">def</span> <span class="nf">setLight</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">renderer</span><span class="p">):</span>
+<div class="viewcode-block" id="DisplayModel.setLight"><a class="viewcode-back" href="../../../api.html#vampy.automatedPreprocessing.DisplayData.DisplayModel.setLight">[docs]</a>    <span class="k">def</span> <span class="nf">setLight</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">renderer</span><span class="p">):</span>
         <span class="n">lightKit</span> <span class="o">=</span> <span class="n">vtk</span><span class="o">.</span><span class="n">vtkLightKit</span><span class="p">()</span>
         <span class="n">lightKit</span><span class="o">.</span><span class="n">MaintainLuminanceOn</span><span class="p">()</span>
         <span class="n">lightKit</span><span class="o">.</span><span class="n">SetKeyLightIntensity</span><span class="p">(</span><span class="mf">0.8</span><span class="p">)</span>
@@ -422,7 +422,7 @@ title="Open an issue"
         <span class="n">lightKit</span><span class="o">.</span><span class="n">SetKeyToBackRatio</span><span class="p">(</span><span class="mf">1000.</span><span class="p">)</span>
         <span class="n">lightKit</span><span class="o">.</span><span class="n">AddLightsToRenderer</span><span class="p">(</span><span class="n">renderer</span><span class="p">)</span></div>
 
-<div class="viewcode-block" id="DisplayModel.renderWindow"><a class="viewcode-back" href="../../../api.html#vampy.automatedPreProcessing.DisplayData.DisplayModel.renderWindow">[docs]</a>    <span class="k">def</span> <span class="nf">renderWindow</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">renderer</span><span class="p">,</span> <span class="n">titleWindow</span><span class="p">):</span>
+<div class="viewcode-block" id="DisplayModel.renderWindow"><a class="viewcode-back" href="../../../api.html#vampy.automatedPreprocessing.DisplayData.DisplayModel.renderWindow">[docs]</a>    <span class="k">def</span> <span class="nf">renderWindow</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">renderer</span><span class="p">,</span> <span class="n">titleWindow</span><span class="p">):</span>
         <span class="n">renderWindow</span> <span class="o">=</span> <span class="n">vtk</span><span class="o">.</span><span class="n">vtkRenderWindow</span><span class="p">()</span>
         <span class="n">renderWindow</span><span class="o">.</span><span class="n">SetSize</span><span class="p">(</span><span class="mi">700</span><span class="p">,</span> <span class="mi">700</span><span class="p">)</span>
         <span class="n">renderWindow</span><span class="o">.</span><span class="n">AddRenderer</span><span class="p">(</span><span class="n">renderer</span><span class="p">)</span>
@@ -438,7 +438,7 @@ title="Open an issue"
         <span class="n">interactor</span><span class="o">.</span><span class="n">Initialize</span><span class="p">()</span>
         <span class="n">interactor</span><span class="o">.</span><span class="n">Start</span><span class="p">()</span></div>
 
-<div class="viewcode-block" id="DisplayModel.DisplayProbesAndModel"><a class="viewcode-back" href="../../../api.html#vampy.automatedPreProcessing.DisplayData.DisplayModel.DisplayProbesAndModel">[docs]</a>    <span class="k">def</span> <span class="nf">DisplayProbesAndModel</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">centerline</span><span class="p">,</span> <span class="n">fileNameCenterline</span><span class="p">,</span>
+<div class="viewcode-block" id="DisplayModel.DisplayProbesAndModel"><a class="viewcode-back" href="../../../api.html#vampy.automatedPreprocessing.DisplayData.DisplayModel.DisplayProbesAndModel">[docs]</a>    <span class="k">def</span> <span class="nf">DisplayProbesAndModel</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">centerline</span><span class="p">,</span> <span class="n">fileNameCenterline</span><span class="p">,</span>
                               <span class="n">listProbePoints</span><span class="p">,</span> <span class="n">model</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;Displays a model and the corresponding probe points along</span>
 <span class="sd">        the centerline. &quot;&quot;&quot;</span>

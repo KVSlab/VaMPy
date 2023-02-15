@@ -185,7 +185,7 @@ const thebe_selector_output = ".output, .cell_output"
  </li>
  <li class="toctree-l1">
   <a class="reference internal" href="atrium.html">
-   Hemodynamics simulation on a left atrium
+   Hemodynamic simulation in the left atrium and left atrial appendage
   </a>
  </li>
 </ul>
@@ -418,23 +418,17 @@ title="Print to PDF"
                 
   <section class="tex2jax_ignore mathjax_ignore" id="tutorials">
 <h1>Tutorials<a class="headerlink" href="#tutorials" title="Permalink to this headline">#</a></h1>
-<p>These tutorials are meant to guide the user through the basic steps of
-performing a computational fluid dynamic (CFD) simulation in a vascular
-body. The tutorials are divided into two main problems where we will first
-consider a model of the <a class="reference external" href="https://en.wikipedia.org/wiki/Internal_carotid_artery">internal carotid
-artery</a> (ICA)
-with an aneurysm, followed by a model of the <a class="reference external" href="https://en.wikipedia.org/wiki/Atrium_(heart)">left
-atrium</a>. For the ICA, we
-will demonstrate different approaches for meshing and pre-processing of
-the model, followed by a CFD simulation using the Oasis software, before
-post-processing the results. For the left atrium model, we will
-investigate local refinement in a user-defined region, also followed by
-CFD simulation and post-processing of the results.</p>
-<p>We assume that you have VaMPy installed, meaning you have a working
-version of <em>morphMan</em> and <em>Oasis</em> on your computer. It is also
-beneficial, but not necessary, that you are familiar with the
-<a class="reference external" href="https://www.paraview.org/">ParaView</a> visualization software, which we
-will frequently be using to visualize the geometries and results.</p>
+<p>These tutorials are meant to guide the user through the basic steps of performing a computational fluid dynamic (CFD)
+simulation in a vascular body. The tutorials are divided into two main problems where we will first consider a model of
+the <a class="reference external" href="https://en.wikipedia.org/wiki/Internal_carotid_artery">internal carotid artery</a> (ICA)
+with an aneurysm, followed by a model of the <a class="reference external" href="https://en.wikipedia.org/wiki/Atrium_(heart)">left atrium</a>. For the ICA,
+we will demonstrate different approaches for meshing and pre-processing of the model, followed by a CFD simulation using
+the Oasis software, before post-processing the results. For the left atrium model, we will investigate local refinement
+in a user-defined region, also followed by CFD simulation and post-processing of the results.</p>
+<p>We assume that you have VaMPy installed, meaning you have a working version
+of <a class="reference external" href="https://github.com/KVSlab/morphMan">morphMan</a> and <a class="reference external" href="https://github.com/mikaem/Oasis">Oasis</a> on your computer. It is
+also beneficial, but not necessary, that you are familiar with the <a class="reference external" href="https://www.paraview.org/">ParaView</a>
+visualization software, which we will frequently be using to visualize the geometries and results.</p>
 <section id="link-to-tutorials">
 <h2>Link to tutorials<a class="headerlink" href="#link-to-tutorials" title="Permalink to this headline">#</a></h2>
 <ul class="simple">
@@ -456,7 +450,7 @@ will frequently be using to visualize the geometries and results.</p>
             mode: "python"
         },
         kernelOptions: {
-            kernelName: "python3",
+            name: "python3",
             path: "./."
         },
         predefinedOutput: true

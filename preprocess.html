@@ -50,6 +50,8 @@ const thebe_selector_input = "pre"
 const thebe_selector_output = ".output, .cell_output"
 </script>
     <script async="async" src="_static/sphinx-thebe.js"></script>
+    <script>window.MathJax = {"options": {"processHtmlClass": "tex2jax_process|mathjax_process|math|output_area"}}</script>
+    <script defer="defer" src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-mml-chtml.js"></script>
     <link rel="index" title="Index" href="genindex.html" />
     <link rel="search" title="Search" href="search.html" />
     <link rel="next" title="Computational fluid dynamics" href="simulation.html" />
@@ -185,7 +187,7 @@ const thebe_selector_output = ".output, .cell_output"
  </li>
  <li class="toctree-l1">
   <a class="reference internal" href="atrium.html">
-   Hemodynamics simulation on a left atrium
+   Hemodynamic simulation in the left atrium and left atrial appendage
   </a>
  </li>
 </ul>
@@ -382,6 +384,31 @@ title="Print to PDF"
    Meshing and boundary conditions
   </a>
  </li>
+ <li class="toc-h2 nav-item toc-entry">
+  <a class="reference internal nav-link" href="#mething-method">
+   Mething method
+  </a>
+ </li>
+ <li class="toc-h2 nav-item toc-entry">
+  <a class="reference internal nav-link" href="#refinement">
+   Refinement
+  </a>
+ </li>
+ <li class="toc-h2 nav-item toc-entry">
+  <a class="reference internal nav-link" href="#smoothing">
+   Smoothing
+  </a>
+ </li>
+ <li class="toc-h2 nav-item toc-entry">
+  <a class="reference internal nav-link" href="#boundary-layers">
+   Boundary layers
+  </a>
+ </li>
+ <li class="toc-h2 nav-item toc-entry">
+  <a class="reference internal nav-link" href="#flow-extensions">
+   Flow extensions
+  </a>
+ </li>
 </ul>
 
     </nav>
@@ -406,6 +433,31 @@ title="Print to PDF"
    Meshing and boundary conditions
   </a>
  </li>
+ <li class="toc-h2 nav-item toc-entry">
+  <a class="reference internal nav-link" href="#mething-method">
+   Mething method
+  </a>
+ </li>
+ <li class="toc-h2 nav-item toc-entry">
+  <a class="reference internal nav-link" href="#refinement">
+   Refinement
+  </a>
+ </li>
+ <li class="toc-h2 nav-item toc-entry">
+  <a class="reference internal nav-link" href="#smoothing">
+   Smoothing
+  </a>
+ </li>
+ <li class="toc-h2 nav-item toc-entry">
+  <a class="reference internal nav-link" href="#boundary-layers">
+   Boundary layers
+  </a>
+ </li>
+ <li class="toc-h2 nav-item toc-entry">
+  <a class="reference internal nav-link" href="#flow-extensions">
+   Flow extensions
+  </a>
+ </li>
 </ul>
 
                         </nav>
@@ -420,21 +472,119 @@ title="Print to PDF"
 <h1>Pre-processing<a class="headerlink" href="#pre-processing" title="Permalink to this headline">#</a></h1>
 <section id="meshing-and-boundary-conditions">
 <h2>Meshing and boundary conditions<a class="headerlink" href="#meshing-and-boundary-conditions" title="Permalink to this headline">#</a></h2>
-<p>In this brief introduction, we present VaMPy’s functionality by
-preparing, simulating, and post-processing models of the <a class="reference external" href="https://en.wikipedia.org/wiki/Internal_carotid_artery">internal carotid
-artery</a> and the <a class="reference external" href="https://en.wikipedia.org/wiki/Atrium_(heart)">left atrium</a>, although
-the software may be readily used for other tubular or vascular shapes.</p>
-<p>The first step of using the Vascular Modeling Pypeline is
-pre-processing. The pre-processing scripts are located inside the
-<code class="docutils literal notranslate"><span class="pre">automatedPreProcessing</span></code> folder, and can be run by using the <code class="docutils literal notranslate"><span class="pre">vampy-mesh</span></code> command in the terminal. The script generates a mesh, boundary conditions, and probes for velocity and pressure sampling. Here we will perform pre-processing for the artery case located in the <code class="docutils literal notranslate"><span class="pre">tests</span></code> folder. In this example we pass the input model path (<code class="docutils literal notranslate"><span class="pre">-i</span></code>) and mesh coarsening factor (<code class="docutils literal notranslate"><span class="pre">-c</span></code>) command-line arguments:</p>
-<div class="highlight-console notranslate"><div class="highlight"><pre><span></span><span class="gp">$ </span>vampy-mesh<span class="w"> </span>-i<span class="w"> </span>tests/Case_test_artery/artery.vtp<span class="w"> </span>-c<span class="w"> </span><span class="m">1</span>.3
+<p>In this brief introduction, we present VaMPy’s functionality by preparing, simulating, and post-processing models of
+the <a class="reference external" href="https://en.wikipedia.org/wiki/Internal_carotid_artery">internal carotid artery</a> and
+the <a class="reference external" href="https://en.wikipedia.org/wiki/Atrium_(heart)">left atrium</a>, although the software may be readily used for other
+tubular or vascular shapes.</p>
+<p>The first step of using the Vascular Modeling Pypeline is pre-processing. The pre-processing scripts are located inside
+the
+<code class="docutils literal notranslate"><span class="pre">automatedPreprocessing</span></code> folder, and can be run by using the <code class="docutils literal notranslate"><span class="pre">vampy-mesh</span></code> command in the terminal. The script generates
+a mesh, boundary conditions, and probes for velocity and pressure sampling. Here we will perform pre-processing for the
+artery case located in the <code class="docutils literal notranslate"><span class="pre">models</span></code> folder. In this example we pass the input model path (<code class="docutils literal notranslate"><span class="pre">-i</span></code>) and mesh coarsening
+factor (<code class="docutils literal notranslate"><span class="pre">-c</span></code>) command-line arguments:</p>
+<div class="highlight-console notranslate"><div class="highlight"><pre><span></span><span class="gp">$ </span>vampy-mesh<span class="w"> </span>-i<span class="w"> </span>models/artery/artery.vtp<span class="w"> </span>-c<span class="w"> </span><span class="m">1</span>.3
 </pre></div>
 </div>
-<p>When complete, a render window will pop up showing the meshed model, prope points, flow rate and pressure split, as shown in <a class="reference internal" href="#render"><span class="std std-numref">Fig. 1</span></a>. The script will save the volumetric mesh as <code class="docutils literal notranslate"><span class="pre">artery.vtu</span></code>, alongside a compressed DOLFIN mesh in <code class="docutils literal notranslate"><span class="pre">artery.xml.gz</span></code>, used for the computational fluid dynamics (CFD) simulations. The pre-processing script will also produce an info file and a probe file, named <code class="docutils literal notranslate"><span class="pre">artery_info.json</span></code> and <code class="docutils literal notranslate"><span class="pre">artery_probes</span></code>, respectively.</p>
+<p>When complete, a render window will pop up showing the meshed model, prope points, flow rate and pressure split, as
+shown in <a class="reference internal" href="#render"><span class="std std-numref">Fig. 1</span></a>. The script will save the volumetric mesh as <code class="docutils literal notranslate"><span class="pre">artery.vtu</span></code>, alongside a compressed DOLFIN mesh
+in <code class="docutils literal notranslate"><span class="pre">artery.xml.gz</span></code>, used for the computational fluid dynamics (CFD) simulations. The pre-processing script will also
+produce an info file and a probe file, named <code class="docutils literal notranslate"><span class="pre">artery_info.json</span></code> and <code class="docutils literal notranslate"><span class="pre">artery_probes</span></code>, respectively.</p>
 <figure class="align-default" id="render">
 <img alt="_images/render.png" src="_images/render.png" />
 <figcaption>
 <p><span class="caption-number">Fig. 1 </span><span class="caption-text">Visualization of the meshed artery model by running <code class="docutils literal notranslate"><span class="pre">vampy-mesh</span></code>.</span><a class="headerlink" href="#render" title="Permalink to this image">#</a></p>
+</figcaption>
+</figure>
+<div class="admonition attention">
+<p class="admonition-title">Attention</p>
+<p>VaMPy has been developed for models that are originally segmented from medical images, where the units are
+often in millimeters (mm). Hence, the current implementation assumes that the input model has been scaled accordinly (to
+mm). It is also preferable that the model is uncapped (open), although there is some experimental methods for uncapping
+a surface model in case it is capped (closed).</p>
+<p>Scaling your model can simply be done by using <code class="docutils literal notranslate"><span class="pre">vmtksurfacescaling</span></code>. For
+instance, scaling from m to mm is performed by running the following command:</p>
+<div class="highlight-console notranslate"><div class="highlight"><pre><span></span><span class="gp">$ </span>vmtksurfacescaling<span class="w"> </span>-ifile<span class="w"> </span>model.vtp<span class="w"> </span>-ofile<span class="w"> </span>model.vtp<span class="w"> </span>-scale<span class="w"> </span><span class="m">1000</span><span class="w"> </span>
+</pre></div>
+</div>
+</div>
+</section>
+<section id="mething-method">
+<h2>Mething method<a class="headerlink" href="#mething-method" title="Permalink to this headline">#</a></h2>
+<p>There are currently three meshing methods to chose between, which determine the local mesh density. The methods are
+selected throught command line argument <code class="docutils literal notranslate"><span class="pre">--meshing-method</span></code> (<code class="docutils literal notranslate"><span class="pre">-m</span></code>), and can be set to either <code class="docutils literal notranslate"><span class="pre">constant</span></code>, <code class="docutils literal notranslate"><span class="pre">diameter</span></code>,
+or <code class="docutils literal notranslate"><span class="pre">curvature</span></code>. The three methods are further examined in the <a class="reference internal" href="artery.html#tutorial-artery"><span class="std std-ref">artery tutorial</span></a>.</p>
+</section>
+<section id="refinement">
+<h2>Refinement<a class="headerlink" href="#refinement" title="Permalink to this headline">#</a></h2>
+<p>Mesh generation may be performed with refinement of a particlar region. To manually refine a region on a geometry, the
+user may provide the <code class="docutils literal notranslate"><span class="pre">--refine-region</span></code> flag, or <code class="docutils literal notranslate"><span class="pre">-r</span></code> for short. In addition, the user may provide
+the <code class="docutils literal notranslate"><span class="pre">--region-points</span></code> (<code class="docutils literal notranslate"><span class="pre">-rp</span></code>) argument, followed by three numbers representing the <span class="math notranslate nohighlight">\(x, y\)</span>, and <span class="math notranslate nohighlight">\(z\)</span> coordinates of a
+point on the surface to be refined. If the point is located slightly off the surface, it will stick to the closest
+surface point. And example of this feature is shown in the <a class="reference internal" href="atrium.html#tutorial-atrium"><span class="std std-ref">atrium tutorial</span></a>.</p>
+</section>
+<section id="smoothing">
+<h2>Smoothing<a class="headerlink" href="#smoothing" title="Permalink to this headline">#</a></h2>
+<p>It may be necessary to smooth the input model in order to improve the quality of the mesh. In VaMPy, we have included
+three smoothing techniques that are controlled by the <code class="docutils literal notranslate"><span class="pre">--smoothing-method</span></code> (<code class="docutils literal notranslate"><span class="pre">-sm</span></code>) argument. These are
+Laplacian (<code class="docutils literal notranslate"><span class="pre">laplace</span></code>), Taubin (<code class="docutils literal notranslate"><span class="pre">taubin</span></code>), and Voronoi diagram smoothing (<code class="docutils literal notranslate"><span class="pre">voronoi</span></code>). Furthermore, for the Laplace and
+Taubin smoothing, the user may select the number of smoothing iterations, controlled by
+the <code class="docutils literal notranslate"><span class="pre">--smoothing-iterations</span></code> (<code class="docutils literal notranslate"><span class="pre">-si</span></code>)
+argument. Similarly, the intensity of the Voronoi diagram smoothing method may be controlled by
+the <code class="docutils literal notranslate"><span class="pre">--smoothing-factor</span></code> (<code class="docutils literal notranslate"><span class="pre">-sf</span></code>) argument, which ranges between 0 and 1, corresponding to 0 and 100%, respectively. To
+perform Laplacian smoothing using the artery model, we may run the following command:</p>
+<div class="highlight-console notranslate"><div class="highlight"><pre><span></span><span class="gp">$ </span>vampy-mesh<span class="w"> </span>-i<span class="w"> </span>models/artery/artery.vtp<span class="w"> </span>-c<span class="w"> </span><span class="m">1</span>.3<span class="w"> </span>--smoothing-method<span class="w"> </span>laplace<span class="w"> </span>-si<span class="w"> </span><span class="m">800</span>
+</pre></div>
+</div>
+<p>In <a class="reference internal" href="#id1"><span class="std std-numref">Fig. 2</span></a>, we have shown a comparison of all the smoothing methods using <code class="docutils literal notranslate"><span class="pre">-si</span> <span class="pre">800</span></code> and <code class="docutils literal notranslate"><span class="pre">-sf</span> <span class="pre">0.75</span></code>, and
+included the original model for reference (in red).</p>
+<figure class="align-default" id="id1">
+<img alt="_images/smoothing.png" src="_images/smoothing.png" />
+<figcaption>
+<p><span class="caption-number">Fig. 2 </span><span class="caption-text">From left to right: the original artery model in red, and a comparison of the three smoothing methods; Laplace, Taubin and Voronoi smoothing, against the original model (red).</span><a class="headerlink" href="#id1" title="Permalink to this image">#</a></p>
+</figcaption>
+</figure>
+</section>
+<section id="boundary-layers">
+<h2>Boundary layers<a class="headerlink" href="#boundary-layers" title="Permalink to this headline">#</a></h2>
+<p>In fluid flows where the Reynolds numbers are large, flow simulations will cause strong gradients near the wall,
+requiring fine resolution of the solution close to the boundary. In this situation it is essential to refine the finite
+element mesh isotropically to capture strong gradients. This is also relevant when computing hemodynamic indices on the
+domain boundary, such as the wall shear stress, which is demonstrated in the <a class="reference internal" href="postprocess.html#overview-post"><span class="std std-ref">post-processing</span></a> section.
+Therefore, VaMPy adds four boundary layers to the computational domain by default. However, these can be turned off by
+setting the <code class="docutils literal notranslate"><span class="pre">--add-boundary-layer</span></code> (<code class="docutils literal notranslate"><span class="pre">-bl</span></code>) argument to <code class="docutils literal notranslate"><span class="pre">False</span></code>. Thus, to skip adding boundary layers for the artery
+model, we may run the following command:</p>
+<div class="highlight-console notranslate"><div class="highlight"><pre><span></span><span class="gp">$ </span>vampy-mesh<span class="w"> </span>-i<span class="w"> </span>models/artery/artery.vtp<span class="w"> </span>-c<span class="w"> </span><span class="m">1</span>.3<span class="w"> </span>--add-boundary-layer<span class="w"> </span>False
+</pre></div>
+</div>
+<p>In <a class="reference internal" href="#bl"><span class="std std-numref">Fig. 3</span></a> we demonstrate the qualitative difference when adding or removing boundary layers to the volumetric
+mesh.</p>
+<figure class="align-default" id="bl">
+<img alt="_images/boundary_layers.png" src="_images/boundary_layers.png" />
+<figcaption>
+<p><span class="caption-number">Fig. 3 </span><span class="caption-text">On the left, a volumetric mesh with no boundary layer. On the right, a volumetric mesh with four boundary layers, which is the default in VaMPy.</span><a class="headerlink" href="#bl" title="Permalink to this image">#</a></p>
+</figcaption>
+</figure>
+</section>
+<section id="flow-extensions">
+<h2>Flow extensions<a class="headerlink" href="#flow-extensions" title="Permalink to this headline">#</a></h2>
+<p>Prior to mesh generation, flow extensions may be appended to the input model, often to assure that flow is fully
+developed as it enters and leaves the domain during CFD simulation. In VaMPy, this is controlled by
+the <code class="docutils literal notranslate"><span class="pre">--add-flowextensions</span></code> (<code class="docutils literal notranslate"><span class="pre">-f</span></code>)
+argument, which takes a boolean value and is <code class="docutils literal notranslate"><span class="pre">True</span></code> by default. The user may also supply the length of the flow
+extensions at what is considered to be the inlet(s) and outlet(s), controlled by the <code class="docutils literal notranslate"><span class="pre">--inlet-flowextension</span></code> (<code class="docutils literal notranslate"><span class="pre">-fli</span></code>)
+and <code class="docutils literal notranslate"><span class="pre">--outlet-flowextension</span></code> (<code class="docutils literal notranslate"><span class="pre">-flo</span></code>) command line arguments. Both are set to <code class="docutils literal notranslate"><span class="pre">5</span></code> by default, corresponding to a flow
+extension length equal to five times the length of the local radius at the boundary (inlet/outlet). To demonstrate, the
+following command will apply flow extensions to the artery model that are two and four times the local radius in length
+at the inlet and outlet, respectively:</p>
+<div class="highlight-console notranslate"><div class="highlight"><pre><span></span><span class="gp">$ </span>vampy-mesh<span class="w"> </span>-i<span class="w"> </span>models/artery/artery.vtp<span class="w"> </span>-c<span class="w"> </span><span class="m">1</span>.3<span class="w"> </span>--add-flowextensions<span class="w"> </span>True<span class="w"> </span>-fli<span class="w"> </span><span class="m">2</span><span class="w"> </span>-flo<span class="w"> </span><span class="m">4</span>
+</pre></div>
+</div>
+<p>To visualize the difference, we have shown a comparison between the original model (left) and four models with flow
+extensions of varying length, ranging from 1 to 4 times the local radius, in <a class="reference internal" href="#flowext"><span class="std std-numref">Fig. 4</span></a>.</p>
+<figure class="align-default" id="flowext">
+<img alt="_images/flow_extension.png" src="_images/flow_extension.png" />
+<figcaption>
+<p><span class="caption-number">Fig. 4 </span><span class="caption-text">On the left, the original model with no flow extensions. The remining models harbor flow extensions of varying length, based on the local radius at the outlet and inlet boundary.</span><a class="headerlink" href="#flowext" title="Permalink to this image">#</a></p>
 </figcaption>
 </figure>
 </section>
@@ -452,7 +602,7 @@ pre-processing. The pre-processing scripts are located inside the
             mode: "python"
         },
         kernelOptions: {
-            kernelName: "python3",
+            name: "python3",
             path: "./."
         },
         predefinedOutput: true

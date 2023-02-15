@@ -5,7 +5,7 @@
   <head>
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>vampy.automatedPreProcessing.NetworkBoundaryConditions &#8212; VaMPy</title>
+    <title>vampy.automatedPreprocessing.NetworkBoundaryConditions &#8212; VaMPy</title>
     
   <!-- Loaded before other Sphinx assets -->
   <link href="../../../_static/styles/theme.css?digest=1999514e3f237ded88cf" rel="stylesheet">
@@ -182,7 +182,7 @@ const thebe_selector_output = ".output, .cell_output"
  </li>
  <li class="toctree-l1">
   <a class="reference internal" href="../../../atrium.html">
-   Hemodynamics simulation on a left atrium
+   Hemodynamic simulation in the left atrium and left atrial appendage
   </a>
  </li>
 </ul>
@@ -287,7 +287,7 @@ title="Source repository"
       </li>
       
       <li>
-        <a href="https://kvslab.github.io/VaMPy//issues/new?title=Issue%20on%20page%20%2F_modules/vampy/automatedPreProcessing/NetworkBoundaryConditions.html&body=Your%20issue%20content%20here."
+        <a href="https://kvslab.github.io/VaMPy//issues/new?title=Issue%20on%20page%20%2F_modules/vampy/automatedPreprocessing/NetworkBoundaryConditions.html&body=Your%20issue%20content%20here."
    class="headerbtn"
    data-toggle="tooltip"
 data-placement="left"
@@ -330,7 +330,7 @@ title="Open an issue"
                 
               <div>
                 
-  <h1>Source code for vampy.automatedPreProcessing.NetworkBoundaryConditions</h1><div class="highlight"><pre>
+  <h1>Source code for vampy.automatedPreprocessing.NetworkBoundaryConditions</h1><div class="highlight"><pre>
 <span></span><span class="ch">#!/usr/bin/env python</span>
 
 <span class="c1"># Program:   AneuTool</span>
@@ -342,7 +342,7 @@ title="Open an issue"
 
 <span class="c1">#   Copyright (c) Christophe Chnafa. All rights reserved.</span>
 
-<div class="viewcode-block" id="FlowSplitting"><a class="viewcode-back" href="../../../api.html#vampy.automatedPreProcessing.NetworkBoundaryConditions.FlowSplitting">[docs]</a><span class="k">class</span> <span class="nc">FlowSplitting</span><span class="p">(</span><span class="nb">object</span><span class="p">):</span>
+<div class="viewcode-block" id="FlowSplitting"><a class="viewcode-back" href="../../../api.html#vampy.automatedPreprocessing.NetworkBoundaryConditions.FlowSplitting">[docs]</a><span class="k">class</span> <span class="nc">FlowSplitting</span><span class="p">(</span><span class="nb">object</span><span class="p">):</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;This class computes the flow splitting for a network according to</span>
 <span class="sd">    [ADD REF AJRN] and [VALIDATION PAPER]&quot;&quot;&quot;</span>
 
@@ -351,7 +351,7 @@ title="Open an issue"
         <span class="bp">self</span><span class="o">.</span><span class="n">hasComputedBetas</span> <span class="o">=</span> <span class="kc">False</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">hasComputedGammas</span> <span class="o">=</span> <span class="kc">False</span>
 
-<div class="viewcode-block" id="FlowSplitting.ComputeAlphas"><a class="viewcode-back" href="../../../api.html#vampy.automatedPreProcessing.NetworkBoundaryConditions.FlowSplitting.ComputeAlphas">[docs]</a>    <span class="k">def</span> <span class="nf">ComputeAlphas</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">network</span><span class="p">,</span> <span class="n">verboseprint</span><span class="p">):</span>
+<div class="viewcode-block" id="FlowSplitting.ComputeAlphas"><a class="viewcode-back" href="../../../api.html#vampy.automatedPreprocessing.NetworkBoundaryConditions.FlowSplitting.ComputeAlphas">[docs]</a>    <span class="k">def</span> <span class="nf">ComputeAlphas</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">network</span><span class="p">,</span> <span class="n">verboseprint</span><span class="p">):</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;Compute the segments alpha coefficient.</span>
 
 <span class="sd">        Compute for each blanked segment of a network its attributed alpha</span>
@@ -393,7 +393,7 @@ title="Open an issue"
             <span class="n">element</span><span class="o">.</span><span class="n">SetAlpha</span><span class="p">(</span><span class="n">alpha</span><span class="p">)</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">hasComputedAlphas</span> <span class="o">=</span> <span class="kc">True</span></div>
 
-<div class="viewcode-block" id="FlowSplitting.ComputeBetas"><a class="viewcode-back" href="../../../api.html#vampy.automatedPreProcessing.NetworkBoundaryConditions.FlowSplitting.ComputeBetas">[docs]</a>    <span class="k">def</span> <span class="nf">ComputeBetas</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">network</span><span class="p">,</span> <span class="n">verboseprint</span><span class="p">):</span>
+<div class="viewcode-block" id="FlowSplitting.ComputeBetas"><a class="viewcode-back" href="../../../api.html#vampy.automatedPreprocessing.NetworkBoundaryConditions.FlowSplitting.ComputeBetas">[docs]</a>    <span class="k">def</span> <span class="nf">ComputeBetas</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">network</span><span class="p">,</span> <span class="n">verboseprint</span><span class="p">):</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;Compute the outlets beta coefficient.</span>
 
 <span class="sd">        Compute for each outlet segment of a network its attributed beta</span>
@@ -431,7 +431,7 @@ title="Open an issue"
             <span class="n">element</span><span class="o">.</span><span class="n">SetBeta</span><span class="p">(</span><span class="n">beta</span><span class="p">)</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">hasComputedBetas</span> <span class="o">=</span> <span class="kc">True</span></div>
 
-<div class="viewcode-block" id="FlowSplitting.ComputeGammas"><a class="viewcode-back" href="../../../api.html#vampy.automatedPreProcessing.NetworkBoundaryConditions.FlowSplitting.ComputeGammas">[docs]</a>    <span class="k">def</span> <span class="nf">ComputeGammas</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">network</span><span class="p">,</span> <span class="n">verboseprint</span><span class="p">):</span>
+<div class="viewcode-block" id="FlowSplitting.ComputeGammas"><a class="viewcode-back" href="../../../api.html#vampy.automatedPreprocessing.NetworkBoundaryConditions.FlowSplitting.ComputeGammas">[docs]</a>    <span class="k">def</span> <span class="nf">ComputeGammas</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">network</span><span class="p">,</span> <span class="n">verboseprint</span><span class="p">):</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;Compute the outlets gamma coefficient.</span>
 
 <span class="sd">        Compute for each outlet segment of a network its attributed beta</span>
@@ -453,7 +453,7 @@ title="Open an issue"
             <span class="n">element</span><span class="o">.</span><span class="n">SetGamma</span><span class="p">(</span><span class="n">gamma</span><span class="p">)</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">hasComputedGammas</span> <span class="o">=</span> <span class="kc">True</span></div>
 
-<div class="viewcode-block" id="FlowSplitting.CheckTotalFlowRate"><a class="viewcode-back" href="../../../api.html#vampy.automatedPreProcessing.NetworkBoundaryConditions.FlowSplitting.CheckTotalFlowRate">[docs]</a>    <span class="k">def</span> <span class="nf">CheckTotalFlowRate</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">network</span><span class="p">,</span> <span class="n">verboseprint</span><span class="p">):</span>
+<div class="viewcode-block" id="FlowSplitting.CheckTotalFlowRate"><a class="viewcode-back" href="../../../api.html#vampy.automatedPreprocessing.NetworkBoundaryConditions.FlowSplitting.CheckTotalFlowRate">[docs]</a>    <span class="k">def</span> <span class="nf">CheckTotalFlowRate</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">network</span><span class="p">,</span> <span class="n">verboseprint</span><span class="p">):</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;Check if the sum of the outflows is 100%. &quot;&quot;&quot;</span>
         <span class="n">tol</span> <span class="o">=</span> <span class="mf">0.000001</span>  <span class="c1"># Flow balance error tolerance.</span>
         <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">hasComputedBetas</span><span class="p">:</span>

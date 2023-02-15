@@ -5,7 +5,7 @@
   <head>
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>vampy.automatedPreProcessing.preprocessing_common &#8212; VaMPy</title>
+    <title>vampy.automatedPreprocessing.preprocessing_common &#8212; VaMPy</title>
     
   <!-- Loaded before other Sphinx assets -->
   <link href="../../../_static/styles/theme.css?digest=1999514e3f237ded88cf" rel="stylesheet">
@@ -182,7 +182,7 @@ const thebe_selector_output = ".output, .cell_output"
  </li>
  <li class="toctree-l1">
   <a class="reference internal" href="../../../atrium.html">
-   Hemodynamics simulation on a left atrium
+   Hemodynamic simulation in the left atrium and left atrial appendage
   </a>
  </li>
 </ul>
@@ -287,7 +287,7 @@ title="Source repository"
       </li>
       
       <li>
-        <a href="https://kvslab.github.io/VaMPy//issues/new?title=Issue%20on%20page%20%2F_modules/vampy/automatedPreProcessing/preprocessing_common.html&body=Your%20issue%20content%20here."
+        <a href="https://kvslab.github.io/VaMPy//issues/new?title=Issue%20on%20page%20%2F_modules/vampy/automatedPreprocessing/preprocessing_common.html&body=Your%20issue%20content%20here."
    class="headerbtn"
    data-toggle="tooltip"
 data-placement="left"
@@ -330,7 +330,7 @@ title="Open an issue"
                 
               <div>
                 
-  <h1>Source code for vampy.automatedPreProcessing.preprocessing_common</h1><div class="highlight"><pre>
+  <h1>Source code for vampy.automatedPreprocessing.preprocessing_common</h1><div class="highlight"><pre>
 <span></span><span class="kn">from</span> <span class="nn">os</span> <span class="kn">import</span> <span class="n">path</span>
 
 <span class="kn">import</span> <span class="nn">numpy</span> <span class="k">as</span> <span class="nn">np</span>
@@ -339,38 +339,17 @@ title="Open an issue"
     <span class="n">get_distance</span><span class="p">,</span> <span class="n">get_number_of_arrays</span><span class="p">,</span> <span class="n">vmtk_smooth_surface</span><span class="p">,</span> <span class="n">get_point_data_array</span><span class="p">,</span> <span class="n">create_vtk_array</span><span class="p">,</span> \
     <span class="n">get_vtk_point_locator</span><span class="p">,</span> <span class="n">vtk_extract_feature_edges</span><span class="p">,</span> <span class="n">get_uncapped_surface</span><span class="p">,</span> <span class="n">vtk_compute_connectivity</span><span class="p">,</span> \
     <span class="n">vtk_compute_mass_properties</span><span class="p">,</span> <span class="n">extract_single_line</span><span class="p">,</span> <span class="n">get_centerline_tolerance</span>
-<span class="kn">from</span> <span class="nn">vampy.automatedPreProcessing</span> <span class="kn">import</span> <span class="n">ImportData</span>
-<span class="kn">from</span> <span class="nn">vampy.automatedPreProcessing.NetworkBoundaryConditions</span> <span class="kn">import</span> <span class="n">FlowSplitting</span>
-<span class="kn">from</span> <span class="nn">vampy.automatedPreProcessing.vmtkpointselector</span> <span class="kn">import</span> <span class="n">vmtkPickPointSeedSelector</span>
+
+<span class="kn">from</span> <span class="nn">vampy.automatedPreprocessing</span> <span class="kn">import</span> <span class="n">ImportData</span>
+<span class="kn">from</span> <span class="nn">vampy.automatedPreprocessing.NetworkBoundaryConditions</span> <span class="kn">import</span> <span class="n">FlowSplitting</span>
+<span class="kn">from</span> <span class="nn">vampy.automatedPreprocessing.vmtk_pointselector</span> <span class="kn">import</span> <span class="n">vmtkPickPointSeedSelector</span>
 
 <span class="c1"># Global array names</span>
-<span class="n">radiusArrayName</span> <span class="o">=</span> <span class="s1">&#39;MaximumInscribedSphereRadius&#39;</span>
-<span class="n">parallelTransportNormalsArrayName</span> <span class="o">=</span> <span class="s1">&#39;ParallelTransportNormals&#39;</span>
-<span class="n">groupIDsArrayName</span> <span class="o">=</span> <span class="s2">&quot;GroupIds&quot;</span>
-<span class="n">abscissasArrayName</span> <span class="o">=</span> <span class="s1">&#39;Abscissas&#39;</span>
-<span class="n">clippingArrayName</span> <span class="o">=</span> <span class="s1">&#39;ClippingArray&#39;</span>
-<span class="n">branchClippingArrayName</span> <span class="o">=</span> <span class="s1">&#39;BranchClippingArray&#39;</span>
-<span class="n">distanceToTubeArrayName</span> <span class="o">=</span> <span class="s1">&#39;DistanceToTubeFunction&#39;</span>
-<span class="n">closedArrayName</span> <span class="o">=</span> <span class="s1">&#39;ClosedSection&#39;</span>
-<span class="n">eikonalSolutionArrayName</span> <span class="o">=</span> <span class="s1">&#39;EikonalSolutionArray&#39;</span>
-<span class="n">edgeArrayName</span> <span class="o">=</span> <span class="s1">&#39;EdgeArray&#39;</span>
-<span class="n">edgePCoordArrayName</span> <span class="o">=</span> <span class="s1">&#39;EdgePCoordArray&#39;</span>
-<span class="n">costFunctionArrayName</span> <span class="o">=</span> <span class="s1">&#39;CostFunctionArray&#39;</span>
 <span class="n">distanceToSpheresArrayName</span> <span class="o">=</span> <span class="s2">&quot;DistanceToSpheres&quot;</span>
-
-<span class="c1"># Options not available from commandline</span>
-<span class="n">divergingRatioToSpacingTolerance</span> <span class="o">=</span> <span class="mf">2.0</span>
-<span class="n">interpolationHalfSize</span> <span class="o">=</span> <span class="mi">3</span>
-<span class="n">voronoiCoreCutOffThreshold</span> <span class="o">=</span> <span class="mf">0.75</span>
-<span class="n">numberOfSplineAnalyzedPoints</span> <span class="o">=</span> <span class="mi">40</span>
-<span class="n">phiValues</span> <span class="o">=</span> <span class="p">[</span><span class="nb">float</span><span class="p">(</span><span class="n">i</span><span class="p">)</span> <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="mi">2</span><span class="p">,</span> <span class="mi">43</span><span class="p">,</span> <span class="mi">2</span><span class="p">)]</span>
-<span class="n">thetaStep</span> <span class="o">=</span> <span class="mf">2.0</span>
-
-<span class="c1"># Shortcuts</span>
-<span class="n">version</span> <span class="o">=</span> <span class="n">vtk</span><span class="o">.</span><span class="n">vtkVersion</span><span class="p">()</span><span class="o">.</span><span class="n">GetVTKMajorVersion</span><span class="p">()</span>
+<span class="n">radiusArrayName</span> <span class="o">=</span> <span class="s1">&#39;MaximumInscribedSphereRadius&#39;</span>
 
 
-<div class="viewcode-block" id="get_regions_to_refine"><a class="viewcode-back" href="../../../api.html#vampy.automatedPreProcessing.preprocessing_common.get_regions_to_refine">[docs]</a><span class="k">def</span> <span class="nf">get_regions_to_refine</span><span class="p">(</span><span class="n">surface</span><span class="p">,</span> <span class="n">provided_points</span><span class="p">,</span> <span class="n">dir_path</span><span class="p">):</span>
+<div class="viewcode-block" id="get_regions_to_refine"><a class="viewcode-back" href="../../../api.html#vampy.automatedPreprocessing.preprocessing_common.get_regions_to_refine">[docs]</a><span class="k">def</span> <span class="nf">get_regions_to_refine</span><span class="p">(</span><span class="n">surface</span><span class="p">,</span> <span class="n">provided_points</span><span class="p">,</span> <span class="n">dir_path</span><span class="p">):</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">    Determines which regions to refine.</span>
 
@@ -400,7 +379,7 @@ title="Open an issue"
     <span class="k">return</span> <span class="p">[</span><span class="n">item</span> <span class="k">for</span> <span class="n">sublist</span> <span class="ow">in</span> <span class="n">dome</span> <span class="k">for</span> <span class="n">item</span> <span class="ow">in</span> <span class="n">sublist</span><span class="p">]</span></div>
 
 
-<div class="viewcode-block" id="provide_region_points"><a class="viewcode-back" href="../../../api.html#vampy.automatedPreProcessing.preprocessing_common.provide_region_points">[docs]</a><span class="k">def</span> <span class="nf">provide_region_points</span><span class="p">(</span><span class="n">surface</span><span class="p">,</span> <span class="n">provided_points</span><span class="p">,</span> <span class="n">dir_path</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>
+<div class="viewcode-block" id="provide_region_points"><a class="viewcode-back" href="../../../api.html#vampy.automatedPreprocessing.preprocessing_common.provide_region_points">[docs]</a><span class="k">def</span> <span class="nf">provide_region_points</span><span class="p">(</span><span class="n">surface</span><span class="p">,</span> <span class="n">provided_points</span><span class="p">,</span> <span class="n">dir_path</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">    Get relevant region points from user selected points on a input surface.</span>
 
@@ -443,7 +422,7 @@ title="Open an issue"
     <span class="k">return</span> <span class="n">points</span></div>
 
 
-<div class="viewcode-block" id="make_voronoi_diagram"><a class="viewcode-back" href="../../../api.html#vampy.automatedPreProcessing.preprocessing_common.make_voronoi_diagram">[docs]</a><span class="k">def</span> <span class="nf">make_voronoi_diagram</span><span class="p">(</span><span class="n">surface</span><span class="p">,</span> <span class="n">file_path</span><span class="p">):</span>
+<div class="viewcode-block" id="make_voronoi_diagram"><a class="viewcode-back" href="../../../api.html#vampy.automatedPreprocessing.preprocessing_common.make_voronoi_diagram">[docs]</a><span class="k">def</span> <span class="nf">make_voronoi_diagram</span><span class="p">(</span><span class="n">surface</span><span class="p">,</span> <span class="n">file_path</span><span class="p">):</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">    Compute the voronoi diagram of surface model.</span>
 
@@ -467,7 +446,7 @@ title="Open an issue"
     <span class="k">return</span> <span class="n">voronoi</span><span class="o">.</span><span class="n">VoronoiDiagram</span></div>
 
 
-<div class="viewcode-block" id="compute_centers_for_meshing"><a class="viewcode-back" href="../../../api.html#vampy.automatedPreProcessing.preprocessing_common.compute_centers_for_meshing">[docs]</a><span class="k">def</span> <span class="nf">compute_centers_for_meshing</span><span class="p">(</span><span class="n">surface</span><span class="p">,</span> <span class="n">is_atrium</span><span class="p">,</span> <span class="n">case_path</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">test_capped</span><span class="o">=</span><span class="kc">False</span><span class="p">):</span>
+<div class="viewcode-block" id="compute_centers_for_meshing"><a class="viewcode-back" href="../../../api.html#vampy.automatedPreprocessing.preprocessing_common.compute_centers_for_meshing">[docs]</a><span class="k">def</span> <span class="nf">compute_centers_for_meshing</span><span class="p">(</span><span class="n">surface</span><span class="p">,</span> <span class="n">is_atrium</span><span class="p">,</span> <span class="n">case_path</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">test_capped</span><span class="o">=</span><span class="kc">False</span><span class="p">):</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">    Compute the center of all the openings in the surface. The inlet is chosen based on</span>
 <span class="sd">    the largest area for arteries (or aneurysm). However, for atrium, the outlet is chosen based on</span>
@@ -552,7 +531,7 @@ title="Open an issue"
     <span class="k">return</span> <span class="n">center_</span><span class="p">,</span> <span class="n">boundary_center</span></div>
 
 
-<div class="viewcode-block" id="get_centers_for_meshing"><a class="viewcode-back" href="../../../api.html#vampy.automatedPreProcessing.preprocessing_common.get_centers_for_meshing">[docs]</a><span class="k">def</span> <span class="nf">get_centers_for_meshing</span><span class="p">(</span><span class="n">surface</span><span class="p">,</span> <span class="n">is_atrium</span><span class="p">,</span> <span class="n">dir_path</span><span class="p">,</span> <span class="n">use_flow_extensions</span><span class="o">=</span><span class="kc">False</span><span class="p">):</span>
+<div class="viewcode-block" id="get_centers_for_meshing"><a class="viewcode-back" href="../../../api.html#vampy.automatedPreprocessing.preprocessing_common.get_centers_for_meshing">[docs]</a><span class="k">def</span> <span class="nf">get_centers_for_meshing</span><span class="p">(</span><span class="n">surface</span><span class="p">,</span> <span class="n">is_atrium</span><span class="p">,</span> <span class="n">dir_path</span><span class="p">,</span> <span class="n">use_flow_extensions</span><span class="o">=</span><span class="kc">False</span><span class="p">):</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">    Get the centers of the inlet and outlets.</span>
 
@@ -605,7 +584,7 @@ title="Open an issue"
     <span class="k">return</span> <span class="n">inlets</span><span class="p">,</span> <span class="n">outlets</span></div>
 
 
-<div class="viewcode-block" id="dist_sphere_curvature"><a class="viewcode-back" href="../../../api.html#vampy.automatedPreProcessing.preprocessing_common.dist_sphere_curvature">[docs]</a><span class="k">def</span> <span class="nf">dist_sphere_curvature</span><span class="p">(</span><span class="n">surface</span><span class="p">,</span> <span class="n">centerlines</span><span class="p">,</span> <span class="n">region_center</span><span class="p">,</span> <span class="n">misr_max</span><span class="p">,</span> <span class="n">save_path</span><span class="p">,</span> <span class="n">factor</span><span class="p">):</span>
+<div class="viewcode-block" id="dist_sphere_curvature"><a class="viewcode-back" href="../../../api.html#vampy.automatedPreprocessing.preprocessing_common.dist_sphere_curvature">[docs]</a><span class="k">def</span> <span class="nf">dist_sphere_curvature</span><span class="p">(</span><span class="n">surface</span><span class="p">,</span> <span class="n">centerlines</span><span class="p">,</span> <span class="n">region_center</span><span class="p">,</span> <span class="n">misr_max</span><span class="p">,</span> <span class="n">save_path</span><span class="p">,</span> <span class="n">factor</span><span class="p">):</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">    Determines the target edge length for each cell on the surface, including</span>
 <span class="sd">    potential refinement or coarsening of certain user specified areas.</span>
@@ -684,7 +663,7 @@ title="Open an issue"
     <span class="c1"># Multiple the surface</span>
     <span class="n">curvatureSurface</span> <span class="o">=</span> <span class="n">curvatureFilter</span><span class="o">.</span><span class="n">Surface</span>
     <span class="n">curvatureArray</span> <span class="o">=</span> <span class="n">get_point_data_array</span><span class="p">(</span><span class="s2">&quot;Curvature&quot;</span><span class="p">,</span> <span class="n">curvatureSurface</span><span class="p">)</span>
-    <span class="n">distance_to_sphere_array</span> <span class="o">=</span> <span class="n">get_point_data_array</span><span class="p">(</span><span class="s2">&quot;DistanceToSpheres&quot;</span><span class="p">,</span> <span class="n">distance_to_sphere</span><span class="p">)</span>
+    <span class="n">distance_to_sphere_array</span> <span class="o">=</span> <span class="n">get_point_data_array</span><span class="p">(</span><span class="n">distanceToSpheresArrayName</span><span class="p">,</span> <span class="n">distance_to_sphere</span><span class="p">)</span>
     <span class="n">size_array</span> <span class="o">=</span> <span class="n">curvatureArray</span> <span class="o">*</span> <span class="n">distance_to_sphere_array</span> <span class="o">*</span> <span class="n">factor</span>
 
     <span class="n">size_vtk_array</span> <span class="o">=</span> <span class="n">create_vtk_array</span><span class="p">(</span><span class="n">size_array</span><span class="p">,</span> <span class="s2">&quot;Size&quot;</span><span class="p">)</span>
@@ -695,7 +674,7 @@ title="Open an issue"
     <span class="k">return</span> <span class="n">distance_to_sphere</span></div>
 
 
-<div class="viewcode-block" id="dist_sphere_constant"><a class="viewcode-back" href="../../../api.html#vampy.automatedPreProcessing.preprocessing_common.dist_sphere_constant">[docs]</a><span class="k">def</span> <span class="nf">dist_sphere_constant</span><span class="p">(</span><span class="n">surface</span><span class="p">,</span> <span class="n">centerlines</span><span class="p">,</span> <span class="n">region_center</span><span class="p">,</span> <span class="n">misr_max</span><span class="p">,</span> <span class="n">save_path</span><span class="p">,</span> <span class="n">edge_length</span><span class="p">):</span>
+<div class="viewcode-block" id="dist_sphere_constant"><a class="viewcode-back" href="../../../api.html#vampy.automatedPreprocessing.preprocessing_common.dist_sphere_constant">[docs]</a><span class="k">def</span> <span class="nf">dist_sphere_constant</span><span class="p">(</span><span class="n">surface</span><span class="p">,</span> <span class="n">centerlines</span><span class="p">,</span> <span class="n">region_center</span><span class="p">,</span> <span class="n">misr_max</span><span class="p">,</span> <span class="n">save_path</span><span class="p">,</span> <span class="n">edge_length</span><span class="p">):</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">    Determines the target edge length for each cell on the surface, including</span>
 <span class="sd">    potential refinement or coarsening of certain user specified areas.</span>
@@ -731,7 +710,7 @@ title="Open an issue"
 
     <span class="n">element_size</span> <span class="o">=</span> <span class="n">edge_length</span> <span class="o">+</span> <span class="n">np</span><span class="o">.</span><span class="n">zeros</span><span class="p">((</span><span class="n">surface</span><span class="o">.</span><span class="n">GetNumberOfPoints</span><span class="p">(),</span> <span class="mi">1</span><span class="p">))</span>
     <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="n">region_center</span><span class="p">)</span> <span class="o">!=</span> <span class="mi">0</span><span class="p">:</span>
-        <span class="n">distance_to_spheres_array</span> <span class="o">=</span> <span class="n">get_point_data_array</span><span class="p">(</span><span class="s2">&quot;DistanceToSpheres&quot;</span><span class="p">,</span> <span class="n">distance_to_sphere</span><span class="p">)</span>
+        <span class="n">distance_to_spheres_array</span> <span class="o">=</span> <span class="n">get_point_data_array</span><span class="p">(</span><span class="n">distanceToSpheresArrayName</span><span class="p">,</span> <span class="n">distance_to_sphere</span><span class="p">)</span>
         <span class="n">element_size</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">minimum</span><span class="p">(</span><span class="n">element_size</span><span class="p">,</span> <span class="n">distance_to_spheres_array</span><span class="p">)</span>
 
     <span class="n">vtk_array</span> <span class="o">=</span> <span class="n">create_vtk_array</span><span class="p">(</span><span class="n">element_size</span><span class="p">,</span> <span class="s2">&quot;Size&quot;</span><span class="p">)</span>
@@ -741,7 +720,7 @@ title="Open an issue"
     <span class="k">return</span> <span class="n">distance_to_sphere</span></div>
 
 
-<div class="viewcode-block" id="dist_sphere_diam"><a class="viewcode-back" href="../../../api.html#vampy.automatedPreProcessing.preprocessing_common.dist_sphere_diam">[docs]</a><span class="k">def</span> <span class="nf">dist_sphere_diam</span><span class="p">(</span><span class="n">surface</span><span class="p">,</span> <span class="n">centerlines</span><span class="p">,</span> <span class="n">region_center</span><span class="p">,</span> <span class="n">misr_max</span><span class="p">,</span> <span class="n">save_path</span><span class="p">,</span> <span class="n">factor</span><span class="p">):</span>
+<div class="viewcode-block" id="dist_sphere_diam"><a class="viewcode-back" href="../../../api.html#vampy.automatedPreprocessing.preprocessing_common.dist_sphere_diam">[docs]</a><span class="k">def</span> <span class="nf">dist_sphere_diam</span><span class="p">(</span><span class="n">surface</span><span class="p">,</span> <span class="n">centerlines</span><span class="p">,</span> <span class="n">region_center</span><span class="p">,</span> <span class="n">misr_max</span><span class="p">,</span> <span class="n">save_path</span><span class="p">,</span> <span class="n">factor</span><span class="p">):</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">    Determines the target edge length for each cell on the surface, including</span>
 <span class="sd">    potential refinement or coarsening of certain user specified areas.</span>
@@ -787,7 +766,7 @@ title="Open an issue"
     <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="n">region_center</span><span class="p">)</span> <span class="o">==</span> <span class="mi">0</span><span class="p">:</span>
         <span class="n">element_size</span> <span class="o">*=</span> <span class="n">factor</span>
     <span class="k">else</span><span class="p">:</span>
-        <span class="n">distance_to_spheres_array</span> <span class="o">=</span> <span class="n">get_point_data_array</span><span class="p">(</span><span class="s2">&quot;DistanceToSpheres&quot;</span><span class="p">,</span> <span class="n">distance_to_sphere</span><span class="p">)</span>
+        <span class="n">distance_to_spheres_array</span> <span class="o">=</span> <span class="n">get_point_data_array</span><span class="p">(</span><span class="n">distanceToSpheresArrayName</span><span class="p">,</span> <span class="n">distance_to_sphere</span><span class="p">)</span>
         <span class="n">element_size</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">minimum</span><span class="p">(</span><span class="n">element_size</span><span class="p">,</span> <span class="n">distance_to_spheres_array</span><span class="p">)</span> <span class="o">*</span> <span class="n">factor</span>
 
     <span class="n">vtk_array</span> <span class="o">=</span> <span class="n">create_vtk_array</span><span class="p">(</span><span class="n">element_size</span><span class="p">,</span> <span class="s2">&quot;Size&quot;</span><span class="p">)</span>
@@ -797,7 +776,7 @@ title="Open an issue"
     <span class="k">return</span> <span class="n">distance_to_sphere</span></div>
 
 
-<div class="viewcode-block" id="mesh_alternative"><a class="viewcode-back" href="../../../api.html#vampy.automatedPreProcessing.preprocessing_common.mesh_alternative">[docs]</a><span class="k">def</span> <span class="nf">mesh_alternative</span><span class="p">(</span><span class="n">surface</span><span class="p">):</span>
+<div class="viewcode-block" id="mesh_alternative"><a class="viewcode-back" href="../../../api.html#vampy.automatedPreprocessing.preprocessing_common.mesh_alternative">[docs]</a><span class="k">def</span> <span class="nf">mesh_alternative</span><span class="p">(</span><span class="n">surface</span><span class="p">):</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">    Subdivides and smoothes the input surface model, preparing it for volumetric meshing.</span>
 
@@ -820,7 +799,7 @@ title="Open an issue"
     <span class="k">return</span> <span class="n">vmtk_smooth_surface</span><span class="p">(</span><span class="n">surface</span><span class="p">,</span> <span class="s2">&quot;laplace&quot;</span><span class="p">,</span> <span class="n">iterations</span><span class="o">=</span><span class="mi">500</span><span class="p">)</span></div>
 
 
-<div class="viewcode-block" id="compute_distance_to_sphere"><a class="viewcode-back" href="../../../api.html#vampy.automatedPreProcessing.preprocessing_common.compute_distance_to_sphere">[docs]</a><span class="k">def</span> <span class="nf">compute_distance_to_sphere</span><span class="p">(</span><span class="n">surface</span><span class="p">,</span> <span class="n">center_sphere</span><span class="p">,</span> <span class="n">radius_sphere</span><span class="o">=</span><span class="mf">0.0</span><span class="p">,</span> <span class="n">distance_offset</span><span class="o">=</span><span class="mf">0.0</span><span class="p">,</span> <span class="n">distance_scale</span><span class="o">=</span><span class="mf">0.01</span><span class="p">,</span>
+<div class="viewcode-block" id="compute_distance_to_sphere"><a class="viewcode-back" href="../../../api.html#vampy.automatedPreprocessing.preprocessing_common.compute_distance_to_sphere">[docs]</a><span class="k">def</span> <span class="nf">compute_distance_to_sphere</span><span class="p">(</span><span class="n">surface</span><span class="p">,</span> <span class="n">center_sphere</span><span class="p">,</span> <span class="n">radius_sphere</span><span class="o">=</span><span class="mf">0.0</span><span class="p">,</span> <span class="n">distance_offset</span><span class="o">=</span><span class="mf">0.0</span><span class="p">,</span> <span class="n">distance_scale</span><span class="o">=</span><span class="mf">0.01</span><span class="p">,</span>
                                <span class="n">min_distance</span><span class="o">=</span><span class="mf">0.2</span><span class="p">,</span> <span class="n">max_distance</span><span class="o">=</span><span class="mf">0.3</span><span class="p">):</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">    Computes cell specific target edge length (distances) based on input criterion.</span>
@@ -838,6 +817,7 @@ title="Open an issue"
 <span class="sd">        surface (vtkPolyData): Modified surface model with distances</span>
 <span class="sd">    &quot;&quot;&quot;</span>
     <span class="c1"># Check if there allready exists a distance to spheres</span>
+
     <span class="n">N</span> <span class="o">=</span> <span class="n">surface</span><span class="o">.</span><span class="n">GetNumberOfPoints</span><span class="p">()</span>
     <span class="n">number</span><span class="p">,</span> <span class="n">names</span> <span class="o">=</span> <span class="n">get_number_of_arrays</span><span class="p">(</span><span class="n">surface</span><span class="p">)</span>
     <span class="n">add</span> <span class="o">=</span> <span class="kc">False</span>
@@ -849,7 +829,7 @@ title="Open an issue"
         <span class="n">dist_array</span> <span class="o">=</span> <span class="n">get_vtk_array</span><span class="p">(</span><span class="n">distanceToSpheresArrayName</span><span class="p">,</span> <span class="mi">1</span><span class="p">,</span> <span class="n">N</span><span class="p">)</span>
         <span class="n">surface</span><span class="o">.</span><span class="n">GetPointData</span><span class="p">()</span><span class="o">.</span><span class="n">AddArray</span><span class="p">(</span><span class="n">dist_array</span><span class="p">)</span>
     <span class="k">else</span><span class="p">:</span>
-        <span class="n">dist_array</span> <span class="o">=</span> <span class="n">surface</span><span class="o">.</span><span class="n">GetPointData</span><span class="p">()</span><span class="o">.</span><span class="n">GetArray</span><span class="p">(</span><span class="s2">&quot;DistanceToSpheres&quot;</span><span class="p">)</span>
+        <span class="n">dist_array</span> <span class="o">=</span> <span class="n">surface</span><span class="o">.</span><span class="n">GetPointData</span><span class="p">()</span><span class="o">.</span><span class="n">GetArray</span><span class="p">(</span><span class="n">distanceToSpheresArrayName</span><span class="p">)</span>
 
     <span class="c1"># Compute distance</span>
     <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="n">N</span><span class="p">):</span>
@@ -877,7 +857,7 @@ title="Open an issue"
     <span class="k">return</span> <span class="n">surface</span></div>
 
 
-<div class="viewcode-block" id="generate_mesh"><a class="viewcode-back" href="../../../api.html#vampy.automatedPreProcessing.preprocessing_common.generate_mesh">[docs]</a><span class="k">def</span> <span class="nf">generate_mesh</span><span class="p">(</span><span class="n">surface</span><span class="p">,</span> <span class="n">add_boundary_layer</span><span class="p">):</span>
+<div class="viewcode-block" id="generate_mesh"><a class="viewcode-back" href="../../../api.html#vampy.automatedPreprocessing.preprocessing_common.generate_mesh">[docs]</a><span class="k">def</span> <span class="nf">generate_mesh</span><span class="p">(</span><span class="n">surface</span><span class="p">,</span> <span class="n">add_boundary_layer</span><span class="p">):</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">    Generates a mesh suitable for CFD from a input surface model.</span>
 
@@ -918,7 +898,7 @@ title="Open an issue"
     <span class="k">return</span> <span class="n">mesh</span><span class="p">,</span> <span class="n">remeshSurface</span></div>
 
 
-<div class="viewcode-block" id="find_boundaries"><a class="viewcode-back" href="../../../api.html#vampy.automatedPreProcessing.preprocessing_common.find_boundaries">[docs]</a><span class="k">def</span> <span class="nf">find_boundaries</span><span class="p">(</span><span class="n">model_path</span><span class="p">,</span> <span class="n">mean_inflow_rate</span><span class="p">,</span> <span class="n">network</span><span class="p">,</span> <span class="n">mesh</span><span class="p">,</span> <span class="n">verbose_print</span><span class="p">,</span> <span class="n">is_atrium</span><span class="p">):</span>
+<div class="viewcode-block" id="find_boundaries"><a class="viewcode-back" href="../../../api.html#vampy.automatedPreprocessing.preprocessing_common.find_boundaries">[docs]</a><span class="k">def</span> <span class="nf">find_boundaries</span><span class="p">(</span><span class="n">model_path</span><span class="p">,</span> <span class="n">mean_inflow_rate</span><span class="p">,</span> <span class="n">network</span><span class="p">,</span> <span class="n">mesh</span><span class="p">,</span> <span class="n">verbose_print</span><span class="p">,</span> <span class="n">is_atrium</span><span class="p">):</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">    Finds inlet and outlet boundary IDs after complete meshing, including</span>
 <span class="sd">    mean flow ratio and area ratios between outlets or inlets (determined by type of model)</span>
@@ -970,9 +950,9 @@ title="Open an issue"
             <span class="n">verbose_print</span><span class="p">(</span><span class="n">network</span><span class="o">.</span><span class="n">elements</span><span class="p">[</span><span class="n">closest</span><span class="p">]</span><span class="o">.</span><span class="n">GetInPointsx0</span><span class="p">()[</span><span class="mi">0</span><span class="p">])</span>
             <span class="n">ids</span><span class="o">.</span><span class="n">insert</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="p">[</span><span class="n">cellEntityId</span><span class="p">,</span> <span class="n">mean_inflow_rate</span><span class="p">])</span>
         <span class="k">else</span><span class="p">:</span>
-            <span class="n">beta</span> <span class="o">=</span> <span class="n">network</span><span class="o">.</span><span class="n">elements</span><span class="p">[</span><span class="n">closest</span><span class="p">]</span><span class="o">.</span><span class="n">GetBeta</span><span class="p">()</span>
-            <span class="n">ids</span><span class="o">.</span><span class="n">append</span><span class="p">([</span><span class="n">cellEntityId</span><span class="p">,</span> <span class="n">beta</span><span class="p">])</span>
-            <span class="n">verbose_print</span><span class="p">(</span><span class="n">beta</span><span class="p">)</span>
+            <span class="n">gamma</span> <span class="o">=</span> <span class="n">network</span><span class="o">.</span><span class="n">elements</span><span class="p">[</span><span class="n">closest</span><span class="p">]</span><span class="o">.</span><span class="n">GetGamma</span><span class="p">()</span>
+            <span class="n">ids</span><span class="o">.</span><span class="n">append</span><span class="p">([</span><span class="n">cellEntityId</span><span class="p">,</span> <span class="n">gamma</span><span class="p">])</span>
+            <span class="n">verbose_print</span><span class="p">(</span><span class="n">gamma</span><span class="p">)</span>
             <span class="n">verbose_print</span><span class="p">(</span><span class="n">network</span><span class="o">.</span><span class="n">elements</span><span class="p">[</span><span class="n">closest</span><span class="p">]</span><span class="o">.</span><span class="n">GetOutPointsx1</span><span class="p">()[</span><span class="mi">0</span><span class="p">])</span>
         <span class="n">verbose_print</span><span class="p">(</span><span class="s1">&#39;CellEntityId: </span><span class="si">%d</span><span class="se">\n</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="n">cellEntityId</span><span class="p">)</span>
         <span class="n">verbose_print</span><span class="p">(</span><span class="s1">&#39;meshPoint: </span><span class="si">%f</span><span class="s1">, </span><span class="si">%f</span><span class="s1">, </span><span class="si">%f</span><span class="se">\n</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="p">(</span><span class="n">meshPoint</span><span class="p">[</span><span class="mi">0</span><span class="p">],</span> <span class="n">meshPoint</span><span class="p">[</span><span class="mi">1</span><span class="p">],</span> <span class="n">meshPoint</span><span class="p">[</span><span class="mi">2</span><span class="p">]))</span>
@@ -1002,7 +982,7 @@ title="Open an issue"
     <span class="n">write_parameters</span><span class="p">(</span><span class="n">info</span><span class="p">,</span> <span class="n">model_path</span><span class="p">)</span></div>
 
 
-<div class="viewcode-block" id="setup_model_network"><a class="viewcode-back" href="../../../api.html#vampy.automatedPreProcessing.preprocessing_common.setup_model_network">[docs]</a><span class="k">def</span> <span class="nf">setup_model_network</span><span class="p">(</span><span class="n">centerlines</span><span class="p">,</span> <span class="n">file_name_probe_points</span><span class="p">,</span> <span class="n">region_center</span><span class="p">,</span> <span class="n">verbose_print</span><span class="p">):</span>
+<div class="viewcode-block" id="setup_model_network"><a class="viewcode-back" href="../../../api.html#vampy.automatedPreprocessing.preprocessing_common.setup_model_network">[docs]</a><span class="k">def</span> <span class="nf">setup_model_network</span><span class="p">(</span><span class="n">centerlines</span><span class="p">,</span> <span class="n">file_name_probe_points</span><span class="p">,</span> <span class="n">region_center</span><span class="p">,</span> <span class="n">verbose_print</span><span class="p">):</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">    Sets up network used for network boundary condition model.</span>
 
@@ -1036,13 +1016,13 @@ title="Open an issue"
     <span class="c1"># Compute the outlet boundary condition percentages.</span>
     <span class="n">flowSplitting</span> <span class="o">=</span> <span class="n">FlowSplitting</span><span class="p">()</span>
     <span class="n">flowSplitting</span><span class="o">.</span><span class="n">ComputeAlphas</span><span class="p">(</span><span class="n">network</span><span class="p">,</span> <span class="n">verbose_print</span><span class="p">)</span>
-    <span class="n">flowSplitting</span><span class="o">.</span><span class="n">ComputeBetas</span><span class="p">(</span><span class="n">network</span><span class="p">,</span> <span class="n">verbose_print</span><span class="p">)</span>
+    <span class="n">flowSplitting</span><span class="o">.</span><span class="n">ComputeGammas</span><span class="p">(</span><span class="n">network</span><span class="p">,</span> <span class="n">verbose_print</span><span class="p">)</span>
     <span class="n">flowSplitting</span><span class="o">.</span><span class="n">CheckTotalFlowRate</span><span class="p">(</span><span class="n">network</span><span class="p">,</span> <span class="n">verbose_print</span><span class="p">)</span>
 
     <span class="k">return</span> <span class="n">network</span><span class="p">,</span> <span class="n">probe_points</span></div>
 
 
-<div class="viewcode-block" id="compute_flow_rate"><a class="viewcode-back" href="../../../api.html#vampy.automatedPreProcessing.preprocessing_common.compute_flow_rate">[docs]</a><span class="k">def</span> <span class="nf">compute_flow_rate</span><span class="p">(</span><span class="n">is_atrium</span><span class="p">,</span> <span class="n">inlet</span><span class="p">,</span> <span class="n">parameters</span><span class="p">):</span>
+<div class="viewcode-block" id="compute_flow_rate"><a class="viewcode-back" href="../../../api.html#vampy.automatedPreprocessing.preprocessing_common.compute_flow_rate">[docs]</a><span class="k">def</span> <span class="nf">compute_flow_rate</span><span class="p">(</span><span class="n">is_atrium</span><span class="p">,</span> <span class="n">inlet</span><span class="p">,</span> <span class="n">parameters</span><span class="p">):</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">    Computes mean flow rate used as boundary condition for pulsatile flow condition</span>
 
@@ -1068,7 +1048,7 @@ title="Open an issue"
     <span class="k">return</span> <span class="n">mean_inflow_rate</span></div>
 
 
-<div class="viewcode-block" id="write_mesh"><a class="viewcode-back" href="../../../api.html#vampy.automatedPreProcessing.preprocessing_common.write_mesh">[docs]</a><span class="k">def</span> <span class="nf">write_mesh</span><span class="p">(</span><span class="n">compress_mesh</span><span class="p">,</span> <span class="n">file_name_surface_name</span><span class="p">,</span> <span class="n">file_name_vtu_mesh</span><span class="p">,</span> <span class="n">file_name_xml_mesh</span><span class="p">,</span> <span class="n">mesh</span><span class="p">,</span> <span class="n">remeshed_surface</span><span class="p">):</span>
+<div class="viewcode-block" id="write_mesh"><a class="viewcode-back" href="../../../api.html#vampy.automatedPreprocessing.preprocessing_common.write_mesh">[docs]</a><span class="k">def</span> <span class="nf">write_mesh</span><span class="p">(</span><span class="n">compress_mesh</span><span class="p">,</span> <span class="n">file_name_surface_name</span><span class="p">,</span> <span class="n">file_name_vtu_mesh</span><span class="p">,</span> <span class="n">file_name_xml_mesh</span><span class="p">,</span> <span class="n">mesh</span><span class="p">,</span> <span class="n">remeshed_surface</span><span class="p">):</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">    Writes the mesh to DOLFIN format, and compresses to .gz format</span>
 
@@ -1094,7 +1074,7 @@ title="Open an issue"
     <span class="n">meshWriter</span><span class="o">.</span><span class="n">Execute</span><span class="p">()</span></div>
 
 
-<div class="viewcode-block" id="add_flow_extension"><a class="viewcode-back" href="../../../api.html#vampy.automatedPreProcessing.preprocessing_common.add_flow_extension">[docs]</a><span class="k">def</span> <span class="nf">add_flow_extension</span><span class="p">(</span><span class="n">surface</span><span class="p">,</span> <span class="n">centerlines</span><span class="p">,</span> <span class="n">include_outlet</span><span class="p">,</span> <span class="n">extension_length</span><span class="o">=</span><span class="mf">2.0</span><span class="p">,</span>
+<div class="viewcode-block" id="add_flow_extension"><a class="viewcode-back" href="../../../api.html#vampy.automatedPreprocessing.preprocessing_common.add_flow_extension">[docs]</a><span class="k">def</span> <span class="nf">add_flow_extension</span><span class="p">(</span><span class="n">surface</span><span class="p">,</span> <span class="n">centerlines</span><span class="p">,</span> <span class="n">include_outlet</span><span class="p">,</span> <span class="n">extension_length</span><span class="o">=</span><span class="mf">2.0</span><span class="p">,</span>
                        <span class="n">extension_mode</span><span class="o">=</span><span class="s2">&quot;boundarynormal&quot;</span><span class="p">):</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">    Adds flow extensions to either all inlets or all outlets with specified extension length.</span>

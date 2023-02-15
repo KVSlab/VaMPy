@@ -5,7 +5,7 @@
   <head>
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>vampy.automatedPostProcessing.compute_flow_and_simulation_metrics &#8212; VaMPy</title>
+    <title>vampy.automatedPostprocessing.compute_flow_and_simulation_metrics &#8212; VaMPy</title>
     
   <!-- Loaded before other Sphinx assets -->
   <link href="../../../_static/styles/theme.css?digest=1999514e3f237ded88cf" rel="stylesheet">
@@ -182,7 +182,7 @@ const thebe_selector_output = ".output, .cell_output"
  </li>
  <li class="toctree-l1">
   <a class="reference internal" href="../../../atrium.html">
-   Hemodynamics simulation on a left atrium
+   Hemodynamic simulation in the left atrium and left atrial appendage
   </a>
  </li>
 </ul>
@@ -287,7 +287,7 @@ title="Source repository"
       </li>
       
       <li>
-        <a href="https://kvslab.github.io/VaMPy//issues/new?title=Issue%20on%20page%20%2F_modules/vampy/automatedPostProcessing/compute_flow_and_simulation_metrics.html&body=Your%20issue%20content%20here."
+        <a href="https://kvslab.github.io/VaMPy//issues/new?title=Issue%20on%20page%20%2F_modules/vampy/automatedPostprocessing/compute_flow_and_simulation_metrics.html&body=Your%20issue%20content%20here."
    class="headerbtn"
    data-toggle="tooltip"
 data-placement="left"
@@ -330,17 +330,17 @@ title="Open an issue"
                 
               <div>
                 
-  <h1>Source code for vampy.automatedPostProcessing.compute_flow_and_simulation_metrics</h1><div class="highlight"><pre>
+  <h1>Source code for vampy.automatedPostprocessing.compute_flow_and_simulation_metrics</h1><div class="highlight"><pre>
 <span></span><span class="kn">from</span> <span class="nn">os</span> <span class="kn">import</span> <span class="n">path</span>
 
 <span class="kn">import</span> <span class="nn">numpy</span> <span class="k">as</span> <span class="nn">np</span>
 <span class="kn">from</span> <span class="nn">dolfin</span> <span class="kn">import</span> <span class="n">FunctionSpace</span><span class="p">,</span> <span class="n">Function</span><span class="p">,</span> <span class="n">MPI</span><span class="p">,</span> <span class="n">VectorFunctionSpace</span><span class="p">,</span> <span class="n">Timer</span><span class="p">,</span> <span class="n">project</span><span class="p">,</span> <span class="n">sqrt</span><span class="p">,</span> <span class="n">inner</span><span class="p">,</span> <span class="n">HDF5File</span><span class="p">,</span> <span class="n">XDMFFile</span><span class="p">,</span> \
     <span class="n">assign</span><span class="p">,</span> <span class="n">CellDiameter</span><span class="p">,</span> <span class="n">Mesh</span><span class="p">,</span> <span class="n">TestFunction</span><span class="p">,</span> <span class="n">list_timings</span><span class="p">,</span> <span class="n">TimingClear</span><span class="p">,</span> <span class="n">TimingType</span><span class="p">,</span> <span class="n">Measure</span><span class="p">,</span> <span class="n">assemble</span>
 
-<span class="kn">from</span> <span class="nn">vampy.automatedPostProcessing.postprocessing_common</span> <span class="kn">import</span> <span class="n">read_command_line</span><span class="p">,</span> <span class="n">epsilon</span><span class="p">,</span> <span class="n">get_dataset_names</span>
+<span class="kn">from</span> <span class="nn">vampy.automatedPostprocessing.postprocessing_common</span> <span class="kn">import</span> <span class="n">read_command_line</span><span class="p">,</span> <span class="n">epsilon</span><span class="p">,</span> <span class="n">get_dataset_names</span>
 
 
-<div class="viewcode-block" id="compute_flow_and_simulation_metrics"><a class="viewcode-back" href="../../../api.html#vampy.automatedPostProcessing.compute_flow_and_simulation_metrics.compute_flow_and_simulation_metrics">[docs]</a><span class="k">def</span> <span class="nf">compute_flow_and_simulation_metrics</span><span class="p">(</span><span class="n">folder</span><span class="p">,</span> <span class="n">nu</span><span class="p">,</span> <span class="n">dt</span><span class="p">,</span> <span class="n">velocity_degree</span><span class="p">,</span> <span class="n">T</span><span class="p">,</span> <span class="n">times_to_average</span><span class="p">,</span> <span class="n">save_frequency</span><span class="p">,</span>
+<div class="viewcode-block" id="compute_flow_and_simulation_metrics"><a class="viewcode-back" href="../../../api.html#vampy.automatedPostprocessing.compute_flow_and_simulation_metrics.compute_flow_and_simulation_metrics">[docs]</a><span class="k">def</span> <span class="nf">compute_flow_and_simulation_metrics</span><span class="p">(</span><span class="n">folder</span><span class="p">,</span> <span class="n">nu</span><span class="p">,</span> <span class="n">dt</span><span class="p">,</span> <span class="n">velocity_degree</span><span class="p">,</span> <span class="n">T</span><span class="p">,</span> <span class="n">times_to_average</span><span class="p">,</span> <span class="n">save_frequency</span><span class="p">,</span>
                                         <span class="n">start_cycle</span><span class="p">,</span> <span class="n">step</span><span class="p">,</span> <span class="n">average_over_cycles</span><span class="p">):</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">    Computes several flow field characteristics</span>
@@ -440,9 +440,22 @@ title="Open an issue"
                                              <span class="n">cycles_to_average</span><span class="p">,</span> <span class="n">saved_time_steps_per_cycle</span><span class="p">)</span></div>
 
 
-<div class="viewcode-block" id="compute_u_avg"><a class="viewcode-back" href="../../../api.html#vampy.automatedPostProcessing.compute_flow_and_simulation_metrics.compute_u_avg">[docs]</a><span class="k">def</span> <span class="nf">compute_u_avg</span><span class="p">(</span><span class="n">dataset_names</span><span class="p">,</span> <span class="n">file_path_u_avg</span><span class="p">,</span> <span class="n">file_u</span><span class="p">,</span> <span class="n">n_cycles</span><span class="p">,</span> <span class="n">saved_time_steps_per_cycle</span><span class="p">,</span>
+<div class="viewcode-block" id="compute_u_avg"><a class="viewcode-back" href="../../../api.html#vampy.automatedPostprocessing.compute_flow_and_simulation_metrics.compute_u_avg">[docs]</a><span class="k">def</span> <span class="nf">compute_u_avg</span><span class="p">(</span><span class="n">dataset_names</span><span class="p">,</span> <span class="n">file_path_u_avg</span><span class="p">,</span> <span class="n">file_u</span><span class="p">,</span> <span class="n">n_cycles</span><span class="p">,</span> <span class="n">saved_time_steps_per_cycle</span><span class="p">,</span>
                   <span class="n">start_cycle</span><span class="p">,</span> <span class="n">u</span><span class="p">,</span> <span class="n">u_avg</span><span class="p">):</span>
-    <span class="c1"># Iterate over saved time steps and compute average velocity</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Iterate over saved time steps and compute average velocity based on save sampling parameters</span>
+
+<span class="sd">    Args:</span>
+<span class="sd">        dataset_names (dict): Contains timestep and respective names of solution timesteps</span>
+<span class="sd">        file_path_u_avg (str): File path to average velocity solution</span>
+<span class="sd">        file_u (str): File path to velocity solution</span>
+<span class="sd">        n_cycles (int): Number of cardiac cycles</span>
+<span class="sd">        saved_time_steps_per_cycle (int): Determines number of saved time steps per cycle</span>
+<span class="sd">        start_cycle (int): Determines which cardiac cycle to start sampling from</span>
+<span class="sd">        u (Function): Function storing velocity</span>
+<span class="sd">        u_avg (Function): Function for storing average velocity</span>
+<span class="sd">        start_cycle (int): Determines which cardiac cycle to start from for post-processing</span>
+<span class="sd">    &quot;&quot;&quot;</span>
     <span class="k">for</span> <span class="n">save_step</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="n">saved_time_steps_per_cycle</span><span class="p">):</span>
         <span class="n">tstep</span> <span class="o">=</span> <span class="o">-</span><span class="mi">1</span>
         <span class="k">for</span> <span class="n">cycle</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="n">start_cycle</span> <span class="o">-</span> <span class="mi">1</span><span class="p">,</span> <span class="n">n_cycles</span><span class="p">):</span>
@@ -471,9 +484,33 @@ title="Open an issue"
         <span class="n">u_avg</span><span class="o">.</span><span class="n">vector</span><span class="p">()</span><span class="o">.</span><span class="n">zero</span><span class="p">()</span></div>
 
 
-<div class="viewcode-block" id="define_functions_and_iterate_dataset"><a class="viewcode-back" href="../../../api.html#vampy.automatedPostProcessing.compute_flow_and_simulation_metrics.define_functions_and_iterate_dataset">[docs]</a><span class="k">def</span> <span class="nf">define_functions_and_iterate_dataset</span><span class="p">(</span><span class="n">time_to_average</span><span class="p">,</span> <span class="n">dataset</span><span class="p">,</span> <span class="n">dataset_avg</span><span class="p">,</span> <span class="n">dt</span><span class="p">,</span> <span class="n">file_u</span><span class="p">,</span> <span class="n">file_path_u_avg</span><span class="p">,</span>
+<div class="viewcode-block" id="define_functions_and_iterate_dataset"><a class="viewcode-back" href="../../../api.html#vampy.automatedPostprocessing.compute_flow_and_simulation_metrics.define_functions_and_iterate_dataset">[docs]</a><span class="k">def</span> <span class="nf">define_functions_and_iterate_dataset</span><span class="p">(</span><span class="n">time_to_average</span><span class="p">,</span> <span class="n">dataset</span><span class="p">,</span> <span class="n">dataset_avg</span><span class="p">,</span> <span class="n">dt</span><span class="p">,</span> <span class="n">file_u</span><span class="p">,</span> <span class="n">file_path_u_avg</span><span class="p">,</span>
                                          <span class="n">file_path_u</span><span class="p">,</span> <span class="n">folder</span><span class="p">,</span> <span class="n">mesh</span><span class="p">,</span> <span class="n">nu</span><span class="p">,</span> <span class="n">N</span><span class="p">,</span> <span class="n">DG</span><span class="p">,</span> <span class="n">V</span><span class="p">,</span> <span class="n">Vv</span><span class="p">,</span> <span class="n">cycles_to_average</span><span class="p">,</span>
                                          <span class="n">saved_time_steps_per_cycle</span><span class="p">):</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Defines functions and vector functions for all metrics to be computed, iterates through dataset and computes</span>
+<span class="sd">    several flow and simulation metrics.</span>
+<span class="sd">    After iteration, saves the  metrics to .xdmf file format.</span>
+
+<span class="sd">    Args:</span>
+<span class="sd">        time_to_average (int): Time in ms to average over</span>
+<span class="sd">        N (int): Number of dataset files to iterate over</span>
+<span class="sd">        DG (FunctionSpace): Discontinous Galerkin function space</span>
+<span class="sd">        V (VectorFunctionSpace): Continous Galerkin function space for vector solutions</span>
+<span class="sd">        Vv (FunctionSpace): Continous Galerkin function space for scalar solutions</span>
+<span class="sd">        Vv:</span>
+<span class="sd">        mesh (Mesh): Volumetric mesh of computational domain</span>
+<span class="sd">        dataset (dict): Contains velocity solution dict keys</span>
+<span class="sd">        dataset_avg (dict): Contains average velocity solution dict keys</span>
+<span class="sd">        file_path_u (str): File path to velocity solution</span>
+<span class="sd">        file_path_u_avg (str): File path to average velocity solution</span>
+<span class="sd">        file_u (str): File path to velocity solution</span>
+<span class="sd">        saved_time_steps_per_cycle (int): Determines number of saved time steps per cycle</span>
+<span class="sd">        folder (str): Path to simulation results</span>
+<span class="sd">        nu (float): Viscosity</span>
+<span class="sd">        dt (float): Time step in [ms]</span>
+<span class="sd">        cycles_to_average (list): List of which cycles to average</span>
+<span class="sd">    &quot;&quot;&quot;</span>
     <span class="c1"># Functions for storing values</span>
     <span class="n">v</span> <span class="o">=</span> <span class="n">TestFunction</span><span class="p">(</span><span class="n">DG</span><span class="p">)</span>
     <span class="n">u</span> <span class="o">=</span> <span class="n">Function</span><span class="p">(</span><span class="n">V</span><span class="p">)</span>
@@ -757,7 +794,7 @@ title="Open an issue"
         <span class="nb">print</span><span class="p">(</span><span class="s2">&quot;Results saved to: </span><span class="si">{}</span><span class="s2">&quot;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">folder</span><span class="p">))</span></div>
 
 
-<div class="viewcode-block" id="rate_of_strain"><a class="viewcode-back" href="../../../api.html#vampy.automatedPostProcessing.compute_flow_and_simulation_metrics.rate_of_strain">[docs]</a><span class="k">def</span> <span class="nf">rate_of_strain</span><span class="p">(</span><span class="n">strain</span><span class="p">,</span> <span class="n">u</span><span class="p">,</span> <span class="n">v</span><span class="p">,</span> <span class="n">mesh</span><span class="p">,</span> <span class="n">h</span><span class="p">):</span>
+<div class="viewcode-block" id="rate_of_strain"><a class="viewcode-back" href="../../../api.html#vampy.automatedPostprocessing.compute_flow_and_simulation_metrics.rate_of_strain">[docs]</a><span class="k">def</span> <span class="nf">rate_of_strain</span><span class="p">(</span><span class="n">strain</span><span class="p">,</span> <span class="n">u</span><span class="p">,</span> <span class="n">v</span><span class="p">,</span> <span class="n">mesh</span><span class="p">,</span> <span class="n">h</span><span class="p">):</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">    Computes rate of strain</span>
 
@@ -776,7 +813,7 @@ title="Open an issue"
     <span class="n">strain</span><span class="o">.</span><span class="n">vector</span><span class="p">()</span><span class="o">.</span><span class="n">apply</span><span class="p">(</span><span class="s2">&quot;insert&quot;</span><span class="p">)</span></div>
 
 
-<div class="viewcode-block" id="rate_of_dissipation"><a class="viewcode-back" href="../../../api.html#vampy.automatedPostProcessing.compute_flow_and_simulation_metrics.rate_of_dissipation">[docs]</a><span class="k">def</span> <span class="nf">rate_of_dissipation</span><span class="p">(</span><span class="n">dissipation</span><span class="p">,</span> <span class="n">u</span><span class="p">,</span> <span class="n">v</span><span class="p">,</span> <span class="n">mesh</span><span class="p">,</span> <span class="n">h</span><span class="p">,</span> <span class="n">nu</span><span class="p">):</span>
+<div class="viewcode-block" id="rate_of_dissipation"><a class="viewcode-back" href="../../../api.html#vampy.automatedPostprocessing.compute_flow_and_simulation_metrics.rate_of_dissipation">[docs]</a><span class="k">def</span> <span class="nf">rate_of_dissipation</span><span class="p">(</span><span class="n">dissipation</span><span class="p">,</span> <span class="n">u</span><span class="p">,</span> <span class="n">v</span><span class="p">,</span> <span class="n">mesh</span><span class="p">,</span> <span class="n">h</span><span class="p">,</span> <span class="n">nu</span><span class="p">):</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">    Computes rate of dissipation</span>
 
@@ -796,7 +833,7 @@ title="Open an issue"
     <span class="n">dissipation</span><span class="o">.</span><span class="n">vector</span><span class="p">()</span><span class="o">.</span><span class="n">apply</span><span class="p">(</span><span class="s2">&quot;insert&quot;</span><span class="p">)</span></div>
 
 
-<div class="viewcode-block" id="main_metrics"><a class="viewcode-back" href="../../../api.html#vampy.automatedPostProcessing.compute_flow_and_simulation_metrics.main_metrics">[docs]</a><span class="k">def</span> <span class="nf">main_metrics</span><span class="p">():</span>
+<div class="viewcode-block" id="main_metrics"><a class="viewcode-back" href="../../../api.html#vampy.automatedPostprocessing.compute_flow_and_simulation_metrics.main_metrics">[docs]</a><span class="k">def</span> <span class="nf">main_metrics</span><span class="p">():</span>
     <span class="n">folder</span><span class="p">,</span> <span class="n">nu</span><span class="p">,</span> <span class="n">_</span><span class="p">,</span> <span class="n">dt</span><span class="p">,</span> <span class="n">velocity_degree</span><span class="p">,</span> <span class="n">_</span><span class="p">,</span> <span class="n">_</span><span class="p">,</span> <span class="n">T</span><span class="p">,</span> <span class="n">save_frequency</span><span class="p">,</span> <span class="n">times_to_average</span><span class="p">,</span> <span class="n">start_cycle</span><span class="p">,</span> <span class="n">step</span><span class="p">,</span> \
         <span class="n">average_over_cycles</span> <span class="o">=</span> <span class="n">read_command_line</span><span class="p">()</span>
 

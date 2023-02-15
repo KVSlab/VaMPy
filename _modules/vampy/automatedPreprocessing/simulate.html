@@ -5,7 +5,7 @@
   <head>
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>vampy.automatedPreProcessing.simulate &#8212; VaMPy</title>
+    <title>vampy.automatedPreprocessing.simulate &#8212; VaMPy</title>
     
   <!-- Loaded before other Sphinx assets -->
   <link href="../../../_static/styles/theme.css?digest=1999514e3f237ded88cf" rel="stylesheet">
@@ -182,7 +182,7 @@ const thebe_selector_output = ".output, .cell_output"
  </li>
  <li class="toctree-l1">
   <a class="reference internal" href="../../../atrium.html">
-   Hemodynamics simulation on a left atrium
+   Hemodynamic simulation in the left atrium and left atrial appendage
   </a>
  </li>
 </ul>
@@ -287,7 +287,7 @@ title="Source repository"
       </li>
       
       <li>
-        <a href="https://kvslab.github.io/VaMPy//issues/new?title=Issue%20on%20page%20%2F_modules/vampy/automatedPreProcessing/simulate.html&body=Your%20issue%20content%20here."
+        <a href="https://kvslab.github.io/VaMPy//issues/new?title=Issue%20on%20page%20%2F_modules/vampy/automatedPreprocessing/simulate.html&body=Your%20issue%20content%20here."
    class="headerbtn"
    data-toggle="tooltip"
 data-placement="left"
@@ -330,7 +330,7 @@ title="Open an issue"
                 
               <div>
                 
-  <h1>Source code for vampy.automatedPreProcessing.simulate</h1><div class="highlight"><pre>
+  <h1>Source code for vampy.automatedPreprocessing.simulate</h1><div class="highlight"><pre>
 <span></span><span class="kn">import</span> <span class="nn">errno</span>
 <span class="kn">import</span> <span class="nn">json</span>
 <span class="kn">from</span> <span class="nn">os</span> <span class="kn">import</span> <span class="n">path</span>
@@ -338,7 +338,7 @@ title="Open an issue"
 <span class="kn">import</span> <span class="nn">paramiko</span>
 
 
-<div class="viewcode-block" id="exists"><a class="viewcode-back" href="../../../api.html#vampy.automatedPreProcessing.simulate.exists">[docs]</a><span class="k">def</span> <span class="nf">exists</span><span class="p">(</span><span class="n">sftp</span><span class="p">,</span> <span class="n">path</span><span class="p">):</span>
+<div class="viewcode-block" id="exists"><a class="viewcode-back" href="../../../api.html#vampy.automatedPreprocessing.simulate.exists">[docs]</a><span class="k">def</span> <span class="nf">exists</span><span class="p">(</span><span class="n">sftp</span><span class="p">,</span> <span class="n">path</span><span class="p">):</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">    os.path.exists for paramiko&#39;s SCP object</span>
 <span class="sd">    &quot;&quot;&quot;</span>
@@ -351,7 +351,7 @@ title="Open an issue"
         <span class="k">return</span> <span class="kc">True</span></div>
 
 
-<div class="viewcode-block" id="run_simulation"><a class="viewcode-back" href="../../../api.html#vampy.automatedPreProcessing.simulate.run_simulation">[docs]</a><span class="k">def</span> <span class="nf">run_simulation</span><span class="p">(</span><span class="n">config_path</span><span class="p">,</span> <span class="n">local_dir</span><span class="p">,</span> <span class="n">case_name</span><span class="p">):</span>
+<div class="viewcode-block" id="run_simulation"><a class="viewcode-back" href="../../../api.html#vampy.automatedPreprocessing.simulate.run_simulation">[docs]</a><span class="k">def</span> <span class="nf">run_simulation</span><span class="p">(</span><span class="n">config_path</span><span class="p">,</span> <span class="n">local_dir</span><span class="p">,</span> <span class="n">case_name</span><span class="p">):</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">    Run simulation of case on a remote ssh server with</span>
 <span class="sd">    given input configuration.</span>

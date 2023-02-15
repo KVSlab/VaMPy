@@ -5,7 +5,7 @@
   <head>
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>vampy.automatedPostProcessing.visualize_probes &#8212; VaMPy</title>
+    <title>vampy.automatedPostprocessing.visualize_probes &#8212; VaMPy</title>
     
   <!-- Loaded before other Sphinx assets -->
   <link href="../../../_static/styles/theme.css?digest=1999514e3f237ded88cf" rel="stylesheet">
@@ -182,7 +182,7 @@ const thebe_selector_output = ".output, .cell_output"
  </li>
  <li class="toctree-l1">
   <a class="reference internal" href="../../../atrium.html">
-   Hemodynamics simulation on a left atrium
+   Hemodynamic simulation in the left atrium and left atrial appendage
   </a>
  </li>
 </ul>
@@ -287,7 +287,7 @@ title="Source repository"
       </li>
       
       <li>
-        <a href="https://kvslab.github.io/VaMPy//issues/new?title=Issue%20on%20page%20%2F_modules/vampy/automatedPostProcessing/visualize_probes.html&body=Your%20issue%20content%20here."
+        <a href="https://kvslab.github.io/VaMPy//issues/new?title=Issue%20on%20page%20%2F_modules/vampy/automatedPostprocessing/visualize_probes.html&body=Your%20issue%20content%20here."
    class="headerbtn"
    data-toggle="tooltip"
 data-placement="left"
@@ -330,7 +330,7 @@ title="Open an issue"
                 
               <div>
                 
-  <h1>Source code for vampy.automatedPostProcessing.visualize_probes</h1><div class="highlight"><pre>
+  <h1>Source code for vampy.automatedPostprocessing.visualize_probes</h1><div class="highlight"><pre>
 <span></span><span class="kn">from</span> <span class="nn">__future__</span> <span class="kn">import</span> <span class="n">print_function</span>
 
 <span class="kn">from</span> <span class="nn">os</span> <span class="kn">import</span> <span class="n">path</span>
@@ -338,10 +338,10 @@ title="Open an issue"
 <span class="kn">import</span> <span class="nn">matplotlib.pyplot</span> <span class="k">as</span> <span class="nn">plt</span>
 <span class="kn">import</span> <span class="nn">numpy</span> <span class="k">as</span> <span class="nn">np</span>
 
-<span class="kn">from</span> <span class="nn">vampy.automatedPostProcessing.postprocessing_common</span> <span class="kn">import</span> <span class="n">read_command_line</span>
+<span class="kn">from</span> <span class="nn">vampy.automatedPostprocessing.postprocessing_common</span> <span class="kn">import</span> <span class="n">read_command_line</span>
 
 
-<div class="viewcode-block" id="visualize_probes"><a class="viewcode-back" href="../../../api.html#vampy.automatedPostProcessing.visualize_probes.visualize_probes">[docs]</a><span class="k">def</span> <span class="nf">visualize_probes</span><span class="p">(</span><span class="n">case_path</span><span class="p">,</span> <span class="n">probe_saving_frequency</span><span class="p">,</span> <span class="n">show_figure</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span> <span class="n">save_figure</span><span class="o">=</span><span class="kc">False</span><span class="p">):</span>
+<div class="viewcode-block" id="visualize_probes"><a class="viewcode-back" href="../../../api.html#vampy.automatedPostprocessing.visualize_probes.visualize_probes">[docs]</a><span class="k">def</span> <span class="nf">visualize_probes</span><span class="p">(</span><span class="n">case_path</span><span class="p">,</span> <span class="n">probe_saving_frequency</span><span class="p">,</span> <span class="n">show_figure</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span> <span class="n">save_figure</span><span class="o">=</span><span class="kc">False</span><span class="p">):</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">    Loads probe points from completed CFD simulation,</span>
 <span class="sd">    and visualizes velocity (magnitude) and pressure at respective probes</span>
@@ -452,7 +452,7 @@ title="Open an issue"
     <span class="n">plt</span><span class="o">.</span><span class="n">clf</span><span class="p">()</span></div>
 
 
-<div class="viewcode-block" id="main_probe"><a class="viewcode-back" href="../../../api.html#vampy.automatedPostProcessing.visualize_probes.main_probe">[docs]</a><span class="k">def</span> <span class="nf">main_probe</span><span class="p">():</span>
+<div class="viewcode-block" id="main_probe"><a class="viewcode-back" href="../../../api.html#vampy.automatedPostprocessing.visualize_probes.main_probe">[docs]</a><span class="k">def</span> <span class="nf">main_probe</span><span class="p">():</span>
     <span class="n">folder</span><span class="p">,</span> <span class="n">_</span><span class="p">,</span> <span class="n">_</span><span class="p">,</span> <span class="n">dt</span><span class="p">,</span> <span class="n">_</span><span class="p">,</span> <span class="n">_</span><span class="p">,</span> <span class="n">probe_freq</span><span class="p">,</span> <span class="n">_</span><span class="p">,</span> <span class="n">_</span><span class="p">,</span> <span class="n">_</span><span class="p">,</span> <span class="n">_</span><span class="p">,</span> <span class="n">_</span><span class="p">,</span> <span class="n">_</span> <span class="o">=</span> <span class="n">read_command_line</span><span class="p">()</span>
     <span class="n">visualize_probes</span><span class="p">(</span><span class="n">folder</span><span class="p">,</span> <span class="n">probe_freq</span><span class="p">,</span> <span class="n">save_figure</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span></div>
 

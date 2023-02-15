@@ -187,7 +187,7 @@ const thebe_selector_output = ".output, .cell_output"
  </li>
  <li class="toctree-l1">
   <a class="reference internal" href="atrium.html">
-   Hemodynamics simulation on a left atrium
+   Hemodynamic simulation in the left atrium and left atrial appendage
   </a>
  </li>
 </ul>
@@ -481,12 +481,12 @@ executing the following command:</p>
 </div>
 <p>This produces several <code class="docutils literal notranslate"><span class="pre">.xdmf</span></code> and corresponding <code class="docutils literal notranslate"><span class="pre">.h5</span></code> files, which can be visualized
 in <a class="reference external" href="https://www.paraview.org/">ParaView</a>. A list of all the computed quantities can be
-viewed <a class="reference internal" href="quantities.html#post-hemo-quantities"><span class="std std-ref">here</span></a>. In <a class="reference internal" href="#post-hemo"><span class="std std-numref">Fig. 2</span></a> we have visualized the time averaged wall shear stress (
+viewed <a class="reference internal" href="quantities.html#post-hemo-quantities"><span class="std std-ref">here</span></a>. In <a class="reference internal" href="#post-hemo"><span class="std std-numref">Fig. 5</span></a> we have visualized the time averaged wall shear stress (
 TAWSS), temporal wall shear stress gradient (TWSSG), and relative residence time (RRT) for the artery case.</p>
 <figure class="align-default" id="post-hemo">
 <img alt="_images/post_hemo.png" src="_images/post_hemo.png" />
 <figcaption>
-<p><span class="caption-number">Fig. 2 </span><span class="caption-text">Visualization of the wall shear stress (left), temporal wall shear stress gradient (middle) and the RRT (right) for the artery case.
+<p><span class="caption-number">Fig. 5 </span><span class="caption-text">Visualization of the wall shear stress (left), temporal wall shear stress gradient (middle) and the RRT (right) for the artery case.
 Note that all quantities have been time averaged over the last cardiac cycles.</span><a class="headerlink" href="#post-hemo" title="Permalink to this image">#</a></p>
 </figcaption>
 </figure>
@@ -499,12 +499,12 @@ Note that all quantities have been time averaged over the last cardiac cycles.</
 </div>
 <p>This produces several <code class="docutils literal notranslate"><span class="pre">.xdmf</span></code> and corresponding <code class="docutils literal notranslate"><span class="pre">.h5</span></code> files, which can be visualized
 in <a class="reference external" href="https://www.paraview.org/">ParaView</a>. A list of all the computed quantities viewed <a class="reference internal" href="quantities.html#post-flow-quantities"><span class="std std-ref">here</span></a>. In
-<a class="reference internal" href="#post-flow"><span class="std std-numref">Fig. 3</span></a> we have visualized the kinetic energy, average velocity and the characteristic edge length for the
+<a class="reference internal" href="#post-flow"><span class="std std-numref">Fig. 6</span></a> we have visualized the kinetic energy, average velocity and the characteristic edge length for the
 artery model.</p>
 <figure class="align-default" id="post-flow">
 <img alt="_images/post_flow.png" src="_images/post_flow.png" />
 <figcaption>
-<p><span class="caption-number">Fig. 3 </span><span class="caption-text">Visualization of the time averaged kinetic energy (left), time averaged velocity (middle) and the characteristic edge length (right) for the artery case.</span><a class="headerlink" href="#post-flow" title="Permalink to this image">#</a></p>
+<p><span class="caption-number">Fig. 6 </span><span class="caption-text">Visualization of the time averaged kinetic energy (left), time averaged velocity (middle) and the characteristic edge length (right) for the artery case.</span><a class="headerlink" href="#post-flow" title="Permalink to this image">#</a></p>
 </figcaption>
 </figure>
 </section>
@@ -518,12 +518,12 @@ viewable <code class="docutils literal notranslate"><span class="pre">.xdmf</spa
 </pre></div>
 </div>
 <p>The script will store the velocity and pressure into <code class="docutils literal notranslate"><span class="pre">velocity.xdmf</span></code> and <code class="docutils literal notranslate"><span class="pre">pressure.xdmf</span></code>, respectively, to
-the <code class="docutils literal notranslate"><span class="pre">Solutions</span></code> folder. In <a class="reference internal" href="#post-vel"><span class="std std-numref">Fig. 4</span></a> we have visualized the instanteneous veloctiy and pressure at the end of
+the <code class="docutils literal notranslate"><span class="pre">Solutions</span></code> folder. In <a class="reference internal" href="#post-vel"><span class="std std-numref">Fig. 7</span></a> we have visualized the instanteneous veloctiy and pressure at the end of
 the simulation for the artery case.</p>
 <figure class="align-default" id="post-vel">
 <img alt="_images/post_vel.png" src="_images/post_vel.png" />
 <figcaption>
-<p><span class="caption-number">Fig. 4 </span><span class="caption-text">Visualization of the volumetric velocity (left) and scalar pressure field (right) for the artery case.</span><a class="headerlink" href="#post-vel" title="Permalink to this image">#</a></p>
+<p><span class="caption-number">Fig. 7 </span><span class="caption-text">Visualization of the volumetric velocity (left) and scalar pressure field (right) for the artery case.</span><a class="headerlink" href="#post-vel" title="Permalink to this image">#</a></p>
 </figcaption>
 </figure>
 </section>
@@ -537,12 +537,12 @@ the simulation for the artery case.</p>
 <p>Note that you may have to adjust the <code class="docutils literal notranslate"><span class="pre">--probe-frequency</span></code> argument, depending on the frequency of probe sampling. The
 script also has an additional dependency to
 <a class="reference external" href="https://github.com/matplotlib/matplotlib">Matplotlib</a>, which can easily be installed with either <code class="docutils literal notranslate"><span class="pre">conda</span></code> or <code class="docutils literal notranslate"><span class="pre">pip</span></code>. In
-<a class="reference internal" href="#post-probe"><span class="std std-numref">Fig. 5</span></a> we have shown a subset of the velocity and pressure traces at four probes within the artery
+<a class="reference internal" href="#post-probe"><span class="std std-numref">Fig. 8</span></a> we have shown a subset of the velocity and pressure traces at four probes within the artery
 geometry.</p>
 <figure class="align-default" id="post-probe">
 <img alt="_images/post_probe.png" src="_images/post_probe.png" />
 <figcaption>
-<p><span class="caption-number">Fig. 5 </span><span class="caption-text">Probe visualization for pressure (blue) and velocity (red) at four probes within the artery geometry.</span><a class="headerlink" href="#post-probe" title="Permalink to this image">#</a></p>
+<p><span class="caption-number">Fig. 8 </span><span class="caption-text">Probe visualization for pressure (blue) and velocity (red) at four probes within the artery geometry.</span><a class="headerlink" href="#post-probe" title="Permalink to this image">#</a></p>
 </figcaption>
 </figure>
 </section>
@@ -557,7 +557,7 @@ at <span class="math notranslate nohighlight">\(t=0.2\)</span> s, representing p
 </pre></div>
 </div>
 <p>Note that the specified time is in milliseconds. A comparison between time averaged and phase averaged kinetic energy (
-KE) and turbulent kinetic energy (TKE) for a representative artery model is shown in <a class="reference internal" href="#phase"><span class="std std-numref">Fig. 6</span></a>. The leftmost
+KE) and turbulent kinetic energy (TKE) for a representative artery model is shown in <a class="reference internal" href="#phase"><span class="std std-numref">Fig. 9</span></a>. The leftmost
 panels displays the model, which is
 case <a class="reference external" href="https://github.com/hkjeldsberg/AneuriskDatabase/tree/master/models/C0097">C0097</a> from
 the <a class="reference external" href="http://ecm2.mathcs.emory.edu/aneuriskweb/index">Aneurisk</a> database. The top middle panel displays the time averaged
@@ -568,7 +568,7 @@ over the last four cycles.</p>
 <figure class="align-default" id="phase">
 <img alt="_images/phase_averaged.png" src="_images/phase_averaged.png" />
 <figcaption>
-<p><span class="caption-number">Fig. 6 </span><span class="caption-text">Time and phase average kinetic energy and turbulent kinetic
+<p><span class="caption-number">Fig. 9 </span><span class="caption-text">Time and phase average kinetic energy and turbulent kinetic
 energy. The leftmost panel display the model, the middle panels display
 kinetic energy, and the rightmost panel display turbulent kinetic
 energy.</span><a class="headerlink" href="#phase" title="Permalink to this image">#</a></p>
@@ -580,16 +580,16 @@ averaged over each cycle in the format <code class="docutils literal notranslate
 cycle, we have simulated an open-source model of the <a class="reference external" href="https://en.wikipedia.org/wiki/Atrium_(heart)">left atrium</a>,
 particularly <a class="reference external" href="%5Bhere%5D(https://zenodo.org/record/3764917#.YyHwsuxByDV)">Case 7</a> from Roney et
 al.<span id="id1">[<a class="reference internal" href="#id3" title="Caroline H Roney, Rokas Bendikas, Farhad Pashakhanloo, Cesare Corrado, Edward J Vigmond, Elliot R McVeigh, Natalia A Trayanova, and Steven A Niederer. Constructing a human atrial fibre atlas. Annals of biomedical engineering, 49(1):233–250, 2021.">RBP+21</a>]</span>
-The model is simulated with <code class="docutils literal notranslate"><span class="pre">Atrium.py</span></code> over five cycles, and is postprocessed with the following command:</p>
+The model is simulated with <code class="docutils literal notranslate"><span class="pre">Atrium.py</span></code> over five cycles, and is post-processed with the following command:</p>
 <div class="highlight-console notranslate"><div class="highlight"><pre><span></span><span class="gp">$ </span>vampy-metrics<span class="w"> </span>--case<span class="w"> </span>src/vampy/simulation/results_atrium/atrium/data/<span class="o">[</span>RUN_NUMBER<span class="o">]</span>/Solutions<span class="w"> </span>--start-cycle<span class="w"> </span><span class="m">1</span><span class="w"> </span>--dt<span class="w"> </span><span class="m">0</span>.951<span class="w"> </span>--average-over-cycles
 </pre></div>
 </div>
 <p>Running this command produces cycle averaged results for all the relevant quantitites. To demonstrate qualitative
-differences in the left atrial appendage we have shown a comparison between cycles in <a class="reference internal" href="#phase"><span class="std std-numref">Fig. 6</span></a> for the TKE.</p>
+differences in the left atrial appendage we have shown a comparison between cycles in <a class="reference internal" href="#phase"><span class="std std-numref">Fig. 9</span></a> for the TKE.</p>
 <figure class="align-default" id="cycle">
 <img alt="_images/cycle_averaged.png" src="_images/cycle_averaged.png" />
 <figcaption>
-<p><span class="caption-number">Fig. 7 </span><span class="caption-text">Time averaged turbulent kinetic energy per cardiac cycle.
+<p><span class="caption-number">Fig. 10 </span><span class="caption-text">Time averaged turbulent kinetic energy per cardiac cycle.
 The top leftmost panel display the model, and the remaining panels show a slice of the time averaged TKE for each of the cardiac cycles, showing qualitative differences in the left atrial appendage.</span><a class="headerlink" href="#cycle" title="Permalink to this image">#</a></p>
 </figcaption>
 </figure>
@@ -615,7 +615,7 @@ The top leftmost panel display the model, and the remaining panels show a slice 
             mode: "python"
         },
         kernelOptions: {
-            kernelName: "python3",
+            name: "python3",
             path: "./."
         },
         predefinedOutput: true

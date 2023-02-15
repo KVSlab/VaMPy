@@ -182,7 +182,7 @@ const thebe_selector_output = ".output, .cell_output"
  </li>
  <li class="toctree-l1">
   <a class="reference internal" href="../../../atrium.html">
-   Hemodynamics simulation on a left atrium
+   Hemodynamic simulation in the left atrium and left atrial appendage
   </a>
  </li>
 </ul>
@@ -338,7 +338,15 @@ title="Open an issue"
 
 
 <div class="viewcode-block" id="get_file_paths"><a class="viewcode-back" href="../../../api.html#vampy.simulation.simulation_common.get_file_paths">[docs]</a><span class="k">def</span> <span class="nf">get_file_paths</span><span class="p">(</span><span class="n">folder</span><span class="p">):</span>
-    <span class="c1"># Create folder where data and solutions (velocity, mesh, pressure) is stored</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Create folder where data and solutions (velocity, mesh, pressure) is stored</span>
+
+<span class="sd">    Args:</span>
+<span class="sd">        folder (str): Path to data storage location</span>
+
+<span class="sd">    Returns:</span>
+<span class="sd">        files (dict): Contains filepaths for respective solution files</span>
+<span class="sd">    &quot;&quot;&quot;</span>
     <span class="n">common_path</span> <span class="o">=</span> <span class="n">path</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">folder</span><span class="p">,</span> <span class="s2">&quot;Solutions&quot;</span><span class="p">)</span>
     <span class="k">if</span> <span class="n">MPI</span><span class="o">.</span><span class="n">rank</span><span class="p">(</span><span class="n">MPI</span><span class="o">.</span><span class="n">comm_world</span><span class="p">)</span> <span class="o">==</span> <span class="mi">0</span><span class="p">:</span>
         <span class="k">if</span> <span class="ow">not</span> <span class="n">path</span><span class="o">.</span><span class="n">exists</span><span class="p">(</span><span class="n">common_path</span><span class="p">):</span>
@@ -354,7 +362,12 @@ title="Open an issue"
 
 
 <div class="viewcode-block" id="print_mesh_information"><a class="viewcode-back" href="../../../api.html#vampy.simulation.simulation_common.print_mesh_information">[docs]</a><span class="k">def</span> <span class="nf">print_mesh_information</span><span class="p">(</span><span class="n">mesh</span><span class="p">):</span>
-    <span class="c1"># Print geometric information about the volumetric mesh</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Print geometric information about the volumetric mesh</span>
+
+<span class="sd">    Args:</span>
+<span class="sd">        mesh (dolfin.cpp.mesh.Mesh): Volumetric mesh</span>
+<span class="sd">    &quot;&quot;&quot;</span>
     <span class="n">dx</span> <span class="o">=</span> <span class="n">Measure</span><span class="p">(</span><span class="s2">&quot;dx&quot;</span><span class="p">,</span> <span class="n">domain</span><span class="o">=</span><span class="n">mesh</span><span class="p">)</span>
     <span class="n">comm</span> <span class="o">=</span> <span class="n">MPI</span><span class="o">.</span><span class="n">comm_world</span>
     <span class="n">local_xmin</span> <span class="o">=</span> <span class="n">mesh</span><span class="o">.</span><span class="n">coordinates</span><span class="p">()[:,</span> <span class="mi">0</span><span class="p">]</span><span class="o">.</span><span class="n">min</span><span class="p">()</span>
@@ -399,6 +412,19 @@ title="Open an issue"
 
 <div class="viewcode-block" id="store_u_mean"><a class="viewcode-back" href="../../../api.html#vampy.simulation.simulation_common.store_u_mean">[docs]</a><span class="k">def</span> <span class="nf">store_u_mean</span><span class="p">(</span><span class="n">T</span><span class="p">,</span> <span class="n">dt</span><span class="p">,</span> <span class="n">save_solution_at_tstep</span><span class="p">,</span> <span class="n">save_solution_frequency</span><span class="p">,</span> <span class="n">u_mean</span><span class="p">,</span> <span class="n">u_mean0</span><span class="p">,</span> <span class="n">u_mean1</span><span class="p">,</span> <span class="n">u_mean2</span><span class="p">,</span>
                  <span class="n">NS_parameters</span><span class="p">):</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Store the time averaged velocity into file u_mean</span>
+
+<span class="sd">    Args:</span>
+<span class="sd">        T (float): End time</span>
+<span class="sd">        dt (float): Time step size</span>
+<span class="sd">        save_solution_at_tstep (int): Time step when solution is to be saved</span>
+<span class="sd">        save_solution_frequency (int): Frequency of solution saving</span>
+<span class="sd">        u_mean (Function): Vector function for storing vector solution of average velocity</span>
+<span class="sd">        u_mean0 (Function): Function storing x-component</span>
+<span class="sd">        u_mean1 (Function): Function storing y-component</span>
+<span class="sd">        u_mean2 (Function): Function storing z-component</span>
+<span class="sd">    &quot;&quot;&quot;</span>
     <span class="c1"># Get the file path</span>
     <span class="n">files</span> <span class="o">=</span> <span class="n">NS_parameters</span><span class="p">[</span><span class="s1">&#39;files&#39;</span><span class="p">]</span>
     <span class="n">u_mean_path</span> <span class="o">=</span> <span class="n">files</span><span class="p">[</span><span class="s2">&quot;u_mean&quot;</span><span class="p">]</span>
