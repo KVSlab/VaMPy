@@ -339,7 +339,6 @@ title="Open an issue"
     <span class="n">get_distance</span><span class="p">,</span> <span class="n">get_number_of_arrays</span><span class="p">,</span> <span class="n">vmtk_smooth_surface</span><span class="p">,</span> <span class="n">get_point_data_array</span><span class="p">,</span> <span class="n">create_vtk_array</span><span class="p">,</span> \
     <span class="n">get_vtk_point_locator</span><span class="p">,</span> <span class="n">vtk_extract_feature_edges</span><span class="p">,</span> <span class="n">get_uncapped_surface</span><span class="p">,</span> <span class="n">vtk_compute_connectivity</span><span class="p">,</span> \
     <span class="n">vtk_compute_mass_properties</span><span class="p">,</span> <span class="n">extract_single_line</span><span class="p">,</span> <span class="n">get_centerline_tolerance</span>
-
 <span class="kn">from</span> <span class="nn">vampy.automatedPreprocessing</span> <span class="kn">import</span> <span class="n">ImportData</span>
 <span class="kn">from</span> <span class="nn">vampy.automatedPreprocessing.NetworkBoundaryConditions</span> <span class="kn">import</span> <span class="n">FlowSplitting</span>
 <span class="kn">from</span> <span class="nn">vampy.automatedPreprocessing.vmtk_pointselector</span> <span class="kn">import</span> <span class="n">vmtkPickPointSeedSelector</span>
@@ -1131,6 +1130,28 @@ title="Open an issue"
     <span class="n">surface_extended</span> <span class="o">=</span> <span class="n">flowExtensionsFilter</span><span class="o">.</span><span class="n">GetOutput</span><span class="p">()</span>
 
     <span class="k">return</span> <span class="n">surface_extended</span></div>
+
+
+<div class="viewcode-block" id="scale_surface"><a class="viewcode-back" href="../../../api.html#vampy.automatedPreprocessing.preprocessing_common.scale_surface">[docs]</a><span class="k">def</span> <span class="nf">scale_surface</span><span class="p">(</span><span class="n">surface</span><span class="p">,</span> <span class="n">scale_factor</span><span class="p">):</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Scale the input surface by a factor scale_factor.</span>
+
+<span class="sd">    Args:</span>
+<span class="sd">        surface (vtkPolyData): Input surface to be scaled</span>
+<span class="sd">        scale_factor (float): Scaling factor</span>
+
+<span class="sd">    Returns:</span>
+<span class="sd">        scaled_surface (vtkPolyData): Scaled input surface</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="n">surface_scaler</span> <span class="o">=</span> <span class="n">vmtkscripts</span><span class="o">.</span><span class="n">vmtkSurfaceScaling</span><span class="p">()</span>
+    <span class="n">surface_scaler</span><span class="o">.</span><span class="n">Surface</span> <span class="o">=</span> <span class="n">surface</span>
+    <span class="n">surface_scaler</span><span class="o">.</span><span class="n">ScaleFactor</span> <span class="o">=</span> <span class="n">scale_factor</span>
+    <span class="n">surface_scaler</span><span class="o">.</span><span class="n">Execute</span><span class="p">()</span>
+
+    <span class="c1"># Get scaled surface</span>
+    <span class="n">scaled_surface</span> <span class="o">=</span> <span class="n">surface_scaler</span><span class="o">.</span><span class="n">Surface</span>
+
+    <span class="k">return</span> <span class="n">scaled_surface</span></div>
 </pre></div>
 
               </div>

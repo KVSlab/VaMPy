@@ -346,7 +346,7 @@ title="Open an issue"
 <span class="kn">from</span> <span class="nn">vampy.automatedPreprocessing.preprocessing_common</span> <span class="kn">import</span> <span class="n">read_polydata</span><span class="p">,</span> <span class="n">get_centers_for_meshing</span><span class="p">,</span> \
     <span class="n">dist_sphere_diam</span><span class="p">,</span> <span class="n">dist_sphere_curvature</span><span class="p">,</span> <span class="n">dist_sphere_constant</span><span class="p">,</span> <span class="n">get_regions_to_refine</span><span class="p">,</span> <span class="n">add_flow_extension</span><span class="p">,</span> \
     <span class="n">write_mesh</span><span class="p">,</span> <span class="n">mesh_alternative</span><span class="p">,</span> <span class="n">generate_mesh</span><span class="p">,</span> <span class="n">find_boundaries</span><span class="p">,</span> \
-    <span class="n">compute_flow_rate</span><span class="p">,</span> <span class="n">setup_model_network</span><span class="p">,</span> <span class="n">radiusArrayName</span>
+    <span class="n">compute_flow_rate</span><span class="p">,</span> <span class="n">setup_model_network</span><span class="p">,</span> <span class="n">radiusArrayName</span><span class="p">,</span> <span class="n">scale_surface</span>
 <span class="kn">from</span> <span class="nn">vampy.automatedPreprocessing.simulate</span> <span class="kn">import</span> <span class="n">run_simulation</span>
 <span class="kn">from</span> <span class="nn">vampy.automatedPreprocessing.visualize</span> <span class="kn">import</span> <span class="n">visualize_model</span>
 
@@ -354,7 +354,7 @@ title="Open an issue"
 <div class="viewcode-block" id="run_pre_processing"><a class="viewcode-back" href="../../../api.html#vampy.automatedPreprocessing.automated_preprocessing.run_pre_processing">[docs]</a><span class="k">def</span> <span class="nf">run_pre_processing</span><span class="p">(</span><span class="n">input_model</span><span class="p">,</span> <span class="n">verbose_print</span><span class="p">,</span> <span class="n">smoothing_method</span><span class="p">,</span> <span class="n">smoothing_factor</span><span class="p">,</span> <span class="n">smoothing_iterations</span><span class="p">,</span>
                        <span class="n">meshing_method</span><span class="p">,</span> <span class="n">refine_region</span><span class="p">,</span> <span class="n">is_atrium</span><span class="p">,</span> <span class="n">add_flow_extensions</span><span class="p">,</span> <span class="n">visualize</span><span class="p">,</span> <span class="n">config_path</span><span class="p">,</span>
                        <span class="n">coarsening_factor</span><span class="p">,</span> <span class="n">inlet_flow_extension_length</span><span class="p">,</span> <span class="n">outlet_flow_extension_length</span><span class="p">,</span> <span class="n">edge_length</span><span class="p">,</span>
-                       <span class="n">region_points</span><span class="p">,</span> <span class="n">compress_mesh</span><span class="p">,</span> <span class="n">add_boundary_layer</span><span class="p">):</span>
+                       <span class="n">region_points</span><span class="p">,</span> <span class="n">compress_mesh</span><span class="p">,</span> <span class="n">add_boundary_layer</span><span class="p">,</span> <span class="n">scale_factor</span><span class="p">):</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">    Automatically generate mesh of surface model in .vtu and .xml format, including prescribed</span>
 <span class="sd">    flow rates at inlet and outlet based on flow network model.</span>
@@ -380,6 +380,7 @@ title="Open an issue"
 <span class="sd">        outlet_flow_extension_length (float): Factor defining length of flow extensions at the outlet(s)</span>
 <span class="sd">        compress_mesh (bool): Compresses finalized mesh if True</span>
 <span class="sd">        add_boundary_layer (bool): Adds boundary layers to walls if True</span>
+<span class="sd">        scale_factor (float): Scale input model by this factor</span>
 <span class="sd">    &quot;&quot;&quot;</span>
     <span class="c1"># Get paths</span>
     <span class="n">case_name</span> <span class="o">=</span> <span class="n">input_model</span><span class="o">.</span><span class="n">rsplit</span><span class="p">(</span><span class="n">path</span><span class="o">.</span><span class="n">sep</span><span class="p">,</span> <span class="mi">1</span><span class="p">)[</span><span class="o">-</span><span class="mi">1</span><span class="p">]</span><span class="o">.</span><span class="n">rsplit</span><span class="p">(</span><span class="s1">&#39;.&#39;</span><span class="p">)[</span><span class="mi">0</span><span class="p">]</span>
@@ -409,6 +410,10 @@ title="Open an issue"
     <span class="c1"># Open the surface file.</span>
     <span class="nb">print</span><span class="p">(</span><span class="s2">&quot;--- Load model file</span><span class="se">\n</span><span class="s2">&quot;</span><span class="p">)</span>
     <span class="n">surface</span> <span class="o">=</span> <span class="n">read_polydata</span><span class="p">(</span><span class="n">input_model</span><span class="p">)</span>
+
+    <span class="c1"># Scale surface</span>
+    <span class="k">if</span> <span class="n">scale_factor</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
+        <span class="n">surface</span> <span class="o">=</span> <span class="n">scale_surface</span><span class="p">(</span><span class="n">surface</span><span class="p">,</span> <span class="n">scale_factor</span><span class="p">)</span>
 
     <span class="c1"># Check if surface is closed and uncapps model if True</span>
     <span class="k">if</span> <span class="n">is_surface_capped</span><span class="p">(</span><span class="n">surface</span><span class="p">)[</span><span class="mi">0</span><span class="p">]:</span>
@@ -802,12 +807,17 @@ title="Open an issue"
                         <span class="nb">type</span><span class="o">=</span><span class="nb">str</span><span class="p">,</span>
                         <span class="n">default</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
                         <span class="n">help</span><span class="o">=</span><span class="s1">&#39;Path to configuration file for remote simulation. &#39;</span> <span class="o">+</span>
-                             <span class="s1">&#39;See example/ssh_config.json for details&#39;</span><span class="p">)</span>
+                             <span class="s1">&#39;See ssh_config.json for details&#39;</span><span class="p">)</span>
 
     <span class="n">parser</span><span class="o">.</span><span class="n">add_argument</span><span class="p">(</span><span class="s1">&#39;-bl&#39;</span><span class="p">,</span> <span class="s1">&#39;--add-boundary-layer&#39;</span><span class="p">,</span>
                         <span class="n">default</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span>
                         <span class="nb">type</span><span class="o">=</span><span class="n">str2bool</span><span class="p">,</span>
                         <span class="n">help</span><span class="o">=</span><span class="s2">&quot;Adds boundary layers along geometry wall if true.&quot;</span><span class="p">)</span>
+
+    <span class="n">parser</span><span class="o">.</span><span class="n">add_argument</span><span class="p">(</span><span class="s1">&#39;-sc&#39;</span><span class="p">,</span> <span class="s1">&#39;--scale-factor&#39;</span><span class="p">,</span>
+                        <span class="n">default</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
+                        <span class="nb">type</span><span class="o">=</span><span class="nb">float</span><span class="p">,</span>
+                        <span class="n">help</span><span class="o">=</span><span class="s2">&quot;Scale input model by this factor. Used to scale model to [mm].&quot;</span><span class="p">)</span>
 
     <span class="c1"># Parse path to get default values</span>
     <span class="k">if</span> <span class="n">required</span><span class="p">:</span>
@@ -842,7 +852,8 @@ title="Open an issue"
                 <span class="n">add_flow_extensions</span><span class="o">=</span><span class="n">args</span><span class="o">.</span><span class="n">add_flowextensions</span><span class="p">,</span> <span class="n">config_path</span><span class="o">=</span><span class="n">args</span><span class="o">.</span><span class="n">config_path</span><span class="p">,</span> <span class="n">edge_length</span><span class="o">=</span><span class="n">args</span><span class="o">.</span><span class="n">edge_length</span><span class="p">,</span>
                 <span class="n">coarsening_factor</span><span class="o">=</span><span class="n">args</span><span class="o">.</span><span class="n">coarsening_factor</span><span class="p">,</span> <span class="n">inlet_flow_extension_length</span><span class="o">=</span><span class="n">args</span><span class="o">.</span><span class="n">inlet_flowextension</span><span class="p">,</span>
                 <span class="n">visualize</span><span class="o">=</span><span class="n">args</span><span class="o">.</span><span class="n">visualize</span><span class="p">,</span> <span class="n">region_points</span><span class="o">=</span><span class="n">args</span><span class="o">.</span><span class="n">region_points</span><span class="p">,</span> <span class="n">compress_mesh</span><span class="o">=</span><span class="n">args</span><span class="o">.</span><span class="n">compress_mesh</span><span class="p">,</span>
-                <span class="n">outlet_flow_extension_length</span><span class="o">=</span><span class="n">args</span><span class="o">.</span><span class="n">outlet_flowextension</span><span class="p">,</span> <span class="n">add_boundary_layer</span><span class="o">=</span><span class="n">args</span><span class="o">.</span><span class="n">add_boundary_layer</span><span class="p">)</span></div>
+                <span class="n">outlet_flow_extension_length</span><span class="o">=</span><span class="n">args</span><span class="o">.</span><span class="n">outlet_flowextension</span><span class="p">,</span> <span class="n">add_boundary_layer</span><span class="o">=</span><span class="n">args</span><span class="o">.</span><span class="n">add_boundary_layer</span><span class="p">,</span>
+                <span class="n">scale_factor</span><span class="o">=</span><span class="n">args</span><span class="o">.</span><span class="n">scale_factor</span><span class="p">)</span></div>
 
 
 <div class="viewcode-block" id="main_meshing"><a class="viewcode-back" href="../../../api.html#vampy.automatedPreprocessing.automated_preprocessing.main_meshing">[docs]</a><span class="k">def</span> <span class="nf">main_meshing</span><span class="p">():</span>

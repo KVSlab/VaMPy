@@ -460,7 +460,7 @@ only return default values.</p>
 
 <dl class="py function">
 <dt class="sig sig-object py" id="vampy.automatedPreprocessing.automated_preprocessing.run_pre_processing">
-<span class="sig-prename descclassname"><span class="pre">vampy.automatedPreprocessing.automated_preprocessing.</span></span><span class="sig-name descname"><span class="pre">run_pre_processing</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">input_model</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">verbose_print</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">smoothing_method</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">smoothing_factor</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">smoothing_iterations</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">meshing_method</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">refine_region</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">is_atrium</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">add_flow_extensions</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">visualize</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">config_path</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">coarsening_factor</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">inlet_flow_extension_length</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">outlet_flow_extension_length</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">edge_length</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">region_points</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">compress_mesh</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">add_boundary_layer</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/vampy/automatedPreprocessing/automated_preprocessing.html#run_pre_processing"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#vampy.automatedPreprocessing.automated_preprocessing.run_pre_processing" title="Permalink to this definition">#</a></dt>
+<span class="sig-prename descclassname"><span class="pre">vampy.automatedPreprocessing.automated_preprocessing.</span></span><span class="sig-name descname"><span class="pre">run_pre_processing</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">input_model</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">verbose_print</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">smoothing_method</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">smoothing_factor</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">smoothing_iterations</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">meshing_method</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">refine_region</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">is_atrium</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">add_flow_extensions</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">visualize</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">config_path</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">coarsening_factor</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">inlet_flow_extension_length</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">outlet_flow_extension_length</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">edge_length</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">region_points</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">compress_mesh</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">add_boundary_layer</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">scale_factor</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/vampy/automatedPreprocessing/automated_preprocessing.html#run_pre_processing"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#vampy.automatedPreprocessing.automated_preprocessing.run_pre_processing" title="Permalink to this definition">#</a></dt>
 <dd><p>Automatically generate mesh of surface model in .vtu and .xml format, including prescribed
 flow rates at inlet and outlet based on flow network model.</p>
 <p>Runs simulation of meshed case on a remote ssh server if server configuration is provided.</p>
@@ -485,6 +485,7 @@ flow rates at inlet and outlet based on flow network model.</p>
 <li><p><strong>outlet_flow_extension_length</strong> (<em>float</em>) – Factor defining length of flow extensions at the outlet(s)</p></li>
 <li><p><strong>compress_mesh</strong> (<em>bool</em>) – Compresses finalized mesh if True</p></li>
 <li><p><strong>add_boundary_layer</strong> (<em>bool</em>) – Adds boundary layers to walls if True</p></li>
+<li><p><strong>scale_factor</strong> (<em>float</em>) – Scale input model by this factor</p></li>
 </ul>
 </dd>
 </dl>
@@ -800,6 +801,26 @@ outlet (list): A flatt list with the points of all the outlets.</p>
 </dd>
 <dt class="field-odd">Return type</dt>
 <dd class="field-odd"><p>points (list)</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="vampy.automatedPreprocessing.preprocessing_common.scale_surface">
+<span class="sig-prename descclassname"><span class="pre">vampy.automatedPreprocessing.preprocessing_common.</span></span><span class="sig-name descname"><span class="pre">scale_surface</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">surface</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">scale_factor</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/vampy/automatedPreprocessing/preprocessing_common.html#scale_surface"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#vampy.automatedPreprocessing.preprocessing_common.scale_surface" title="Permalink to this definition">#</a></dt>
+<dd><p>Scale the input surface by a factor scale_factor.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>surface</strong> (<em>vtkPolyData</em>) – Input surface to be scaled</p></li>
+<li><p><strong>scale_factor</strong> (<em>float</em>) – Scaling factor</p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns</dt>
+<dd class="field-even"><p>Scaled input surface</p>
+</dd>
+<dt class="field-odd">Return type</dt>
+<dd class="field-odd"><p>scaled_surface (vtkPolyData)</p>
 </dd>
 </dl>
 </dd></dl>

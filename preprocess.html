@@ -385,13 +385,8 @@ title="Print to PDF"
   </a>
  </li>
  <li class="toc-h2 nav-item toc-entry">
-  <a class="reference internal nav-link" href="#mething-method">
-   Mething method
-  </a>
- </li>
- <li class="toc-h2 nav-item toc-entry">
-  <a class="reference internal nav-link" href="#refinement">
-   Refinement
+  <a class="reference internal nav-link" href="#dimensions-and-scaling">
+   Dimensions and scaling
   </a>
  </li>
  <li class="toc-h2 nav-item toc-entry">
@@ -400,13 +395,23 @@ title="Print to PDF"
   </a>
  </li>
  <li class="toc-h2 nav-item toc-entry">
+  <a class="reference internal nav-link" href="#flow-extensions">
+   Flow extensions
+  </a>
+ </li>
+ <li class="toc-h2 nav-item toc-entry">
   <a class="reference internal nav-link" href="#boundary-layers">
    Boundary layers
   </a>
  </li>
  <li class="toc-h2 nav-item toc-entry">
-  <a class="reference internal nav-link" href="#flow-extensions">
-   Flow extensions
+  <a class="reference internal nav-link" href="#refinement">
+   Refinement
+  </a>
+ </li>
+ <li class="toc-h2 nav-item toc-entry">
+  <a class="reference internal nav-link" href="#mething-method">
+   Mething method
   </a>
  </li>
 </ul>
@@ -434,13 +439,8 @@ title="Print to PDF"
   </a>
  </li>
  <li class="toc-h2 nav-item toc-entry">
-  <a class="reference internal nav-link" href="#mething-method">
-   Mething method
-  </a>
- </li>
- <li class="toc-h2 nav-item toc-entry">
-  <a class="reference internal nav-link" href="#refinement">
-   Refinement
+  <a class="reference internal nav-link" href="#dimensions-and-scaling">
+   Dimensions and scaling
   </a>
  </li>
  <li class="toc-h2 nav-item toc-entry">
@@ -449,13 +449,23 @@ title="Print to PDF"
   </a>
  </li>
  <li class="toc-h2 nav-item toc-entry">
+  <a class="reference internal nav-link" href="#flow-extensions">
+   Flow extensions
+  </a>
+ </li>
+ <li class="toc-h2 nav-item toc-entry">
   <a class="reference internal nav-link" href="#boundary-layers">
    Boundary layers
   </a>
  </li>
  <li class="toc-h2 nav-item toc-entry">
-  <a class="reference internal nav-link" href="#flow-extensions">
-   Flow extensions
+  <a class="reference internal nav-link" href="#refinement">
+   Refinement
+  </a>
+ </li>
+ <li class="toc-h2 nav-item toc-entry">
+  <a class="reference internal nav-link" href="#mething-method">
+   Mething method
   </a>
  </li>
 </ul>
@@ -495,32 +505,18 @@ produce an info file and a probe file, named <code class="docutils literal notra
 <p><span class="caption-number">Fig. 1 </span><span class="caption-text">Visualization of the meshed artery model by running <code class="docutils literal notranslate"><span class="pre">vampy-mesh</span></code>.</span><a class="headerlink" href="#render" title="Permalink to this image">#</a></p>
 </figcaption>
 </figure>
-<div class="admonition attention">
-<p class="admonition-title">Attention</p>
-<p>VaMPy has been developed for models that are originally segmented from medical images, where the units are
-often in millimeters (mm). Hence, the current implementation assumes that the input model has been scaled accordinly (to
-mm). It is also preferable that the model is uncapped (open), although there is some experimental methods for uncapping
-a surface model in case it is capped (closed).</p>
-<p>Scaling your model can simply be done by using <code class="docutils literal notranslate"><span class="pre">vmtksurfacescaling</span></code>. For
-instance, scaling from m to mm is performed by running the following command:</p>
-<div class="highlight-console notranslate"><div class="highlight"><pre><span></span><span class="gp">$ </span>vmtksurfacescaling<span class="w"> </span>-ifile<span class="w"> </span>model.vtp<span class="w"> </span>-ofile<span class="w"> </span>model.vtp<span class="w"> </span>-scale<span class="w"> </span><span class="m">1000</span><span class="w"> </span>
+</section>
+<section id="dimensions-and-scaling">
+<h2>Dimensions and scaling<a class="headerlink" href="#dimensions-and-scaling" title="Permalink to this headline">#</a></h2>
+<p>VaMPy has been developed for models that are originally segmented from medical images, where the units are often in
+millimeters (mm). Hence, the current implementation assumes that the input model is in mm. It is also preferable that
+the model is uncapped (open), although there is some experimental methods for uncapping a surface model in case it is
+capped (closed).</p>
+<p>If your input model is not in mm, you may scale it by adding the <code class="docutils literal notranslate"><span class="pre">--scale-factor</span></code> argument, which takes a numerical
+value. To scale your model from m to mm you can run the following command:</p>
+<div class="highlight-console notranslate"><div class="highlight"><pre><span></span><span class="gp">$ </span>vampy-mesh<span class="w"> </span>-i<span class="w"> </span>models/artery/artery.vtp<span class="w"> </span>-c<span class="w"> </span><span class="m">1</span>.3<span class="w"> </span>--scaling-factor<span class="w"> </span><span class="m">1000</span>
 </pre></div>
 </div>
-</div>
-</section>
-<section id="mething-method">
-<h2>Mething method<a class="headerlink" href="#mething-method" title="Permalink to this headline">#</a></h2>
-<p>There are currently three meshing methods to chose between, which determine the local mesh density. The methods are
-selected throught command line argument <code class="docutils literal notranslate"><span class="pre">--meshing-method</span></code> (<code class="docutils literal notranslate"><span class="pre">-m</span></code>), and can be set to either <code class="docutils literal notranslate"><span class="pre">constant</span></code>, <code class="docutils literal notranslate"><span class="pre">diameter</span></code>,
-or <code class="docutils literal notranslate"><span class="pre">curvature</span></code>. By default, the <code class="docutils literal notranslate"><span class="pre">diameter</span></code> method is selected. The three methods are further examined in the <a class="reference internal" href="artery.html#tutorial-artery"><span class="std std-ref">artery tutorial</span></a>.</p>
-</section>
-<section id="refinement">
-<h2>Refinement<a class="headerlink" href="#refinement" title="Permalink to this headline">#</a></h2>
-<p>Mesh generation may be performed with refinement of a particlar region. To manually refine a region on a geometry, the
-user may provide the <code class="docutils literal notranslate"><span class="pre">--refine-region</span></code> flag, or <code class="docutils literal notranslate"><span class="pre">-r</span></code> for short. In addition, the user may provide
-the <code class="docutils literal notranslate"><span class="pre">--region-points</span></code> (<code class="docutils literal notranslate"><span class="pre">-rp</span></code>) argument, followed by three numbers representing the <span class="math notranslate nohighlight">\(x, y\)</span>, and <span class="math notranslate nohighlight">\(z\)</span> coordinates of a
-point on the surface to be refined. If the point is located slightly off the surface, it will stick to the closest
-surface point. And example of this feature is shown in the <a class="reference internal" href="atrium.html#tutorial-atrium"><span class="std std-ref">atrium tutorial</span></a>.</p>
 </section>
 <section id="smoothing">
 <h2>Smoothing<a class="headerlink" href="#smoothing" title="Permalink to this headline">#</a></h2>
@@ -530,8 +526,9 @@ Laplacian (<code class="docutils literal notranslate"><span class="pre">laplace<
 Taubin smoothing, the user may select the number of smoothing iterations, controlled by
 the <code class="docutils literal notranslate"><span class="pre">--smoothing-iterations</span></code> (<code class="docutils literal notranslate"><span class="pre">-si</span></code>)
 argument. Similarly, the intensity of the Voronoi diagram smoothing method may be controlled by
-the <code class="docutils literal notranslate"><span class="pre">--smoothing-factor</span></code> (<code class="docutils literal notranslate"><span class="pre">-sf</span></code>) argument, which ranges between 0 and 1, corresponding to 0 and 100%, respectively. By default, no smoothing is performed. To
-perform Laplacian smoothing using the artery model, we may run the following command:</p>
+the <code class="docutils literal notranslate"><span class="pre">--smoothing-factor</span></code> (<code class="docutils literal notranslate"><span class="pre">-sf</span></code>) argument, which ranges between 0 and 1, corresponding to 0 and 100%, respectively. By
+default, no smoothing is performed. To perform Laplacian smoothing using the artery model, we may run the following
+command:</p>
 <div class="highlight-console notranslate"><div class="highlight"><pre><span></span><span class="gp">$ </span>vampy-mesh<span class="w"> </span>-i<span class="w"> </span>models/artery/artery.vtp<span class="w"> </span>-c<span class="w"> </span><span class="m">1</span>.3<span class="w"> </span>--smoothing-method<span class="w"> </span>laplace<span class="w"> </span>-si<span class="w"> </span><span class="m">800</span>
 </pre></div>
 </div>
@@ -541,27 +538,6 @@ included the original model for reference (in red).</p>
 <img alt="_images/smoothing.png" src="_images/smoothing.png" />
 <figcaption>
 <p><span class="caption-number">Fig. 2 </span><span class="caption-text">From left to right: the original artery model in red, and a comparison of the three smoothing methods; Laplace, Taubin and Voronoi smoothing, against the original model (red).</span><a class="headerlink" href="#id1" title="Permalink to this image">#</a></p>
-</figcaption>
-</figure>
-</section>
-<section id="boundary-layers">
-<h2>Boundary layers<a class="headerlink" href="#boundary-layers" title="Permalink to this headline">#</a></h2>
-<p>In fluid flows where the Reynolds numbers are large, flow simulations will cause strong gradients near the wall,
-requiring fine resolution of the solution close to the boundary. In this situation it is essential to refine the finite
-element mesh isotropically to capture strong gradients. This is also relevant when computing hemodynamic indices on the
-domain boundary, such as the wall shear stress, which is demonstrated in the <a class="reference internal" href="postprocess.html#overview-post"><span class="std std-ref">post-processing</span></a> section.
-Therefore, VaMPy adds four boundary layers to the computational domain by default. However, these can be turned off by
-setting the <code class="docutils literal notranslate"><span class="pre">--add-boundary-layer</span></code> (<code class="docutils literal notranslate"><span class="pre">-bl</span></code>) argument to <code class="docutils literal notranslate"><span class="pre">False</span></code>. Thus, to skip adding boundary layers for the artery
-model, we may run the following command:</p>
-<div class="highlight-console notranslate"><div class="highlight"><pre><span></span><span class="gp">$ </span>vampy-mesh<span class="w"> </span>-i<span class="w"> </span>models/artery/artery.vtp<span class="w"> </span>-c<span class="w"> </span><span class="m">1</span>.3<span class="w"> </span>--add-boundary-layer<span class="w"> </span>False
-</pre></div>
-</div>
-<p>In <a class="reference internal" href="#bl"><span class="std std-numref">Fig. 3</span></a> we demonstrate the qualitative difference when adding or removing boundary layers to the volumetric
-mesh.</p>
-<figure class="align-default" id="bl">
-<img alt="_images/boundary_layers.png" src="_images/boundary_layers.png" />
-<figcaption>
-<p><span class="caption-number">Fig. 3 </span><span class="caption-text">On the left, a volumetric mesh with no boundary layer. On the right, a volumetric mesh with four boundary layers, which is the default in VaMPy.</span><a class="headerlink" href="#bl" title="Permalink to this image">#</a></p>
 </figcaption>
 </figure>
 </section>
@@ -580,13 +556,49 @@ at the inlet and outlet, respectively:</p>
 </pre></div>
 </div>
 <p>To visualize the difference, we have shown a comparison between the original model (left) and four models with flow
-extensions of varying length, ranging from 1 to 4 times the local radius, in <a class="reference internal" href="#flowext"><span class="std std-numref">Fig. 4</span></a>.</p>
+extensions of varying length, ranging from 1 to 4 times the local radius, in <a class="reference internal" href="#flowext"><span class="std std-numref">Fig. 3</span></a>.</p>
 <figure class="align-default" id="flowext">
 <img alt="_images/flow_extension.png" src="_images/flow_extension.png" />
 <figcaption>
-<p><span class="caption-number">Fig. 4 </span><span class="caption-text">On the left, the original model with no flow extensions. The remining models harbor flow extensions of varying length, based on the local radius at the outlet and inlet boundary.</span><a class="headerlink" href="#flowext" title="Permalink to this image">#</a></p>
+<p><span class="caption-number">Fig. 3 </span><span class="caption-text">On the left, the original model with no flow extensions. The remining models harbor flow extensions of varying length, based on the local radius at the outlet and inlet boundary.</span><a class="headerlink" href="#flowext" title="Permalink to this image">#</a></p>
 </figcaption>
 </figure>
+</section>
+<section id="boundary-layers">
+<h2>Boundary layers<a class="headerlink" href="#boundary-layers" title="Permalink to this headline">#</a></h2>
+<p>In fluid flows where the Reynolds numbers are large, flow simulations will cause strong gradients near the wall,
+requiring fine resolution of the solution close to the boundary. In this situation it is essential to refine the finite
+element mesh isotropically to capture strong gradients. This is also relevant when computing hemodynamic indices on the
+domain boundary, such as the wall shear stress, which is demonstrated in the <a class="reference internal" href="postprocess.html#overview-post"><span class="std std-ref">post-processing</span></a> section.
+Therefore, VaMPy adds four boundary layers to the computational domain by default. However, these can be turned off by
+setting the <code class="docutils literal notranslate"><span class="pre">--add-boundary-layer</span></code> (<code class="docutils literal notranslate"><span class="pre">-bl</span></code>) argument to <code class="docutils literal notranslate"><span class="pre">False</span></code>. Thus, to skip adding boundary layers for the artery
+model, we may run the following command:</p>
+<div class="highlight-console notranslate"><div class="highlight"><pre><span></span><span class="gp">$ </span>vampy-mesh<span class="w"> </span>-i<span class="w"> </span>models/artery/artery.vtp<span class="w"> </span>-c<span class="w"> </span><span class="m">1</span>.3<span class="w"> </span>--add-boundary-layer<span class="w"> </span>False
+</pre></div>
+</div>
+<p>In <a class="reference internal" href="#bl"><span class="std std-numref">Fig. 4</span></a> we demonstrate the qualitative difference when adding or removing boundary layers to the volumetric
+mesh.</p>
+<figure class="align-default" id="bl">
+<img alt="_images/boundary_layers.png" src="_images/boundary_layers.png" />
+<figcaption>
+<p><span class="caption-number">Fig. 4 </span><span class="caption-text">On the left, a volumetric mesh with no boundary layer. On the right, a volumetric mesh with four boundary layers, which is the default in VaMPy.</span><a class="headerlink" href="#bl" title="Permalink to this image">#</a></p>
+</figcaption>
+</figure>
+</section>
+<section id="refinement">
+<h2>Refinement<a class="headerlink" href="#refinement" title="Permalink to this headline">#</a></h2>
+<p>Mesh generation may be performed with refinement of a particlar region. To manually refine a region on a geometry, the
+user may provide the <code class="docutils literal notranslate"><span class="pre">--refine-region</span></code> flag, or <code class="docutils literal notranslate"><span class="pre">-r</span></code> for short. In addition, the user may provide
+the <code class="docutils literal notranslate"><span class="pre">--region-points</span></code> (<code class="docutils literal notranslate"><span class="pre">-rp</span></code>) argument, followed by three numbers representing the <span class="math notranslate nohighlight">\(x, y\)</span>, and <span class="math notranslate nohighlight">\(z\)</span> coordinates of a
+point on the surface to be refined. If the point is located slightly off the surface, it will stick to the closest
+surface point. And example of this feature is shown in the <a class="reference internal" href="atrium.html#tutorial-atrium"><span class="std std-ref">atrium tutorial</span></a>.</p>
+</section>
+<section id="mething-method">
+<h2>Mething method<a class="headerlink" href="#mething-method" title="Permalink to this headline">#</a></h2>
+<p>There are currently three meshing methods to chose between, which determine the local mesh density. The methods are
+selected throught command line argument <code class="docutils literal notranslate"><span class="pre">--meshing-method</span></code> (<code class="docutils literal notranslate"><span class="pre">-m</span></code>), and can be set to either <code class="docutils literal notranslate"><span class="pre">constant</span></code>, <code class="docutils literal notranslate"><span class="pre">diameter</span></code>,
+or <code class="docutils literal notranslate"><span class="pre">curvature</span></code>. By default, the <code class="docutils literal notranslate"><span class="pre">diameter</span></code> method is selected. The three methods are further examined in
+the <a class="reference internal" href="artery.html#tutorial-artery"><span class="std std-ref">artery tutorial</span></a>.</p>
 </section>
 </section>
 
