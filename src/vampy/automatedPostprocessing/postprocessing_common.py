@@ -68,7 +68,7 @@ def read_command_line():
                         help="Time(s) during cardiac cycle to average, in the interval [0,T). Measured in [ms].")
 
     parser.add_argument('-sc', '--start-cycle',
-                        type=float,
+                        type=int,
                         default=2,
                         help="Start post-processing from this cardiac cycle.")
 
