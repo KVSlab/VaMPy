@@ -106,22 +106,24 @@ Probe visualization for pressure (blue) and velocity (red) at four probes within
 By default, `vampy-metrics` computes the average values over a full cycle, for a desired number of cycles, determined by
 the `--start-cycle` flag. Setting `--start-cycle 2` would correspond to computing the averaged values from the second
 cardiac cycle and onward. Alternatively, the user may supply the specific times $t$ during the cardiac cycle $T$ to
-the `--times-to-average` flag, to compute phase averaged quantities, where $t \in [0,T)$. Thus, to compute the metrics
-at $t=0.2$ s, representing peak systole, and to skip the first cycle, the user may run the following command:
+the `--times-to-average` flag, to compute phase averaged quantities, where $t \in [0,T)$. To demonstrate the qualitative
+differences, we have simulated an open-source model of the [left atrium](https://en.wikipedia.org/wiki/Atrium_(heart)),
+particularly [Case 7]([here](https://zenodo.org/record/3764917#.YyHwsuxByDV)) from Roney et
+al.{cite}`roney2021constructing` The model is simulated
+with [Atrium.py](https://github.com/KVSlab/VaMPy/blob/master/src/vampy/simulation/Atrium.py) over five cycles using
+$T=951$ ms and $\Delta t = 0.951$ ms, which are the default values in the problem file. To compute the metrics at
+$t=200\Delta t$, and to skip the first cycle, run the following command:
 
 ``` console
-$ vampy-metrics --case src/vampy/simulation/results_artery/artery/data/[RUN_NUMBER]/Solutions --start-cycle 2 --times-to-average 200 --T 1000 --dt 0.1
+$ vampy-metrics --case src/vampy/simulation/results_atrium/atrium/data/[RUN_NUMBER]/Solutions --start-cycle 2 --times-to-average 190.2 
 ```
 
-Note that the specified time is in milliseconds. A comparison between time averaged and phase averaged kinetic energy (
-KE) and turbulent kinetic energy (TKE) for a representative artery model is shown in {numref}`phase`. The leftmost
-panels displays the model, which is
-case [C0097](https://github.com/hkjeldsberg/AneuriskDatabase/tree/master/models/C0097) from
-the [Aneurisk](http://ecm2.mathcs.emory.edu/aneuriskweb/index) database. The top middle panel displays the time averaged
-KE over the last four cycles, whereas the bottom middle panel displays the phase averaged KE at $t=0.2$ s. Similarly,
-the top right panel displays the time averaged TKE over the last four cycles, and bottom right panel displays the phase
-averaged TKE at $t=0.2$ s. For this illustration, the simulation was run over five cycles, and the metrics were computed
-over the last four cycles.
+Note that the specified time ($t=190.2$) is in milliseconds. A comparison between time averaged and phase averaged
+kinetic energy (KE) and turbulent kinetic energy (TKE) for the atrium model is shown in the leftmost panel in
+{numref}`phase`. The top middle panel displays the time averaged KE over the last four cycles, whereas the bottom middle
+panel displays the phase averaged KE at $t=0.19$ s. Similarly, the top right panel displays the time averaged TKE over
+the last four cycles, and bottom right panel displays the phase averaged TKE at $t=0.19$ s. For this demonstration, the
+simulation was run over five cycles, while the metrics were computed over the last four cycles.
 
 ```{figure} figures/phase_averaged.png
 ---
@@ -130,19 +132,16 @@ name: phase
 Time and phase average kinetic energy and turbulent kinetic
 energy. The leftmost panel display the model, the middle panels display
 kinetic energy, and the rightmost panel display turbulent kinetic
-energy.
+energy. Note that KE and TKE have been scaled independently. 
 ```
 
-Another feature of the `vampy-metrics` and `vampy-hemo` scripts is computation of time averaged quantities per cycle.
+Another feature of the `vampy-metrics` and `vampy-hemo` scripts is computation of time averaged quantities *per cycle*.
 This is controlled by the `--average-over-cycles` flag, which when supplied will output additional files that are
-averaged over each cycle in the format `[QUANTITY]_cycle_[#CYCLE].xdmf`. To demonstrate qualitative differences per
-cycle, we have simulated an open-source model of the [left atrium](https://en.wikipedia.org/wiki/Atrium_(heart)),
-particularly [Case 7]([here](https://zenodo.org/record/3764917#.YyHwsuxByDV)) from Roney et
-al.{cite}`roney2021constructing`
-The model is simulated with `Atrium.py` over five cycles, and is post-processed with the following command:
+averaged over each cycle in the format `[QUANTITY]_cycle_[#CYCLE].xdmf`. To demonstrate this feature, we consider the
+atrium model from before, and perform post-processing using the following command:
 
 ``` console
-$ vampy-metrics --case src/vampy/simulation/results_atrium/atrium/data/[RUN_NUMBER]/Solutions --start-cycle 1 --dt 0.951 --average-over-cycles
+$ vampy-metrics --case src/vampy/simulation/results_atrium/atrium/data/[RUN_NUMBER]/Solutions --start-cycle 1 --average-over-cycles
 ```
 
 Running this command produces cycle averaged results for all the relevant quantitites. To demonstrate qualitative
@@ -153,7 +152,7 @@ differences in the left atrial appendage we have shown a comparison between cycl
 name: cycle
 ---
 Time averaged turbulent kinetic energy per cardiac cycle. 
-The top leftmost panel display the model, and the remaining panels show a slice of the time averaged TKE for each of the cardiac cycles, showing qualitative differences in the left atrial appendage.
+The top leftmost panel display the model, and the remaining panels show a slice of the time averaged TKE for each of the cardiac cycles, showing qualitative differences in the left atrial appendage. 
 ```
 
 ```{bibliography}
