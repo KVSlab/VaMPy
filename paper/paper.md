@@ -42,7 +42,7 @@ and referenced from text using \autoref{fig:example}.
 Figure sizes can be customized by adding an optional second parameter:
 ![Caption for example figure.](figure.png){ width=20% }
 
-# Statement of Usage (if applicable)
+# Statement of Use in Research (if applicable)
 
 Mention (if applicable) of any ongoing research projects using the software or recent scholarly publications enabled by
 it.
