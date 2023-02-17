@@ -25,11 +25,13 @@ bibliography: paper.bib
 
 # Summary
 
-Cardiovascular diseases are overwhelming the healthcare systems, and the
-costs are anticipated to increase in the years to come [@Murray1997],
-not to the mention the personal tragedy for those affected [@gage1996effect].
+Cardiovascular diseases are overwhelming the healthcare systems, and the costs are anticipated to increase in the years
+to come [@Murray1997], not to the mention the personal tragedy for those affected [@gage1996effect]....
 
 # Statement of Need
+
+A Statement of need section that clearly illustrates the research purpose of the software and places it in the context
+of related work. 
 
 VaMPy is needed...
 
@@ -40,16 +42,16 @@ and referenced from text using \autoref{fig:example}.
 Figure sizes can be customized by adding an optional second parameter:
 ![Caption for example figure.](figure.png){ width=20% }
 
-# Statement of Field / Related Work
+# Statement of Usage (if applicable)
 
-- A summary describing the high-level functionality and purpose of the software for a diverse, non-specialist audience.
-- A clear statement of need that illustrates the purpose of the software.
-- A description of how this software compares to other commonly-used packages in this research area.
-- Mentions (if applicable) of any ongoing research projects using the software or recent scholarly publications enabled by it.
-- A list of key references including a link to the software archive.
+Mention (if applicable) of any ongoing research projects using the software or recent scholarly publications enabled by
+it.
 
 # Acknowledgements
 
-We acknowledge XXX for testing VaMPy, and the open-source projects [vtk](https://www.vtk.org/), [vmtk](http://www.vmtk.org), and [FEniCS](https://fenicsproject.org).
+We acknowledge XXX for testing VaMPy, and the open-source projects [vtk](https://www.vtk.org/)
+, [vmtk](http://www.vmtk.org), [Oasis](https://github.com/mikaem/Oasis/), [FEniCS](https://fenicsproject.org).
+
++ Funding (?)
 
 # References
