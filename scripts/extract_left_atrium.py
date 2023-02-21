@@ -47,6 +47,9 @@ def extract_LA_and_LAA(folder, index, cycle, clip_volume=False):
 
     # File paths
     casename = (folder.split("/")[-2])
+    casename = folder.split("/")[-1]
+    step = int(casename)
+    folder = folder.rsplit("/", 1)[0]
 
     if index is None:
         try:
@@ -56,16 +59,16 @@ def extract_LA_and_LAA(folder, index, cycle, clip_volume=False):
         save_path = path.join(folder, casename)
 
     else:
-        cyclename = "_cycle_{:02d}".format(int(cycle)) if cycle is not None else ""
+        cyclename = "_cycle_{:02d}_{:03d}".format(int(cycle), int(casename)) if cycle is not None else ""
         # filename = "{}{}_{:03d}".format(index, cyclename, casename)
         filename = "{}{}".format(index, cyclename)
 
         if clip_volume:
             filetype = ".vtu"
-            input_path = path.join(folder, filename + filetype)
+            input_path = path.join(folder, "VTU", filename + filetype)
         else:
             filetype = ".vtp"
-            input_path = path.join(folder, filename + filetype)
+            input_path = path.join(folder, "VTP", filename + filetype)
 
         clipped_path = path.join(folder, "CLIPPED")
 
@@ -85,10 +88,10 @@ def extract_LA_and_LAA(folder, index, cycle, clip_volume=False):
         # Load a pre-clipped model
         surface = read_polydata(
             "/Users/henriakj/PhD/Code/VaMPy/models/models_for_convergence_study_upf_af_n_1/LA_20CYCLE_3M/LA_remeshed_surface.vtp")
-        surface = read_polydata(
-            "/Users/henriakj/PhD/Code/VaMPy/models/models_for_rigid_vs_moving/LAMOV/LAMOV_remeshed_surface.vtp")
-        surface = read_polydata(
-            "/Users/henriakj/PhD/Code/VaMPy/models/models_from_roney_2022_n_20_v2/LA004/mesh/LA004_remeshed_surface.vtp")
+        # surface = read_polydata(
+        #     "/Users/henriakj/PhD/Code/VaMPy/models/models_for_rigid_vs_moving/LAMOV/LAMOV_remeshed_surface.vtp")
+        # surface = read_polydata(
+        #     "/Users/henriakj/PhD/Code/VaMPy/models/models_from_roney_2022_n_20_v2/LA004/mesh/LA004_remeshed_surface.vtp")
         volume = read_polydata(input_path)
     else:
         surface = read_polydata(input_path)
@@ -252,21 +255,22 @@ def extract_LA_or_LAA(folder, laa_point, index, cycle, clip_volume=False):
 
     # File paths
     casename = (folder.split("/")[-2])
-    # folder = folder.rsplit("/", 1)[0]
+    casename = (folder.split("/")[-1])
+    folder = folder.rsplit("/", 1)[0]
 
     if index is None:
         filename = casename
         save_path = path.join(folder, filename)
 
     else:
-        cyclename = "_cycle_{:02d}".format(int(cycle)) if cycle is not None else ""
+        cyclename = "_cycle_{:02d}_{:03d}".format(int(cycle), int(casename)) if cycle is not None else ""
         filename = "{}{}".format(index, cyclename)
         # filename = "{}{}_{:03d}".format(index, cyclename, casename)
 
         save_path = path.join(folder, "CLIPPED", filename)
 
-        if not isdir(save_path):
-            mkdir(save_path)
+        # if not isdir(save_path):
+        #     mkdir(save_path)
 
     if clip_volume:
         filetype = ".vtu"

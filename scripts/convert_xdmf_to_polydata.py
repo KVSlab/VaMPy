@@ -10,7 +10,8 @@ paraview.simple._DisableFirstRenderCameraReset()
 
 def convert_to_polydata(folder, nr, index, cycle):
     rRTxdmf = Xdmf3ReaderS(registrationName='{}.xdmf'.format(index),
-                           FileName=[path.join(folder, '{}_cycle_{:02d}.xdmf'.format(index, int(cycle)))])
+                           FileName=[
+                               path.join(folder, '{}_cycle_{:02d}_{:03d}.xdmf'.format(index, int(cycle), int(nr)))])
     rRTxdmf.PointArrays = ['{}'.format(index)]
 
     # get active view
@@ -128,7 +129,7 @@ def convert_to_polydata(folder, nr, index, cycle):
     if not isdir(xdmf_path):
         os.mkdir(xdmf_path)
 
-    SaveData(os.path.join(xdmf_path, '{}_cycle_{:02d}.vtp'.format(index, int(cycle))),
+    SaveData(os.path.join(xdmf_path, '{}_cycle_{:02d}_{:03d}.vtp'.format(index, int(cycle), int(nr))),
              proxy=extractSurface1, PointDataArrays=['{}'.format(index)])
 
     # ================================================================
