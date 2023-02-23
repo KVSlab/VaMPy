@@ -115,6 +115,7 @@ if __name__ == '__main__':
     cycle = 3
     steps = [2]
     steps = [4, 5, 7, 10, 16, 25, 50, 100]
+    steps = [4, 5, 7, 10, 16, 25, 50, 100]
     steps = [2,3]
     metrics = ["dissipation"]  # , "turbulent_kinetic_energy", "turbulent_dissipation"]
     cases = ["Rigid"]
