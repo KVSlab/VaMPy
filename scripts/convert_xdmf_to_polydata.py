@@ -1,7 +1,5 @@
-import argparse
 import os
 from os import path
-from os.path import isdir
 
 from paraview.simple import *
 
@@ -11,7 +9,8 @@ paraview.simple._DisableFirstRenderCameraReset()
 def convert_to_polydata(folder, nr, index, cycle):
     rRTxdmf = Xdmf3ReaderS(registrationName='{}.xdmf'.format(index),
                            FileName=[
-                               path.join(folder, '{}_cycle_{:02d}_{:03d}.xdmf'.format(index, int(cycle), int(nr)))])
+                               path.join(folder, 'Hemodynamics', f'{index}_cycle_{cycle:02d}.xdmf')])
+    # path.join(folder, '{}_cycle_{:02d}_{:03d}.xdmf'.format(index, int(cycle), int(nr)))])
     rRTxdmf.PointArrays = ['{}'.format(index)]
 
     # get active view
@@ -125,12 +124,10 @@ def convert_to_polydata(folder, nr, index, cycle):
     renderView1.OrientationAxesVisibility = 0
     # SaveData('/Users/henriakj/PhD/Oasis/results_moving_atrium/{}/data/{}/Solutions/{}.vtp'.format(model, nr, index),
     #         proxy=extractSurface1, PointDataArrays=['{}'.format(index)])
-    xdmf_path = path.join(folder, "VTP")
-    if not isdir(xdmf_path):
-        os.mkdir(xdmf_path)
+    vtp_path = path.join(folder, 'Hemodynamics')
 
-    SaveData(os.path.join(xdmf_path, '{}_cycle_{:02d}_{:03d}.vtp'.format(index, int(cycle), int(nr))),
-             proxy=extractSurface1, PointDataArrays=['{}'.format(index)])
+    SaveData(os.path.join(vtp_path, f'{index}_cycle_{cycle:02d}.vtp'), proxy=extractSurface1,
+             PointDataArrays=['{}'.format(index)])
 
     # ================================================================
     # addendum: following script captures some of the application
@@ -171,16 +168,27 @@ def ResetSession():
 
 
 if __name__ == '__main__':
-    parser = argparse.ArgumentParser()
-    parser.add_argument("--folder")
-    parser.add_argument("--nr")
-    parser.add_argument("--index")
-    parser.add_argument("--cycle")
-    args = parser.parse_args()
-    folder = args.folder
-    number = args.nr
-    index = args.index
-    cycle = args.cycle
-    print("--- Converting cases in: {}, number: {}, index: {}, cycle: {}".format(folder, number, index, cycle))
+    if False:
+        parser = argparse.ArgumentParser()
+        parser.add_argument("--folder")
+        parser.add_argument("--nr")
+        parser.add_argument("--index")
+        parser.add_argument("--cycle")
+        args = parser.parse_args()
+        folder = args.folder
+        number = args.nr
+        index = args.index
+        cycle = args.cycle
+        print("--- Converting cases in: {}, number: {}, index: {}, cycle: {}".format(folder, number, index, cycle))
 
-    convert_to_polydata(folder, number, index, cycle)
+    indecies = ["kinetic_energy", "dissipation", "turbulent_kinetic_energy", "turbulent_dissipation"]
+    indecies = ["TAWSS", "TWSSG", "ECAP", "OSI", "RRT"]
+    cycles = list(range(1, 6))
+    cases = ["Rigid", "Moving", "Generic"]
+    number = 0  # Not used
+    for case in cases:
+        folder = f"/Users/henriakj/PhD/Code/OasisMove/results_moving_atrium/RigidVsMoving/{case}"
+        for cycle in cycles:
+            for index in indecies:
+                print(f"Converting XDMF to VTP for {index} for cycle {cycle} for case {case}")
+                convert_to_polydata(folder, number, index, cycle)
