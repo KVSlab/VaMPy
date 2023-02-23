@@ -86,7 +86,7 @@ def main(metric, cycle, conv, case, step=None):
         laname = ""
     # save data
     SaveData(
-        f'/Users/henriakj/PhD/Code/OasisMove/results_moving_atrium/RigidVsMoving/{case}/FlowMetrics/{index}_cycle_{cycle:02d}.vtu',
+        f'/Users/henriakj/PhD/Code/OasisMove/results_moving_atrium/RigidVsMoving/{case}/FlowMetrics/{metric}_cycle_{cycle:02d}.vtu',
         # f'/Users/henriakj/PhD/Code/OasisMove/results_moving_atrium/{conv}Convergence/FlowMetrics/VTU/{}{}_cycle_{:02d}{}.vtu'.format(
         #    conv, laname,
         #    metric, cycle, steps),
