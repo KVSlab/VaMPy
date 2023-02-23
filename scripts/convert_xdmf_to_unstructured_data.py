@@ -18,10 +18,9 @@ def main(metric, cycle, conv, case, step=None):
         lapath = ""
     # create a new 'Xdmf3ReaderS'
     kinetic_energy_cycle_01xdmf = Xdmf3ReaderS(registrationName='kinetic_energy_cycle_01.xdmf', FileName=[
-        #'/Users/henriakj/PhD/Code/OasisMove/results_moving_atrium/RigidVsMoving/{}/FlowMetrics/{}_cycle_{:02d}{}.xdmf'.format(
-         #   case,
-             '/Users/henriakj/PhD/Code/OasisMove/results_moving_atrium/{}Convergence/FlowMetrics/{}{}_cycle_{:02d}{}.xdmf'.format(
-            conv, lapath, metric, cycle, steps)])
+        f'/Users/henriakj/PhD/Code/OasisMove/results_moving_atrium/RigidVsMoving/{case}/FlowMetrics/{metric}_cycle_{cycle:02d}.xdmf'])
+    # '/Users/henriakj/PhD/Code/OasisMove/results_moving_atrium/{}Convergence/FlowMetrics/{}{}_cycle_{:02d}{}.xdmf'.format(
+    #   conv, lapath, metric, cycle, steps)])
 
     # show data in view
     kinetic_energy_cycle_01xdmfDisplay = Show(kinetic_energy_cycle_01xdmf, renderView1,
@@ -87,10 +86,10 @@ def main(metric, cycle, conv, case, step=None):
         laname = ""
     # save data
     SaveData(
-        #'/Users/henriakj/PhD/Code/OasisMove/results_moving_atrium/RigidVsMoving/{}/FlowMetrics/VTU/{}_cycle_{:02d}{}.vtu'.format(
-            '/Users/henriakj/PhD/Code/OasisMove/results_moving_atrium/{}Convergence/FlowMetrics/VTU/{}{}_cycle_{:02d}{}.vtu'.format(
-            conv, laname,
-             metric, cycle, steps),
+        f'/Users/henriakj/PhD/Code/OasisMove/results_moving_atrium/RigidVsMoving/{case}/FlowMetrics/{index}_cycle_{cycle:02d}.vtu',
+        # f'/Users/henriakj/PhD/Code/OasisMove/results_moving_atrium/{conv}Convergence/FlowMetrics/VTU/{}{}_cycle_{:02d}{}.vtu'.format(
+        #    conv, laname,
+        #    metric, cycle, steps),
         proxy=kinetic_energy_cycle_01xdmf, PointDataArrays=[metric])
 
     ResetSession()
@@ -107,23 +106,15 @@ def ResetSession():
 if __name__ == '__main__':
     conv = "Save"  # Cycle, Time
 
-    cycles = list(range(1, 21))
     cases = ["LA{:03d}".format(i) for i in [53]]  # , 67, 86, 105, 135, 175]]
     cases = ["DT{:03d}".format(i) for i in [10, 20, 50, 100, 200]]  # , 67, 86, 105, 135, 175]]
+    steps = [4, 5, 7, 10, 16, 25, 50, 100]
     metrics = ["kinetic_energy", "dissipation", "turbulent_kinetic_energy", "turbulent_dissipation"]
-    cycle = 5
-    cycle = 3
-    steps = [2]
-    steps = [4, 5, 7, 10, 16, 25, 50, 100]
-    steps = [4, 5, 7, 10, 16, 25, 50, 100]
-    steps = [2,3]
-    metrics = ["dissipation"]  # , "turbulent_kinetic_energy", "turbulent_dissipation"]
-    cases = ["Rigid"]
-    cases = ["Moving", "Generic"]
+    cases = ["Rigid", "Moving", "Generic"]
+    cycles = list(range(1, 6))
+    step = 0
     for metric in metrics:
-        for step in steps:
-            case = "LA"
-            # for case in cases:
-            # for cycle in cycles[1:]:
-            print("Converting XDMF to VTU for {} for cycle {} for case {}".format(metric, cycle, case))
-            main(metric, cycle, conv, case, step)
+        for cycle in cycles:
+            for case in cases:
+                print("Converting XDMF to VTU for {} for cycle {} for case {}".format(metric, cycle, case))
+                main(metric, cycle, conv, case, step)
