@@ -643,6 +643,16 @@ title="Print to PDF"
   </a>
  </li>
  <li class="toc-h2 nav-item toc-entry">
+  <a class="reference internal nav-link" href="#running-parallel-computational-fluid-dynamics-in-oasis">
+   Running parallel computational fluid dynamics in
+   <code class="docutils literal notranslate">
+    <span class="pre">
+     Oasis
+    </span>
+   </code>
+  </a>
+ </li>
+ <li class="toc-h2 nav-item toc-entry">
   <a class="reference internal nav-link" href="#adjusting-simulation-parameters">
    Adjusting simulation parameters
   </a>
@@ -673,6 +683,19 @@ the following command:</p>
 </div>
 <p>Running the simulations will create the result folder <code class="docutils literal notranslate"><span class="pre">results_artery</span></code> (specific to the <code class="docutils literal notranslate"><span class="pre">Artery.py</span></code> problem) located
 inside <code class="docutils literal notranslate"><span class="pre">src/vampy/simulation</span></code>, with the results and corresponding mesh saved compactly in HDF5 format.</p>
+<p>conda env update –file environment.yml –name your_environment</p>
+</section>
+<section id="running-parallel-computational-fluid-dynamics-in-oasis">
+<h2>Running parallel computational fluid dynamics in <code class="docutils literal notranslate"><span class="pre">Oasis</span></code><a class="headerlink" href="#running-parallel-computational-fluid-dynamics-in-oasis" title="Permalink to this heading">#</a></h2>
+<p>Oasis runs with <a class="reference external" href="https://mpi4py.readthedocs.io/en/stable/">MPI</a>, and problem files may be executed using MPI commands.
+To use MPI commands you will need to use an MPI interpreter, which is provided with the command <code class="docutils literal notranslate"><span class="pre">mpirun</span></code>, which is part
+of the Python MPI package <em>mpi4py</em>. On some systems this command is called <code class="docutils literal notranslate"><span class="pre">mpiexec</span></code> and <em>mpi4py</em> seems to include both.
+Assuming <em>mpi4py</em> is installed, you may run the CFD simulation in parallel using the <code class="docutils literal notranslate"><span class="pre">mpirun</span></code> command as follows:</p>
+<div class="highlight-console notranslate"><div class="highlight"><pre><span></span><span class="gp">$ </span>mpirun<span class="w"> </span>-np<span class="w"> </span><span class="m">4</span><span class="w"> </span>oasis<span class="w"> </span>NSfracStep<span class="w"> </span><span class="nv">problem</span><span class="o">=</span>Artery<span class="w"> </span><span class="nv">mesh_path</span><span class="o">=</span>../../../models/artery/artery.xml.gz<span class="w"> </span><span class="nv">save_solution_after_cycle</span><span class="o">=</span><span class="m">0</span>
+</pre></div>
+</div>
+<p>Here the <code class="docutils literal notranslate"><span class="pre">-np</span> <span class="pre">4</span></code> argument tells MPI to use four processes, which is the number of cores that will be used for the CFD
+simulation. The number may be adjusted to the desired number of cores needed for your simulation.</p>
 </section>
 <section id="adjusting-simulation-parameters">
 <h2>Adjusting simulation parameters<a class="headerlink" href="#adjusting-simulation-parameters" title="Permalink to this heading">#</a></h2>
@@ -781,6 +804,16 @@ we can run the following command:</p>
  <li class="toc-h2 nav-item toc-entry">
   <a class="reference internal nav-link" href="#simulations-in-oasis">
    Simulations in
+   <code class="docutils literal notranslate">
+    <span class="pre">
+     Oasis
+    </span>
+   </code>
+  </a>
+ </li>
+ <li class="toc-h2 nav-item toc-entry">
+  <a class="reference internal nav-link" href="#running-parallel-computational-fluid-dynamics-in-oasis">
+   Running parallel computational fluid dynamics in
    <code class="docutils literal notranslate">
     <span class="pre">
      Oasis
