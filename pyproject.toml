@@ -3,8 +3,8 @@ requires = ["setuptools>=61.0.0", "wheel"]
 
 [project]
 name = "vampy"
-version = "0.2.0"
-description = "Automated tools used to prepare, run, and analyze vascular morphologies."
+version = "1.0.0"
+description = "Automated and objective tools used to prepare, run, and analyze vascular morphologies."
 authors = [{ name = "Henrik A. Kjeldsberg", email = "henriakj@simula.no" }]
 license = { file = "LICENSE" }
 readme = "README.md"
