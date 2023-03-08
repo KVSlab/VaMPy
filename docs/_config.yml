@@ -27,21 +27,30 @@ bibtex_bibfiles:
 
 # Information about where the book exists on the web
 repository:
-  url: https://kvslab.github.io/VaMPy/
+  url: https://github.com/kvslab/VaMPy/
   path_to_book: docs  # Optional path to your book, relative to the repository root
-  branch: gh-pages  # Which branch of the repository should be used when creating links (optional)
+  branch: master  # Which branch of the repository should be used when creating links (optional)
 
 sphinx:
   extra_extensions:
     - 'sphinx.ext.autodoc'
     - 'sphinx.ext.napoleon'
     - 'sphinx.ext.viewcode'
+  config:
+    html_last_updated_fmt: "%b %d, %Y"
+    suppress_warnings: [ "mystnb.unknown_mime_type" ]
+
+launch_buttons:
+  notebook_interface: "jupyterlab"
+  binderhub_url: "https://mybinder.org"
 
 parse:
   myst_enable_extensions:
     - amsmath
     - dollarmath
     - linkify
+    - html_image
+
 
 # Add GitHub buttons to your book
 # See https://jupyterbook.org/customize/config.html#add-a-link-to-your-repository
