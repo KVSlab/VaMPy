@@ -29,7 +29,7 @@ bibtex_bibfiles:
 repository:
   url: https://github.com/kvslab/VaMPy/
   path_to_book: docs  # Optional path to your book, relative to the repository root
-  branch: master  # Which branch of the repository should be used when creating links (optional)
+  branch: gh-pages # Which branch of the repository should be used when creating links (optional)
 
 sphinx:
   extra_extensions:
