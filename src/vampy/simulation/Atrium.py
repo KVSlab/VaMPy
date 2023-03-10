@@ -2,15 +2,17 @@ import json
 import pickle
 from os import makedirs
 from pprint import pprint
+from dolfin import set_log_level, MPI
 
 from oasis.problems.NSfracStep import *
 
-from vampy.simulation.Probe import Probes
+from vampy.simulation.Probe import Probes  # type: ignore
 from vampy.simulation.Womersley import make_womersley_bcs, compute_boundary_geometry_acrn
 from vampy.simulation.simulation_common import store_u_mean, get_file_paths, print_mesh_information
 
 # FEniCS specific command to control the desired level of logging, here set to critical errors
 set_log_level(50)
+comm = MPI.comm_world
 
 
 def problem_parameters(commandline_kwargs, NS_parameters, scalar_components, Schmidt, NS_expressions, **NS_namespace):
@@ -208,19 +210,25 @@ def temporal_hook(mesh, dt, t, save_solution_frequency, u_, NS_expressions, id_i
         U_vector = project(sqrt(inner(u_, u_)), DG).vector().get_local()
         h = mesh.hmin()
 
-        U_mean = U_vector.mean()
-        U_max = U_vector.max()
+        # Collect velocities in parallel
+        local_U_mean = U_vector.mean()
+        local_U_max = U_vector.max()
 
-        Re_mean = U_mean * D_mitral / nu
-        Re_max = U_max * D_mitral / nu
-
-        CFL_mean = U_mean * dt / h
-        CFL_max = U_max * dt / h
+        U_mean = comm.gather(local_U_mean, 0)
+        U_max = comm.gather(local_U_max, 0)
 
         if MPI.rank(MPI.comm_world) == 0:
+            u_mean = np.mean(U_mean)
+            u_max = max(U_max)
+
+            Re_mean = u_mean * D_mitral / nu
+            Re_max = u_max * D_mitral / nu
+
+            CFL_mean = u_mean * dt / h
+            CFL_max = u_max * dt / h
             info = 'Time = {0:2.4e}, timestep = {1:6d}, max Reynolds number={2:2.3f}, mean Reynolds number={3:2.3f}' + \
                    ', max velocity={4:2.3f}, mean velocity={5:2.3f}, max CFL={6:2.3f}, mean CFL={7:2.3f}'
-            info_green(info.format(t, tstep, Re_max, Re_mean, U_max, U_mean, CFL_max, CFL_mean))
+            info_green(info.format(t, tstep, Re_max, Re_mean, u_max, u_mean, CFL_max, CFL_mean))
 
     # Sample velocity and pressure in points/probes
     eval_dict["centerline_u_x_probes"](u_[0])

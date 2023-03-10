@@ -4,7 +4,7 @@ import numpy as np
 from dolfin import FunctionSpace, Function, MPI, VectorFunctionSpace, Timer, project, sqrt, inner, HDF5File, XDMFFile, \
     assign, CellDiameter, Mesh, TestFunction, list_timings, TimingClear, TimingType, Measure, assemble
 
-from vampy.automatedPostProcessing.postprocessing_common import read_command_line, epsilon, get_dataset_names
+from vampy.automatedPostprocessing.postprocessing_common import read_command_line, epsilon, get_dataset_names
 
 
 def compute_flow_and_simulation_metrics(folder, nu, dt, velocity_degree, T, times_to_average, save_frequency,
@@ -109,7 +109,20 @@ def compute_flow_and_simulation_metrics(folder, nu, dt, velocity_degree, T, time
 
 def compute_u_avg(dataset_names, file_path_u_avg, file_u, n_cycles, saved_time_steps_per_cycle,
                   start_cycle, u, u_avg):
-    # Iterate over saved time steps and compute average velocity
+    """
+    Iterate over saved time steps and compute average velocity based on save sampling parameters
+
+    Args:
+        dataset_names (dict): Contains timestep and respective names of solution timesteps
+        file_path_u_avg (str): File path to average velocity solution
+        file_u (str): File path to velocity solution
+        n_cycles (int): Number of cardiac cycles
+        saved_time_steps_per_cycle (int): Determines number of saved time steps per cycle
+        start_cycle (int): Determines which cardiac cycle to start sampling from
+        u (Function): Function storing velocity
+        u_avg (Function): Function for storing average velocity
+        start_cycle (int): Determines which cardiac cycle to start from for post-processing
+    """
     for save_step in range(saved_time_steps_per_cycle):
         tstep = -1
         for cycle in range(start_cycle - 1, n_cycles):
@@ -141,6 +154,30 @@ def compute_u_avg(dataset_names, file_path_u_avg, file_u, n_cycles, saved_time_s
 def define_functions_and_iterate_dataset(time_to_average, dataset, dataset_avg, dt, file_u, file_path_u_avg,
                                          file_path_u, folder, mesh, nu, N, DG, V, Vv, cycles_to_average,
                                          saved_time_steps_per_cycle):
+    """
+    Defines functions and vector functions for all metrics to be computed, iterates through dataset and computes
+    several flow and simulation metrics.
+    After iteration, saves the  metrics to .xdmf file format.
+
+    Args:
+        time_to_average (int): Time in ms to average over
+        N (int): Number of dataset files to iterate over
+        DG (FunctionSpace): Discontinous Galerkin function space
+        V (VectorFunctionSpace): Continous Galerkin function space for vector solutions
+        Vv (FunctionSpace): Continous Galerkin function space for scalar solutions
+        Vv:
+        mesh (Mesh): Volumetric mesh of computational domain
+        dataset (dict): Contains velocity solution dict keys
+        dataset_avg (dict): Contains average velocity solution dict keys
+        file_path_u (str): File path to velocity solution
+        file_path_u_avg (str): File path to average velocity solution
+        file_u (str): File path to velocity solution
+        saved_time_steps_per_cycle (int): Determines number of saved time steps per cycle
+        folder (str): Path to simulation results
+        nu (float): Viscosity
+        dt (float): Time step in [ms]
+        cycles_to_average (list): List of which cycles to average
+    """
     # Functions for storing values
     v = TestFunction(DG)
     u = Function(V)

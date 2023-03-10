@@ -1,26 +1,47 @@
-# Computational fluid dynamics 
+# Computational fluid dynamics
+
 ## Simulations in `Oasis`
 
-Following pre-processing, the next step of using the Vascular Modeling Pypeline is performing the computational fluid dynamics (CFD) simulations with `oasis`. 
-Assuming `oasis` has been installed, start by navigating to the `simulation` folder:
+Following pre-processing, the next step of using the Vascular Modeling Pypeline is performing the computational fluid
+dynamics (CFD) simulations with `oasis`. Assuming `oasis` has been installed, start by navigating to the `simulation`
+folder:
 
 ``` console
 $ cd src/vampy/simulation
 ```
 
-We can now perform a CFD simulation for two cycles with 10 000 time steps per cycle and default parameters by executing the following command:
- 
+We can now perform a CFD simulation for two cycles with 10 000 time steps per cycle and default parameters by executing
+the following command:
+
 ``` console
-$ oasis NSfracStep problem=Artery mesh_path=../../tests/Case_test_artery/artery.xml.gz save_solution_after_cycle=0
+$ oasis NSfracStep problem=Artery mesh_path=../../../models/artery/artery.xml.gz save_solution_after_cycle=0
 ```
 
-Running the simulations will create the result folder `results_artery` (specific to the `Artery.py` problem) located inside `src/vampy/simulation`, with the results and corresponding mesh saved compactly in HDF5 format.
+Running the simulations will create the result folder `results_artery` (specific to the `Artery.py` problem) located
+inside `src/vampy/simulation`, with the results and corresponding mesh saved compactly in HDF5 format.
+
+conda env update --file environment.yml --name your_environment
+
+## Running parallel computational fluid dynamics in `Oasis`
+
+Oasis runs with [MPI](https://mpi4py.readthedocs.io/en/stable/), and problem files may be executed using MPI commands.
+To use MPI commands you will need to use an MPI interpreter, which is provided with the command `mpirun`, which is part
+of the Python MPI package *mpi4py*. On some systems this command is called `mpiexec` and *mpi4py* seems to include both.
+Assuming *mpi4py* is installed, you may run the CFD simulation in parallel using the `mpirun` command as follows:
+
+``` console
+$ mpirun -np 4 oasis NSfracStep problem=Artery mesh_path=../../../models/artery/artery.xml.gz save_solution_after_cycle=0
+```
+
+Here the `-np 4` argument tells MPI to use four processes, which is the number of cores that will be used for the CFD
+simulation. The number may be adjusted to the desired number of cores needed for your simulation.
 
 ## Adjusting simulation parameters
 
-The default parameters for CFD simulation have been chosen based on the authors' experience and clinically reported hemodynamic parameters.
-However, changing any of the parameters is simply done by adding them as command line arguments.
-To demonstrate, consider the following Python snippet showing an overview of the parameters used for the `Artery.py` problem:
+The default parameters for CFD simulation have been chosen based on the authors' experience and clinically reported
+hemodynamic parameters. However, changing any of the parameters is simply done by adding them as command line arguments.
+To demonstrate, consider the following Python snippet showing an overview of the parameters used for the `Artery.py`
+problem:
 
 ``` Python
 # Parameters are in mm and ms
@@ -54,8 +75,10 @@ NS_parameters.update(
     krylov_solvers=dict(monitor_convergence=False)
 )
 ```
-To start a simulation that runs for five cardiac cycles, uses a coarser time step, and saves the solution less frequent we can run the following command:
+
+To start a simulation that runs for five cardiac cycles, use a coarser time step, and saves the solution less frequent
+we can run the following command:
 
 ``` console
-$ oasis NSfracStep problem=Artery mesh_path=../../tests/Case_test_artery/artery.xml.gz number_of_cycles=5 dt=0.951 save_solution_frequency=20
+$ oasis NSfracStep problem=Artery mesh_path=../../../models/artery/artery.xml.gz number_of_cycles=5 dt=0.951 save_solution_frequency=20
 ```

@@ -1,7 +1,7 @@
 import shutil
 from os import path, remove
 
-from vampy.automatedPostProcessing.compute_flow_and_simulation_metrics import compute_flow_and_simulation_metrics
+from vampy.automatedPostprocessing.compute_flow_and_simulation_metrics import compute_flow_and_simulation_metrics
 
 
 def test_compute_flow_and_simulation_metrics_for_full_cycle():
@@ -129,8 +129,8 @@ def test_compute_flow_and_simulation_metrics_averaged_over_one_cycle():
 
 def get_default_parameters():
     # Define default parameters for tests
-    results_path = "tests/test_results/1/Solutions"
-    flow_metrics_path = "tests/test_results/1/FlowMetrics"
+    results_path = "tests/test_data/results/Solutions"
+    flow_metrics_path = "tests/test_data/results/FlowMetrics"
     nu = 3.3018e-3
     dt = 0.951
     velocity_degree = 1

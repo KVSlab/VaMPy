@@ -1,4 +1,4 @@
-from . import automatedPreProcessing
+from . import automated_preprocessing
 from . import preprocessing_common
 from . import DisplayData
 from . import ImportData
@@ -6,4 +6,4 @@ from . import NetworkBoundaryConditions
 from . import simulate
 from . import ToolRepairSTL
 from . import visualize
-from . import vmtkpointselector
+from . import vmtk_pointselector

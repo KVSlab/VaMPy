@@ -1,7 +1,7 @@
 import shutil
 from os import path
 
-from vampy.automatedPostProcessing.compute_hemodynamic_indices import compute_hemodynamic_indices
+from vampy.automatedPostprocessing.compute_hemodynamic_indices import compute_hemodynamic_indices
 
 
 def test_compute_hemodynamic_indices():
@@ -71,8 +71,8 @@ def test_compute_hemodynamic_indices_averaged_over_one_cycle():
 
 def get_default_parameters():
     # Define default parameters for tests
-    results_path = "tests/test_results/1/Solutions"
-    indices_path = "tests/test_results/1/Hemodynamics"
+    results_path = "tests/test_data/results/Solutions"
+    indices_path = "tests/test_data/results/Hemodynamics"
     nu = 3.3018e-3
     rho = 1060
     dt = 0.951

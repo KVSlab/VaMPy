@@ -1,3 +1,4 @@
+# type: ignore
 __author__ = "Mikael Mortensen <mikaem@math.uio.no>"
 __date__ = "2011-12-19"
 __copyright__ = "Copyright (C) 2011 " + __author__
@@ -5,6 +6,7 @@ __license__ = "GNU Lesser GPL version 3 or any later version"
 """
 This module contains functionality for efficiently probing a Function many times.
 """
+__all__ = ["Probes"]
 
 import cppimport
 from mpi4py.MPI import COMM_WORLD as comm
@@ -13,7 +15,7 @@ from numpy import zeros, squeeze, save
 ProbeObject = object
 
 try:
-    probe11 = cppimport.imp('probe.probe11')
+    probe11 = cppimport.imp('vampy.simulation.probe.probe11')
     ProbeObject = probe11.Probes
 except ImportError:
     print("Failed to import probe.probe11")

@@ -1,11 +1,11 @@
 from os import path, remove
 
-from vampy.automatedPostProcessing.visualize_probes import visualize_probes
+from vampy.automatedPostprocessing.visualize_probes import visualize_probes
 
 
 def test_visualize_probes():
     # Path to test results and params
-    probe_path = "tests/test_results/1/Probes"
+    probe_path = "tests/test_data/results/Probes"
     probe_frequency = 100
     file_path = path.join(probe_path, "Probes.png")
 

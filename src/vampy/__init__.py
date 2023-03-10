@@ -2,21 +2,21 @@
 from importlib.metadata import metadata
 
 # Imports from post-processing
-from .automatedPostProcessing import compute_flow_and_simulation_metrics
-from .automatedPostProcessing import compute_hemodynamic_indices
-from .automatedPostProcessing import compute_velocity_and_pressure
-from .automatedPostProcessing import postprocessing_common
-from .automatedPostProcessing import visualize_probes
+from .automatedPostprocessing import compute_flow_and_simulation_metrics
+from .automatedPostprocessing import compute_hemodynamic_indices
+from .automatedPostprocessing import compute_velocity_and_pressure
+from .automatedPostprocessing import postprocessing_common
+from .automatedPostprocessing import visualize_probes
 # Imports from pre-processing
-from .automatedPreProcessing import DisplayData
-from .automatedPreProcessing import ImportData
-from .automatedPreProcessing import NetworkBoundaryConditions
-from .automatedPreProcessing import ToolRepairSTL
-from .automatedPreProcessing import automatedPreProcessing
-from .automatedPreProcessing import preprocessing_common
-from .automatedPreProcessing import simulate
-from .automatedPreProcessing import visualize
-from .automatedPreProcessing import vmtkpointselector
+from .automatedPreprocessing import DisplayData
+from .automatedPreprocessing import ImportData
+from .automatedPreprocessing import NetworkBoundaryConditions
+from .automatedPreprocessing import ToolRepairSTL
+from .automatedPreprocessing import automated_preprocessing
+from .automatedPreprocessing import preprocessing_common
+from .automatedPreprocessing import simulate
+from .automatedPreprocessing import visualize
+from .automatedPreprocessing import vmtk_pointselector
 # Imports from simulation scripts
 from .simulation import Artery
 from .simulation import Atrium
@@ -38,7 +38,7 @@ __all__ = [
     "compute_velocity_and_pressure",
     "postprocessing_common",
     "visualize_probes",
-    "automatedPreProcessing",
+    "automated_preprocessing",
     "preprocessing_common",
     "DisplayData",
     "ImportData",
@@ -46,7 +46,7 @@ __all__ = [
     "simulate",
     "ToolRepairSTL",
     "visualize",
-    "vmtkpointselector",
+    "vmtk_pointselector",
     "Artery",
     "Atrium",
     "simulation_common",
