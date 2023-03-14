@@ -1,4 +1,4 @@
-# The Vascular Modeling Pypeline
+# VaMPy - The Vascular Modeling Pypeline
 
 The [Vascular Modeling Pypeline](https://github.com/KVSlab/vampy) (VaMPy) is a collection of automated scripts to
 prepare, run, and analyze vascular morphologies. This includes pre-processing scripts for generating a volumetric mesh,
