@@ -14,17 +14,18 @@ from vampy.automatedPreprocessing import ToolRepairSTL
 from vampy.automatedPreprocessing.preprocessing_common import read_polydata, get_centers_for_meshing, \
     dist_sphere_diam, dist_sphere_curvature, dist_sphere_constant, get_regions_to_refine, add_flow_extension, \
     write_mesh, mesh_alternative, generate_mesh, find_boundaries, \
-    compute_flow_rate, setup_model_network, radiusArrayName, scale_surface
+    compute_flow_rate, setup_model_network, radiusArrayName, scale_surface, remesh_surface
 from vampy.automatedPreprocessing.simulate import run_simulation
 from vampy.automatedPreprocessing.visualize import visualize_model
-from vampy.automatedPreprocessing.visualize import visualize
+
 from .moving_common import get_point_map, project_displacement, save_displacement
 
 
 def run_pre_processing(input_model, verbose_print, smoothing_method, smoothing_factor, smoothing_iterations,
                        meshing_method, refine_region, is_atrium, add_flow_extensions, visualize, config_path,
                        coarsening_factor, inlet_flow_extension_length, outlet_flow_extension_length, edge_length,
-                       region_points, compress_mesh, add_boundary_layer, scale_factor,dynamic_mesh, clamp_boundaries,):
+                       region_points, compress_mesh, add_boundary_layer, scale_factor, dynamic_mesh,
+                       clamp_boundaries):
     """
     Automatically generate mesh of surface model in .vtu and .xml format, including prescribed
     flow rates at inlet and outlet based on flow network model.
@@ -582,12 +583,6 @@ def read_command_line(input_path=None):
                         type=str2bool,
                         help="Clamps boundaries at inlet(s) and outlet if true.")
 
-    parser.add_argument('-bl', '--boundary-layer',
-                        dest="addBoundaryLayer",
-                        default=True,
-                        type=str2bool,
-                        help="Adds boundary layers along geometry wall if true.")
-
     # Parse path to get default values
     if required:
         args = parser.parse_args()
@@ -622,7 +617,7 @@ def read_command_line(input_path=None):
                 coarsening_factor=args.coarsening_factor, inlet_flow_extension_length=args.inlet_flowextension,
                 visualize=args.visualize, region_points=args.region_points, compress_mesh=args.compress_mesh,
                 outlet_flow_extension_length=args.outlet_flowextension, add_boundary_layer=args.add_boundary_layer,
-                scale_factor=args.scale_factor,dynamic_mesh=args.dynamicMesh,
+                scale_factor=args.scale_factor, dynamic_mesh=args.dynamicMesh,
                 clamp_boundaries=args.clampBoundaries)
 
 

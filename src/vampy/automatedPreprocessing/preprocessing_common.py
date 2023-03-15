@@ -9,6 +9,7 @@ from morphman import vtk_clean_polydata, vtk_triangulate_surface, get_parameters
 from vampy.automatedPreprocessing import ImportData
 from vampy.automatedPreprocessing.NetworkBoundaryConditions import FlowSplitting
 from vampy.automatedPreprocessing.vmtk_pointselector import vmtkPickPointSeedSelector
+import vtkmodules.numpy_interface.dataset_adapter as dsa
 
 # Global array names
 distanceToSpheresArrayName = "DistanceToSpheres"
