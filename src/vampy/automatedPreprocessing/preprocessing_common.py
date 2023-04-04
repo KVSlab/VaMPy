@@ -1,4 +1,5 @@
 from os import path
+import gzip
 
 import numpy as np
 from morphman import vtk_clean_polydata, vtk_triangulate_surface, get_parameters, write_parameters, read_polydata, \
@@ -730,13 +731,27 @@ def write_mesh(compress_mesh, file_name_surface_name, file_name_vtu_mesh, file_n
     write_polydata(mesh, file_name_vtu_mesh)
 
     # Write mesh to FEniCS to format
-    meshWriter = vmtkscripts.vmtkMeshWriter()
-    meshWriter.CellEntityIdsArrayName = "CellEntityIds"
-    meshWriter.Mesh = mesh
-    meshWriter.Mode = "ascii"
-    meshWriter.Compressed = compress_mesh
-    meshWriter.OutputFileName = file_name_xml_mesh
-    meshWriter.Execute()
+    if compress_mesh:
+        file_name_xml_mesh += '.gz'
+    writer = vtkvmtk.vtkvmtkDolfinWriter()
+    writer.SetInputData(mesh)
+    writer.SetFileName(file_name_xml_mesh)
+    writer.SetBoundaryDataArrayName("CellEntityIds")
+    writer.SetBoundaryDataIdOffset(-1)
+    writer.SetStoreCellMarkers(0)
+
+    print('--- Writing Dolfin file')
+    writer.Write()
+
+    # Compress mesh locally to bypass VMTK issue
+    if compress_mesh:
+        file = open(file_name_xml_mesh, 'rb')
+        xml = file.read()
+        file.close()
+
+        gzfile = gzip.open(file_name_xml_mesh, 'wb')
+        gzfile.write(xml)
+        gzfile.close()
 
 
 def add_flow_extension(surface, centerlines, include_outlet, extension_length=2.0,
