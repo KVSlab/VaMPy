@@ -46,7 +46,7 @@ $ conda activate your_environment
 
 Finally, you can install the `VaMPy` package inside your environment using `pip`:
 
-```
+``` console
 $ python3 -m pip install .
 ```
 
@@ -62,6 +62,11 @@ $ python3 -m pytest tests
 
 We recommend Windows users to use [Windows Subsystem for Linux](https://learn.microsoft.com/en-us/windows/wsl/install)
 and follow the [Linux](install:linux) instructions, or use [Docker](install:docker).
+
+Alternatively, Windows users may install the `FEniCS` dependency from source, by following
+the [FEniCS Reference Manual](https://fenics.readthedocs.io/en/latest/installation.html). Then, download the remaining
+dependencies through `conda` by removing the `fenics` dependency inside `environment.yml` and follow the steps of
+the [Linux/macOS](install:linux) installation instructions.
 
 ## Editable installation of VaMPy
 
