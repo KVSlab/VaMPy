@@ -8,7 +8,8 @@ parts:
   - caption: Installation
     chapters:
       - file: installation
-      - file: issues
+      - file: conda
+      - file: docker
 
   - caption: Using VaMPy
     chapters:
