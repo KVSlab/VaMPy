@@ -10,6 +10,7 @@ parts:
       - file: installation
       - file: conda
       - file: docker
+      - file: issues
 
   - caption: Using VaMPy
     chapters:
