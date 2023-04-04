@@ -3,9 +3,9 @@ import pickle
 from os import makedirs
 from pprint import pprint
 
-from oasis.problems.NSfracStep import *
-from oasis.problems.NSfracStep.MovingAtriumCommon import Surface_counter, Wall_motion
-from oasis.problems.NSfracStep.MovingCommon import get_visualization_writers
+from oasismove.problems.NSfracStep import *
+from oasismove.problems.NSfracStep.MovingAtriumCommon import Surface_counter, Wall_motion
+from oasismove.problems.NSfracStep.MovingCommon import get_visualization_writers
 
 from Probe import Probes
 from Womersley import make_womersley_bcs, compute_boundary_geometry_acrn
@@ -39,12 +39,12 @@ def problem_parameters(commandline_kwargs, NS_parameters, scalar_components, Sch
         # Override some problem specific parameters
         # Parameters are in mm and ms
         cardiac_cycle = float(commandline_kwargs.get("cardiac_cycle", 1000))
-        number_of_cycles = float(commandline_kwargs.get("number_of_cycles", 5))
+        number_of_cycles = float(commandline_kwargs.get("number_of_cycles", 1))
 
         NS_parameters.update(
             # Moving atrium parameters
             dynamic_mesh=True,  # Run moving mesh simulation
-            compute_velocity_and_pressure=True,  # Only solve mesh equations
+            compute_velocity_and_pressure=False,  # Only solve mesh equations
             # Backflow parameters
             backflow_beta=1.0,
             backflow_facets=[],
@@ -56,7 +56,7 @@ def problem_parameters(commandline_kwargs, NS_parameters, scalar_components, Sch
             # Simulation parameters
             cardiac_cycle=cardiac_cycle,  # Run simulation for 1 cardiac cycles [ms]
             T=number_of_cycles * cardiac_cycle,  # Number of cycles
-            dt=0.2,  # # Time step size [ms]
+            dt=1,  # # Time step size [ms]
             # Frequencies to save data
             dump_probe_frequency=500,  # Dump frequency for sampling velocity & pressure at probes along the centerline
             save_solution_frequency=40,  # Save frequency for velocity and pressure field
