@@ -21,8 +21,8 @@ The Vascular Modeling Pypeline (VaMPy) is a collection of fully automated script
 
 Installation
 ------------
-VaMPy and its dependencies can be installed using either `conda`, or by building and running a `Docker` container, and `pip`. 
-For detailed installation notes see the [installation guidelines](https://kvslab.github.io/VaMPy/installation.html).  
+VaMPy and its dependencies can be installed with `conda` on Linux and macOS as explained [here](https://kvslab.github.io/VaMPy/conda.html).
+VaMPy can also be installed and run through its latest `Docker` image supported by Windows, Linux, and macOS, and explained [here](https://kvslab.github.io/VaMPy/docker.html).
 
 Documentation
 -------------
