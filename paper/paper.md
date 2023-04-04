@@ -30,36 +30,36 @@ bibliography: paper.bib
 
 # Summary
 
-Hemodynamic forces, such as wall shear stress (WSS), play a role in vessel wall adaption and remodeling. However,
-directly measuring these forces is challenging. Medical researchers commonly use image-based computational fluid
-dynamics (CFD) to study vascular pathology, but modeling choices and simulation results vary widely. To address this, we
-aim to create an automated CFD pipeline for modeling cardiovascular flows that is objective and consistent, where
-modeling choices are backed up by rigorous research. The Vascular Modeling Pypeline (`VaMPy`) is an entry-level
-high-performance CFD pipeline with high-level Python interface that lets the user easily extend or modify the
-functionality.
+In medical research, it has become increasingly common to use image-based computational fluid dynamics (CFD) to study
+vascular pathology. Hemodynamic forces, such as wall shear stress (WSS), are believed to play a crucial role in vessel
+wall adaptation and remodeling. However, measuring these forces directly is challenging due to limitations in current
+measurement techniques. Additionally, there is significant variability in CFD modeling choices and simulation results,
+which can make it difficult to compare and interpret findings across studies. To address this, we aim to create an
+automated CFD pipeline for modeling cardiovascular flows that is objective and consistent, where modeling choices are
+backed up by rigorous research. The Vascular Modeling Pypeline (`VaMPy`) is an entry-level high-performance CFD pipeline
+with high-level Python interface that lets the user easily extend or modify the functionality.
 
 # Statement of Need
 
-Simulation of the cardiovascular flows has shown to become an indispensable research tool, which can potentially reveal
+Simulation of the cardiovascular flows has become an indispensable research tool, which can potentially reveal
 fundamental properties of the cardiovascular system in both physiological and pathological states. More specifically,
-medical image-based computational fluid dynamics (CFD) [@taylor2010image] has been extensively used in the investigation
+medical image-based computational fluid dynamics (CFD) [@taylor2010image] has been used extensively in the investigation
 of disease initiation of, e.g., coronary artery disease [@taylor2013computational], carotid bifurcation [@fisher],
 arteriovenous fistula [@Lee2005a], and aneurysms [@steinman2003image]. Numerous scientific studies have been conducted
 to scrutinize and assess different components of a conventional image-based modeling process, with the objective of
 creating a genuinely "patient-specific" CFD model. As highlighted and examined in a review [@steinman2019patient],
 particular emphasis has been placed on investigating the influence of medical imaging techniques, segmentation methods,
-flow velocities, and the impact of non-Newtonian rheology. However, recent challenge studies withinin aneurysm research
+flow velocities, and the impact of non-Newtonian rheology. However, recent challenge studies within aneurysm research
 have brought to light a significant inter-laboratory variability. When 26 research groups were provided with identical
 segmented surfaces and boundary conditions, the results showed large variability stemming from the various CFD solution
 strategies [@Steinman2013]. Futhermore, when provided with identical medical images and no guidelines – reflecting
-current research practice – results from 28 research groups showed significant variaiblity in the predicted
+current research practice – results from 28 research groups showed significant variability in the predicted
 WSS [@valen2018real]. These results might point to a broader reproducibility issue. While modeling and simulating
 cardiovascular flow can provide valuable and additional insight to vascular remodeling, establishing local computational
 pipelines for medical image-based CFD remains a time-intensive process that is error-prone and a significant source of
 variability.
 
-With this in mind, the objective was to devise a comprehensive and resilient open-source research code enabling
-open and reproduciable science, with an emphasis on user-friendliness, geared towards students, educators, and researchers. By
+With this in mind, the objective was to devise a comprehensive and resilient open-source research code enabling reproduciable science, with an emphasis on user-friendliness, geared towards students, educators, and researchers. By
 automating the process, we reduce the need for manual labor, which enables mass production of CFD results, and of equal
 importance, significantly reduces the variability. The latter is also ensured by making all aspects of the modeling
 choices based on state-of-the-art research shown to be the current gold-standard choices in aneurysm CFD modeling.
@@ -74,7 +74,7 @@ Illustration of the computational fluid dynamics pipeline be executing the `Arte
 
 The first feature of `VaMPy` is the pre-processing pipeline, which is built upon the methods introduced
 in `morphMan` [@kjeldsberg2019morphman], a published framework for objective and automated manipulation of vascular
-morphologies. The pre-processing pipeline includes volumetric mesh generation, automated identification of inlet and
+morphologies. The pre-processing pipeline includes volumetric mesh generation, automated identification of inlets and
 outlets for boundary conditions, and generation of probe points for velocity and pressure measurements within the
 domain. Prior to meshing, the user may also add adjustable features such as flow extensions, surface smoothing, local
 refinement, and generation of boundary layers. The volumetric meshing may be set to uniform or variable mesh density,
@@ -101,7 +101,8 @@ hemodynamic indices includes the most commonly computed ones, including wall she
 index (OSI), and relative residence time (RRT), and to demonstrate we have shown the time averaged WSS (TAWSS) in the
 rightmost panel of \autoref{fig:pipeline}. The probe point visualization script creates a figure of velocity and
 pressure traces at pre-determined points inside the domain. Finally, the conversion script creates viewable versions of
-the compact velocity and pressure solutions, and may be visualized in software such as `ParaView` [@ayachit2015paraview].
+the compact velocity and pressure solutions, and may be visualized in software such as `ParaView` [@ayachit2015paraview]
+.
 
 ![Example of an extension of `VaMPy` to cardiovascular flow in the left atrium and the associated hemodynamic stresses. From top left to bottom right: the volumetric rendering of velocity, the pressure field, volumetric rendering of the Q-criterion, TAWSS, OSI, and RRT. \label{fig:atrium}](Figure2.png)
 
