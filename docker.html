@@ -9,7 +9,7 @@
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" /><meta name="generator" content="Docutils 0.18.1: http://docutils.sourceforge.net/" />
 
-    <title>Installation &#8212; VaMPy</title>
+    <title>Installing with Docker &#8212; VaMPy</title>
   
   
   
@@ -61,11 +61,11 @@ const thebe_selector_input = "pre"
 const thebe_selector_output = ".output, .cell_output"
 </script>
     <script async="async" src="_static/sphinx-thebe.js"></script>
-    <script>DOCUMENTATION_OPTIONS.pagename = 'installation';</script>
+    <script>DOCUMENTATION_OPTIONS.pagename = 'docker';</script>
     <link rel="index" title="Index" href="genindex.html" />
     <link rel="search" title="Search" href="search.html" />
-    <link rel="next" title="Installing with conda" href="conda.html" />
-    <link rel="prev" title="VaMPy - The Vascular Modeling Pypeline" href="index.html" />
+    <link rel="next" title="Known issues" href="issues.html" />
+    <link rel="prev" title="Installing with conda" href="conda.html" />
   <meta name="viewport" content="width=device-width, initial-scale=1"/>
   <meta name="docsearch:language" content="en"/>
   </head>
@@ -158,9 +158,9 @@ const thebe_selector_output = ".output, .cell_output"
         </ul>
         <p aria-level="2" class="caption" role="heading"><span class="caption-text">Installation</span></p>
 <ul class="current nav bd-sidenav">
-<li class="toctree-l1 current active"><a class="current reference internal" href="#">Installation</a></li>
+<li class="toctree-l1"><a class="reference internal" href="installation.html">Installation</a></li>
 <li class="toctree-l1"><a class="reference internal" href="conda.html">Installing with <code class="docutils literal notranslate"><span class="pre">conda</span></code></a></li>
-<li class="toctree-l1"><a class="reference internal" href="docker.html">Installing with Docker</a></li>
+<li class="toctree-l1 current active"><a class="current reference internal" href="#">Installing with Docker</a></li>
 <li class="toctree-l1"><a class="reference internal" href="issues.html">Known issues</a></li>
 </ul>
 <p aria-level="2" class="caption" role="heading"><span class="caption-text">Using VaMPy</span></p>
@@ -252,7 +252,7 @@ const thebe_selector_output = ".output, .cell_output"
       
       
       
-      <li><a href="https://github.com/kvslab/VaMPy/issues/new?title=Issue%20on%20page%20%2Finstallation.html&body=Your%20issue%20content%20here." target="_blank"
+      <li><a href="https://github.com/kvslab/VaMPy/issues/new?title=Issue%20on%20page%20%2Fdocker.html&body=Your%20issue%20content%20here." target="_blank"
    class="btn btn-sm btn-source-issues-button dropdown-item"
    title="Open an issue"
    data-bs-placement="left" data-bs-toggle="tooltip"
@@ -282,7 +282,7 @@ const thebe_selector_output = ".output, .cell_output"
       
       
       
-      <li><a href="_sources/installation.md" target="_blank"
+      <li><a href="_sources/docker.md" target="_blank"
    class="btn btn-sm btn-download-source-button dropdown-item"
    title="Download source file"
    data-bs-placement="left" data-bs-toggle="tooltip"
@@ -364,7 +364,7 @@ document.write(`
               
 
 <div id="jb-print-docs-body" class="onlyprint">
-    <h1>Installation</h1>
+    <h1>Installing with Docker</h1>
     <!-- Table of contents -->
     <div id="print-main-content">
         <div id="jb-print-toc">
@@ -374,9 +374,11 @@ document.write(`
             </div>
             <nav aria-label="Page">
                 <ul class="visible nav section-nav flex-column">
-<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#dependencies">Dependencies</a></li>
-<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#installing-with-conda">Installing with <code class="docutils literal notranslate"><span class="pre">conda</span></code></a></li>
-<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#installing-with-docker">Installing with Docker</a></li>
+<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#prerequisites">Prerequisites</a></li>
+<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#step-1-pull-the-docker-image">Step 1: Pull the Docker image</a></li>
+<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#step-2-run-the-docker-container">Step 2: Run the Docker container</a></li>
+<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#step-3-verify-the-installation">Step 3: Verify the installation</a></li>
+<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#building-our-own-docker-image">Building our own docker image</a></li>
 </ul>
             </nav>
         </div>
@@ -388,34 +390,51 @@ document.write(`
 <div id="searchbox"></div>
                 <article class="bd-article" role="main">
                   
-  <section class="tex2jax_ignore mathjax_ignore" id="installation">
-<h1>Installation<a class="headerlink" href="#installation" title="Permalink to this heading">#</a></h1>
-<p><code class="docutils literal notranslate"><span class="pre">VaMPy</span></code> is a pure Python package that combines the morphological processing tools of
-<a class="reference external" href="https://github.com/KVSlab/morphMan">morphMan</a>, the computational fluid dynamics
-solver <a class="reference external" href="https://github.com/mikaem/Oasis">Oasis</a>, and the finite element computing
-platform <a class="reference external" href="https://fenicsproject.org/">FEniCS</a> into a powerful and user-friendly computational fluid dynamics pipeline.</p>
-<section id="dependencies">
-<h2>Dependencies<a class="headerlink" href="#dependencies" title="Permalink to this heading">#</a></h2>
-<p>The dependencies of <code class="docutils literal notranslate"><span class="pre">VaMPy</span></code> are:</p>
+  <section class="tex2jax_ignore mathjax_ignore" id="installing-with-docker">
+<span id="install-docker"></span><h1>Installing with Docker<a class="headerlink" href="#installing-with-docker" title="Permalink to this heading">#</a></h1>
+<p>Installing <code class="docutils literal notranslate"><span class="pre">VaMPy</span></code> through Docker may be a good choice if you want to work in an isolated environment that doesn’t
+interfere with your system’s existing libraries or dependencies. Our Docker image contains <code class="docutils literal notranslate"><span class="pre">VaMPy</span></code> with its
+dependencies, and can be run on any operating system that supports Docker. The image is built to support the AMD64
+architecture, making it compatible with most modern CPUs.</p>
+<section id="prerequisites">
+<h2>Prerequisites<a class="headerlink" href="#prerequisites" title="Permalink to this heading">#</a></h2>
 <ul class="simple">
-<li><p>Python &gt;= 3.8</p></li>
-<li><p>FEniCS &gt;= 2018.1</p></li>
-<li><p>morphMan &gt;= 1.2</p></li>
-<li><p>Oasis &gt;= 2018.1</p></li>
-<li><p>paramiko &gt;= 3.0</p></li>
-<li><p>cppimport &gt;= 22.8.2</p></li>
+<li><p><a class="reference external" href="https://docs.docker.com/get-docker/">Docker</a> must be installed on your system.</p></li>
 </ul>
 </section>
-<section id="installing-with-conda">
-<h2>Installing with <code class="docutils literal notranslate"><span class="pre">conda</span></code><a class="headerlink" href="#installing-with-conda" title="Permalink to this heading">#</a></h2>
-<p>To install <code class="docutils literal notranslate"><span class="pre">VaMPy</span></code> and all its dependencies to a <em>local environment</em>, we recommend using <code class="docutils literal notranslate"><span class="pre">conda</span></code>.
-Instructions for installing <code class="docutils literal notranslate"><span class="pre">VaMPy</span></code>
-with <code class="docutils literal notranslate"><span class="pre">conda</span></code> can be found <a class="reference internal" href="conda.html#install-conda"><span class="std std-ref">here</span></a>.</p>
+<section id="step-1-pull-the-docker-image">
+<h2>Step 1: Pull the Docker image<a class="headerlink" href="#step-1-pull-the-docker-image" title="Permalink to this heading">#</a></h2>
+<p>You can pull the Docker image for the latest <code class="docutils literal notranslate"><span class="pre">VaMPy</span></code> package from its
+official <a class="reference external" href="https://github.com/KVSlab/VaMPy/pkgs/container/vampy">GitHub container registry</a> using the following command:</p>
+<div class="highlight-console notranslate"><div class="highlight"><pre><span></span><span class="gp">$ </span>docker<span class="w"> </span>pull<span class="w"> </span>ghcr.io/kvslab/vampy:latest
+</pre></div>
+</div>
 </section>
-<section id="installing-with-docker">
-<h2>Installing with Docker<a class="headerlink" href="#installing-with-docker" title="Permalink to this heading">#</a></h2>
-<p>To install <code class="docutils literal notranslate"><span class="pre">VaMPy</span></code> and all its dependencies to an <em>isolated environment</em>, we recommend using the dedicated Docker
-container. Instructions for installing <code class="docutils literal notranslate"><span class="pre">VaMPy</span></code> with Docker can be found <a class="reference internal" href="docker.html#install-docker"><span class="std std-ref">here</span></a>.</p>
+<section id="step-2-run-the-docker-container">
+<h2>Step 2: Run the Docker container<a class="headerlink" href="#step-2-run-the-docker-container" title="Permalink to this heading">#</a></h2>
+<p>After pulling the Docker image, you can run the container using the following command:</p>
+<div class="highlight-console notranslate"><div class="highlight"><pre><span></span><span class="gp">$ </span>docker<span class="w"> </span>run<span class="w"> </span>-it<span class="w"> </span>ghcr.io/kvslab/vampy:latest
+</pre></div>
+</div>
+</section>
+<section id="step-3-verify-the-installation">
+<h2>Step 3: Verify the installation<a class="headerlink" href="#step-3-verify-the-installation" title="Permalink to this heading">#</a></h2>
+<p>You can verify that <code class="docutils literal notranslate"><span class="pre">VaMPy</span></code> installed correctly by running the tests using the following command:</p>
+<div class="highlight-console notranslate"><div class="highlight"><pre><span></span><span class="gp">$ </span>python3<span class="w"> </span>-m<span class="w"> </span>pytest<span class="w"> </span>tests<span class="w"> </span>
+</pre></div>
+</div>
+</section>
+<section id="building-our-own-docker-image">
+<h2>Building our own docker image<a class="headerlink" href="#building-our-own-docker-image" title="Permalink to this heading">#</a></h2>
+<p>Instead of pulling the Docker image for <code class="docutils literal notranslate"><span class="pre">VaMPy</span></code> from GitHub, you can build it yourself using the provided <code class="docutils literal notranslate"><span class="pre">Dockerfile</span></code>.
+The Dockerfile can be found in the <code class="docutils literal notranslate"><span class="pre">docker</span></code> folder located in the root of the project repository.</p>
+<p>To build the Docker image, open a terminal window and navigate to the <code class="docutils literal notranslate"><span class="pre">docker</span></code> folder of the project. Then, execute the
+following command:</p>
+<div class="highlight-console notranslate"><div class="highlight"><pre><span></span><span class="go">docker build -t vampy .</span>
+</pre></div>
+</div>
+<p>This command will use the instructions in the <code class="docutils literal notranslate"><span class="pre">Dockerfile</span></code> to create a Docker image with the name <code class="docutils literal notranslate"><span class="pre">vampy</span></code>. Once the
+Docker image is built, you can run a container from it using the <code class="docutils literal notranslate"><span class="pre">docker</span> <span class="pre">run</span></code> command.</p>
 </section>
 </section>
 
@@ -451,20 +470,20 @@ container. Instructions for installing <code class="docutils literal notranslate
     <div class="footer-article-item"><!-- Previous / next buttons -->
 <div class="prev-next-area">
     <a class="left-prev"
-       href="index.html"
+       href="conda.html"
        title="previous page">
       <i class="fa-solid fa-angle-left"></i>
       <div class="prev-next-info">
         <p class="prev-next-subtitle">previous</p>
-        <p class="prev-next-title">VaMPy - The Vascular Modeling Pypeline</p>
+        <p class="prev-next-title">Installing with <code class="docutils literal notranslate"><span class="pre">conda</span></code></p>
       </div>
     </a>
     <a class="right-next"
-       href="conda.html"
+       href="issues.html"
        title="next page">
       <div class="prev-next-info">
         <p class="prev-next-subtitle">next</p>
-        <p class="prev-next-title">Installing with <code class="docutils literal notranslate"><span class="pre">conda</span></code></p>
+        <p class="prev-next-title">Known issues</p>
       </div>
       <i class="fa-solid fa-angle-right"></i>
     </a>
@@ -486,9 +505,11 @@ container. Instructions for installing <code class="docutils literal notranslate
   </div>
   <nav class="bd-toc-nav page-toc">
     <ul class="visible nav section-nav flex-column">
-<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#dependencies">Dependencies</a></li>
-<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#installing-with-conda">Installing with <code class="docutils literal notranslate"><span class="pre">conda</span></code></a></li>
-<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#installing-with-docker">Installing with Docker</a></li>
+<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#prerequisites">Prerequisites</a></li>
+<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#step-1-pull-the-docker-image">Step 1: Pull the Docker image</a></li>
+<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#step-2-run-the-docker-container">Step 2: Run the Docker container</a></li>
+<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#step-3-verify-the-installation">Step 3: Verify the installation</a></li>
+<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#building-our-own-docker-image">Building our own docker image</a></li>
 </ul>
   </nav></div>
 

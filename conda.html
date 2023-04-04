@@ -9,7 +9,7 @@
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" /><meta name="generator" content="Docutils 0.18.1: http://docutils.sourceforge.net/" />
 
-    <title>Installation &#8212; VaMPy</title>
+    <title>Installing with conda &#8212; VaMPy</title>
   
   
   
@@ -61,11 +61,11 @@ const thebe_selector_input = "pre"
 const thebe_selector_output = ".output, .cell_output"
 </script>
     <script async="async" src="_static/sphinx-thebe.js"></script>
-    <script>DOCUMENTATION_OPTIONS.pagename = 'installation';</script>
+    <script>DOCUMENTATION_OPTIONS.pagename = 'conda';</script>
     <link rel="index" title="Index" href="genindex.html" />
     <link rel="search" title="Search" href="search.html" />
-    <link rel="next" title="Installing with conda" href="conda.html" />
-    <link rel="prev" title="VaMPy - The Vascular Modeling Pypeline" href="index.html" />
+    <link rel="next" title="Installing with Docker" href="docker.html" />
+    <link rel="prev" title="Installation" href="installation.html" />
   <meta name="viewport" content="width=device-width, initial-scale=1"/>
   <meta name="docsearch:language" content="en"/>
   </head>
@@ -158,8 +158,8 @@ const thebe_selector_output = ".output, .cell_output"
         </ul>
         <p aria-level="2" class="caption" role="heading"><span class="caption-text">Installation</span></p>
 <ul class="current nav bd-sidenav">
-<li class="toctree-l1 current active"><a class="current reference internal" href="#">Installation</a></li>
-<li class="toctree-l1"><a class="reference internal" href="conda.html">Installing with <code class="docutils literal notranslate"><span class="pre">conda</span></code></a></li>
+<li class="toctree-l1"><a class="reference internal" href="installation.html">Installation</a></li>
+<li class="toctree-l1 current active"><a class="current reference internal" href="#">Installing with <code class="docutils literal notranslate"><span class="pre">conda</span></code></a></li>
 <li class="toctree-l1"><a class="reference internal" href="docker.html">Installing with Docker</a></li>
 <li class="toctree-l1"><a class="reference internal" href="issues.html">Known issues</a></li>
 </ul>
@@ -252,7 +252,7 @@ const thebe_selector_output = ".output, .cell_output"
       
       
       
-      <li><a href="https://github.com/kvslab/VaMPy/issues/new?title=Issue%20on%20page%20%2Finstallation.html&body=Your%20issue%20content%20here." target="_blank"
+      <li><a href="https://github.com/kvslab/VaMPy/issues/new?title=Issue%20on%20page%20%2Fconda.html&body=Your%20issue%20content%20here." target="_blank"
    class="btn btn-sm btn-source-issues-button dropdown-item"
    title="Open an issue"
    data-bs-placement="left" data-bs-toggle="tooltip"
@@ -282,7 +282,7 @@ const thebe_selector_output = ".output, .cell_output"
       
       
       
-      <li><a href="_sources/installation.md" target="_blank"
+      <li><a href="_sources/conda.md" target="_blank"
    class="btn btn-sm btn-download-source-button dropdown-item"
    title="Download source file"
    data-bs-placement="left" data-bs-toggle="tooltip"
@@ -364,7 +364,7 @@ document.write(`
               
 
 <div id="jb-print-docs-body" class="onlyprint">
-    <h1>Installation</h1>
+    <h1>Installing with conda</h1>
     <!-- Table of contents -->
     <div id="print-main-content">
         <div id="jb-print-toc">
@@ -374,9 +374,17 @@ document.write(`
             </div>
             <nav aria-label="Page">
                 <ul class="visible nav section-nav flex-column">
-<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#dependencies">Dependencies</a></li>
-<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#installing-with-conda">Installing with <code class="docutils literal notranslate"><span class="pre">conda</span></code></a></li>
-<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#installing-with-docker">Installing with Docker</a></li>
+<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#prerequisites">Prerequisites</a></li>
+<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#installation-on-linux-or-macos">Installation on Linux or macOS</a><ul class="nav section-nav flex-column">
+<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#step-1-clone-the-vampy-repository">Step 1:  Clone the <code class="docutils literal notranslate"><span class="pre">VaMPy</span></code> repository</a></li>
+<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#step-2-create-a-conda-environment">Step 2:  Create a <code class="docutils literal notranslate"><span class="pre">conda</span></code> environment</a></li>
+<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#step-3-activate-the-conda-environment">Step 3: Activate the <code class="docutils literal notranslate"><span class="pre">conda</span></code> environment</a></li>
+<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#step-4-install-vampy-inside-the-conda-environment-using-pip">Step 4: Install <code class="docutils literal notranslate"><span class="pre">VaMPy</span></code> inside the <code class="docutils literal notranslate"><span class="pre">conda</span></code> environment using <code class="docutils literal notranslate"><span class="pre">pip</span></code></a></li>
+<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#step-5-verify-the-installation">Step 5: Verify the installation</a></li>
+</ul>
+</li>
+<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#installation-on-windows">Installation on Windows</a></li>
+<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#editable-installation-of-vampy">Editable installation of VaMPy</a></li>
 </ul>
             </nav>
         </div>
@@ -388,34 +396,77 @@ document.write(`
 <div id="searchbox"></div>
                 <article class="bd-article" role="main">
                   
-  <section class="tex2jax_ignore mathjax_ignore" id="installation">
-<h1>Installation<a class="headerlink" href="#installation" title="Permalink to this heading">#</a></h1>
-<p><code class="docutils literal notranslate"><span class="pre">VaMPy</span></code> is a pure Python package that combines the morphological processing tools of
-<a class="reference external" href="https://github.com/KVSlab/morphMan">morphMan</a>, the computational fluid dynamics
-solver <a class="reference external" href="https://github.com/mikaem/Oasis">Oasis</a>, and the finite element computing
-platform <a class="reference external" href="https://fenicsproject.org/">FEniCS</a> into a powerful and user-friendly computational fluid dynamics pipeline.</p>
-<section id="dependencies">
-<h2>Dependencies<a class="headerlink" href="#dependencies" title="Permalink to this heading">#</a></h2>
-<p>The dependencies of <code class="docutils literal notranslate"><span class="pre">VaMPy</span></code> are:</p>
+  <section class="tex2jax_ignore mathjax_ignore" id="installing-with-conda">
+<span id="install-conda"></span><h1>Installing with <code class="docutils literal notranslate"><span class="pre">conda</span></code><a class="headerlink" href="#installing-with-conda" title="Permalink to this heading">#</a></h1>
+<p>Using <code class="docutils literal notranslate"><span class="pre">conda</span></code> for installing <code class="docutils literal notranslate"><span class="pre">VaMPy</span></code> allows you to easily manage dependencies and keep them isolated from your system’s
+existing libraries. We recommend this option for developers who want to contribute to the software, but requires
+installation of all the dependencies.</p>
+<section id="prerequisites">
+<h2>Prerequisites<a class="headerlink" href="#prerequisites" title="Permalink to this heading">#</a></h2>
 <ul class="simple">
-<li><p>Python &gt;= 3.8</p></li>
-<li><p>FEniCS &gt;= 2018.1</p></li>
-<li><p>morphMan &gt;= 1.2</p></li>
-<li><p>Oasis &gt;= 2018.1</p></li>
-<li><p>paramiko &gt;= 3.0</p></li>
-<li><p>cppimport &gt;= 22.8.2</p></li>
+<li><p>The <code class="docutils literal notranslate"><span class="pre">conda</span></code> package manager must be installed on your computer. It can be installed
+through <a class="reference external" href="https://www.anaconda.com/">Anaconda</a> or <a class="reference external" href="https://docs.conda.io/en/latest/miniconda.html">Miniconda</a>.</p></li>
 </ul>
 </section>
-<section id="installing-with-conda">
-<h2>Installing with <code class="docutils literal notranslate"><span class="pre">conda</span></code><a class="headerlink" href="#installing-with-conda" title="Permalink to this heading">#</a></h2>
-<p>To install <code class="docutils literal notranslate"><span class="pre">VaMPy</span></code> and all its dependencies to a <em>local environment</em>, we recommend using <code class="docutils literal notranslate"><span class="pre">conda</span></code>.
-Instructions for installing <code class="docutils literal notranslate"><span class="pre">VaMPy</span></code>
-with <code class="docutils literal notranslate"><span class="pre">conda</span></code> can be found <a class="reference internal" href="conda.html#install-conda"><span class="std std-ref">here</span></a>.</p>
+<section id="installation-on-linux-or-macos">
+<span id="install-linux"></span><h2>Installation on Linux or macOS<a class="headerlink" href="#installation-on-linux-or-macos" title="Permalink to this heading">#</a></h2>
+<section id="step-1-clone-the-vampy-repository">
+<h3>Step 1:  Clone the <code class="docutils literal notranslate"><span class="pre">VaMPy</span></code> repository<a class="headerlink" href="#step-1-clone-the-vampy-repository" title="Permalink to this heading">#</a></h3>
+<p>Start by downloading and navigating to the root directory of <code class="docutils literal notranslate"><span class="pre">VaMPy</span></code> with the following command in your terminal:</p>
+<div class="highlight-console notranslate"><div class="highlight"><pre><span></span><span class="gp">$ </span>git<span class="w"> </span>clone<span class="w"> </span>https://github.com/KVSLab/VaMPy.git
+<span class="gp">$ </span><span class="nb">cd</span><span class="w"> </span>VaMPy
+</pre></div>
+</div>
 </section>
-<section id="installing-with-docker">
-<h2>Installing with Docker<a class="headerlink" href="#installing-with-docker" title="Permalink to this heading">#</a></h2>
-<p>To install <code class="docutils literal notranslate"><span class="pre">VaMPy</span></code> and all its dependencies to an <em>isolated environment</em>, we recommend using the dedicated Docker
-container. Instructions for installing <code class="docutils literal notranslate"><span class="pre">VaMPy</span></code> with Docker can be found <a class="reference internal" href="docker.html#install-docker"><span class="std std-ref">here</span></a>.</p>
+<section id="step-2-create-a-conda-environment">
+<h3>Step 2:  Create a <code class="docutils literal notranslate"><span class="pre">conda</span></code> environment<a class="headerlink" href="#step-2-create-a-conda-environment" title="Permalink to this heading">#</a></h3>
+<p>Once you have installed <code class="docutils literal notranslate"><span class="pre">conda</span></code>, create a new environment for <code class="docutils literal notranslate"><span class="pre">VaMPy</span></code> with all its dependencies using the following
+command in your terminal:</p>
+<div class="highlight-console notranslate"><div class="highlight"><pre><span></span><span class="gp">$ </span>conda<span class="w"> </span>env<span class="w"> </span>update<span class="w"> </span>--file<span class="w"> </span>environment.yml<span class="w"> </span>--name<span class="w"> </span>your_environment
+</pre></div>
+</div>
+</section>
+<section id="step-3-activate-the-conda-environment">
+<h3>Step 3: Activate the <code class="docutils literal notranslate"><span class="pre">conda</span></code> environment<a class="headerlink" href="#step-3-activate-the-conda-environment" title="Permalink to this heading">#</a></h3>
+<p>After the configuration of the <code class="docutils literal notranslate"><span class="pre">conda</span></code> environment is finished, activate the newly created environment by running the
+following command:</p>
+<div class="highlight-console notranslate"><div class="highlight"><pre><span></span><span class="gp">$ </span>conda<span class="w"> </span>activate<span class="w"> </span>your_environment
+</pre></div>
+</div>
+</section>
+<section id="step-4-install-vampy-inside-the-conda-environment-using-pip">
+<h3>Step 4: Install <code class="docutils literal notranslate"><span class="pre">VaMPy</span></code> inside the <code class="docutils literal notranslate"><span class="pre">conda</span></code> environment using <code class="docutils literal notranslate"><span class="pre">pip</span></code><a class="headerlink" href="#step-4-install-vampy-inside-the-conda-environment-using-pip" title="Permalink to this heading">#</a></h3>
+<p>Finally, you can install the <code class="docutils literal notranslate"><span class="pre">VaMPy</span></code> package inside your environment using <code class="docutils literal notranslate"><span class="pre">pip</span></code>:</p>
+<div class="highlight-console notranslate"><div class="highlight"><pre><span></span><span class="gp">$ </span>python3<span class="w"> </span>-m<span class="w"> </span>pip<span class="w"> </span>install<span class="w"> </span>.
+</pre></div>
+</div>
+</section>
+<section id="step-5-verify-the-installation">
+<h3>Step 5: Verify the installation<a class="headerlink" href="#step-5-verify-the-installation" title="Permalink to this heading">#</a></h3>
+<p>You can verify that <code class="docutils literal notranslate"><span class="pre">VaMPy</span></code> installed correctly by running the tests using the following command:</p>
+<div class="highlight-console notranslate"><div class="highlight"><pre><span></span><span class="gp">$ </span>python3<span class="w"> </span>-m<span class="w"> </span>pytest<span class="w"> </span>tests<span class="w"> </span>
+</pre></div>
+</div>
+</section>
+</section>
+<section id="installation-on-windows">
+<h2>Installation on Windows<a class="headerlink" href="#installation-on-windows" title="Permalink to this heading">#</a></h2>
+<p>We recommend Windows users to use <a class="reference external" href="https://learn.microsoft.com/en-us/windows/wsl/install">Windows Subsystem for Linux</a>
+and follow the <a class="reference internal" href="#install-linux"><span class="std std-ref">Linux</span></a> instructions, or use <a class="reference internal" href="docker.html#install-docker"><span class="std std-ref">Docker</span></a>.</p>
+<p>Alternatively, Windows users may install the <code class="docutils literal notranslate"><span class="pre">FEniCS</span></code> dependency from source, by following
+the <a class="reference external" href="https://fenics.readthedocs.io/en/latest/installation.html">FEniCS Reference Manual</a>. Then, download the remaining
+dependencies through <code class="docutils literal notranslate"><span class="pre">conda</span></code> by removing the <code class="docutils literal notranslate"><span class="pre">fenics</span></code> dependency inside <code class="docutils literal notranslate"><span class="pre">environment.yml</span></code> and follow the steps of
+the <a class="reference internal" href="#install-linux"><span class="std std-ref">Linux/macOS</span></a> installation instructions.</p>
+</section>
+<section id="editable-installation-of-vampy">
+<h2>Editable installation of VaMPy<a class="headerlink" href="#editable-installation-of-vampy" title="Permalink to this heading">#</a></h2>
+<p>If you want to make changes to any of the scripts included in <code class="docutils literal notranslate"><span class="pre">VaMPy</span></code>, you can install an editable version on your
+machine by supplying the <code class="docutils literal notranslate"><span class="pre">--editable</span></code> flag:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span>$ python3 -m pip install --editable .
+</pre></div>
+</div>
+<p>The <code class="docutils literal notranslate"><span class="pre">--editable</span></code> flag installs the project in editable mode meaning that any changes to the original package will be
+reflected directly in your environment.</p>
 </section>
 </section>
 
@@ -451,20 +502,20 @@ container. Instructions for installing <code class="docutils literal notranslate
     <div class="footer-article-item"><!-- Previous / next buttons -->
 <div class="prev-next-area">
     <a class="left-prev"
-       href="index.html"
+       href="installation.html"
        title="previous page">
       <i class="fa-solid fa-angle-left"></i>
       <div class="prev-next-info">
         <p class="prev-next-subtitle">previous</p>
-        <p class="prev-next-title">VaMPy - The Vascular Modeling Pypeline</p>
+        <p class="prev-next-title">Installation</p>
       </div>
     </a>
     <a class="right-next"
-       href="conda.html"
+       href="docker.html"
        title="next page">
       <div class="prev-next-info">
         <p class="prev-next-subtitle">next</p>
-        <p class="prev-next-title">Installing with <code class="docutils literal notranslate"><span class="pre">conda</span></code></p>
+        <p class="prev-next-title">Installing with Docker</p>
       </div>
       <i class="fa-solid fa-angle-right"></i>
     </a>
@@ -486,9 +537,17 @@ container. Instructions for installing <code class="docutils literal notranslate
   </div>
   <nav class="bd-toc-nav page-toc">
     <ul class="visible nav section-nav flex-column">
-<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#dependencies">Dependencies</a></li>
-<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#installing-with-conda">Installing with <code class="docutils literal notranslate"><span class="pre">conda</span></code></a></li>
-<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#installing-with-docker">Installing with Docker</a></li>
+<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#prerequisites">Prerequisites</a></li>
+<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#installation-on-linux-or-macos">Installation on Linux or macOS</a><ul class="nav section-nav flex-column">
+<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#step-1-clone-the-vampy-repository">Step 1:  Clone the <code class="docutils literal notranslate"><span class="pre">VaMPy</span></code> repository</a></li>
+<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#step-2-create-a-conda-environment">Step 2:  Create a <code class="docutils literal notranslate"><span class="pre">conda</span></code> environment</a></li>
+<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#step-3-activate-the-conda-environment">Step 3: Activate the <code class="docutils literal notranslate"><span class="pre">conda</span></code> environment</a></li>
+<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#step-4-install-vampy-inside-the-conda-environment-using-pip">Step 4: Install <code class="docutils literal notranslate"><span class="pre">VaMPy</span></code> inside the <code class="docutils literal notranslate"><span class="pre">conda</span></code> environment using <code class="docutils literal notranslate"><span class="pre">pip</span></code></a></li>
+<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#step-5-verify-the-installation">Step 5: Verify the installation</a></li>
+</ul>
+</li>
+<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#installation-on-windows">Installation on Windows</a></li>
+<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#editable-installation-of-vampy">Editable installation of VaMPy</a></li>
 </ul>
   </nav></div>
 
