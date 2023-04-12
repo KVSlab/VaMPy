@@ -52,9 +52,11 @@ $ python3 -m pip install .
 
 ### Step 5: Verify the installation
 
-You can verify that `VaMPy` installed correctly by running the tests using the following command:
+You can verify that `VaMPy` is installed correctly by downloading the test dependencies, and running the tests using the
+following commands:
 
 ``` console
+$ python3 -m pip install .[test]
 $ python3 -m pytest tests 
 ```
 
