@@ -602,7 +602,6 @@ document.write(`
 
         <span class="k">else</span><span class="p">:</span>
             <span class="n">centerlines</span> <span class="o">=</span> <span class="n">read_polydata</span><span class="p">(</span><span class="n">file_name_flow_centerlines</span><span class="p">)</span>
-
     <span class="c1"># Choose input for the mesh</span>
     <span class="nb">print</span><span class="p">(</span><span class="s2">&quot;--- Computing distance to sphere</span><span class="se">\n</span><span class="s2">&quot;</span><span class="p">)</span>
     <span class="k">if</span> <span class="n">meshing_method</span> <span class="o">==</span> <span class="s2">&quot;constant&quot;</span><span class="p">:</span>
@@ -627,19 +626,19 @@ document.write(`
 
     <span class="c1"># Compute mesh</span>
     <span class="k">if</span> <span class="ow">not</span> <span class="n">path</span><span class="o">.</span><span class="n">isfile</span><span class="p">(</span><span class="n">file_name_vtu_mesh</span><span class="p">):</span>
+        <span class="nb">print</span><span class="p">(</span><span class="s2">&quot;--- Computing mesh</span><span class="se">\n</span><span class="s2">&quot;</span><span class="p">)</span>
         <span class="k">try</span><span class="p">:</span>
-            <span class="nb">print</span><span class="p">(</span><span class="s2">&quot;--- Computing mesh</span><span class="se">\n</span><span class="s2">&quot;</span><span class="p">)</span>
             <span class="n">mesh</span><span class="p">,</span> <span class="n">remeshed_surface</span> <span class="o">=</span> <span class="n">generate_mesh</span><span class="p">(</span><span class="n">distance_to_sphere</span><span class="p">,</span> <span class="n">add_boundary_layer</span><span class="p">)</span>
-            <span class="k">assert</span> <span class="n">remeshed_surface</span><span class="o">.</span><span class="n">GetNumberOfPoints</span><span class="p">()</span> <span class="o">&gt;</span> <span class="mi">0</span><span class="p">,</span> \
-                <span class="s2">&quot;No points in surface mesh, try to remesh&quot;</span>
-            <span class="k">assert</span> <span class="n">mesh</span><span class="o">.</span><span class="n">GetNumberOfPoints</span><span class="p">()</span> <span class="o">&gt;</span> <span class="mi">0</span><span class="p">,</span> <span class="s2">&quot;No points in mesh, try to remesh&quot;</span>
-
         <span class="k">except</span> <span class="ne">Exception</span><span class="p">:</span>
             <span class="n">distance_to_sphere</span> <span class="o">=</span> <span class="n">mesh_alternative</span><span class="p">(</span><span class="n">distance_to_sphere</span><span class="p">)</span>
             <span class="n">mesh</span><span class="p">,</span> <span class="n">remeshed_surface</span> <span class="o">=</span> <span class="n">generate_mesh</span><span class="p">(</span><span class="n">distance_to_sphere</span><span class="p">,</span> <span class="n">add_boundary_layer</span><span class="p">)</span>
-            <span class="k">assert</span> <span class="n">mesh</span><span class="o">.</span><span class="n">GetNumberOfPoints</span><span class="p">()</span> <span class="o">&gt;</span> <span class="mi">0</span><span class="p">,</span> <span class="s2">&quot;No points in mesh, after remeshing&quot;</span>
-            <span class="k">assert</span> <span class="n">remeshed_surface</span><span class="o">.</span><span class="n">GetNumberOfPoints</span><span class="p">()</span> <span class="o">&gt;</span> <span class="mi">0</span><span class="p">,</span> \
-                <span class="s2">&quot;No points in surface mesh, try to remesh&quot;</span>
+
+        <span class="k">assert</span> <span class="n">mesh</span><span class="o">.</span><span class="n">GetNumberOfPoints</span><span class="p">()</span> <span class="o">&gt;</span> <span class="mi">0</span><span class="p">,</span> <span class="s2">&quot;No points in mesh, try to remesh.&quot;</span>
+        <span class="k">assert</span> <span class="n">remeshed_surface</span><span class="o">.</span><span class="n">GetNumberOfPoints</span><span class="p">()</span> <span class="o">&gt;</span> <span class="mi">0</span><span class="p">,</span> <span class="s2">&quot;No points in surface mesh, try to remesh.&quot;</span>
+
+        <span class="k">if</span> <span class="n">mesh</span><span class="o">.</span><span class="n">GetNumberOfPoints</span><span class="p">()</span> <span class="o">&lt;</span> <span class="n">remeshed_surface</span><span class="o">.</span><span class="n">GetNumberOfPoints</span><span class="p">():</span>
+            <span class="nb">print</span><span class="p">(</span><span class="s2">&quot;--- An error occurred during meshing. Will attempt to re-mesh </span><span class="se">\n</span><span class="s2">&quot;</span><span class="p">)</span>
+            <span class="n">mesh</span><span class="p">,</span> <span class="n">remeshed_surface</span> <span class="o">=</span> <span class="n">generate_mesh</span><span class="p">(</span><span class="n">distance_to_sphere</span><span class="p">,</span> <span class="n">add_boundary_layer</span><span class="p">)</span>
 
         <span class="n">write_mesh</span><span class="p">(</span><span class="n">compress_mesh</span><span class="p">,</span> <span class="n">file_name_surface_name</span><span class="p">,</span> <span class="n">file_name_vtu_mesh</span><span class="p">,</span> <span class="n">file_name_xml_mesh</span><span class="p">,</span>
                    <span class="n">mesh</span><span class="p">,</span> <span class="n">remeshed_surface</span><span class="p">)</span>
@@ -907,7 +906,7 @@ By Henrik A. Kjeldsberg
   
   <div class="footer-item">
     <p class="last-updated">
-  Last updated on Apr 12, 2023.
+  Last updated on Apr 13, 2023.
   <br/>
 </p>
   </div>
