@@ -274,7 +274,6 @@ def run_pre_processing(input_model, verbose_print, smoothing_method, smoothing_f
 
         else:
             centerlines = read_polydata(file_name_flow_centerlines)
-
     # Choose input for the mesh
     print("--- Computing distance to sphere\n")
     if meshing_method == "constant":
@@ -308,9 +307,9 @@ def run_pre_processing(input_model, verbose_print, smoothing_method, smoothing_f
 
         assert mesh.GetNumberOfPoints() > 0, "No points in mesh, try to remesh."
         assert remeshed_surface.GetNumberOfPoints() > 0, "No points in surface mesh, try to remesh."
-        
+
         if mesh.GetNumberOfPoints() < remeshed_surface.GetNumberOfPoints():
-            print("--- Re-computing mesh\n")
+            print("--- An error occurred during meshing. Will attempt to re-mesh \n")
             mesh, remeshed_surface = generate_mesh(distance_to_sphere, add_boundary_layer)
 
         write_mesh(compress_mesh, file_name_surface_name, file_name_vtu_mesh, file_name_xml_mesh,
