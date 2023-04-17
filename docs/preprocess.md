@@ -41,7 +41,7 @@ If your input model is not in mm, you may scale it by adding the `--scale-factor
 value. To scale your model from m to mm you can run the following command:
 
 ``` console
-$ vampy-mesh -i models/artery/artery.vtp -c 1.3 --scaling-factor 1000
+$ vampy-mesh -i models/artery/artery.vtp -c 1.3 --scale-factor 1000
 ```
 
 ## Smoothing
