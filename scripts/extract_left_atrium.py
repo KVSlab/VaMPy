@@ -48,8 +48,8 @@ def extract_LA_and_LAA(folder, index, cycle, clip_volume=False):
     # File paths
     casename = (folder.split("/")[-2])
     casename = folder.split("/")[-1]
-    step = int(casename)
-    folder = folder.rsplit("/", 1)[0]
+    #tep = int(casename)
+    #folder = folder.rsplit("/", 1)[0]
 
     if index is None:
         try:
@@ -256,7 +256,7 @@ def extract_LA_or_LAA(folder, laa_point, index, cycle, clip_volume=False):
     # File paths
     casename = (folder.split("/")[-2])
     casename = (folder.split("/")[-1])
-    folder = folder.rsplit("/", 1)[0]
+    #folder = folder.rsplit("/", 1)[0]
 
     if index is None:
         filename = casename
