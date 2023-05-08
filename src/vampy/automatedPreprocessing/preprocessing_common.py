@@ -540,6 +540,7 @@ def generate_mesh(surface, add_boundary_layer):
     meshGenerator.Surface = surface
     meshGenerator.ElementSizeMode = "edgelengtharray"  # Variable size mesh
     meshGenerator.TargetEdgeLengthArrayName = "Size"  # Variable size mesh
+    meshGenerator.LogOn = 0
     if add_boundary_layer:
         meshGenerator.BoundaryLayer = 1
         meshGenerator.NumberOfSubLayers = 4

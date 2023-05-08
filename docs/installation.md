@@ -1,7 +1,7 @@
 # Installation
 
 `VaMPy` is a pure Python package that combines the morphological processing tools of
-[morphMan](https://github.com/KVSlab/morphMan), the computational fluid dynamics
+[morphMan](https://github.com/KVSlab/morphMan) and [vmtk](http://www.vmtk.org/), the computational fluid dynamics
 solver [Oasis](https://github.com/mikaem/Oasis), and the finite element computing
 platform [FEniCS](https://fenicsproject.org/) into a powerful and user-friendly computational fluid dynamics pipeline.
 
@@ -12,6 +12,7 @@ The dependencies of `VaMPy` are:
 * Python >= 3.8
 * FEniCS >= 2018.1
 * morphMan >= 1.2
+* vmtk >= 1.4.0
 * Oasis >= 2018.1
 * paramiko >= 3.0
 * cppimport >= 22.8.2
