@@ -7,8 +7,8 @@ from oasismove.problems.NSfracStep import *
 from oasismove.problems.NSfracStep.MovingAtriumCommon import Surface_counter, Wall_motion
 from oasismove.problems.NSfracStep.MovingCommon import get_visualization_writers
 
-from Probe import Probes
-from Womersley import make_womersley_bcs, compute_boundary_geometry_acrn
+from vampy.simulation.Probe import Probes
+from vampy.simulation.Womersley import make_womersley_bcs, compute_boundary_geometry_acrn
 from vampy.simulation.simulation_common import store_u_mean, get_file_paths, print_mesh_information
 
 # FEniCS specific command to control the desired level of logging, here set to critical errors
