@@ -24,7 +24,7 @@ affiliations:
 - name: Department of Computational Physiology, Simula Research Laboratory, Oslo, Norway
   index: 1
 
-date: 15 March 2023
+date: 19 May 2023
 bibliography: paper.bib
 ---
 
