@@ -13,7 +13,7 @@ from vampy.automatedPreprocessing import ToolRepairSTL
 from vampy.automatedPreprocessing.preprocessing_common import read_polydata, get_centers_for_meshing, \
     dist_sphere_diam, dist_sphere_curvature, dist_sphere_constant, get_regions_to_refine, add_flow_extension, \
     write_mesh, mesh_alternative, generate_mesh, find_boundaries, \
-    compute_flow_rate, setup_model_network, radiusArrayName, scale_surface
+    compute_flow_rate, setup_model_network, radiusArrayName, scale_surface, get_furtest_surface_point
 from vampy.automatedPreprocessing.simulate import run_simulation
 from vampy.automatedPreprocessing.visualize import visualize_model
 
@@ -125,7 +125,7 @@ def run_pre_processing(input_model, verbose_print, smoothing_method, smoothing_f
 
     # Get point the furthest away inlet when only one boundary
     if not has_outlet:
-        outlets = get_furtest_surface_point(inlet, outlets, surface)
+        outlets = get_furtest_surface_point(inlet, surface)
 
     source = outlets if is_atrium else inlet
     target = inlet if is_atrium else outlets
