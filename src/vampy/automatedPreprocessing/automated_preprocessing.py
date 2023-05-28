@@ -3,17 +3,18 @@ import sys
 from os import remove, path
 
 import numpy as np
-from morphman import is_surface_capped, get_uncapped_surface, write_polydata, get_parameters, vtk_clean_polydata, \
+from morphman import get_uncapped_surface, write_polydata, get_parameters, vtk_clean_polydata, \
     vtk_triangulate_surface, write_parameters, vmtk_cap_polydata, compute_centerlines, get_centerline_tolerance, \
     get_vtk_point_locator, extract_single_line, vtk_merge_polydata, get_point_data_array, smooth_voronoi_diagram, \
     create_new_surface, compute_centers, vmtk_smooth_surface, str2bool, vmtk_compute_voronoi_diagram, \
     prepare_output_surface
+
 # Local imports
 from vampy.automatedPreprocessing import ToolRepairSTL
 from vampy.automatedPreprocessing.preprocessing_common import read_polydata, get_centers_for_meshing, \
     dist_sphere_diam, dist_sphere_curvature, dist_sphere_constant, get_regions_to_refine, add_flow_extension, \
-    write_mesh, mesh_alternative, generate_mesh, find_boundaries, \
-    compute_flow_rate, setup_model_network, radiusArrayName, scale_surface, get_furtest_surface_point
+    write_mesh, mesh_alternative, generate_mesh, find_boundaries, compute_flow_rate, setup_model_network, \
+    radiusArrayName, scale_surface, get_furtest_surface_point, check_if_closed_surface
 from vampy.automatedPreprocessing.simulate import run_simulation
 from vampy.automatedPreprocessing.visualize import visualize_model
 
@@ -84,7 +85,8 @@ def run_pre_processing(input_model, verbose_print, smoothing_method, smoothing_f
         surface = scale_surface(surface, scale_factor)
 
     # Check if surface is closed and uncapps model if True
-    if is_surface_capped(surface)[0]:
+    is_capped = check_if_closed_surface(surface)
+    if is_capped:
         if not path.isfile(file_name_clipped_model):
             print("--- Clipping the models inlets and outlets.\n")
             # Value of gradients_limit should be generally low, to detect flat surfaces corresponding

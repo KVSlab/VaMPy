@@ -7,6 +7,7 @@ from morphman import vtk_clean_polydata, vtk_triangulate_surface, get_parameters
     get_distance, get_number_of_arrays, vmtk_smooth_surface, get_point_data_array, create_vtk_array, \
     get_vtk_point_locator, vtk_extract_feature_edges, get_uncapped_surface, vtk_compute_connectivity, \
     vtk_compute_mass_properties, extract_single_line, get_centerline_tolerance
+
 from vampy.automatedPreprocessing import ImportData
 from vampy.automatedPreprocessing.NetworkBoundaryConditions import FlowSplitting
 from vampy.automatedPreprocessing.vmtk_pointselector import vmtkPickPointSeedSelector
@@ -858,3 +859,18 @@ def get_furtest_surface_point(inlet, surface):
             end_point_distance = dx
             outlets = tmp_p
     return outlets
+
+
+def check_if_closed_surface(surface):
+    """
+      Checks if the given surface is capped (i.e., has no feature edges).
+
+      Args:
+          surface (vtkPolyData): The surface to check for capping.
+
+      Returns:
+          bool: True if the surface is capped, False otherwise.
+      """
+
+    cells = vtk_extract_feature_edges(surface)
+    return cells.GetNumberOfCells() == 0
