@@ -46,7 +46,7 @@ def problem_parameters(commandline_kwargs, NS_parameters, scalar_components, Sch
             dynamic_mesh=True,  # Run moving mesh simulation
             compute_velocity_and_pressure=False,  # Only solve mesh equations
             # Backflow parameters
-            backflow_beta=1.0,
+            backflow_beta=0.2,
             backflow_facets=[],
             # Fluid parameters
             nu=3.3018868e-3,  # Viscosity [nu: 0.0035 Pa-s / 1060 kg/m^3 = 3.3018868E-6 m^2/s == 3.3018868E-3 mm^2/ms]
@@ -59,13 +59,13 @@ def problem_parameters(commandline_kwargs, NS_parameters, scalar_components, Sch
             dt=1,  # # Time step size [ms]
             # Frequencies to save data
             dump_probe_frequency=500,  # Dump frequency for sampling velocity & pressure at probes along the centerline
-            save_solution_frequency=40,  # Save frequency for velocity and pressure field
-            save_solution_frequency_xdmf=40,  # Save frequency for velocity and pressure field
+            save_solution_frequency=5,  # Save frequency for velocity and pressure field
+            save_solution_frequency_xdmf=5,  # Save frequency for velocity and pressure field
             save_solution_after_cycle=0,  # Store solution after 1 cardiac cycle
             save_volume_frequency=1e10,  # Save frequency for storing volume
-            save_flow_metrics_frequency=40,  # Frequency for storing flow metrics
+            save_flow_metrics_frequency=4e10,  # Frequency for storing flow metrics
             # Oasis specific parameters
-            checkpoint=500,  # Overwrite solution in Checkpoint folder each checkpoint
+            checkpoint=50000,  # Overwrite solution in Checkpoint folder each checkpoint
             print_intermediate_info=200,
             folder="results_moving_atrium",
             mesh_path=commandline_kwargs["mesh_path"],
