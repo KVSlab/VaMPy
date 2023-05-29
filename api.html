@@ -469,6 +469,23 @@ or following centerline direction</p></li>
 </dd></dl>
 
 <dl class="py function">
+<dt class="sig sig-object py" id="vampy.automatedPreprocessing.preprocessing_common.check_if_closed_surface">
+<span class="sig-prename descclassname"><span class="pre">vampy.automatedPreprocessing.preprocessing_common.</span></span><span class="sig-name descname"><span class="pre">check_if_closed_surface</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">surface</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/vampy/automatedPreprocessing/preprocessing_common.html#check_if_closed_surface"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#vampy.automatedPreprocessing.preprocessing_common.check_if_closed_surface" title="Permalink to this definition">#</a></dt>
+<dd><p>Checks if the given surface is capped (i.e., has no feature edges).</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><p><strong>surface</strong> (<em>vtkPolyData</em>) – The surface to check for capping.</p>
+</dd>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><p>True if the surface is capped, False otherwise.</p>
+</dd>
+<dt class="field-odd">Return type<span class="colon">:</span></dt>
+<dd class="field-odd"><p>bool</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py function">
 <dt class="sig sig-object py" id="vampy.automatedPreprocessing.preprocessing_common.compute_centers_for_meshing">
 <span class="sig-prename descclassname"><span class="pre">vampy.automatedPreprocessing.preprocessing_common.</span></span><span class="sig-name descname"><span class="pre">compute_centers_for_meshing</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">surface</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">is_atrium</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">case_path</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">test_capped</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">False</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/vampy/automatedPreprocessing/preprocessing_common.html#compute_centers_for_meshing"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#vampy.automatedPreprocessing.preprocessing_common.compute_centers_for_meshing" title="Permalink to this definition">#</a></dt>
 <dd><p>Compute the center of all the openings in the surface. The inlet is chosen based on
@@ -674,6 +691,28 @@ outlet (list): A flatt list with the points of all the outlets.</p>
 </dd>
 <dt class="field-odd">Return type<span class="colon">:</span></dt>
 <dd class="field-odd"><p>inlet (list)</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="vampy.automatedPreprocessing.preprocessing_common.get_furtest_surface_point">
+<span class="sig-prename descclassname"><span class="pre">vampy.automatedPreprocessing.preprocessing_common.</span></span><span class="sig-name descname"><span class="pre">get_furtest_surface_point</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">inlet</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">surface</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/vampy/automatedPreprocessing/preprocessing_common.html#get_furtest_surface_point"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#vampy.automatedPreprocessing.preprocessing_common.get_furtest_surface_point" title="Permalink to this definition">#</a></dt>
+<dd><p>Calculates the furthest point on a given surface from a specified inlet point.
+It iterates over each point on the surface, calculating its distance from the inlet and updates
+the furthest distance accordingly.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>inlet</strong> (<em>list</em>) – A list with the inlet point.</p></li>
+<li><p><strong>surface</strong> (<em>vtkPolyData</em>) – The surface to check for the furthest point.</p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><p>The x, y, z coordinates of the furthest point on the surface from the inlet.</p>
+</dd>
+<dt class="field-odd">Return type<span class="colon">:</span></dt>
+<dd class="field-odd"><p>outlets (list)</p>
 </dd>
 </dl>
 </dd></dl>
@@ -2026,7 +2065,7 @@ By Henrik A. Kjeldsberg
   
   <div class="footer-item">
     <p class="last-updated">
-  Last updated on May 19, 2023.
+  Last updated on May 29, 2023.
   <br/>
 </p>
   </div>

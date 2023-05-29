@@ -331,17 +331,18 @@ document.write(`
 <span class="kn">from</span> <span class="nn">os</span> <span class="kn">import</span> <span class="n">remove</span><span class="p">,</span> <span class="n">path</span>
 
 <span class="kn">import</span> <span class="nn">numpy</span> <span class="k">as</span> <span class="nn">np</span>
-<span class="kn">from</span> <span class="nn">morphman</span> <span class="kn">import</span> <span class="n">is_surface_capped</span><span class="p">,</span> <span class="n">get_uncapped_surface</span><span class="p">,</span> <span class="n">write_polydata</span><span class="p">,</span> <span class="n">get_parameters</span><span class="p">,</span> <span class="n">vtk_clean_polydata</span><span class="p">,</span> \
+<span class="kn">from</span> <span class="nn">morphman</span> <span class="kn">import</span> <span class="n">get_uncapped_surface</span><span class="p">,</span> <span class="n">write_polydata</span><span class="p">,</span> <span class="n">get_parameters</span><span class="p">,</span> <span class="n">vtk_clean_polydata</span><span class="p">,</span> \
     <span class="n">vtk_triangulate_surface</span><span class="p">,</span> <span class="n">write_parameters</span><span class="p">,</span> <span class="n">vmtk_cap_polydata</span><span class="p">,</span> <span class="n">compute_centerlines</span><span class="p">,</span> <span class="n">get_centerline_tolerance</span><span class="p">,</span> \
     <span class="n">get_vtk_point_locator</span><span class="p">,</span> <span class="n">extract_single_line</span><span class="p">,</span> <span class="n">vtk_merge_polydata</span><span class="p">,</span> <span class="n">get_point_data_array</span><span class="p">,</span> <span class="n">smooth_voronoi_diagram</span><span class="p">,</span> \
     <span class="n">create_new_surface</span><span class="p">,</span> <span class="n">compute_centers</span><span class="p">,</span> <span class="n">vmtk_smooth_surface</span><span class="p">,</span> <span class="n">str2bool</span><span class="p">,</span> <span class="n">vmtk_compute_voronoi_diagram</span><span class="p">,</span> \
     <span class="n">prepare_output_surface</span>
+
 <span class="c1"># Local imports</span>
 <span class="kn">from</span> <span class="nn">vampy.automatedPreprocessing</span> <span class="kn">import</span> <span class="n">ToolRepairSTL</span>
 <span class="kn">from</span> <span class="nn">vampy.automatedPreprocessing.preprocessing_common</span> <span class="kn">import</span> <span class="n">read_polydata</span><span class="p">,</span> <span class="n">get_centers_for_meshing</span><span class="p">,</span> \
     <span class="n">dist_sphere_diam</span><span class="p">,</span> <span class="n">dist_sphere_curvature</span><span class="p">,</span> <span class="n">dist_sphere_constant</span><span class="p">,</span> <span class="n">get_regions_to_refine</span><span class="p">,</span> <span class="n">add_flow_extension</span><span class="p">,</span> \
-    <span class="n">write_mesh</span><span class="p">,</span> <span class="n">mesh_alternative</span><span class="p">,</span> <span class="n">generate_mesh</span><span class="p">,</span> <span class="n">find_boundaries</span><span class="p">,</span> \
-    <span class="n">compute_flow_rate</span><span class="p">,</span> <span class="n">setup_model_network</span><span class="p">,</span> <span class="n">radiusArrayName</span><span class="p">,</span> <span class="n">scale_surface</span>
+    <span class="n">write_mesh</span><span class="p">,</span> <span class="n">mesh_alternative</span><span class="p">,</span> <span class="n">generate_mesh</span><span class="p">,</span> <span class="n">find_boundaries</span><span class="p">,</span> <span class="n">compute_flow_rate</span><span class="p">,</span> <span class="n">setup_model_network</span><span class="p">,</span> \
+    <span class="n">radiusArrayName</span><span class="p">,</span> <span class="n">scale_surface</span><span class="p">,</span> <span class="n">get_furtest_surface_point</span><span class="p">,</span> <span class="n">check_if_closed_surface</span>
 <span class="kn">from</span> <span class="nn">vampy.automatedPreprocessing.simulate</span> <span class="kn">import</span> <span class="n">run_simulation</span>
 <span class="kn">from</span> <span class="nn">vampy.automatedPreprocessing.visualize</span> <span class="kn">import</span> <span class="n">visualize_model</span>
 
@@ -383,23 +384,24 @@ document.write(`
     <span class="nb">print</span><span class="p">(</span><span class="s2">&quot;</span><span class="se">\n</span><span class="s2">--- Working on case:&quot;</span><span class="p">,</span> <span class="n">case_name</span><span class="p">,</span> <span class="s2">&quot;</span><span class="se">\n</span><span class="s2">&quot;</span><span class="p">)</span>
 
     <span class="c1"># Naming conventions</span>
-    <span class="n">file_name_centerlines</span> <span class="o">=</span> <span class="n">path</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">dir_path</span><span class="p">,</span> <span class="n">case_name</span> <span class="o">+</span> <span class="s2">&quot;_centerlines.vtp&quot;</span><span class="p">)</span>
-    <span class="n">file_name_refine_region_centerlines</span> <span class="o">=</span> <span class="n">path</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">dir_path</span><span class="p">,</span> <span class="n">case_name</span> <span class="o">+</span> <span class="s2">&quot;_refine_region_centerline.vtp&quot;</span><span class="p">)</span>
-    <span class="n">file_name_region_centerlines</span> <span class="o">=</span> <span class="n">path</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">dir_path</span><span class="p">,</span> <span class="n">case_name</span> <span class="o">+</span> <span class="s2">&quot;_sac_centerline_</span><span class="si">{}</span><span class="s2">.vtp&quot;</span><span class="p">)</span>
-    <span class="n">file_name_distance_to_sphere_diam</span> <span class="o">=</span> <span class="n">path</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">dir_path</span><span class="p">,</span> <span class="n">case_name</span> <span class="o">+</span> <span class="s2">&quot;_distance_to_sphere_diam.vtp&quot;</span><span class="p">)</span>
-    <span class="n">file_name_distance_to_sphere_const</span> <span class="o">=</span> <span class="n">path</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">dir_path</span><span class="p">,</span> <span class="n">case_name</span> <span class="o">+</span> <span class="s2">&quot;_distance_to_sphere_const.vtp&quot;</span><span class="p">)</span>
-    <span class="n">file_name_distance_to_sphere_curv</span> <span class="o">=</span> <span class="n">path</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">dir_path</span><span class="p">,</span> <span class="n">case_name</span> <span class="o">+</span> <span class="s2">&quot;_distance_to_sphere_curv.vtp&quot;</span><span class="p">)</span>
-    <span class="n">file_name_probe_points</span> <span class="o">=</span> <span class="n">path</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">dir_path</span><span class="p">,</span> <span class="n">case_name</span> <span class="o">+</span> <span class="s2">&quot;_probe_point&quot;</span><span class="p">)</span>
-    <span class="n">file_name_voronoi</span> <span class="o">=</span> <span class="n">path</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">dir_path</span><span class="p">,</span> <span class="n">case_name</span> <span class="o">+</span> <span class="s2">&quot;_voronoi.vtp&quot;</span><span class="p">)</span>
-    <span class="n">file_name_voronoi_smooth</span> <span class="o">=</span> <span class="n">path</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">dir_path</span><span class="p">,</span> <span class="n">case_name</span> <span class="o">+</span> <span class="s2">&quot;_voronoi_smooth.vtp&quot;</span><span class="p">)</span>
-    <span class="n">file_name_voronoi_surface</span> <span class="o">=</span> <span class="n">path</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">dir_path</span><span class="p">,</span> <span class="n">case_name</span> <span class="o">+</span> <span class="s2">&quot;_voronoi_surface.vtp&quot;</span><span class="p">)</span>
-    <span class="n">file_name_surface_smooth</span> <span class="o">=</span> <span class="n">path</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">dir_path</span><span class="p">,</span> <span class="n">case_name</span> <span class="o">+</span> <span class="s2">&quot;_smooth.vtp&quot;</span><span class="p">)</span>
-    <span class="n">file_name_model_flow_ext</span> <span class="o">=</span> <span class="n">path</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">dir_path</span><span class="p">,</span> <span class="n">case_name</span> <span class="o">+</span> <span class="s2">&quot;_flowext.vtp&quot;</span><span class="p">)</span>
-    <span class="n">file_name_clipped_model</span> <span class="o">=</span> <span class="n">path</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">dir_path</span><span class="p">,</span> <span class="n">case_name</span> <span class="o">+</span> <span class="s2">&quot;_clippedmodel.vtp&quot;</span><span class="p">)</span>
-    <span class="n">file_name_flow_centerlines</span> <span class="o">=</span> <span class="n">path</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">dir_path</span><span class="p">,</span> <span class="n">case_name</span> <span class="o">+</span> <span class="s2">&quot;_flow_cl.vtp&quot;</span><span class="p">)</span>
-    <span class="n">file_name_surface_name</span> <span class="o">=</span> <span class="n">path</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">dir_path</span><span class="p">,</span> <span class="n">case_name</span> <span class="o">+</span> <span class="s2">&quot;_remeshed_surface.vtp&quot;</span><span class="p">)</span>
-    <span class="n">file_name_xml_mesh</span> <span class="o">=</span> <span class="n">path</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">dir_path</span><span class="p">,</span> <span class="n">case_name</span> <span class="o">+</span> <span class="s2">&quot;.xml&quot;</span><span class="p">)</span>
-    <span class="n">file_name_vtu_mesh</span> <span class="o">=</span> <span class="n">path</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">dir_path</span><span class="p">,</span> <span class="n">case_name</span> <span class="o">+</span> <span class="s2">&quot;.vtu&quot;</span><span class="p">)</span>
+    <span class="n">base_path</span> <span class="o">=</span> <span class="n">path</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">dir_path</span><span class="p">,</span> <span class="n">case_name</span><span class="p">)</span>
+    <span class="n">file_name_centerlines</span> <span class="o">=</span> <span class="n">base_path</span> <span class="o">+</span> <span class="s2">&quot;_centerlines.vtp&quot;</span>
+    <span class="n">file_name_refine_region_centerlines</span> <span class="o">=</span> <span class="n">base_path</span> <span class="o">+</span> <span class="s2">&quot;_refine_region_centerline.vtp&quot;</span>
+    <span class="n">file_name_region_centerlines</span> <span class="o">=</span> <span class="n">base_path</span> <span class="o">+</span> <span class="s2">&quot;_sac_centerline_</span><span class="si">{}</span><span class="s2">.vtp&quot;</span>
+    <span class="n">file_name_distance_to_sphere_diam</span> <span class="o">=</span> <span class="n">base_path</span> <span class="o">+</span> <span class="s2">&quot;_distance_to_sphere_diam.vtp&quot;</span>
+    <span class="n">file_name_distance_to_sphere_const</span> <span class="o">=</span> <span class="n">base_path</span> <span class="o">+</span> <span class="s2">&quot;_distance_to_sphere_const.vtp&quot;</span>
+    <span class="n">file_name_distance_to_sphere_curv</span> <span class="o">=</span> <span class="n">base_path</span> <span class="o">+</span> <span class="s2">&quot;_distance_to_sphere_curv.vtp&quot;</span>
+    <span class="n">file_name_probe_points</span> <span class="o">=</span> <span class="n">base_path</span> <span class="o">+</span> <span class="s2">&quot;_probe_point&quot;</span>
+    <span class="n">file_name_voronoi</span> <span class="o">=</span> <span class="n">base_path</span> <span class="o">+</span> <span class="s2">&quot;_voronoi.vtp&quot;</span>
+    <span class="n">file_name_voronoi_smooth</span> <span class="o">=</span> <span class="n">base_path</span> <span class="o">+</span> <span class="s2">&quot;_voronoi_smooth.vtp&quot;</span>
+    <span class="n">file_name_voronoi_surface</span> <span class="o">=</span> <span class="n">base_path</span> <span class="o">+</span> <span class="s2">&quot;_voronoi_surface.vtp&quot;</span>
+    <span class="n">file_name_surface_smooth</span> <span class="o">=</span> <span class="n">base_path</span> <span class="o">+</span> <span class="s2">&quot;_smooth.vtp&quot;</span>
+    <span class="n">file_name_model_flow_ext</span> <span class="o">=</span> <span class="n">base_path</span> <span class="o">+</span> <span class="s2">&quot;_flowext.vtp&quot;</span>
+    <span class="n">file_name_clipped_model</span> <span class="o">=</span> <span class="n">base_path</span> <span class="o">+</span> <span class="s2">&quot;_clippedmodel.vtp&quot;</span>
+    <span class="n">file_name_flow_centerlines</span> <span class="o">=</span> <span class="n">base_path</span> <span class="o">+</span> <span class="s2">&quot;_flow_cl.vtp&quot;</span>
+    <span class="n">file_name_surface_name</span> <span class="o">=</span> <span class="n">base_path</span> <span class="o">+</span> <span class="s2">&quot;_remeshed_surface.vtp&quot;</span>
+    <span class="n">file_name_xml_mesh</span> <span class="o">=</span> <span class="n">base_path</span> <span class="o">+</span> <span class="s2">&quot;.xml&quot;</span>
+    <span class="n">file_name_vtu_mesh</span> <span class="o">=</span> <span class="n">base_path</span> <span class="o">+</span> <span class="s2">&quot;.vtu&quot;</span>
     <span class="n">region_centerlines</span> <span class="o">=</span> <span class="kc">None</span>
 
     <span class="c1"># Open the surface file.</span>
@@ -411,7 +413,8 @@ document.write(`
         <span class="n">surface</span> <span class="o">=</span> <span class="n">scale_surface</span><span class="p">(</span><span class="n">surface</span><span class="p">,</span> <span class="n">scale_factor</span><span class="p">)</span>
 
     <span class="c1"># Check if surface is closed and uncapps model if True</span>
-    <span class="k">if</span> <span class="n">is_surface_capped</span><span class="p">(</span><span class="n">surface</span><span class="p">)[</span><span class="mi">0</span><span class="p">]:</span>
+    <span class="n">is_capped</span> <span class="o">=</span> <span class="n">check_if_closed_surface</span><span class="p">(</span><span class="n">surface</span><span class="p">)</span>
+    <span class="k">if</span> <span class="n">is_capped</span><span class="p">:</span>
         <span class="k">if</span> <span class="ow">not</span> <span class="n">path</span><span class="o">.</span><span class="n">isfile</span><span class="p">(</span><span class="n">file_name_clipped_model</span><span class="p">):</span>
             <span class="nb">print</span><span class="p">(</span><span class="s2">&quot;--- Clipping the models inlets and outlets.</span><span class="se">\n</span><span class="s2">&quot;</span><span class="p">)</span>
             <span class="c1"># Value of gradients_limit should be generally low, to detect flat surfaces corresponding</span>
@@ -422,7 +425,9 @@ document.write(`
             <span class="n">write_polydata</span><span class="p">(</span><span class="n">surface</span><span class="p">,</span> <span class="n">file_name_clipped_model</span><span class="p">)</span>
         <span class="k">else</span><span class="p">:</span>
             <span class="n">surface</span> <span class="o">=</span> <span class="n">read_polydata</span><span class="p">(</span><span class="n">file_name_clipped_model</span><span class="p">)</span>
-    <span class="n">parameters</span> <span class="o">=</span> <span class="n">get_parameters</span><span class="p">(</span><span class="n">path</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">dir_path</span><span class="p">,</span> <span class="n">case_name</span><span class="p">))</span>
+
+    <span class="c1"># Get model parameters</span>
+    <span class="n">parameters</span> <span class="o">=</span> <span class="n">get_parameters</span><span class="p">(</span><span class="n">base_path</span><span class="p">)</span>
 
     <span class="k">if</span> <span class="s2">&quot;check_surface&quot;</span> <span class="ow">not</span> <span class="ow">in</span> <span class="n">parameters</span><span class="o">.</span><span class="n">keys</span><span class="p">():</span>
         <span class="n">surface</span> <span class="o">=</span> <span class="n">vtk_clean_polydata</span><span class="p">(</span><span class="n">surface</span><span class="p">)</span>
@@ -438,14 +443,20 @@ document.write(`
                                 <span class="s2">&quot;Nan coordinates or some other shenanigans.&quot;</span><span class="p">))</span>
         <span class="k">else</span><span class="p">:</span>
             <span class="n">parameters</span><span class="p">[</span><span class="s2">&quot;check_surface&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="kc">True</span>
-            <span class="n">write_parameters</span><span class="p">(</span><span class="n">parameters</span><span class="p">,</span> <span class="n">path</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">dir_path</span><span class="p">,</span> <span class="n">case_name</span><span class="p">))</span>
+            <span class="n">write_parameters</span><span class="p">(</span><span class="n">parameters</span><span class="p">,</span> <span class="n">base_path</span><span class="p">)</span>
 
     <span class="c1"># Create a capped version of the surface</span>
     <span class="n">capped_surface</span> <span class="o">=</span> <span class="n">vmtk_cap_polydata</span><span class="p">(</span><span class="n">surface</span><span class="p">)</span>
 
     <span class="c1"># Get centerlines</span>
     <span class="nb">print</span><span class="p">(</span><span class="s2">&quot;--- Get centerlines</span><span class="se">\n</span><span class="s2">&quot;</span><span class="p">)</span>
-    <span class="n">inlet</span><span class="p">,</span> <span class="n">outlets</span> <span class="o">=</span> <span class="n">get_centers_for_meshing</span><span class="p">(</span><span class="n">surface</span><span class="p">,</span> <span class="n">is_atrium</span><span class="p">,</span> <span class="n">path</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">dir_path</span><span class="p">,</span> <span class="n">case_name</span><span class="p">))</span>
+    <span class="n">inlet</span><span class="p">,</span> <span class="n">outlets</span> <span class="o">=</span> <span class="n">get_centers_for_meshing</span><span class="p">(</span><span class="n">surface</span><span class="p">,</span> <span class="n">is_atrium</span><span class="p">,</span> <span class="n">base_path</span><span class="p">)</span>
+    <span class="n">has_outlet</span> <span class="o">=</span> <span class="nb">len</span><span class="p">(</span><span class="n">outlets</span><span class="p">)</span> <span class="o">!=</span> <span class="mi">0</span>
+
+    <span class="c1"># Get point the furthest away inlet when only one boundary</span>
+    <span class="k">if</span> <span class="ow">not</span> <span class="n">has_outlet</span><span class="p">:</span>
+        <span class="n">outlets</span> <span class="o">=</span> <span class="n">get_furtest_surface_point</span><span class="p">(</span><span class="n">inlet</span><span class="p">,</span> <span class="n">surface</span><span class="p">)</span>
+
     <span class="n">source</span> <span class="o">=</span> <span class="n">outlets</span> <span class="k">if</span> <span class="n">is_atrium</span> <span class="k">else</span> <span class="n">inlet</span>
     <span class="n">target</span> <span class="o">=</span> <span class="n">inlet</span> <span class="k">if</span> <span class="n">is_atrium</span> <span class="k">else</span> <span class="n">outlets</span>
 
@@ -457,7 +468,7 @@ document.write(`
     <span class="n">misr_max</span> <span class="o">=</span> <span class="p">[]</span>
 
     <span class="k">if</span> <span class="n">refine_region</span><span class="p">:</span>
-        <span class="n">regions</span> <span class="o">=</span> <span class="n">get_regions_to_refine</span><span class="p">(</span><span class="n">capped_surface</span><span class="p">,</span> <span class="n">region_points</span><span class="p">,</span> <span class="n">path</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">dir_path</span><span class="p">,</span> <span class="n">case_name</span><span class="p">))</span>
+        <span class="n">regions</span> <span class="o">=</span> <span class="n">get_regions_to_refine</span><span class="p">(</span><span class="n">capped_surface</span><span class="p">,</span> <span class="n">region_points</span><span class="p">,</span> <span class="n">base_path</span><span class="p">)</span>
         <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="n">regions</span><span class="p">)</span> <span class="o">//</span> <span class="mi">3</span><span class="p">):</span>
             <span class="nb">print</span><span class="p">(</span><span class="s2">&quot;--- Region to refine (</span><span class="si">{}</span><span class="s2">): </span><span class="si">{:.3f}</span><span class="s2"> </span><span class="si">{:.3f}</span><span class="s2"> </span><span class="si">{:.3f}</span><span class="s2">&quot;</span>
                   <span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">i</span> <span class="o">+</span> <span class="mi">1</span><span class="p">,</span> <span class="n">regions</span><span class="p">[</span><span class="mi">3</span> <span class="o">*</span> <span class="n">i</span><span class="p">],</span> <span class="n">regions</span><span class="p">[</span><span class="mi">3</span> <span class="o">*</span> <span class="n">i</span> <span class="o">+</span> <span class="mi">1</span><span class="p">],</span> <span class="n">regions</span><span class="p">[</span><span class="mi">3</span> <span class="o">*</span> <span class="n">i</span> <span class="o">+</span> <span class="mi">2</span><span class="p">]))</span>
@@ -467,7 +478,7 @@ document.write(`
 
         <span class="c1"># Extract the region centerline</span>
         <span class="n">refine_region_centerline</span> <span class="o">=</span> <span class="p">[]</span>
-        <span class="n">info</span> <span class="o">=</span> <span class="n">get_parameters</span><span class="p">(</span><span class="n">path</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">dir_path</span><span class="p">,</span> <span class="n">case_name</span><span class="p">))</span>
+        <span class="n">info</span> <span class="o">=</span> <span class="n">get_parameters</span><span class="p">(</span><span class="n">base_path</span><span class="p">)</span>
         <span class="n">num_anu</span> <span class="o">=</span> <span class="n">info</span><span class="p">[</span><span class="s2">&quot;number_of_regions&quot;</span><span class="p">]</span>
 
         <span class="c1"># Compute mean distance between points</span>
@@ -592,8 +603,11 @@ document.write(`
         <span class="k">if</span> <span class="ow">not</span> <span class="n">path</span><span class="o">.</span><span class="n">isfile</span><span class="p">(</span><span class="n">file_name_flow_centerlines</span><span class="p">):</span>
             <span class="nb">print</span><span class="p">(</span><span class="s2">&quot;--- Compute the model centerlines with flow extension.</span><span class="se">\n</span><span class="s2">&quot;</span><span class="p">)</span>
             <span class="c1"># Compute the centerlines.</span>
-            <span class="n">inlet</span><span class="p">,</span> <span class="n">outlets</span> <span class="o">=</span> <span class="n">get_centers_for_meshing</span><span class="p">(</span><span class="n">surface_extended</span><span class="p">,</span> <span class="n">is_atrium</span><span class="p">,</span> <span class="n">path</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">dir_path</span><span class="p">,</span> <span class="n">case_name</span><span class="p">),</span>
-                                                     <span class="n">use_flow_extensions</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
+            <span class="k">if</span> <span class="n">has_outlet</span><span class="p">:</span>
+                <span class="n">inlet</span><span class="p">,</span> <span class="n">outlets</span> <span class="o">=</span> <span class="n">get_centers_for_meshing</span><span class="p">(</span><span class="n">surface_extended</span><span class="p">,</span> <span class="n">is_atrium</span><span class="p">,</span> <span class="n">base_path</span><span class="p">,</span>
+                                                         <span class="n">use_flow_extensions</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
+            <span class="k">else</span><span class="p">:</span>
+                <span class="n">inlet</span><span class="p">,</span> <span class="n">_</span> <span class="o">=</span> <span class="n">get_centers_for_meshing</span><span class="p">(</span><span class="n">surface_extended</span><span class="p">,</span> <span class="n">is_atrium</span><span class="p">,</span> <span class="n">base_path</span><span class="p">,</span> <span class="n">use_flow_extensions</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
             <span class="c1"># Flip outlets and inlets for atrium models</span>
             <span class="n">source</span> <span class="o">=</span> <span class="n">outlets</span> <span class="k">if</span> <span class="n">is_atrium</span> <span class="k">else</span> <span class="n">inlet</span>
             <span class="n">target</span> <span class="o">=</span> <span class="n">inlet</span> <span class="k">if</span> <span class="n">is_atrium</span> <span class="k">else</span> <span class="n">outlets</span>
@@ -649,12 +663,12 @@ document.write(`
     <span class="n">network</span><span class="p">,</span> <span class="n">probe_points</span> <span class="o">=</span> <span class="n">setup_model_network</span><span class="p">(</span><span class="n">centerlines</span><span class="p">,</span> <span class="n">file_name_probe_points</span><span class="p">,</span> <span class="n">region_center</span><span class="p">,</span> <span class="n">verbose_print</span><span class="p">)</span>
 
     <span class="c1"># Load updated parameters following meshing</span>
-    <span class="n">parameters</span> <span class="o">=</span> <span class="n">get_parameters</span><span class="p">(</span><span class="n">path</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">dir_path</span><span class="p">,</span> <span class="n">case_name</span><span class="p">))</span>
+    <span class="n">parameters</span> <span class="o">=</span> <span class="n">get_parameters</span><span class="p">(</span><span class="n">base_path</span><span class="p">)</span>
 
     <span class="nb">print</span><span class="p">(</span><span class="s2">&quot;--- Computing flow rates and flow split, and setting boundary IDs</span><span class="se">\n</span><span class="s2">&quot;</span><span class="p">)</span>
     <span class="n">mean_inflow_rate</span> <span class="o">=</span> <span class="n">compute_flow_rate</span><span class="p">(</span><span class="n">is_atrium</span><span class="p">,</span> <span class="n">inlet</span><span class="p">,</span> <span class="n">parameters</span><span class="p">)</span>
 
-    <span class="n">find_boundaries</span><span class="p">(</span><span class="n">path</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">dir_path</span><span class="p">,</span> <span class="n">case_name</span><span class="p">),</span> <span class="n">mean_inflow_rate</span><span class="p">,</span> <span class="n">network</span><span class="p">,</span> <span class="n">mesh</span><span class="p">,</span> <span class="n">verbose_print</span><span class="p">,</span> <span class="n">is_atrium</span><span class="p">)</span>
+    <span class="n">find_boundaries</span><span class="p">(</span><span class="n">base_path</span><span class="p">,</span> <span class="n">mean_inflow_rate</span><span class="p">,</span> <span class="n">network</span><span class="p">,</span> <span class="n">mesh</span><span class="p">,</span> <span class="n">verbose_print</span><span class="p">,</span> <span class="n">is_atrium</span><span class="p">)</span>
 
     <span class="c1"># Display the flow split at the outlets, inlet flow rate, and probes.</span>
     <span class="k">if</span> <span class="n">visualize</span><span class="p">:</span>
@@ -906,7 +920,7 @@ By Henrik A. Kjeldsberg
   
   <div class="footer-item">
     <p class="last-updated">
-  Last updated on May 19, 2023.
+  Last updated on May 29, 2023.
   <br/>
 </p>
   </div>
