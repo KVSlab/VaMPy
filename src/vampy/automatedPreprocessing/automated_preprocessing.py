@@ -3,17 +3,18 @@ import sys
 from os import remove, path
 
 import numpy as np
-from morphman import is_surface_capped, get_uncapped_surface, write_polydata, get_parameters, vtk_clean_polydata, \
+from morphman import get_uncapped_surface, write_polydata, get_parameters, vtk_clean_polydata, \
     vtk_triangulate_surface, write_parameters, vmtk_cap_polydata, compute_centerlines, get_centerline_tolerance, \
     get_vtk_point_locator, extract_single_line, vtk_merge_polydata, get_point_data_array, smooth_voronoi_diagram, \
     create_new_surface, compute_centers, vmtk_smooth_surface, str2bool, vmtk_compute_voronoi_diagram, \
     prepare_output_surface
+
 # Local imports
 from vampy.automatedPreprocessing import ToolRepairSTL
 from vampy.automatedPreprocessing.preprocessing_common import read_polydata, get_centers_for_meshing, \
     dist_sphere_diam, dist_sphere_curvature, dist_sphere_constant, get_regions_to_refine, add_flow_extension, \
-    write_mesh, mesh_alternative, generate_mesh, find_boundaries, \
-    compute_flow_rate, setup_model_network, radiusArrayName, scale_surface
+    write_mesh, mesh_alternative, generate_mesh, find_boundaries, compute_flow_rate, setup_model_network, \
+    radiusArrayName, scale_surface, get_furtest_surface_point, check_if_closed_surface
 from vampy.automatedPreprocessing.simulate import run_simulation
 from vampy.automatedPreprocessing.visualize import visualize_model
 
@@ -55,23 +56,24 @@ def run_pre_processing(input_model, verbose_print, smoothing_method, smoothing_f
     print("\n--- Working on case:", case_name, "\n")
 
     # Naming conventions
-    file_name_centerlines = path.join(dir_path, case_name + "_centerlines.vtp")
-    file_name_refine_region_centerlines = path.join(dir_path, case_name + "_refine_region_centerline.vtp")
-    file_name_region_centerlines = path.join(dir_path, case_name + "_sac_centerline_{}.vtp")
-    file_name_distance_to_sphere_diam = path.join(dir_path, case_name + "_distance_to_sphere_diam.vtp")
-    file_name_distance_to_sphere_const = path.join(dir_path, case_name + "_distance_to_sphere_const.vtp")
-    file_name_distance_to_sphere_curv = path.join(dir_path, case_name + "_distance_to_sphere_curv.vtp")
-    file_name_probe_points = path.join(dir_path, case_name + "_probe_point")
-    file_name_voronoi = path.join(dir_path, case_name + "_voronoi.vtp")
-    file_name_voronoi_smooth = path.join(dir_path, case_name + "_voronoi_smooth.vtp")
-    file_name_voronoi_surface = path.join(dir_path, case_name + "_voronoi_surface.vtp")
-    file_name_surface_smooth = path.join(dir_path, case_name + "_smooth.vtp")
-    file_name_model_flow_ext = path.join(dir_path, case_name + "_flowext.vtp")
-    file_name_clipped_model = path.join(dir_path, case_name + "_clippedmodel.vtp")
-    file_name_flow_centerlines = path.join(dir_path, case_name + "_flow_cl.vtp")
-    file_name_surface_name = path.join(dir_path, case_name + "_remeshed_surface.vtp")
-    file_name_xml_mesh = path.join(dir_path, case_name + ".xml")
-    file_name_vtu_mesh = path.join(dir_path, case_name + ".vtu")
+    base_path = path.join(dir_path, case_name)
+    file_name_centerlines = base_path + "_centerlines.vtp"
+    file_name_refine_region_centerlines = base_path + "_refine_region_centerline.vtp"
+    file_name_region_centerlines = base_path + "_sac_centerline_{}.vtp"
+    file_name_distance_to_sphere_diam = base_path + "_distance_to_sphere_diam.vtp"
+    file_name_distance_to_sphere_const = base_path + "_distance_to_sphere_const.vtp"
+    file_name_distance_to_sphere_curv = base_path + "_distance_to_sphere_curv.vtp"
+    file_name_probe_points = base_path + "_probe_point"
+    file_name_voronoi = base_path + "_voronoi.vtp"
+    file_name_voronoi_smooth = base_path + "_voronoi_smooth.vtp"
+    file_name_voronoi_surface = base_path + "_voronoi_surface.vtp"
+    file_name_surface_smooth = base_path + "_smooth.vtp"
+    file_name_model_flow_ext = base_path + "_flowext.vtp"
+    file_name_clipped_model = base_path + "_clippedmodel.vtp"
+    file_name_flow_centerlines = base_path + "_flow_cl.vtp"
+    file_name_surface_name = base_path + "_remeshed_surface.vtp"
+    file_name_xml_mesh = base_path + ".xml"
+    file_name_vtu_mesh = base_path + ".vtu"
     region_centerlines = None
 
     # Open the surface file.
@@ -83,7 +85,8 @@ def run_pre_processing(input_model, verbose_print, smoothing_method, smoothing_f
         surface = scale_surface(surface, scale_factor)
 
     # Check if surface is closed and uncapps model if True
-    if is_surface_capped(surface)[0]:
+    is_capped = check_if_closed_surface(surface)
+    if is_capped:
         if not path.isfile(file_name_clipped_model):
             print("--- Clipping the models inlets and outlets.\n")
             # Value of gradients_limit should be generally low, to detect flat surfaces corresponding
@@ -94,7 +97,9 @@ def run_pre_processing(input_model, verbose_print, smoothing_method, smoothing_f
             write_polydata(surface, file_name_clipped_model)
         else:
             surface = read_polydata(file_name_clipped_model)
-    parameters = get_parameters(path.join(dir_path, case_name))
+
+    # Get model parameters
+    parameters = get_parameters(base_path)
 
     if "check_surface" not in parameters.keys():
         surface = vtk_clean_polydata(surface)
@@ -110,14 +115,20 @@ def run_pre_processing(input_model, verbose_print, smoothing_method, smoothing_f
                                 "Nan coordinates or some other shenanigans."))
         else:
             parameters["check_surface"] = True
-            write_parameters(parameters, path.join(dir_path, case_name))
+            write_parameters(parameters, base_path)
 
     # Create a capped version of the surface
     capped_surface = vmtk_cap_polydata(surface)
 
     # Get centerlines
     print("--- Get centerlines\n")
-    inlet, outlets = get_centers_for_meshing(surface, is_atrium, path.join(dir_path, case_name))
+    inlet, outlets = get_centers_for_meshing(surface, is_atrium, base_path)
+    has_outlet = len(outlets) != 0
+
+    # Get point the furthest away inlet when only one boundary
+    if not has_outlet:
+        outlets = get_furtest_surface_point(inlet, surface)
+
     source = outlets if is_atrium else inlet
     target = inlet if is_atrium else outlets
 
@@ -129,7 +140,7 @@ def run_pre_processing(input_model, verbose_print, smoothing_method, smoothing_f
     misr_max = []
 
     if refine_region:
-        regions = get_regions_to_refine(capped_surface, region_points, path.join(dir_path, case_name))
+        regions = get_regions_to_refine(capped_surface, region_points, base_path)
         for i in range(len(regions) // 3):
             print("--- Region to refine ({}): {:.3f} {:.3f} {:.3f}"
                   .format(i + 1, regions[3 * i], regions[3 * i + 1], regions[3 * i + 2]))
@@ -139,7 +150,7 @@ def run_pre_processing(input_model, verbose_print, smoothing_method, smoothing_f
 
         # Extract the region centerline
         refine_region_centerline = []
-        info = get_parameters(path.join(dir_path, case_name))
+        info = get_parameters(base_path)
         num_anu = info["number_of_regions"]
 
         # Compute mean distance between points
@@ -264,8 +275,11 @@ def run_pre_processing(input_model, verbose_print, smoothing_method, smoothing_f
         if not path.isfile(file_name_flow_centerlines):
             print("--- Compute the model centerlines with flow extension.\n")
             # Compute the centerlines.
-            inlet, outlets = get_centers_for_meshing(surface_extended, is_atrium, path.join(dir_path, case_name),
-                                                     use_flow_extensions=True)
+            if has_outlet:
+                inlet, outlets = get_centers_for_meshing(surface_extended, is_atrium, base_path,
+                                                         use_flow_extensions=True)
+            else:
+                inlet, _ = get_centers_for_meshing(surface_extended, is_atrium, base_path, use_flow_extensions=True)
             # Flip outlets and inlets for atrium models
             source = outlets if is_atrium else inlet
             target = inlet if is_atrium else outlets
@@ -321,12 +335,12 @@ def run_pre_processing(input_model, verbose_print, smoothing_method, smoothing_f
     network, probe_points = setup_model_network(centerlines, file_name_probe_points, region_center, verbose_print)
 
     # Load updated parameters following meshing
-    parameters = get_parameters(path.join(dir_path, case_name))
+    parameters = get_parameters(base_path)
 
     print("--- Computing flow rates and flow split, and setting boundary IDs\n")
     mean_inflow_rate = compute_flow_rate(is_atrium, inlet, parameters)
 
-    find_boundaries(path.join(dir_path, case_name), mean_inflow_rate, network, mesh, verbose_print, is_atrium)
+    find_boundaries(base_path, mean_inflow_rate, network, mesh, verbose_print, is_atrium)
 
     # Display the flow split at the outlets, inlet flow rate, and probes.
     if visualize:
