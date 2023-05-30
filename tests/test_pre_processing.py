@@ -35,8 +35,8 @@ def test_mesh_model_with_one_inlet():
     mesh_vtu = read_polydata(mesh_path_vtu)
     mesh_xml = Mesh(mesh_path_xml)
 
-    num_points = 4605
-    num_cells = 25524
+    num_points = 3473
+    num_cells = 19208
 
     assert mesh_vtu.GetNumberOfPoints() == num_points
     assert mesh_xml.num_cells() == num_cells

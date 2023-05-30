@@ -854,7 +854,7 @@ def get_furtest_surface_point(inlet, surface):
     end_point_distance = 0
     for i in range(surface.GetNumberOfPoints()):
         tmp_p = list(surface.GetPoint(i))
-        dx = get_distance(inlet[0], tmp_p)
+        dx = get_distance(inlet, tmp_p)
         if dx > end_point_distance:
             end_point_distance = dx
             outlets = tmp_p
