@@ -19,7 +19,7 @@ from vampy.automatedPreprocessing.preprocessing_common import read_polydata, get
     get_furtest_surface_point
 from vampy.automatedPreprocessing.simulate import run_simulation
 from vampy.automatedPreprocessing.visualize import visualize_model
-from .moving_common import get_point_map, project_displacement, save_displacement
+from vampy.automatedPreprocessing.moving_common import get_point_map, project_displacement, save_displacement
 
 
 def run_pre_processing(input_model, verbose_print, smoothing_method, smoothing_factor, smoothing_iterations,
