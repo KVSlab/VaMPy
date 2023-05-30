@@ -2,6 +2,7 @@ import gzip
 from os import path
 
 import numpy as np
+import vtkmodules.numpy_interface.dataset_adapter as dsa
 from morphman import vtk_clean_polydata, vtk_triangulate_surface, get_parameters, write_parameters, read_polydata, \
     vmtkscripts, vtk, write_polydata, vtkvmtk, get_curvilinear_coordinate, vtk_compute_threshold, get_vtk_array, \
     get_distance, get_number_of_arrays, vmtk_smooth_surface, get_point_data_array, create_vtk_array, \
@@ -11,7 +12,6 @@ from morphman import vtk_clean_polydata, vtk_triangulate_surface, get_parameters
 from vampy.automatedPreprocessing import ImportData
 from vampy.automatedPreprocessing.NetworkBoundaryConditions import FlowSplitting
 from vampy.automatedPreprocessing.vmtk_pointselector import vmtkPickPointSeedSelector
-import vtkmodules.numpy_interface.dataset_adapter as dsa
 
 # Global array names
 distanceToSpheresArrayName = "DistanceToSpheres"
@@ -400,7 +400,6 @@ def dist_sphere_constant(surface, centerlines, region_center, misr_max, save_pat
             element_size = np.maximum(element_size, distance_to_spheres_array)
         else:
             element_size = np.minimum(element_size, distance_to_spheres_array)
-
 
     vtk_array = create_vtk_array(element_size, "Size")
     distance_to_sphere.GetPointData().AddArray(vtk_array)
