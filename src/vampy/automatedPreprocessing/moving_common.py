@@ -3,6 +3,8 @@ from os import listdir, mkdir
 from morphman.common import *
 from vtk.numpy_interface import dataset_adapter as dsa
 
+from vampy.automatedPreprocessing.preprocessing_common import scale_surface
+
 # Global array names
 radiusArrayName = 'MaximumInscribedSphereRadius'
 parallelTransportNormalsArrayName = 'ParallelTransportNormals'
@@ -189,7 +191,7 @@ def save_displacement(file_name_displacement_points, points):
 
 
 def project_displacement(clamp_boundaries, distance, folder_extended_surfaces, folder_moved_surfaces, point_map,
-                         surface, surface_extended, remeshed):
+                         surface, surface_extended, remeshed, scale_factor):
     """
     Args:
         clamp_boundaries:
@@ -218,6 +220,9 @@ def project_displacement(clamp_boundaries, distance, folder_extended_surfaces, f
             continue
 
         tmp_surface = read_polydata(model_path)
+        if scale_factor is not None:
+            tmp_surface = scale_surface(tmp_surface, scale_factor)
+
         new_path = path.join(folder_extended_surfaces, model_path.split("/")[-1])
         if not path.exists(new_path):
             move_surface_model(tmp_surface, surface, remeshed, surface_extended, distance, point_map, new_path, i,

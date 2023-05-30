@@ -11,6 +11,7 @@ from morphman import get_uncapped_surface, write_polydata, get_parameters, vtk_c
 
 # Local imports
 from vampy.automatedPreprocessing import ToolRepairSTL
+from vampy.automatedPreprocessing.moving_common import get_point_map, project_displacement, save_displacement
 from vampy.automatedPreprocessing.preprocessing_common import read_polydata, get_centers_for_meshing, \
     dist_sphere_diam, dist_sphere_curvature, dist_sphere_constant, get_regions_to_refine, add_flow_extension, \
     write_mesh, mesh_alternative, generate_mesh, find_boundaries, \
@@ -18,7 +19,6 @@ from vampy.automatedPreprocessing.preprocessing_common import read_polydata, get
     get_furtest_surface_point
 from vampy.automatedPreprocessing.simulate import run_simulation
 from vampy.automatedPreprocessing.visualize import visualize_model
-from vampy.automatedPreprocessing.moving_common import get_point_map, project_displacement, save_displacement
 
 
 def run_pre_processing(input_model, verbose_print, smoothing_method, smoothing_factor, smoothing_iterations,
@@ -302,7 +302,7 @@ def run_pre_processing(input_model, verbose_print, smoothing_method, smoothing_f
 
         # Project displacement between surfaces
         points = project_displacement(clamp_boundaries, distance, folder_extended_surfaces, folder_moved_surfaces,
-                                      point_map, surface, surface_extended, remeshed)
+                                      point_map, surface, surface_extended, remeshed, scale_factor)
 
         # Save displacement to numpy array
         save_displacement(file_name_displacement_points, points)
