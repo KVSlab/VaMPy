@@ -3,11 +3,12 @@ import sys
 from os import remove, path
 
 import numpy as np
+from IPython import embed
 from morphman import get_uncapped_surface, write_polydata, get_parameters, vtk_clean_polydata, \
     vtk_triangulate_surface, write_parameters, vmtk_cap_polydata, compute_centerlines, get_centerline_tolerance, \
     get_vtk_point_locator, extract_single_line, vtk_merge_polydata, get_point_data_array, smooth_voronoi_diagram, \
     create_new_surface, compute_centers, vmtk_smooth_surface, str2bool, vmtk_compute_voronoi_diagram, \
-    prepare_output_surface
+    prepare_output_surface, vmtk_compute_geometric_features
 
 # Local imports
 from vampy.automatedPreprocessing import ToolRepairSTL
@@ -22,7 +23,7 @@ from vampy.automatedPreprocessing.visualize import visualize_model
 def run_pre_processing(input_model, verbose_print, smoothing_method, smoothing_factor, smoothing_iterations,
                        meshing_method, refine_region, is_atrium, add_flow_extensions, visualize, config_path,
                        coarsening_factor, inlet_flow_extension_length, outlet_flow_extension_length, edge_length,
-                       region_points, compress_mesh, add_boundary_layer, scale_factor):
+                       region_points, compress_mesh, add_boundary_layer, scale_factor, resampling_step):
     """
     Automatically generate mesh of surface model in .vtu and .xml format, including prescribed
     flow rates at inlet and outlet based on flow network model.
@@ -49,6 +50,7 @@ def run_pre_processing(input_model, verbose_print, smoothing_method, smoothing_f
         compress_mesh (bool): Compresses finalized mesh if True
         add_boundary_layer (bool): Adds boundary layers to walls if True
         scale_factor (float): Scale input model by this factor
+        resampling_step (float): Float value determining the resampling step for centerline computations, in [m]
     """
     # Get paths
     case_name = input_model.rsplit(path.sep, 1)[-1].rsplit('.')[0]
@@ -132,7 +134,8 @@ def run_pre_processing(input_model, verbose_print, smoothing_method, smoothing_f
     source = outlets if is_atrium else inlet
     target = inlet if is_atrium else outlets
 
-    centerlines, voronoi, _ = compute_centerlines(source, target, file_name_centerlines, capped_surface, resampling=0.1)
+    centerlines, voronoi, _ = compute_centerlines(source, target, file_name_centerlines, capped_surface,
+                                                  resampling=resampling_step)
     tol = get_centerline_tolerance(centerlines)
 
     # Get 'center' and 'radius' of the regions(s)
@@ -146,7 +149,7 @@ def run_pre_processing(input_model, verbose_print, smoothing_method, smoothing_f
                   .format(i + 1, regions[3 * i], regions[3 * i + 1], regions[3 * i + 2]))
 
         centerline_region, _, _ = compute_centerlines(source, regions, file_name_refine_region_centerlines,
-                                                      capped_surface, resampling=0.1)
+                                                      capped_surface, resampling=resampling_step)
 
         # Extract the region centerline
         refine_region_centerline = []
@@ -284,10 +287,22 @@ def run_pre_processing(input_model, verbose_print, smoothing_method, smoothing_f
             source = outlets if is_atrium else inlet
             target = inlet if is_atrium else outlets
             centerlines, _, _ = compute_centerlines(source, target, file_name_flow_centerlines, capped_surface,
-                                                    resampling=0.1)
+                                                    resampling=resampling_step)
 
         else:
             centerlines = read_polydata(file_name_flow_centerlines)
+
+    # Clip centerline if only one inlet to avoid refining model surface
+    if not has_outlet:
+        line = extract_single_line(centerlines, 0)
+        line = vmtk_compute_geometric_features(line, smooth=False)
+
+        # Clip centerline where Frenet Tangent is constant
+        n = get_point_data_array("FrenetTangent", line, k=3)
+        n_diff = np.linalg.norm(np.cross(n[1:], n[:-1]), axis=1)
+        n_id = n_diff[::-1].argmax()
+        centerlines = extract_single_line(centerlines, 0, end_id=centerlines.GetNumberOfPoints() - n_id - 1)
+
     # Choose input for the mesh
     print("--- Computing distance to sphere\n")
     if meshing_method == "constant":
@@ -497,7 +512,13 @@ def read_command_line(input_path=None):
     parser.add_argument('-sc', '--scale-factor',
                         default=None,
                         type=float,
+
                         help="Scale input model by this factor. Used to scale model to [mm].")
+
+    parser.add_argument('-rs', '--resampling-step',
+                        default=0.1,
+                        type=float,
+                        help="Resampling step used to resample centerline in [m].")
 
     # Parse path to get default values
     if required:
@@ -533,7 +554,7 @@ def read_command_line(input_path=None):
                 coarsening_factor=args.coarsening_factor, inlet_flow_extension_length=args.inlet_flowextension,
                 visualize=args.visualize, region_points=args.region_points, compress_mesh=args.compress_mesh,
                 outlet_flow_extension_length=args.outlet_flowextension, add_boundary_layer=args.add_boundary_layer,
-                scale_factor=args.scale_factor)
+                scale_factor=args.scale_factor, resampling_step=args.resampling_step)
 
 
 def main_meshing():
