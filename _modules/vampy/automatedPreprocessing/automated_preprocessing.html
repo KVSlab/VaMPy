@@ -335,7 +335,7 @@ document.write(`
     <span class="n">vtk_triangulate_surface</span><span class="p">,</span> <span class="n">write_parameters</span><span class="p">,</span> <span class="n">vmtk_cap_polydata</span><span class="p">,</span> <span class="n">compute_centerlines</span><span class="p">,</span> <span class="n">get_centerline_tolerance</span><span class="p">,</span> \
     <span class="n">get_vtk_point_locator</span><span class="p">,</span> <span class="n">extract_single_line</span><span class="p">,</span> <span class="n">vtk_merge_polydata</span><span class="p">,</span> <span class="n">get_point_data_array</span><span class="p">,</span> <span class="n">smooth_voronoi_diagram</span><span class="p">,</span> \
     <span class="n">create_new_surface</span><span class="p">,</span> <span class="n">compute_centers</span><span class="p">,</span> <span class="n">vmtk_smooth_surface</span><span class="p">,</span> <span class="n">str2bool</span><span class="p">,</span> <span class="n">vmtk_compute_voronoi_diagram</span><span class="p">,</span> \
-    <span class="n">prepare_output_surface</span>
+    <span class="n">prepare_output_surface</span><span class="p">,</span> <span class="n">vmtk_compute_geometric_features</span>
 
 <span class="c1"># Local imports</span>
 <span class="kn">from</span> <span class="nn">vampy.automatedPreprocessing</span> <span class="kn">import</span> <span class="n">ToolRepairSTL</span>
@@ -350,7 +350,7 @@ document.write(`
 <div class="viewcode-block" id="run_pre_processing"><a class="viewcode-back" href="../../../api.html#vampy.automatedPreprocessing.automated_preprocessing.run_pre_processing">[docs]</a><span class="k">def</span> <span class="nf">run_pre_processing</span><span class="p">(</span><span class="n">input_model</span><span class="p">,</span> <span class="n">verbose_print</span><span class="p">,</span> <span class="n">smoothing_method</span><span class="p">,</span> <span class="n">smoothing_factor</span><span class="p">,</span> <span class="n">smoothing_iterations</span><span class="p">,</span>
                        <span class="n">meshing_method</span><span class="p">,</span> <span class="n">refine_region</span><span class="p">,</span> <span class="n">is_atrium</span><span class="p">,</span> <span class="n">add_flow_extensions</span><span class="p">,</span> <span class="n">visualize</span><span class="p">,</span> <span class="n">config_path</span><span class="p">,</span>
                        <span class="n">coarsening_factor</span><span class="p">,</span> <span class="n">inlet_flow_extension_length</span><span class="p">,</span> <span class="n">outlet_flow_extension_length</span><span class="p">,</span> <span class="n">edge_length</span><span class="p">,</span>
-                       <span class="n">region_points</span><span class="p">,</span> <span class="n">compress_mesh</span><span class="p">,</span> <span class="n">add_boundary_layer</span><span class="p">,</span> <span class="n">scale_factor</span><span class="p">):</span>
+                       <span class="n">region_points</span><span class="p">,</span> <span class="n">compress_mesh</span><span class="p">,</span> <span class="n">add_boundary_layer</span><span class="p">,</span> <span class="n">scale_factor</span><span class="p">,</span> <span class="n">resampling_step</span><span class="p">):</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">    Automatically generate mesh of surface model in .vtu and .xml format, including prescribed</span>
 <span class="sd">    flow rates at inlet and outlet based on flow network model.</span>
@@ -377,6 +377,7 @@ document.write(`
 <span class="sd">        compress_mesh (bool): Compresses finalized mesh if True</span>
 <span class="sd">        add_boundary_layer (bool): Adds boundary layers to walls if True</span>
 <span class="sd">        scale_factor (float): Scale input model by this factor</span>
+<span class="sd">        resampling_step (float): Float value determining the resampling step for centerline computations, in [m]</span>
 <span class="sd">    &quot;&quot;&quot;</span>
     <span class="c1"># Get paths</span>
     <span class="n">case_name</span> <span class="o">=</span> <span class="n">input_model</span><span class="o">.</span><span class="n">rsplit</span><span class="p">(</span><span class="n">path</span><span class="o">.</span><span class="n">sep</span><span class="p">,</span> <span class="mi">1</span><span class="p">)[</span><span class="o">-</span><span class="mi">1</span><span class="p">]</span><span class="o">.</span><span class="n">rsplit</span><span class="p">(</span><span class="s1">&#39;.&#39;</span><span class="p">)[</span><span class="mi">0</span><span class="p">]</span>
@@ -460,7 +461,8 @@ document.write(`
     <span class="n">source</span> <span class="o">=</span> <span class="n">outlets</span> <span class="k">if</span> <span class="n">is_atrium</span> <span class="k">else</span> <span class="n">inlet</span>
     <span class="n">target</span> <span class="o">=</span> <span class="n">inlet</span> <span class="k">if</span> <span class="n">is_atrium</span> <span class="k">else</span> <span class="n">outlets</span>
 
-    <span class="n">centerlines</span><span class="p">,</span> <span class="n">voronoi</span><span class="p">,</span> <span class="n">_</span> <span class="o">=</span> <span class="n">compute_centerlines</span><span class="p">(</span><span class="n">source</span><span class="p">,</span> <span class="n">target</span><span class="p">,</span> <span class="n">file_name_centerlines</span><span class="p">,</span> <span class="n">capped_surface</span><span class="p">,</span> <span class="n">resampling</span><span class="o">=</span><span class="mf">0.1</span><span class="p">)</span>
+    <span class="n">centerlines</span><span class="p">,</span> <span class="n">voronoi</span><span class="p">,</span> <span class="n">_</span> <span class="o">=</span> <span class="n">compute_centerlines</span><span class="p">(</span><span class="n">source</span><span class="p">,</span> <span class="n">target</span><span class="p">,</span> <span class="n">file_name_centerlines</span><span class="p">,</span> <span class="n">capped_surface</span><span class="p">,</span>
+                                                  <span class="n">resampling</span><span class="o">=</span><span class="n">resampling_step</span><span class="p">)</span>
     <span class="n">tol</span> <span class="o">=</span> <span class="n">get_centerline_tolerance</span><span class="p">(</span><span class="n">centerlines</span><span class="p">)</span>
 
     <span class="c1"># Get &#39;center&#39; and &#39;radius&#39; of the regions(s)</span>
@@ -474,7 +476,7 @@ document.write(`
                   <span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">i</span> <span class="o">+</span> <span class="mi">1</span><span class="p">,</span> <span class="n">regions</span><span class="p">[</span><span class="mi">3</span> <span class="o">*</span> <span class="n">i</span><span class="p">],</span> <span class="n">regions</span><span class="p">[</span><span class="mi">3</span> <span class="o">*</span> <span class="n">i</span> <span class="o">+</span> <span class="mi">1</span><span class="p">],</span> <span class="n">regions</span><span class="p">[</span><span class="mi">3</span> <span class="o">*</span> <span class="n">i</span> <span class="o">+</span> <span class="mi">2</span><span class="p">]))</span>
 
         <span class="n">centerline_region</span><span class="p">,</span> <span class="n">_</span><span class="p">,</span> <span class="n">_</span> <span class="o">=</span> <span class="n">compute_centerlines</span><span class="p">(</span><span class="n">source</span><span class="p">,</span> <span class="n">regions</span><span class="p">,</span> <span class="n">file_name_refine_region_centerlines</span><span class="p">,</span>
-                                                      <span class="n">capped_surface</span><span class="p">,</span> <span class="n">resampling</span><span class="o">=</span><span class="mf">0.1</span><span class="p">)</span>
+                                                      <span class="n">capped_surface</span><span class="p">,</span> <span class="n">resampling</span><span class="o">=</span><span class="n">resampling_step</span><span class="p">)</span>
 
         <span class="c1"># Extract the region centerline</span>
         <span class="n">refine_region_centerline</span> <span class="o">=</span> <span class="p">[]</span>
@@ -612,10 +614,22 @@ document.write(`
             <span class="n">source</span> <span class="o">=</span> <span class="n">outlets</span> <span class="k">if</span> <span class="n">is_atrium</span> <span class="k">else</span> <span class="n">inlet</span>
             <span class="n">target</span> <span class="o">=</span> <span class="n">inlet</span> <span class="k">if</span> <span class="n">is_atrium</span> <span class="k">else</span> <span class="n">outlets</span>
             <span class="n">centerlines</span><span class="p">,</span> <span class="n">_</span><span class="p">,</span> <span class="n">_</span> <span class="o">=</span> <span class="n">compute_centerlines</span><span class="p">(</span><span class="n">source</span><span class="p">,</span> <span class="n">target</span><span class="p">,</span> <span class="n">file_name_flow_centerlines</span><span class="p">,</span> <span class="n">capped_surface</span><span class="p">,</span>
-                                                    <span class="n">resampling</span><span class="o">=</span><span class="mf">0.1</span><span class="p">)</span>
+                                                    <span class="n">resampling</span><span class="o">=</span><span class="n">resampling_step</span><span class="p">)</span>
 
         <span class="k">else</span><span class="p">:</span>
             <span class="n">centerlines</span> <span class="o">=</span> <span class="n">read_polydata</span><span class="p">(</span><span class="n">file_name_flow_centerlines</span><span class="p">)</span>
+
+    <span class="c1"># Clip centerline if only one inlet to avoid refining model surface</span>
+    <span class="k">if</span> <span class="ow">not</span> <span class="n">has_outlet</span><span class="p">:</span>
+        <span class="n">line</span> <span class="o">=</span> <span class="n">extract_single_line</span><span class="p">(</span><span class="n">centerlines</span><span class="p">,</span> <span class="mi">0</span><span class="p">)</span>
+        <span class="n">line</span> <span class="o">=</span> <span class="n">vmtk_compute_geometric_features</span><span class="p">(</span><span class="n">line</span><span class="p">,</span> <span class="n">smooth</span><span class="o">=</span><span class="kc">False</span><span class="p">)</span>
+
+        <span class="c1"># Clip centerline where Frenet Tangent is constant</span>
+        <span class="n">n</span> <span class="o">=</span> <span class="n">get_point_data_array</span><span class="p">(</span><span class="s2">&quot;FrenetTangent&quot;</span><span class="p">,</span> <span class="n">line</span><span class="p">,</span> <span class="n">k</span><span class="o">=</span><span class="mi">3</span><span class="p">)</span>
+        <span class="n">n_diff</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">linalg</span><span class="o">.</span><span class="n">norm</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">cross</span><span class="p">(</span><span class="n">n</span><span class="p">[</span><span class="mi">1</span><span class="p">:],</span> <span class="n">n</span><span class="p">[:</span><span class="o">-</span><span class="mi">1</span><span class="p">]),</span> <span class="n">axis</span><span class="o">=</span><span class="mi">1</span><span class="p">)</span>
+        <span class="n">n_id</span> <span class="o">=</span> <span class="n">n_diff</span><span class="p">[::</span><span class="o">-</span><span class="mi">1</span><span class="p">]</span><span class="o">.</span><span class="n">argmax</span><span class="p">()</span>
+        <span class="n">centerlines</span> <span class="o">=</span> <span class="n">extract_single_line</span><span class="p">(</span><span class="n">centerlines</span><span class="p">,</span> <span class="mi">0</span><span class="p">,</span> <span class="n">end_id</span><span class="o">=</span><span class="n">centerlines</span><span class="o">.</span><span class="n">GetNumberOfPoints</span><span class="p">()</span> <span class="o">-</span> <span class="n">n_id</span> <span class="o">-</span> <span class="mi">1</span><span class="p">)</span>
+
     <span class="c1"># Choose input for the mesh</span>
     <span class="nb">print</span><span class="p">(</span><span class="s2">&quot;--- Computing distance to sphere</span><span class="se">\n</span><span class="s2">&quot;</span><span class="p">)</span>
     <span class="k">if</span> <span class="n">meshing_method</span> <span class="o">==</span> <span class="s2">&quot;constant&quot;</span><span class="p">:</span>
@@ -825,7 +839,13 @@ document.write(`
     <span class="n">parser</span><span class="o">.</span><span class="n">add_argument</span><span class="p">(</span><span class="s1">&#39;-sc&#39;</span><span class="p">,</span> <span class="s1">&#39;--scale-factor&#39;</span><span class="p">,</span>
                         <span class="n">default</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
                         <span class="nb">type</span><span class="o">=</span><span class="nb">float</span><span class="p">,</span>
+
                         <span class="n">help</span><span class="o">=</span><span class="s2">&quot;Scale input model by this factor. Used to scale model to [mm].&quot;</span><span class="p">)</span>
+
+    <span class="n">parser</span><span class="o">.</span><span class="n">add_argument</span><span class="p">(</span><span class="s1">&#39;-rs&#39;</span><span class="p">,</span> <span class="s1">&#39;--resampling-step&#39;</span><span class="p">,</span>
+                        <span class="n">default</span><span class="o">=</span><span class="mf">0.1</span><span class="p">,</span>
+                        <span class="nb">type</span><span class="o">=</span><span class="nb">float</span><span class="p">,</span>
+                        <span class="n">help</span><span class="o">=</span><span class="s2">&quot;Resampling step used to resample centerline in [m].&quot;</span><span class="p">)</span>
 
     <span class="c1"># Parse path to get default values</span>
     <span class="k">if</span> <span class="n">required</span><span class="p">:</span>
@@ -861,7 +881,7 @@ document.write(`
                 <span class="n">coarsening_factor</span><span class="o">=</span><span class="n">args</span><span class="o">.</span><span class="n">coarsening_factor</span><span class="p">,</span> <span class="n">inlet_flow_extension_length</span><span class="o">=</span><span class="n">args</span><span class="o">.</span><span class="n">inlet_flowextension</span><span class="p">,</span>
                 <span class="n">visualize</span><span class="o">=</span><span class="n">args</span><span class="o">.</span><span class="n">visualize</span><span class="p">,</span> <span class="n">region_points</span><span class="o">=</span><span class="n">args</span><span class="o">.</span><span class="n">region_points</span><span class="p">,</span> <span class="n">compress_mesh</span><span class="o">=</span><span class="n">args</span><span class="o">.</span><span class="n">compress_mesh</span><span class="p">,</span>
                 <span class="n">outlet_flow_extension_length</span><span class="o">=</span><span class="n">args</span><span class="o">.</span><span class="n">outlet_flowextension</span><span class="p">,</span> <span class="n">add_boundary_layer</span><span class="o">=</span><span class="n">args</span><span class="o">.</span><span class="n">add_boundary_layer</span><span class="p">,</span>
-                <span class="n">scale_factor</span><span class="o">=</span><span class="n">args</span><span class="o">.</span><span class="n">scale_factor</span><span class="p">)</span></div>
+                <span class="n">scale_factor</span><span class="o">=</span><span class="n">args</span><span class="o">.</span><span class="n">scale_factor</span><span class="p">,</span> <span class="n">resampling_step</span><span class="o">=</span><span class="n">args</span><span class="o">.</span><span class="n">resampling_step</span><span class="p">)</span></div>
 
 
 <div class="viewcode-block" id="main_meshing"><a class="viewcode-back" href="../../../api.html#vampy.automatedPreprocessing.automated_preprocessing.main_meshing">[docs]</a><span class="k">def</span> <span class="nf">main_meshing</span><span class="p">():</span>
@@ -920,7 +940,7 @@ By Henrik A. Kjeldsberg
   
   <div class="footer-item">
     <p class="last-updated">
-  Last updated on May 29, 2023.
+  Last updated on May 30, 2023.
   <br/>
 </p>
   </div>

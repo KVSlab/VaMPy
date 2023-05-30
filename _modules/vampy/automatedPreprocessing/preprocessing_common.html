@@ -1182,7 +1182,7 @@ document.write(`
     <span class="n">end_point_distance</span> <span class="o">=</span> <span class="mi">0</span>
     <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="n">surface</span><span class="o">.</span><span class="n">GetNumberOfPoints</span><span class="p">()):</span>
         <span class="n">tmp_p</span> <span class="o">=</span> <span class="nb">list</span><span class="p">(</span><span class="n">surface</span><span class="o">.</span><span class="n">GetPoint</span><span class="p">(</span><span class="n">i</span><span class="p">))</span>
-        <span class="n">dx</span> <span class="o">=</span> <span class="n">get_distance</span><span class="p">(</span><span class="n">inlet</span><span class="p">[</span><span class="mi">0</span><span class="p">],</span> <span class="n">tmp_p</span><span class="p">)</span>
+        <span class="n">dx</span> <span class="o">=</span> <span class="n">get_distance</span><span class="p">(</span><span class="n">inlet</span><span class="p">,</span> <span class="n">tmp_p</span><span class="p">)</span>
         <span class="k">if</span> <span class="n">dx</span> <span class="o">&gt;</span> <span class="n">end_point_distance</span><span class="p">:</span>
             <span class="n">end_point_distance</span> <span class="o">=</span> <span class="n">dx</span>
             <span class="n">outlets</span> <span class="o">=</span> <span class="n">tmp_p</span>
@@ -1252,7 +1252,7 @@ By Henrik A. Kjeldsberg
   
   <div class="footer-item">
     <p class="last-updated">
-  Last updated on May 29, 2023.
+  Last updated on May 30, 2023.
   <br/>
 </p>
   </div>
