@@ -3,7 +3,6 @@ import sys
 from os import path
 
 import numpy as np
-# Local imports
 from morphman import get_uncapped_surface, write_polydata, get_parameters, vtk_clean_polydata, \
     vtk_triangulate_surface, write_parameters, vmtk_cap_polydata, compute_centerlines, get_centerline_tolerance, \
     get_vtk_point_locator, extract_single_line, vtk_merge_polydata, get_point_data_array, smooth_voronoi_diagram, \
