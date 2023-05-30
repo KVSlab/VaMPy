@@ -2,12 +2,13 @@ import json
 import pickle
 from os import makedirs
 from pprint import pprint
+from dolfin import set_log_level, MPI
 
 from oasismove.problems.NSfracStep import *
 from oasismove.problems.NSfracStep.MovingAtriumCommon import Surface_counter, Wall_motion
 from oasismove.problems.NSfracStep.MovingCommon import get_visualization_writers
 
-from vampy.simulation.Probe import Probes
+from vampy.simulation.Probe import Probes    # type: ignore
 from vampy.simulation.Womersley import make_womersley_bcs, compute_boundary_geometry_acrn
 from vampy.simulation.simulation_common import store_u_mean, get_file_paths, print_mesh_information
 
