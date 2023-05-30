@@ -78,7 +78,7 @@ def get_default_parameters():
     dt = 0.951
     T = 951
     velocity_degree = 1
-    save_frequency = 50
+    save_frequency = 200
     start_cycle = 1
     step = 1
 
