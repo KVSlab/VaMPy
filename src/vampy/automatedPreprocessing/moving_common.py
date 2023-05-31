@@ -1,6 +1,7 @@
 from os import listdir, mkdir
 
 from morphman.common import *
+from scipy.interpolate import interp1d
 from vtk.numpy_interface import dataset_adapter as dsa
 
 from vampy.automatedPreprocessing.preprocessing_common import scale_surface
@@ -176,18 +177,36 @@ def save_displacement(file_name_displacement_points, points):
         points (ndarray): Numpy array consisting of displacement surface points
     """
     N = 200
+    periodic = False
+    if periodic:
+        points[:, :, -1] = points[:, :, 0]
 
-    points[:, :, -1] = points[:, :, 0]
     time = np.linspace(0, 1, points.shape[2])
     N2 = N + N // (time.shape[0] - 1)
 
     move = np.zeros((points.shape[0], points.shape[1], N + 1))
-    move[:, 0, :] = resample(points[:, 0, :], N2, time, axis=1)[0][:, :N - N2 + 1]
-    move[:, 1, :] = resample(points[:, 1, :], N2, time, axis=1)[0][:, :N - N2 + 1]
-    move[:, 2, :] = resample(points[:, 2, :], N2, time, axis=1)[0][:, :N - N2 + 1]
+    time_r = np.linspace(0, 1, N + 1)
+    # Use interp1d if smooth displacement
+    smooth_displacement = True
+    if smooth_displacement:
+        x = interp1d(time, points[:, 0, :], axis=1)
+        y = interp1d(time, points[:, 0, :], axis=1)
+        z = interp1d(time, points[:, 0, :], axis=1)
+
+        move[:, 0, :] = x(time_r)
+        move[:, 1, :] = y(time_r)
+        move[:, 2, :] = z(time_r)
+    else:
+        move[:, 0, :] = resample(points[:, 0, :], N2, time, axis=1)[0][:, :N - N2 + 1]
+        move[:, 1, :] = resample(points[:, 1, :], N2, time, axis=1)[0][:, :N - N2 + 1]
+        move[:, 2, :] = resample(points[:, 2, :], N2, time, axis=1)[0][:, :N - N2 + 1]
 
     points = move
     points.dump(file_name_displacement_points)
+
+
+# plt.plot(np.linspace(0,1,200), poly);
+# plt.plot(np.linspace(0,1,len(move[1,0,:])), move[100000,0,:], 'r-');plt.plot(points[100000,0,:],'bo-');plt.show()
 
 
 def project_displacement(clamp_boundaries, distance, folder_extended_surfaces, folder_moved_surfaces, point_map,
