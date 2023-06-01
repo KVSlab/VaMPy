@@ -153,51 +153,6 @@ def run_pre_processing(input_model, verbose_print, smoothing_method, smoothing_f
     region_center = []
     misr_max = []
 
-    if refine_region:
-        regions = get_regions_to_refine(capped_surface, region_points, base_path)
-        for i in range(len(regions) // 3):
-            print("--- Region to refine ({}): {:.3f} {:.3f} {:.3f}"
-                  .format(i + 1, regions[3 * i], regions[3 * i + 1], regions[3 * i + 2]))
-
-        centerline_region, _, _ = compute_centerlines(source, regions, file_name_refine_region_centerlines,
-                                                      capped_surface, resampling=resampling_step)
-
-        # Extract the region centerline
-        refine_region_centerline = []
-        info = get_parameters(base_path)
-        num_anu = info["number_of_regions"]
-
-        # Compute mean distance between points
-        for i in range(num_anu):
-            if not path.isfile(file_name_region_centerlines.format(i)):
-                line = extract_single_line(centerline_region, i)
-                locator = get_vtk_point_locator(centerlines)
-                for j in range(line.GetNumberOfPoints() - 1, 0, -1):
-                    point = line.GetPoints().GetPoint(j)
-                    ID = locator.FindClosestPoint(point)
-                    tmp_point = centerlines.GetPoints().GetPoint(ID)
-                    dist = np.sqrt(np.sum((np.asarray(point) - np.asarray(tmp_point)) ** 2))
-                    if dist <= tol:
-                        break
-
-                tmp = extract_single_line(line, 0, start_id=j)
-                write_polydata(tmp, file_name_region_centerlines.format(i))
-
-                # List of VtkPolyData sac(s) centerline
-                refine_region_centerline.append(tmp)
-
-            else:
-                refine_region_centerline.append(read_polydata(file_name_region_centerlines.format(i)))
-
-        # Merge the sac centerline
-        region_centerlines = vtk_merge_polydata(refine_region_centerline)
-
-        for region in refine_region_centerline:
-            region_factor = 0.9 if is_atrium else 0.5
-            region_center.append(region.GetPoints().GetPoint(int(region.GetNumberOfPoints() * region_factor)))
-            tmp_misr = get_point_data_array(radiusArrayName, region)
-            misr_max.append(tmp_misr.max())
-
     # Smooth surface
     if smoothing_method == "voronoi":
         print("--- Smooth surface: Voronoi smoothing\n")
