@@ -20,10 +20,6 @@ $ oasis NSfracStep problem=Artery mesh_path=../../../models/artery/artery.xml.gz
 Running the simulations will create the result folder `results_artery` (specific to the `Artery.py` problem) located
 inside `src/vampy/simulation`, with the results and corresponding mesh saved compactly in HDF5 format.
 
-```console
-$ conda env update --file environment.yml --name your_environment
-```
-
 ## Running parallel computational fluid dynamics in `Oasis`
 
 Oasis runs with [MPI](https://mpi4py.readthedocs.io/en/stable/), and problem files may be executed using MPI commands.
