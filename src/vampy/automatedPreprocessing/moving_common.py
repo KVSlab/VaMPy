@@ -190,8 +190,8 @@ def save_displacement(file_name_displacement_points, points):
     smooth_displacement = True
     if smooth_displacement:
         x = interp1d(time, points[:, 0, :], axis=1)
-        y = interp1d(time, points[:, 0, :], axis=1)
-        z = interp1d(time, points[:, 0, :], axis=1)
+        y = interp1d(time, points[:, 1, :], axis=1)
+        z = interp1d(time, points[:, 2, :], axis=1)
 
         move[:, 0, :] = x(time_r)
         move[:, 1, :] = y(time_r)
