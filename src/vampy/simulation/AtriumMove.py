@@ -33,9 +33,11 @@ def problem_parameters(commandline_kwargs, NS_parameters, scalar_components, Sch
 
     if "restart_folder" in commandline_kwargs.keys():
         restart_folder = commandline_kwargs["restart_folder"]
+        mesh_path = commandline_kwargs["mesh_path"]
         f = open(path.join(restart_folder, 'params.dat'), 'rb')
         NS_parameters.update(pickle.load(f))
         NS_parameters['restart_folder'] = restart_folder
+        NS_parameters['mesh_path'] = mesh_path
     else:
         # Override some problem specific parameters
         # Parameters are in mm and ms
