@@ -2,13 +2,12 @@ import json
 import pickle
 from os import makedirs
 from pprint import pprint
-from dolfin import set_log_level, MPI
 
 from oasismove.problems.NSfracStep import *
 from oasismove.problems.NSfracStep.MovingAtriumCommon import Surface_counter, Wall_motion
 from oasismove.problems.NSfracStep.MovingCommon import get_visualization_writers
 
-from vampy.simulation.Probe import Probes    # type: ignore
+from vampy.simulation.Probe import Probes  # type: ignore
 from vampy.simulation.Womersley import make_womersley_bcs, compute_boundary_geometry_acrn
 from vampy.simulation.simulation_common import store_u_mean, get_file_paths, print_mesh_information
 
@@ -309,10 +308,6 @@ def update_boundary_conditions(t, dynamic_mesh, NS_expressions, id_in, **NS_name
         # Update wall motion BCs
         for coord in ["x", "y", "z"]:
             NS_expressions["wall_{}".format(coord)].t = t
-
-
-def velocity_tentative_hook(mesh, boundary, u_ab, x_1, b, A, ui, u, v, backflow_facets, backflow_beta, **NS_namespace):
-    add_backflow_stabilization(A, b, backflow_beta, backflow_facets, boundary, mesh, u, u_ab, ui, v, x_1)
 
 
 def temporal_hook(mesh, id_wall, id_out, cardiac_cycle, dt, t, save_solution_frequency, u_, id_in, tstep, newfolder,
