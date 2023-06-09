@@ -882,7 +882,7 @@ def add_flow_extension(surface, centerlines, include_outlet, extension_length=2.
     flowExtensionsFilter.SetInputData(surface)
     flowExtensionsFilter.SetCenterlines(centerlines)
     flowExtensionsFilter.SetAdaptiveExtensionLength(1)
-    flowExtensionsFilter.SetAdaptiveNumberOfBoundaryPoints(0)
+    flowExtensionsFilter.SetAdaptiveNumberOfBoundaryPoints(1)
     flowExtensionsFilter.SetExtensionRatio(extension_length)
     flowExtensionsFilter.SetTransitionRatio(1.0)
     flowExtensionsFilter.SetCenterlineNormalEstimationDistanceRatio(1.0)
@@ -933,9 +933,15 @@ def remesh_surface(surface, edge_length, exclude=None):
     remeshing.MaxEdgeLength = 1e6
     remeshing.MinEdgeLength = 0.0
     remeshing.TargetEdgeLengthFactor = 1.0
-    remeshing.TargetEdgeLengthArrayName = ""
     remeshing.TriangleSplitFactor = 5.0
-    remeshing.ElementSizeMode = "edgelength"
+    bladder = False
+    if bladder:
+        remeshing.ElementSizeMode = "edgelengtharray"  # Variable size mesh
+        remeshing.TargetEdgeLengthArrayName = "Size"  # Variable size mesh
+    else:
+        remeshing.ElementSizeMode = "edgelength"
+        remeshing.TargetEdgeLengthArrayName = ""
+
     if exclude is not None:
         remeshing.ExcludeEntityIds = exclude
 
