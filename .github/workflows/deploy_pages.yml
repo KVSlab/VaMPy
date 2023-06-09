@@ -64,6 +64,10 @@ jobs:
       - name: Install VaMPy
         run: python3 -m pip install .[test]
 
+      # https://github.com/executablebooks/jupyter-book/issues/1997
+      - name: Downgrade docutils to fix layout-bug
+        run: python3 -m pip install docutils==0.17.1
+
         # Build the book
       - name: Build the book
         run: |
