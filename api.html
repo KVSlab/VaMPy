@@ -7,7 +7,7 @@
 
   <head>
     <meta charset="utf-8" />
-    <meta name="viewport" content="width=device-width, initial-scale=1.0" /><meta name="generator" content="Docutils 0.18.1: http://docutils.sourceforge.net/" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" /><meta name="generator" content="Docutils 0.17.1: http://docutils.sourceforge.net/" />
 
     <title>API Reference &#8212; VaMPy</title>
   
@@ -417,7 +417,7 @@ only return default values.</p>
 flow rates at inlet and outlet based on flow network model.</p>
 <p>Runs simulation of meshed case on a remote ssh server if server configuration is provided.</p>
 <dl class="field-list simple">
-<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dt class="field-odd">Parameters</dt>
 <dd class="field-odd"><ul class="simple">
 <li><p><strong>input_model</strong> (<em>str</em>) – Name of case</p></li>
 <li><p><strong>verbose_print</strong> (<em>bool</em>) – Toggles verbose mode</p></li>
@@ -449,7 +449,7 @@ flow rates at inlet and outlet based on flow network model.</p>
 <span class="sig-prename descclassname"><span class="pre">vampy.automatedPreprocessing.preprocessing_common.</span></span><span class="sig-name descname"><span class="pre">add_flow_extension</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">surface</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">centerlines</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">include_outlet</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">extension_length</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">2.0</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">extension_mode</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">'boundarynormal'</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/vampy/automatedPreprocessing/preprocessing_common.html#add_flow_extension"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#vampy.automatedPreprocessing.preprocessing_common.add_flow_extension" title="Permalink to this definition">#</a></dt>
 <dd><p>Adds flow extensions to either all inlets or all outlets with specified extension length.</p>
 <dl class="field-list simple">
-<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dt class="field-odd">Parameters</dt>
 <dd class="field-odd"><ul class="simple">
 <li><p><strong>surface</strong> (<em>vtkPolyData</em>) – Surface model to extend</p></li>
 <li><p><strong>centerlines</strong> (<em>vtkPolyData</em>) – Centerlines in model</p></li>
@@ -460,10 +460,10 @@ Factor is multiplied with MISR at relevant boundary</p></li>
 or following centerline direction</p></li>
 </ul>
 </dd>
-<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dt class="field-even">Returns</dt>
 <dd class="field-even"><p>Extended surface model</p>
 </dd>
-<dt class="field-odd">Return type<span class="colon">:</span></dt>
+<dt class="field-odd">Return type</dt>
 <dd class="field-odd"><p>surface_extended (vtkPolyData)</p>
 </dd>
 </dl>
@@ -474,13 +474,13 @@ or following centerline direction</p></li>
 <span class="sig-prename descclassname"><span class="pre">vampy.automatedPreprocessing.preprocessing_common.</span></span><span class="sig-name descname"><span class="pre">check_if_closed_surface</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">surface</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/vampy/automatedPreprocessing/preprocessing_common.html#check_if_closed_surface"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#vampy.automatedPreprocessing.preprocessing_common.check_if_closed_surface" title="Permalink to this definition">#</a></dt>
 <dd><p>Checks if the given surface is capped (i.e., has no feature edges).</p>
 <dl class="field-list simple">
-<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dt class="field-odd">Parameters</dt>
 <dd class="field-odd"><p><strong>surface</strong> (<em>vtkPolyData</em>) – The surface to check for capping.</p>
 </dd>
-<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dt class="field-even">Returns</dt>
 <dd class="field-even"><p>True if the surface is capped, False otherwise.</p>
 </dd>
-<dt class="field-odd">Return type<span class="colon">:</span></dt>
+<dt class="field-odd">Return type</dt>
 <dd class="field-odd"><p>bool</p>
 </dd>
 </dl>
@@ -493,7 +493,7 @@ or following centerline direction</p></li>
 the largest area for arteries (or aneurysm). However, for atrium, the outlet is chosen based on
 the largest area (new).</p>
 <dl class="field-list simple">
-<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dt class="field-odd">Parameters</dt>
 <dd class="field-odd"><ul class="simple">
 <li><p><strong>test_capped</strong> (<em>bool</em>) – Check if surface is capped.</p></li>
 <li><p><strong>surface</strong> (<em>vtkPolyData</em>) – centers of the openings.</p></li>
@@ -501,11 +501,11 @@ the largest area (new).</p>
 <li><p><strong>is_atrium</strong> (<em>bool</em>) – Check if it is an atrium model.</p></li>
 </ul>
 </dd>
-<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dt class="field-even">Returns</dt>
 <dd class="field-even"><p>Inlet center.
 outlet_centers (list): A flattened list with all the outlet centers.</p>
 </dd>
-<dt class="field-odd">Return type<span class="colon">:</span></dt>
+<dt class="field-odd">Return type</dt>
 <dd class="field-odd"><p>inlet_center (list)</p>
 </dd>
 </dl>
@@ -516,7 +516,7 @@ outlet_centers (list): A flattened list with all the outlet centers.</p>
 <span class="sig-prename descclassname"><span class="pre">vampy.automatedPreprocessing.preprocessing_common.</span></span><span class="sig-name descname"><span class="pre">compute_distance_to_sphere</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">surface</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">center_sphere</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">radius_sphere</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">0.0</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">distance_offset</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">0.0</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">distance_scale</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">0.01</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">min_distance</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">0.2</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">max_distance</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">0.3</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/vampy/automatedPreprocessing/preprocessing_common.html#compute_distance_to_sphere"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#vampy.automatedPreprocessing.preprocessing_common.compute_distance_to_sphere" title="Permalink to this definition">#</a></dt>
 <dd><p>Computes cell specific target edge length (distances) based on input criterion.</p>
 <dl class="field-list simple">
-<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dt class="field-odd">Parameters</dt>
 <dd class="field-odd"><ul class="simple">
 <li><p><strong>surface</strong> (<em>vtkPolyData</em>) – Input surface model</p></li>
 <li><p><strong>center_sphere</strong> (<em>list</em>) – Point representing region to refine</p></li>
@@ -527,10 +527,10 @@ outlet_centers (list): A flattened list with all the outlet centers.</p>
 <li><p><strong>max_distance</strong> (<em>float</em>) – Maximum distance away from the relevant region before scaling stops</p></li>
 </ul>
 </dd>
-<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dt class="field-even">Returns</dt>
 <dd class="field-even"><p>Modified surface model with distances</p>
 </dd>
-<dt class="field-odd">Return type<span class="colon">:</span></dt>
+<dt class="field-odd">Return type</dt>
 <dd class="field-odd"><p>surface (vtkPolyData)</p>
 </dd>
 </dl>
@@ -541,17 +541,17 @@ outlet_centers (list): A flattened list with all the outlet centers.</p>
 <span class="sig-prename descclassname"><span class="pre">vampy.automatedPreprocessing.preprocessing_common.</span></span><span class="sig-name descname"><span class="pre">compute_flow_rate</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">is_atrium</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">inlet</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">parameters</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/vampy/automatedPreprocessing/preprocessing_common.html#compute_flow_rate"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#vampy.automatedPreprocessing.preprocessing_common.compute_flow_rate" title="Permalink to this definition">#</a></dt>
 <dd><p>Computes mean flow rate used as boundary condition for pulsatile flow condition</p>
 <dl class="field-list simple">
-<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dt class="field-odd">Parameters</dt>
 <dd class="field-odd"><ul class="simple">
 <li><p><strong>is_atrium</strong> (<em>bool</em>) – Determines if model is atrium or artery</p></li>
 <li><p><strong>inlet</strong> (<em>list</em>) – List of points representing midpoint of boundaries</p></li>
 <li><p><strong>parameters</strong> (<em>dict</em>) – Dictionary containing model parameters</p></li>
 </ul>
 </dd>
-<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dt class="field-even">Returns</dt>
 <dd class="field-even"><p>Mean inflow rate</p>
 </dd>
-<dt class="field-odd">Return type<span class="colon">:</span></dt>
+<dt class="field-odd">Return type</dt>
 <dd class="field-odd"><p>mean_inflow_rate (float)</p>
 </dd>
 </dl>
@@ -565,7 +565,7 @@ potential refinement or coarsening of certain user specified areas.
 Level of refinement/coarseness is determined based on user selected region, otherwise a constant target edge length
 is selected.</p>
 <dl class="field-list simple">
-<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dt class="field-odd">Parameters</dt>
 <dd class="field-odd"><ul class="simple">
 <li><p><strong>surface</strong> (<em>vtkPolyData</em>) – Input surface model</p></li>
 <li><p><strong>centerlines</strong> (<em>vtkPolyData</em>) – Centerlines of input model</p></li>
@@ -575,10 +575,10 @@ is selected.</p>
 <li><p><strong>edge_length</strong> (<em>float</em>) – Target edge length</p></li>
 </ul>
 </dd>
-<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dt class="field-even">Returns</dt>
 <dd class="field-even"><p>Processed surface model with info on cell specific target edge length</p>
 </dd>
-<dt class="field-odd">Return type<span class="colon">:</span></dt>
+<dt class="field-odd">Return type</dt>
 <dd class="field-odd"><p>surface (vtkPolyData)</p>
 </dd>
 </dl>
@@ -591,7 +591,7 @@ is selected.</p>
 potential refinement or coarsening of certain user specified areas.
 Level of refinement/coarseness is determined based on surface curvature.</p>
 <dl class="field-list simple">
-<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dt class="field-odd">Parameters</dt>
 <dd class="field-odd"><ul class="simple">
 <li><p><strong>surface</strong> (<em>vtkPolyData</em>) – Input surface model</p></li>
 <li><p><strong>centerlines</strong> (<em>vtkPolyData</em>) – Centerlines of input model</p></li>
@@ -601,10 +601,10 @@ Level of refinement/coarseness is determined based on surface curvature.</p>
 <li><p><strong>factor</strong> (<em>float</em>) – Coarsening factor, determining the level of refinement (&lt;1) or coarsening (&gt;1)</p></li>
 </ul>
 </dd>
-<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dt class="field-even">Returns</dt>
 <dd class="field-even"><p>Processed surface model with info on cell specific target edge length</p>
 </dd>
-<dt class="field-odd">Return type<span class="colon">:</span></dt>
+<dt class="field-odd">Return type</dt>
 <dd class="field-odd"><p>surface (vtkPolyData)</p>
 </dd>
 </dl>
@@ -617,7 +617,7 @@ Level of refinement/coarseness is determined based on surface curvature.</p>
 potential refinement or coarsening of certain user specified areas.
 Level of refinement/coarseness is determined based on the distance to the centerline.</p>
 <dl class="field-list simple">
-<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dt class="field-odd">Parameters</dt>
 <dd class="field-odd"><ul class="simple">
 <li><p><strong>surface</strong> (<em>vtkPolyData</em>) – Input surface model</p></li>
 <li><p><strong>centerlines</strong> (<em>vtkPolyData</em>) – Centerlines of input model</p></li>
@@ -627,10 +627,10 @@ Level of refinement/coarseness is determined based on the distance to the center
 <li><p><strong>factor</strong> (<em>float</em>) – Coarsening factor, determining the level of refinement (&lt;1) or coarsening (&gt;1)</p></li>
 </ul>
 </dd>
-<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dt class="field-even">Returns</dt>
 <dd class="field-even"><p>Processed surface model with info on cell specific target edge length</p>
 </dd>
-<dt class="field-odd">Return type<span class="colon">:</span></dt>
+<dt class="field-odd">Return type</dt>
 <dd class="field-odd"><p>surface (vtkPolyData)</p>
 </dd>
 </dl>
@@ -642,7 +642,7 @@ Level of refinement/coarseness is determined based on the distance to the center
 <dd><p>Finds inlet and outlet boundary IDs after complete meshing, including
 mean flow ratio and area ratios between outlets or inlets (determined by type of model)</p>
 <dl class="field-list simple">
-<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dt class="field-odd">Parameters</dt>
 <dd class="field-odd"><ul class="simple">
 <li><p><strong>model_path</strong> (<em>str</em>) – Path to model files</p></li>
 <li><p><strong>mean_inflow_rate</strong> (<em>float</em>) – Flow rate</p></li>
@@ -660,14 +660,14 @@ mean flow ratio and area ratios between outlets or inlets (determined by type of
 <span class="sig-prename descclassname"><span class="pre">vampy.automatedPreprocessing.preprocessing_common.</span></span><span class="sig-name descname"><span class="pre">generate_mesh</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">surface</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">add_boundary_layer</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/vampy/automatedPreprocessing/preprocessing_common.html#generate_mesh"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#vampy.automatedPreprocessing.preprocessing_common.generate_mesh" title="Permalink to this definition">#</a></dt>
 <dd><p>Generates a mesh suitable for CFD from a input surface model.</p>
 <dl class="field-list simple">
-<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dt class="field-odd">Parameters</dt>
 <dd class="field-odd"><p><strong>surface</strong> (<em>vtkPolyData</em>) – Surface model to be meshed.</p>
 </dd>
-<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dt class="field-even">Returns</dt>
 <dd class="field-even"><p>Output mesh
 remeshedsurface (vtkPolyData): Remeshed version of the input model</p>
 </dd>
-<dt class="field-odd">Return type<span class="colon">:</span></dt>
+<dt class="field-odd">Return type</dt>
 <dd class="field-odd"><p>mesh (vtkUnstructuredGrid)</p>
 </dd>
 </dl>
@@ -678,7 +678,7 @@ remeshedsurface (vtkPolyData): Remeshed version of the input model</p>
 <span class="sig-prename descclassname"><span class="pre">vampy.automatedPreprocessing.preprocessing_common.</span></span><span class="sig-name descname"><span class="pre">get_centers_for_meshing</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">surface</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">is_atrium</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">dir_path</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">use_flow_extensions</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">False</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/vampy/automatedPreprocessing/preprocessing_common.html#get_centers_for_meshing"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#vampy.automatedPreprocessing.preprocessing_common.get_centers_for_meshing" title="Permalink to this definition">#</a></dt>
 <dd><p>Get the centers of the inlet and outlets.</p>
 <dl class="field-list simple">
-<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dt class="field-odd">Parameters</dt>
 <dd class="field-odd"><ul class="simple">
 <li><p><strong>surface</strong> (<em>vtkPolyData</em>) – An open surface.</p></li>
 <li><p><strong>is_atrium</strong> (<em>bool</em>) – True if model represents atrium</p></li>
@@ -686,11 +686,11 @@ remeshedsurface (vtkPolyData): Remeshed version of the input model</p>
 <li><p><strong>use_flow_extensions</strong> (<em>bool</em>) – Turn on/off flow extension.</p></li>
 </ul>
 </dd>
-<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dt class="field-even">Returns</dt>
 <dd class="field-even"><p>A flatt list with the point of the inlet
 outlet (list): A flatt list with the points of all the outlets.</p>
 </dd>
-<dt class="field-odd">Return type<span class="colon">:</span></dt>
+<dt class="field-odd">Return type</dt>
 <dd class="field-odd"><p>inlet (list)</p>
 </dd>
 </dl>
@@ -703,16 +703,16 @@ outlet (list): A flatt list with the points of all the outlets.</p>
 It iterates over each point on the surface, calculating its distance from the inlet and updates
 the furthest distance accordingly.</p>
 <dl class="field-list simple">
-<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dt class="field-odd">Parameters</dt>
 <dd class="field-odd"><ul class="simple">
 <li><p><strong>inlet</strong> (<em>list</em>) – A list with the inlet point.</p></li>
 <li><p><strong>surface</strong> (<em>vtkPolyData</em>) – The surface to check for the furthest point.</p></li>
 </ul>
 </dd>
-<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dt class="field-even">Returns</dt>
 <dd class="field-even"><p>The x, y, z coordinates of the furthest point on the surface from the inlet.</p>
 </dd>
-<dt class="field-odd">Return type<span class="colon">:</span></dt>
+<dt class="field-odd">Return type</dt>
 <dd class="field-odd"><p>outlets (list)</p>
 </dd>
 </dl>
@@ -723,17 +723,17 @@ the furthest distance accordingly.</p>
 <span class="sig-prename descclassname"><span class="pre">vampy.automatedPreprocessing.preprocessing_common.</span></span><span class="sig-name descname"><span class="pre">get_regions_to_refine</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">surface</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">provided_points</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">dir_path</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/vampy/automatedPreprocessing/preprocessing_common.html#get_regions_to_refine"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#vampy.automatedPreprocessing.preprocessing_common.get_regions_to_refine" title="Permalink to this definition">#</a></dt>
 <dd><p>Determines which regions to refine.</p>
 <dl class="field-list simple">
-<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dt class="field-odd">Parameters</dt>
 <dd class="field-odd"><ul class="simple">
 <li><p><strong>surface</strong> (<em>vtkPoylData</em>) – Surface model</p></li>
 <li><p><strong>provided_points</strong> (<em>ndarray</em>) – Points defining regions to refine</p></li>
 <li><p><strong>dir_path</strong> (<em>str</em>) – Path to save directory</p></li>
 </ul>
 </dd>
-<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dt class="field-even">Returns</dt>
 <dd class="field-even"><p>List of points representing regions to refine</p>
 </dd>
-<dt class="field-odd">Return type<span class="colon">:</span></dt>
+<dt class="field-odd">Return type</dt>
 <dd class="field-odd"><p>region_points (list)</p>
 </dd>
 </dl>
@@ -744,16 +744,16 @@ the furthest distance accordingly.</p>
 <span class="sig-prename descclassname"><span class="pre">vampy.automatedPreprocessing.preprocessing_common.</span></span><span class="sig-name descname"><span class="pre">make_voronoi_diagram</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">surface</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">file_path</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/vampy/automatedPreprocessing/preprocessing_common.html#make_voronoi_diagram"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#vampy.automatedPreprocessing.preprocessing_common.make_voronoi_diagram" title="Permalink to this definition">#</a></dt>
 <dd><p>Compute the voronoi diagram of surface model.</p>
 <dl class="field-list simple">
-<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dt class="field-odd">Parameters</dt>
 <dd class="field-odd"><ul class="simple">
 <li><p><strong>surface</strong> (<em>polydata</em>) – Capped surface model to create a Voronoi diagram of.</p></li>
 <li><p><strong>file_path</strong> (<em>str</em>) – Absolute path to surface model path.</p></li>
 </ul>
 </dd>
-<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dt class="field-even">Returns</dt>
 <dd class="field-even"><p>Voronoi diagram of surface.</p>
 </dd>
-<dt class="field-odd">Return type<span class="colon">:</span></dt>
+<dt class="field-odd">Return type</dt>
 <dd class="field-odd"><p>voronoi (vtkPolyData)</p>
 </dd>
 </dl>
@@ -764,13 +764,13 @@ the furthest distance accordingly.</p>
 <span class="sig-prename descclassname"><span class="pre">vampy.automatedPreprocessing.preprocessing_common.</span></span><span class="sig-name descname"><span class="pre">mesh_alternative</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">surface</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/vampy/automatedPreprocessing/preprocessing_common.html#mesh_alternative"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#vampy.automatedPreprocessing.preprocessing_common.mesh_alternative" title="Permalink to this definition">#</a></dt>
 <dd><p>Subdivides and smoothes the input surface model, preparing it for volumetric meshing.</p>
 <dl class="field-list simple">
-<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dt class="field-odd">Parameters</dt>
 <dd class="field-odd"><p><strong>surface</strong> (<em>vtkPolyData</em>) – Input surface model to be meshed alternatively</p>
 </dd>
-<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dt class="field-even">Returns</dt>
 <dd class="field-even"><p>Smoothed model</p>
 </dd>
-<dt class="field-odd">Return type<span class="colon">:</span></dt>
+<dt class="field-odd">Return type</dt>
 <dd class="field-odd"><p>surface (vtkPolyData)</p>
 </dd>
 </dl>
@@ -781,17 +781,17 @@ the furthest distance accordingly.</p>
 <span class="sig-prename descclassname"><span class="pre">vampy.automatedPreprocessing.preprocessing_common.</span></span><span class="sig-name descname"><span class="pre">provide_region_points</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">surface</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">provided_points</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">dir_path</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/vampy/automatedPreprocessing/preprocessing_common.html#provide_region_points"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#vampy.automatedPreprocessing.preprocessing_common.provide_region_points" title="Permalink to this definition">#</a></dt>
 <dd><p>Get relevant region points from user selected points on a input surface.</p>
 <dl class="field-list simple">
-<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dt class="field-odd">Parameters</dt>
 <dd class="field-odd"><ul class="simple">
 <li><p><strong>provided_points</strong> (<em>ndarray</em>) – Point(s) representing area to refine</p></li>
 <li><p><strong>surface</strong> (<em>vtkPolyData</em>) – Surface model.</p></li>
 <li><p><strong>dir_path</strong> (<em>str</em>) – Location of info.json file</p></li>
 </ul>
 </dd>
-<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dt class="field-even">Returns</dt>
 <dd class="field-even"><p>List of relevant outlet IDs</p>
 </dd>
-<dt class="field-odd">Return type<span class="colon">:</span></dt>
+<dt class="field-odd">Return type</dt>
 <dd class="field-odd"><p>points (list)</p>
 </dd>
 </dl>
@@ -802,16 +802,16 @@ the furthest distance accordingly.</p>
 <span class="sig-prename descclassname"><span class="pre">vampy.automatedPreprocessing.preprocessing_common.</span></span><span class="sig-name descname"><span class="pre">scale_surface</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">surface</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">scale_factor</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/vampy/automatedPreprocessing/preprocessing_common.html#scale_surface"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#vampy.automatedPreprocessing.preprocessing_common.scale_surface" title="Permalink to this definition">#</a></dt>
 <dd><p>Scale the input surface by a factor scale_factor.</p>
 <dl class="field-list simple">
-<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dt class="field-odd">Parameters</dt>
 <dd class="field-odd"><ul class="simple">
 <li><p><strong>surface</strong> (<em>vtkPolyData</em>) – Input surface to be scaled</p></li>
 <li><p><strong>scale_factor</strong> (<em>float</em>) – Scaling factor</p></li>
 </ul>
 </dd>
-<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dt class="field-even">Returns</dt>
 <dd class="field-even"><p>Scaled input surface</p>
 </dd>
-<dt class="field-odd">Return type<span class="colon">:</span></dt>
+<dt class="field-odd">Return type</dt>
 <dd class="field-odd"><p>scaled_surface (vtkPolyData)</p>
 </dd>
 </dl>
@@ -822,7 +822,7 @@ the furthest distance accordingly.</p>
 <span class="sig-prename descclassname"><span class="pre">vampy.automatedPreprocessing.preprocessing_common.</span></span><span class="sig-name descname"><span class="pre">setup_model_network</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">centerlines</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">file_name_probe_points</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">region_center</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">verbose_print</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/vampy/automatedPreprocessing/preprocessing_common.html#setup_model_network"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#vampy.automatedPreprocessing.preprocessing_common.setup_model_network" title="Permalink to this definition">#</a></dt>
 <dd><p>Sets up network used for network boundary condition model.</p>
 <dl class="field-list simple">
-<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dt class="field-odd">Parameters</dt>
 <dd class="field-odd"><ul class="simple">
 <li><p><strong>centerlines</strong> (<em>vtkPolyData</em>) – Centerlines representing meshed model</p></li>
 <li><p><strong>file_name_probe_points</strong> (<em>str</em>) – Save path of probe points</p></li>
@@ -830,11 +830,11 @@ the furthest distance accordingly.</p>
 <li><p><strong>verbose_print</strong> (<em>bool</em>) – Prints additional info if True</p></li>
 </ul>
 </dd>
-<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dt class="field-even">Returns</dt>
 <dd class="field-even"><p>Network model
 probe_points (ndarray): Probe points where velocity and pressure is to be sampled</p>
 </dd>
-<dt class="field-odd">Return type<span class="colon">:</span></dt>
+<dt class="field-odd">Return type</dt>
 <dd class="field-odd"><p>network (<a class="reference internal" href="#vampy.automatedPreprocessing.ImportData.Network" title="vampy.automatedPreprocessing.ImportData.Network">Network</a>)</p>
 </dd>
 </dl>
@@ -845,7 +845,7 @@ probe_points (ndarray): Probe points where velocity and pressure is to be sample
 <span class="sig-prename descclassname"><span class="pre">vampy.automatedPreprocessing.preprocessing_common.</span></span><span class="sig-name descname"><span class="pre">write_mesh</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">compress_mesh</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">file_name_surface_name</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">file_name_vtu_mesh</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">file_name_xml_mesh</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">mesh</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">remeshed_surface</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/vampy/automatedPreprocessing/preprocessing_common.html#write_mesh"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#vampy.automatedPreprocessing.preprocessing_common.write_mesh" title="Permalink to this definition">#</a></dt>
 <dd><p>Writes the mesh to DOLFIN format, and compresses to .gz format</p>
 <dl class="field-list simple">
-<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dt class="field-odd">Parameters</dt>
 <dd class="field-odd"><ul class="simple">
 <li><p><strong>compress_mesh</strong> (<em>bool</em>) – Compressed mesh to zipped format</p></li>
 <li><p><strong>file_name_surface_name</strong> (<em>str</em>) – Path to remeshed surface model</p></li>
@@ -1402,7 +1402,7 @@ gamma_i = S_i / sumOutletAreas</p>
 <dd><p>Run simulation of case on a remote ssh server with
 given input configuration.</p>
 <dl class="field-list simple">
-<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dt class="field-odd">Parameters</dt>
 <dd class="field-odd"><ul class="simple">
 <li><p><strong>config_path</strong> (<em>str</em>) – Path to configuration file</p></li>
 <li><p><strong>local_dir</strong> (<em>str</em>) – Path to case folder</p></li>
@@ -1418,7 +1418,7 @@ given input configuration.</p>
 <dd><p>Visualize surface model / mesh with distributed flow rates at each inlet/outlet
 in an interactive VTK window.</p>
 <dl class="field-list simple">
-<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dt class="field-odd">Parameters</dt>
 <dd class="field-odd"><ul class="simple">
 <li><p><strong>network_elements</strong> (<em>list</em>) – List of inlet/outlet elements within a surface model network</p></li>
 <li><p><strong>probe_points</strong> (<em>ndarray</em>) – Array of probe points</p></li>
@@ -1497,7 +1497,7 @@ in an interactive VTK window.</p>
 for velocity field stored at ‘folder’ location
 for flow_metrics given viscosity and time step</p>
 <dl class="field-list simple">
-<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dt class="field-odd">Parameters</dt>
 <dd class="field-odd"><ul class="simple">
 <li><p><strong>folder</strong> (<em>str</em>) – Path to simulation results</p></li>
 <li><p><strong>nu</strong> (<em>float</em>) – Viscosity</p></li>
@@ -1519,7 +1519,7 @@ for flow_metrics given viscosity and time step</p>
 <span class="sig-prename descclassname"><span class="pre">vampy.automatedPostprocessing.compute_flow_and_simulation_metrics.</span></span><span class="sig-name descname"><span class="pre">compute_u_avg</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">dataset_names</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">file_path_u_avg</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">file_u</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">n_cycles</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">saved_time_steps_per_cycle</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">start_cycle</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">u</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">u_avg</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/vampy/automatedPostprocessing/compute_flow_and_simulation_metrics.html#compute_u_avg"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#vampy.automatedPostprocessing.compute_flow_and_simulation_metrics.compute_u_avg" title="Permalink to this definition">#</a></dt>
 <dd><p>Iterate over saved time steps and compute average velocity based on save sampling parameters</p>
 <dl class="field-list simple">
-<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dt class="field-odd">Parameters</dt>
 <dd class="field-odd"><ul class="simple">
 <li><p><strong>dataset_names</strong> (<em>dict</em>) – Contains timestep and respective names of solution timesteps</p></li>
 <li><p><strong>file_path_u_avg</strong> (<em>str</em>) – File path to average velocity solution</p></li>
@@ -1542,7 +1542,7 @@ for flow_metrics given viscosity and time step</p>
 several flow and simulation metrics.
 After iteration, saves the  metrics to .xdmf file format.</p>
 <dl class="field-list simple">
-<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dt class="field-odd">Parameters</dt>
 <dd class="field-odd"><ul class="simple">
 <li><p><strong>time_to_average</strong> (<em>int</em>) – Time in ms to average over</p></li>
 <li><p><strong>N</strong> (<em>int</em>) – Number of dataset files to iterate over</p></li>
@@ -1576,7 +1576,7 @@ After iteration, saves the  metrics to .xdmf file format.</p>
 <span class="sig-prename descclassname"><span class="pre">vampy.automatedPostprocessing.compute_flow_and_simulation_metrics.</span></span><span class="sig-name descname"><span class="pre">rate_of_dissipation</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">dissipation</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">u</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">v</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">mesh</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">h</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">nu</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/vampy/automatedPostprocessing/compute_flow_and_simulation_metrics.html#rate_of_dissipation"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#vampy.automatedPostprocessing.compute_flow_and_simulation_metrics.rate_of_dissipation" title="Permalink to this definition">#</a></dt>
 <dd><p>Computes rate of dissipation</p>
 <dl class="field-list simple">
-<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dt class="field-odd">Parameters</dt>
 <dd class="field-odd"><ul class="simple">
 <li><p><strong>dissipation</strong> (<em>Function</em>) – Function to save rate of dissipation to</p></li>
 <li><p><strong>u</strong> (<em>Function</em>) – Function for velocity field</p></li>
@@ -1594,7 +1594,7 @@ After iteration, saves the  metrics to .xdmf file format.</p>
 <span class="sig-prename descclassname"><span class="pre">vampy.automatedPostprocessing.compute_flow_and_simulation_metrics.</span></span><span class="sig-name descname"><span class="pre">rate_of_strain</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">strain</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">u</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">v</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">mesh</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">h</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/vampy/automatedPostprocessing/compute_flow_and_simulation_metrics.html#rate_of_strain"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#vampy.automatedPostprocessing.compute_flow_and_simulation_metrics.rate_of_strain" title="Permalink to this definition">#</a></dt>
 <dd><p>Computes rate of strain</p>
 <dl class="field-list simple">
-<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dt class="field-odd">Parameters</dt>
 <dd class="field-odd"><ul class="simple">
 <li><p><strong>strain</strong> (<em>Function</em>) – Function to save rate of strain to</p></li>
 <li><p><strong>u</strong> (<em>Function</em>) – Function for velocity field</p></li>
@@ -1620,7 +1620,7 @@ and computes and saves the following hemodynamic quantities:
 <p>The resulting wall shear stress will be in units Pascal [Pa], given that the provided
 density (rho) is in [kg/m^3], the time step (dt) is in [ms], and viscosity (nu) is in [mm^2/ms].</p>
 <dl class="field-list simple">
-<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dt class="field-odd">Parameters</dt>
 <dd class="field-odd"><ul class="simple">
 <li><p><strong>velocity_degree</strong> (<em>int</em>) – Finite element degree of velocity</p></li>
 <li><p><strong>folder</strong> (<em>str</em>) – Path to results from simulation</p></li>
@@ -1648,7 +1648,7 @@ density (rho) is in [kg/m^3], the time step (dt) is in [ms], and viscosity (nu) 
 <dd><p>Loads velocity and pressure from compressed .h5 CFD solution and
 converts and saves to .xdmf format for visualization (in e.g. ParaView).</p>
 <dl class="field-list simple">
-<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dt class="field-odd">Parameters</dt>
 <dd class="field-odd"><ul class="simple">
 <li><p><strong>case_path</strong> (<em>str</em>) – Path to results from simulation</p></li>
 <li><p><strong>dt</strong> (<em>float</em>) – Time step of simulation</p></li>
@@ -1676,10 +1676,10 @@ converts and saves to .xdmf format for visualization (in e.g. ParaView).</p>
 :param u: Function to compute norm of
 :type u: Function</p>
 <dl class="field-list simple">
-<dt class="field-odd">Returns<span class="colon">:</span></dt>
+<dt class="field-odd">Returns</dt>
 <dd class="field-odd"><p>Norm as expression</p>
 </dd>
-<dt class="field-even">Return type<span class="colon">:</span></dt>
+<dt class="field-even">Return type</dt>
 <dd class="field-even"><p>norm (Power)</p>
 </dd>
 </dl>
@@ -1694,10 +1694,10 @@ converts and saves to .xdmf format for visualization (in e.g. ParaView).</p>
 :param u: Velocity field
 :type u: Function</p>
 <dl class="field-list simple">
-<dt class="field-odd">Returns<span class="colon">:</span></dt>
+<dt class="field-odd">Returns</dt>
 <dd class="field-odd"><p>Strain rate tensor of u</p>
 </dd>
-<dt class="field-even">Return type<span class="colon">:</span></dt>
+<dt class="field-even">Return type</dt>
 <dd class="field-even"><p>epsilon (Function)</p>
 </dd>
 </dl>
@@ -1708,7 +1708,7 @@ converts and saves to .xdmf format for visualization (in e.g. ParaView).</p>
 <span class="sig-prename descclassname"><span class="pre">vampy.automatedPostprocessing.postprocessing_common.</span></span><span class="sig-name descname"><span class="pre">get_dataset_names</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">data_file</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">num_files</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">100000</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">step</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">1</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">start</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">1</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">print_info</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">True</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">vector_filename</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">'/velocity/vector_%d'</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/vampy/automatedPostprocessing/postprocessing_common.html#get_dataset_names"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#vampy.automatedPostprocessing.postprocessing_common.get_dataset_names" title="Permalink to this definition">#</a></dt>
 <dd><p>Read velocity fields datasets and extract names of files</p>
 <dl class="field-list simple">
-<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dt class="field-odd">Parameters</dt>
 <dd class="field-odd"><ul class="simple">
 <li><p><strong>data_file</strong> (<em>HDF5File</em>) – File object of velocity</p></li>
 <li><p><strong>num_files</strong> (<em>int</em>) – Number of files</p></li>
@@ -1718,10 +1718,10 @@ converts and saves to .xdmf format for visualization (in e.g. ParaView).</p>
 <li><p><strong>vector_filename</strong> (<em>str</em>) – Name of velocity files</p></li>
 </ul>
 </dd>
-<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dt class="field-even">Returns</dt>
 <dd class="field-even"><p>List of data file names</p>
 </dd>
-<dt class="field-odd">Return type<span class="colon">:</span></dt>
+<dt class="field-odd">Return type</dt>
 <dd class="field-odd"><p>names (list)</p>
 </dd>
 </dl>
@@ -1745,7 +1745,7 @@ converts and saves to .xdmf format for visualization (in e.g. ParaView).</p>
 and visualizes velocity (magnitude) and pressure at respective probes
 Assuming results are in mm/s.</p>
 <dl class="field-list simple">
-<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dt class="field-odd">Parameters</dt>
 <dd class="field-odd"><ul class="simple">
 <li><p><strong>probe_saving_frequency</strong> (<em>int</em>) – Interval between saving probes.</p></li>
 <li><p><strong>case_path</strong> (<em>str</em>) – Path to results from simulation</p></li>
@@ -1765,16 +1765,16 @@ Assuming results are in mm/s.</p>
 <dd><p>Adjusted choice of beta for the dual-pressure boundary condition.
 Ramped up to desired value if flow rate error (err) increases</p>
 <dl class="field-list simple">
-<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dt class="field-odd">Parameters</dt>
 <dd class="field-odd"><ul class="simple">
 <li><p><strong>err</strong> (<em>float</em>) – Flow split error</p></li>
 <li><p><strong>p</strong> (<em>float</em>) – Pressure value</p></li>
 </ul>
 </dd>
-<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dt class="field-even">Returns</dt>
 <dd class="field-even"><p>Variable factor in flow split method</p>
 </dd>
-<dt class="field-odd">Return type<span class="colon">:</span></dt>
+<dt class="field-odd">Return type</dt>
 <dd class="field-odd"><p>beta (float)</p>
 </dd>
 </dl>
@@ -1927,13 +1927,13 @@ the projection of x onto the plane defined by c and n.</p>
 <span class="sig-prename descclassname"><span class="pre">vampy.simulation.simulation_common.</span></span><span class="sig-name descname"><span class="pre">get_file_paths</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">folder</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/vampy/simulation/simulation_common.html#get_file_paths"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#vampy.simulation.simulation_common.get_file_paths" title="Permalink to this definition">#</a></dt>
 <dd><p>Create folder where data and solutions (velocity, mesh, pressure) is stored</p>
 <dl class="field-list simple">
-<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dt class="field-odd">Parameters</dt>
 <dd class="field-odd"><p><strong>folder</strong> (<em>str</em>) – Path to data storage location</p>
 </dd>
-<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dt class="field-even">Returns</dt>
 <dd class="field-even"><p>Contains filepaths for respective solution files</p>
 </dd>
-<dt class="field-odd">Return type<span class="colon">:</span></dt>
+<dt class="field-odd">Return type</dt>
 <dd class="field-odd"><p>files (dict)</p>
 </dd>
 </dl>
@@ -1944,7 +1944,7 @@ the projection of x onto the plane defined by c and n.</p>
 <span class="sig-prename descclassname"><span class="pre">vampy.simulation.simulation_common.</span></span><span class="sig-name descname"><span class="pre">print_mesh_information</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">mesh</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/vampy/simulation/simulation_common.html#print_mesh_information"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#vampy.simulation.simulation_common.print_mesh_information" title="Permalink to this definition">#</a></dt>
 <dd><p>Print geometric information about the volumetric mesh</p>
 <dl class="field-list simple">
-<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dt class="field-odd">Parameters</dt>
 <dd class="field-odd"><p><strong>mesh</strong> (<em>dolfin.cpp.mesh.Mesh</em>) – Volumetric mesh</p>
 </dd>
 </dl>
@@ -1955,7 +1955,7 @@ the projection of x onto the plane defined by c and n.</p>
 <span class="sig-prename descclassname"><span class="pre">vampy.simulation.simulation_common.</span></span><span class="sig-name descname"><span class="pre">store_u_mean</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">T</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">dt</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">save_solution_at_tstep</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">save_solution_frequency</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">u_mean</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">u_mean0</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">u_mean1</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">u_mean2</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">NS_parameters</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/vampy/simulation/simulation_common.html#store_u_mean"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#vampy.simulation.simulation_common.store_u_mean" title="Permalink to this definition">#</a></dt>
 <dd><p>Store the time averaged velocity into file u_mean</p>
 <dl class="field-list simple">
-<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dt class="field-odd">Parameters</dt>
 <dd class="field-odd"><ul class="simple">
 <li><p><strong>T</strong> (<em>float</em>) – End time</p></li>
 <li><p><strong>dt</strong> (<em>float</em>) – Time step size</p></li>
@@ -2066,7 +2066,7 @@ By Henrik A. Kjeldsberg
   
   <div class="footer-item">
     <p class="last-updated">
-  Last updated on Jun 01, 2023.
+  Last updated on Jun 09, 2023.
   <br/>
 </p>
   </div>
