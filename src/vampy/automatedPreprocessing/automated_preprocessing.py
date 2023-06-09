@@ -67,6 +67,7 @@ def run_pre_processing(input_model, verbose_print, smoothing_method, smoothing_f
     file_name_refine_region_centerlines = base_path + "_refine_region_centerline.vtp"
     file_name_region_centerlines = base_path + "_sac_centerline_{}.vtp"
     file_name_distance_to_sphere_diam = base_path + "_distance_to_sphere_diam.vtp"
+    file_name_distance_to_sphere_diam_pre = base_path + "_distance_to_sphere_diam_pre.vtp"
     file_name_distance_to_sphere_const = base_path + "_distance_to_sphere_const.vtp"
     file_name_distance_to_sphere_curv = base_path + "_distance_to_sphere_curv.vtp"
     file_name_probe_points = base_path + "_probe_point"
@@ -86,6 +87,8 @@ def run_pre_processing(input_model, verbose_print, smoothing_method, smoothing_f
     file_name_displacement_points = path.join(dir_path, case_name + "_points.np")
     folder_moved_surfaces = path.join(dir_path, case_name + "_moved")
     folder_extended_surfaces = path.join(dir_path, case_name + "_extended")
+    condition = "sr"  # or "sr"
+    folder_moved_surfaces += f"_{condition}"
 
     print("\n--- Working on case:", case_name, "\n")
 
@@ -136,6 +139,9 @@ def run_pre_processing(input_model, verbose_print, smoothing_method, smoothing_f
     # Get centerlines
     print("--- Get centerlines\n")
     inlet, outlets = get_centers_for_meshing(surface, is_atrium, base_path)
+    bladder = False
+    if bladder:
+        outlets = []
     has_outlet = len(outlets) != 0
 
     # Get point the furthest away inlet when only one boundary
@@ -217,11 +223,30 @@ def run_pre_processing(input_model, verbose_print, smoothing_method, smoothing_f
     elif smoothing_method == "no_smooth" or None:
         print("\n--- No smoothing of surface\n")
 
-    if edge_length is not None:
+    if refine_region:
+        get_refine_region(capped_surface, case_name, centerlines, dir_path,
+                          file_name_refine_region_centerlines, file_name_region_centerlines,
+                          is_atrium, misr_max, region_center, region_points, source, tol)
+    # Clip centerline if only one inlet to avoid refining model surface
+    if not has_outlet:
+        line = extract_single_line(centerlines, 0)
+        line = vmtk_compute_geometric_features(line, smooth=False)
+
+        # Clip centerline where Frenet Tangent is constant
+        n = get_point_data_array("FrenetTangent", line, k=3)
+        n_diff = np.linalg.norm(np.cross(n[1:], n[:-1]), axis=1)
+        n_id = n_diff[::-1].argmax()
+        centerlines_2 = extract_single_line(centerlines, 0, end_id=centerlines.GetNumberOfPoints() - n_id - 1)
+        #write_polydata(centerlines, file_name_centerlines.replace("centerlines", "cut_centerlines"))
+
+    if edge_length is not None or bladder:
         if path.exists(file_name_remeshed):
             remeshed = read_polydata(file_name_remeshed)
         else:
-            print("-- Remeshing --")
+            print("\n--- Remeshing\n")
+            surface = dist_sphere_constant(surface, centerlines, region_center, misr_max,
+                                                      file_name_distance_to_sphere_diam_pre, edge_length)
+
             remeshed = remesh_surface(surface, edge_length)
             remeshed = vtk_clean_polydata(remeshed)
             write_polydata(remeshed, file_name_remeshed)
@@ -240,7 +265,7 @@ def run_pre_processing(input_model, verbose_print, smoothing_method, smoothing_f
             surface_extended = add_flow_extension(surface_extended, centerlines, include_outlet=True,
                                                   extension_length=outlet_flow_extension_length)
 
-            surface_extended = vmtk_smooth_surface(surface_extended, "laplace", iterations=200)
+            surface_extended = vmtk_smooth_surface(surface_extended, "laplace", iterations=75)
             write_polydata(surface_extended, file_name_model_flow_ext)
         else:
             surface_extended = read_polydata(file_name_model_flow_ext)
@@ -281,11 +306,6 @@ def run_pre_processing(input_model, verbose_print, smoothing_method, smoothing_f
         else:
             centerlines = read_polydata(file_name_flow_centerlines)
 
-    if refine_region:
-        get_refine_region(capped_surface, case_name, centerlines, dir_path,
-                          file_name_refine_region_centerlines, file_name_region_centerlines,
-                          is_atrium, misr_max, region_center, region_points, source, tol)
-
     # Clip centerline if only one inlet to avoid refining model surface
     if not has_outlet:
         line = extract_single_line(centerlines, 0)
@@ -296,6 +316,7 @@ def run_pre_processing(input_model, verbose_print, smoothing_method, smoothing_f
         n_diff = np.linalg.norm(np.cross(n[1:], n[:-1]), axis=1)
         n_id = n_diff[::-1].argmax()
         centerlines = extract_single_line(centerlines, 0, end_id=centerlines.GetNumberOfPoints() - n_id - 1)
+        write_polydata(centerlines, file_name_centerlines.replace("centerlines", "cut_centerlines"))
 
     # Choose input for the mesh
     print("--- Computing distance to sphere\n")
@@ -555,15 +576,15 @@ def read_command_line(input_path=None):
 
     parser.add_argument('-dm', '--dynamic-mesh',
                         dest="dynamicMesh",
+                        action="store_true",
                         default=False,
-                        type=str2bool,
                         help="If true, assumes a dynamic mesh and will perform computation of projection " +
                              "between moved surfaces located in the '[filename_model]_moved' folder.")
 
     parser.add_argument('-cl', '--clamp-boundaries',
                         dest="clampBoundaries",
+                        action="store_true",
                         default=False,
-                        type=str2bool,
                         help="Clamps boundaries at inlet(s) and outlet if true.")
 
     parser.add_argument('-rs', '--resampling-step',
