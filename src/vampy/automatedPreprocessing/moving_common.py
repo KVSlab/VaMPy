@@ -1,5 +1,6 @@
 from os import listdir, mkdir
 
+from IPython import embed
 from morphman.common import *
 from scipy.interpolate import interp1d
 from vtk.numpy_interface import dataset_adapter as dsa
@@ -177,7 +178,7 @@ def save_displacement(file_name_displacement_points, points):
         points (ndarray): Numpy array consisting of displacement surface points
     """
     N = 200
-    periodic = False
+    periodic = True
     if periodic:
         points[:, :, -1] = points[:, :, 0]
 
@@ -187,7 +188,7 @@ def save_displacement(file_name_displacement_points, points):
     move = np.zeros((points.shape[0], points.shape[1], N + 1))
     time_r = np.linspace(0, 1, N + 1)
     # Use interp1d if smooth displacement
-    smooth_displacement = True
+    smooth_displacement = False
     if smooth_displacement:
         x = interp1d(time, points[:, 0, :], axis=1)
         y = interp1d(time, points[:, 1, :], axis=1)
@@ -220,7 +221,7 @@ def project_displacement(clamp_boundaries, distance, folder_extended_surfaces, f
     """
     # Add extents to all surfaces
     extended_surfaces = sorted(
-        [f for f in listdir(folder_moved_surfaces) if f[:2] in ["LA", "Co", "Fu", "Ge", "Sm", "AF", "an", "bl"]])
+        [f for f in listdir(folder_moved_surfaces) if f[:2] in ["LA", "Co", "Fu", "Ge", "Sm", "AF", "an", "bl", "mo"]])
     if not path.exists(folder_extended_surfaces):
         mkdir(folder_extended_surfaces)
 
