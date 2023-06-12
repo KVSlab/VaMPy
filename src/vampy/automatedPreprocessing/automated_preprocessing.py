@@ -8,7 +8,6 @@ from morphman import get_uncapped_surface, write_polydata, get_parameters, vtk_c
     get_vtk_point_locator, extract_single_line, vtk_merge_polydata, get_point_data_array, smooth_voronoi_diagram, \
     create_new_surface, compute_centers, vmtk_smooth_surface, str2bool, vmtk_compute_voronoi_diagram, \
     prepare_output_surface, vmtk_compute_geometric_features
-
 # Local imports
 from vampy.automatedPreprocessing import ToolRepairSTL
 from vampy.automatedPreprocessing.moving_common import get_point_map, project_displacement, save_displacement
@@ -236,8 +235,8 @@ def run_pre_processing(input_model, verbose_print, smoothing_method, smoothing_f
         n = get_point_data_array("FrenetTangent", line, k=3)
         n_diff = np.linalg.norm(np.cross(n[1:], n[:-1]), axis=1)
         n_id = n_diff[::-1].argmax()
-        centerlines_2 = extract_single_line(centerlines, 0, end_id=centerlines.GetNumberOfPoints() - n_id - 1)
-        #write_polydata(centerlines, file_name_centerlines.replace("centerlines", "cut_centerlines"))
+        extract_single_line(centerlines, 0, end_id=centerlines.GetNumberOfPoints() - n_id - 1)
+        # write_polydata(centerlines, file_name_centerlines.replace("centerlines", "cut_centerlines"))
 
     if edge_length is not None or bladder:
         if path.exists(file_name_remeshed):
@@ -245,7 +244,7 @@ def run_pre_processing(input_model, verbose_print, smoothing_method, smoothing_f
         else:
             print("\n--- Remeshing\n")
             surface = dist_sphere_constant(surface, centerlines, region_center, misr_max,
-                                                      file_name_distance_to_sphere_diam_pre, edge_length)
+                                           file_name_distance_to_sphere_diam_pre, edge_length)
 
             remeshed = remesh_surface(surface, edge_length)
             remeshed = vtk_clean_polydata(remeshed)
