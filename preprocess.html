@@ -445,7 +445,7 @@ argument. Similarly, the intensity of the Voronoi diagram smoothing method may b
 the <code class="docutils literal notranslate"><span class="pre">--smoothing-factor</span></code> (<code class="docutils literal notranslate"><span class="pre">-sf</span></code>) argument, which ranges between 0 and 1, corresponding to 0 and 100%, respectively. By
 default, no smoothing is performed. To perform Laplacian smoothing using the artery model, we may run the following
 command:</p>
-<div class="highlight-console notranslate"><div class="highlight"><pre><span></span><span class="gp">$ </span>vampy-mesh<span class="w"> </span>-i<span class="w"> </span>models/artery/artery.vtp<span class="w"> </span>-c<span class="w"> </span><span class="m">1</span>.3<span class="w"> </span>--smoothing-method<span class="w"> </span>laplace<span class="w"> </span>-si<span class="w"> </span><span class="m">800</span>
+<div class="highlight-console notranslate"><div class="highlight"><pre><span></span><span class="gp">$ </span>vampy-mesh<span class="w"> </span>-i<span class="w"> </span>models/artery/artery.vtp<span class="w"> </span>-c<span class="w"> </span><span class="m">1</span>.3<span class="w"> </span>--smoothing-method<span class="w"> </span>laplace<span class="w"> </span>-si<span class="w"> </span><span class="m">800</span><span class="w"> </span>-sf<span class="w"> </span><span class="m">0</span>.75
 </pre></div>
 </div>
 <p>In <a class="reference internal" href="#id1"><span class="std std-numref">Fig. 2</span></a>, we have shown a comparison of all the smoothing methods using <code class="docutils literal notranslate"><span class="pre">-si</span> <span class="pre">800</span></code> and <code class="docutils literal notranslate"><span class="pre">-sf</span> <span class="pre">0.75</span></code>, and
@@ -460,14 +460,14 @@ included the original model for reference (in red).</p>
 <section id="flow-extensions">
 <h2>Flow extensions<a class="headerlink" href="#flow-extensions" title="Permalink to this heading">#</a></h2>
 <p>Prior to mesh generation, flow extensions may be appended to the input model, often to assure that flow is fully
-developed as it enters and leaves the domain during CFD simulation. In VaMPy, this is controlled by
-the <code class="docutils literal notranslate"><span class="pre">--add-flowextensions</span></code> (<code class="docutils literal notranslate"><span class="pre">-f</span></code>)
-argument, which takes a boolean value and is <code class="docutils literal notranslate"><span class="pre">True</span></code> by default. The user may also supply the length of the flow
-extensions at what is considered to be the inlet(s) and outlet(s), controlled by the <code class="docutils literal notranslate"><span class="pre">--inlet-flowextension</span></code> (<code class="docutils literal notranslate"><span class="pre">-fli</span></code>)
-and <code class="docutils literal notranslate"><span class="pre">--outlet-flowextension</span></code> (<code class="docutils literal notranslate"><span class="pre">-flo</span></code>) command line arguments. Both are set to <code class="docutils literal notranslate"><span class="pre">5</span></code> by default, corresponding to a flow
-extension length equal to five times the length of the local radius at the boundary (inlet/outlet). To demonstrate, the
-following command will apply flow extensions to the artery model that are two and four times the local radius in length
-at the inlet and outlet, respectively:</p>
+developed as it enters and leaves the domain during CFD simulation. It is also essential to add cylindrical flow
+extensions when applying velocity profiles that assume a circular inlet. In VaMPy, this is controlled by
+the <code class="docutils literal notranslate"><span class="pre">--add-flowextensions</span></code> (<code class="docutils literal notranslate"><span class="pre">-f</span></code>) argument, which takes a boolean value and is <code class="docutils literal notranslate"><span class="pre">True</span></code> by default. The user may also
+supply the length of the flow extensions at what is considered to be the inlet(s) and outlet(s), controlled by
+the <code class="docutils literal notranslate"><span class="pre">--inlet-flowextension</span></code> (<code class="docutils literal notranslate"><span class="pre">-fli</span></code>) and <code class="docutils literal notranslate"><span class="pre">--outlet-flowextension</span></code> (<code class="docutils literal notranslate"><span class="pre">-flo</span></code>) command line arguments. Both are set to <code class="docutils literal notranslate"><span class="pre">5</span></code>
+by default, corresponding to a flow extension length equal to five times the length of the local radius at the
+boundary (inlet/outlet). To demonstrate, the following command will apply flow extensions to the artery model that are
+two and four times the local radius in length at the inlet and outlet, respectively:</p>
 <div class="highlight-console notranslate"><div class="highlight"><pre><span></span><span class="gp">$ </span>vampy-mesh<span class="w"> </span>-i<span class="w"> </span>models/artery/artery.vtp<span class="w"> </span>-c<span class="w"> </span><span class="m">1</span>.3<span class="w"> </span>--add-flowextensions<span class="w"> </span>True<span class="w"> </span>-fli<span class="w"> </span><span class="m">2</span><span class="w"> </span>-flo<span class="w"> </span><span class="m">4</span>
 </pre></div>
 </div>
@@ -624,7 +624,7 @@ By Henrik A. Kjeldsberg
   
   <div class="footer-item">
     <p class="last-updated">
-  Last updated on Jun 09, 2023.
+  Last updated on Jun 12, 2023.
   <br/>
 </p>
   </div>

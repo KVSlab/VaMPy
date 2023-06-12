@@ -330,7 +330,7 @@ document.write(`
 <span class="kn">from</span> <span class="nn">time</span> <span class="kn">import</span> <span class="n">time</span>
 
 <span class="kn">from</span> <span class="nn">dolfin</span> <span class="kn">import</span> <span class="n">parameters</span><span class="p">,</span> <span class="n">MPI</span><span class="p">,</span> <span class="n">assemble</span><span class="p">,</span> <span class="n">interpolate</span><span class="p">,</span> <span class="n">Measure</span><span class="p">,</span> <span class="n">FacetNormal</span><span class="p">,</span> <span class="n">Identity</span><span class="p">,</span> <span class="n">VectorFunctionSpace</span><span class="p">,</span> \
-    <span class="n">BoundaryMesh</span><span class="p">,</span> <span class="n">Function</span><span class="p">,</span> <span class="n">FacetArea</span><span class="p">,</span> <span class="n">TestFunction</span><span class="p">,</span> <span class="n">FunctionSpace</span><span class="p">,</span> <span class="n">grad</span><span class="p">,</span> <span class="n">inner</span>
+    <span class="n">BoundaryMesh</span><span class="p">,</span> <span class="n">Function</span><span class="p">,</span> <span class="n">FacetArea</span><span class="p">,</span> <span class="n">TestFunction</span><span class="p">,</span> <span class="n">FunctionSpace</span><span class="p">,</span> <span class="n">grad</span><span class="p">,</span> <span class="n">inner</span><span class="p">,</span> <span class="n">sqrt</span>
 
 <span class="k">try</span><span class="p">:</span>
     <span class="n">parameters</span><span class="p">[</span><span class="s2">&quot;allow_extrapolation&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="kc">True</span>
@@ -430,9 +430,58 @@ document.write(`
     <span class="k">return</span> <span class="mf">0.5</span> <span class="o">*</span> <span class="p">(</span><span class="n">grad</span><span class="p">(</span><span class="n">u</span><span class="p">)</span> <span class="o">+</span> <span class="n">grad</span><span class="p">(</span><span class="n">u</span><span class="p">)</span><span class="o">.</span><span class="n">T</span><span class="p">)</span></div>
 
 
+<div class="viewcode-block" id="rate_of_strain"><a class="viewcode-back" href="../../../api.html#vampy.automatedPostprocessing.postprocessing_common.rate_of_strain">[docs]</a><span class="k">def</span> <span class="nf">rate_of_strain</span><span class="p">(</span><span class="n">strain</span><span class="p">,</span> <span class="n">u</span><span class="p">,</span> <span class="n">v</span><span class="p">,</span> <span class="n">mesh</span><span class="p">,</span> <span class="n">h</span><span class="p">):</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Computes rate of strain</span>
+
+<span class="sd">    Args:</span>
+<span class="sd">        strain (Function): Function to save rate of strain to</span>
+<span class="sd">        u (Function): Function for velocity field</span>
+<span class="sd">        v (Function): Test function for velocity</span>
+<span class="sd">        mesh: Mesh to compute strain rate on</span>
+<span class="sd">        h (float): Cell diameter of mesh</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="n">dx</span> <span class="o">=</span> <span class="n">Measure</span><span class="p">(</span><span class="s2">&quot;dx&quot;</span><span class="p">,</span> <span class="n">domain</span><span class="o">=</span><span class="n">mesh</span><span class="p">)</span>
+    <span class="n">eps</span> <span class="o">=</span> <span class="n">epsilon</span><span class="p">(</span><span class="n">u</span><span class="p">)</span>
+    <span class="n">f</span> <span class="o">=</span> <span class="n">sqrt</span><span class="p">(</span><span class="n">inner</span><span class="p">(</span><span class="n">eps</span><span class="p">,</span> <span class="n">eps</span><span class="p">))</span>
+    <span class="n">x</span> <span class="o">=</span> <span class="n">assemble</span><span class="p">(</span><span class="n">inner</span><span class="p">(</span><span class="n">f</span><span class="p">,</span> <span class="n">v</span><span class="p">)</span> <span class="o">/</span> <span class="n">h</span> <span class="o">*</span> <span class="n">dx</span><span class="p">)</span>
+    <span class="n">strain</span><span class="o">.</span><span class="n">vector</span><span class="p">()</span><span class="o">.</span><span class="n">set_local</span><span class="p">(</span><span class="n">x</span><span class="o">.</span><span class="n">get_local</span><span class="p">())</span>
+    <span class="n">strain</span><span class="o">.</span><span class="n">vector</span><span class="p">()</span><span class="o">.</span><span class="n">apply</span><span class="p">(</span><span class="s2">&quot;insert&quot;</span><span class="p">)</span></div>
+
+
+<div class="viewcode-block" id="rate_of_dissipation"><a class="viewcode-back" href="../../../api.html#vampy.automatedPostprocessing.postprocessing_common.rate_of_dissipation">[docs]</a><span class="k">def</span> <span class="nf">rate_of_dissipation</span><span class="p">(</span><span class="n">dissipation</span><span class="p">,</span> <span class="n">u</span><span class="p">,</span> <span class="n">v</span><span class="p">,</span> <span class="n">mesh</span><span class="p">,</span> <span class="n">h</span><span class="p">,</span> <span class="n">nu</span><span class="p">):</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Computes rate of dissipation</span>
+
+<span class="sd">    Args:</span>
+<span class="sd">        dissipation (Function): Function to save rate of dissipation to</span>
+<span class="sd">        u (Function): Function for velocity field</span>
+<span class="sd">        v (Function): Test function for velocity</span>
+<span class="sd">        mesh: Mesh to compute dissipation rate on</span>
+<span class="sd">        h (float): Cell diameter of mesh</span>
+<span class="sd">        nu (float): Viscosity</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="n">dx</span> <span class="o">=</span> <span class="n">Measure</span><span class="p">(</span><span class="s2">&quot;dx&quot;</span><span class="p">,</span> <span class="n">domain</span><span class="o">=</span><span class="n">mesh</span><span class="p">)</span>
+    <span class="n">eps</span> <span class="o">=</span> <span class="n">epsilon</span><span class="p">(</span><span class="n">u</span><span class="p">)</span>
+    <span class="n">f</span> <span class="o">=</span> <span class="mi">2</span> <span class="o">*</span> <span class="n">nu</span> <span class="o">*</span> <span class="n">inner</span><span class="p">(</span><span class="n">eps</span><span class="p">,</span> <span class="n">eps</span><span class="p">)</span>
+    <span class="n">x</span> <span class="o">=</span> <span class="n">assemble</span><span class="p">(</span><span class="n">inner</span><span class="p">(</span><span class="n">f</span><span class="p">,</span> <span class="n">v</span><span class="p">)</span> <span class="o">/</span> <span class="n">h</span> <span class="o">*</span> <span class="n">dx</span><span class="p">)</span>
+    <span class="n">dissipation</span><span class="o">.</span><span class="n">vector</span><span class="p">()</span><span class="o">.</span><span class="n">set_local</span><span class="p">(</span><span class="n">x</span><span class="o">.</span><span class="n">get_local</span><span class="p">())</span>
+    <span class="n">dissipation</span><span class="o">.</span><span class="n">vector</span><span class="p">()</span><span class="o">.</span><span class="n">apply</span><span class="p">(</span><span class="s2">&quot;insert&quot;</span><span class="p">)</span></div>
+
+
 <div class="viewcode-block" id="STRESS"><a class="viewcode-back" href="../../../api.html#vampy.automatedPostprocessing.postprocessing_common.STRESS">[docs]</a><span class="k">class</span> <span class="nc">STRESS</span><span class="p">:</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;Computes the stress on a given mesh based on provided velocity and pressure fields.&quot;&quot;&quot;</span>
+
     <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">u</span><span class="p">,</span> <span class="n">p</span><span class="p">,</span> <span class="n">nu</span><span class="p">,</span> <span class="n">mesh</span><span class="p">):</span>
-        <span class="n">ds</span> <span class="o">=</span> <span class="n">Measure</span><span class="p">(</span><span class="s2">&quot;ds&quot;</span><span class="p">,</span> <span class="n">domain</span><span class="o">=</span><span class="n">mesh</span><span class="p">)</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;Initializes the StressComputer.</span>
+
+<span class="sd">        Args:</span>
+<span class="sd">            u (Function): The velocity field.</span>
+<span class="sd">            p (Function): The pressure field.</span>
+<span class="sd">            nu (float): The kinematic viscosity.</span>
+<span class="sd">            mesh (Mesh): The mesh on which to compute stress.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="n">boundary_ds</span> <span class="o">=</span> <span class="n">Measure</span><span class="p">(</span><span class="s2">&quot;ds&quot;</span><span class="p">,</span> <span class="n">domain</span><span class="o">=</span><span class="n">mesh</span><span class="p">)</span>
         <span class="n">boundary_mesh</span> <span class="o">=</span> <span class="n">BoundaryMesh</span><span class="p">(</span><span class="n">mesh</span><span class="p">,</span> <span class="s1">&#39;exterior&#39;</span><span class="p">)</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">bmV</span> <span class="o">=</span> <span class="n">VectorFunctionSpace</span><span class="p">(</span><span class="n">boundary_mesh</span><span class="p">,</span> <span class="s1">&#39;CG&#39;</span><span class="p">,</span> <span class="mi">1</span><span class="p">)</span>
 
@@ -460,9 +509,9 @@ document.write(`
         <span class="bp">self</span><span class="o">.</span><span class="n">Ftv</span> <span class="o">=</span> <span class="n">Function</span><span class="p">(</span><span class="n">vector</span><span class="p">)</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">Ft</span> <span class="o">=</span> <span class="n">Function</span><span class="p">(</span><span class="n">scalar</span><span class="p">)</span>
 
-        <span class="bp">self</span><span class="o">.</span><span class="n">Ln</span> <span class="o">=</span> <span class="mi">1</span> <span class="o">/</span> <span class="n">scaling</span> <span class="o">*</span> <span class="n">v</span> <span class="o">*</span> <span class="n">Fn</span> <span class="o">*</span> <span class="n">ds</span>
-        <span class="bp">self</span><span class="o">.</span><span class="n">Ltv</span> <span class="o">=</span> <span class="mi">1</span> <span class="o">/</span> <span class="p">(</span><span class="mi">2</span> <span class="o">*</span> <span class="n">scaling</span><span class="p">)</span> <span class="o">*</span> <span class="n">inner</span><span class="p">(</span><span class="n">w</span><span class="p">,</span> <span class="n">Ft</span><span class="p">)</span> <span class="o">*</span> <span class="n">ds</span>
-        <span class="bp">self</span><span class="o">.</span><span class="n">Lt</span> <span class="o">=</span> <span class="mi">1</span> <span class="o">/</span> <span class="n">scaling</span> <span class="o">*</span> <span class="n">inner</span><span class="p">(</span><span class="n">v</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">norm_l2</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">Ftv</span><span class="p">))</span> <span class="o">*</span> <span class="n">ds</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">Ln</span> <span class="o">=</span> <span class="mi">1</span> <span class="o">/</span> <span class="n">scaling</span> <span class="o">*</span> <span class="n">v</span> <span class="o">*</span> <span class="n">Fn</span> <span class="o">*</span> <span class="n">boundary_ds</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">Ltv</span> <span class="o">=</span> <span class="mi">1</span> <span class="o">/</span> <span class="p">(</span><span class="mi">2</span> <span class="o">*</span> <span class="n">scaling</span><span class="p">)</span> <span class="o">*</span> <span class="n">inner</span><span class="p">(</span><span class="n">w</span><span class="p">,</span> <span class="n">Ft</span><span class="p">)</span> <span class="o">*</span> <span class="n">boundary_ds</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">Lt</span> <span class="o">=</span> <span class="mi">1</span> <span class="o">/</span> <span class="n">scaling</span> <span class="o">*</span> <span class="n">inner</span><span class="p">(</span><span class="n">v</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">norm_l2</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">Ftv</span><span class="p">))</span> <span class="o">*</span> <span class="n">boundary_ds</span>
 
     <span class="k">def</span> <span class="fm">__call__</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
@@ -588,7 +637,7 @@ By Henrik A. Kjeldsberg
   
   <div class="footer-item">
     <p class="last-updated">
-  Last updated on Jun 09, 2023.
+  Last updated on Jun 12, 2023.
   <br/>
 </p>
   </div>
