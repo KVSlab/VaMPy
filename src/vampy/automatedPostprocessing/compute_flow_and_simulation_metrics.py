@@ -518,7 +518,7 @@ def define_functions_and_iterate_dataset(time_to_average, dataset, dataset_avg, 
 
 def main_metrics():
     folder, nu, _, dt, velocity_degree, _, _, T, save_frequency, times_to_average, start_cycle, step, \
-    average_over_cycles = read_command_line()
+        average_over_cycles = read_command_line()
 
     compute_flow_and_simulation_metrics(folder, nu, dt, velocity_degree, T, times_to_average, save_frequency,
                                         start_cycle, step, average_over_cycles)
@@ -526,7 +526,7 @@ def main_metrics():
 
 if __name__ == '__main__':
     folder, nu, _, dt, velocity_degree, _, _, T, save_frequency, times_to_average, start_cycle, step, \
-    average_over_cycles = read_command_line()
+        average_over_cycles = read_command_line()
 
     compute_flow_and_simulation_metrics(folder, nu, dt, velocity_degree, T, times_to_average, save_frequency,
                                         start_cycle, step, average_over_cycles)
