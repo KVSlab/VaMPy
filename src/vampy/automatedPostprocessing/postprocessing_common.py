@@ -2,7 +2,7 @@ import argparse
 from time import time
 
 from dolfin import parameters, MPI, assemble, interpolate, Measure, FacetNormal, Identity, VectorFunctionSpace, \
-    BoundaryMesh, Function, FacetArea, TestFunction, FunctionSpace, grad, inner
+    BoundaryMesh, Function, FacetArea, TestFunction, FunctionSpace, grad, inner, sqrt
 
 try:
     parameters["allow_extrapolation"] = True
@@ -85,8 +85,8 @@ def read_command_line():
     args = parser.parse_args()
 
     return args.case, args.nu, args.rho, args.dt, args.velocity_degree, args.pressure_degree, args.probe_frequency, \
-        args.T, args.save_frequency, args.times_to_average, args.start_cycle, args.sample_step, \
-        args.average_over_cycles
+           args.T, args.save_frequency, args.times_to_average, args.start_cycle, args.sample_step, \
+           args.average_over_cycles
 
 
 def epsilon(u):
@@ -102,9 +102,58 @@ def epsilon(u):
     return 0.5 * (grad(u) + grad(u).T)
 
 
+def rate_of_strain(strain, u, v, mesh, h):
+    """
+    Computes rate of strain
+
+    Args:
+        strain (Function): Function to save rate of strain to
+        u (Function): Function for velocity field
+        v (Function): Test function for velocity
+        mesh: Mesh to compute strain rate on
+        h (float): Cell diameter of mesh
+    """
+    dx = Measure("dx", domain=mesh)
+    eps = epsilon(u)
+    f = sqrt(inner(eps, eps))
+    x = assemble(inner(f, v) / h * dx)
+    strain.vector().set_local(x.get_local())
+    strain.vector().apply("insert")
+
+
+def rate_of_dissipation(dissipation, u, v, mesh, h, nu):
+    """
+    Computes rate of dissipation
+
+    Args:
+        dissipation (Function): Function to save rate of dissipation to
+        u (Function): Function for velocity field
+        v (Function): Test function for velocity
+        mesh: Mesh to compute dissipation rate on
+        h (float): Cell diameter of mesh
+        nu (float): Viscosity
+    """
+    dx = Measure("dx", domain=mesh)
+    eps = epsilon(u)
+    f = 2 * nu * inner(eps, eps)
+    x = assemble(inner(f, v) / h * dx)
+    dissipation.vector().set_local(x.get_local())
+    dissipation.vector().apply("insert")
+
+
 class STRESS:
+    """Computes the stress on a given mesh based on provided velocity and pressure fields."""
+
     def __init__(self, u, p, nu, mesh):
-        ds = Measure("ds", domain=mesh)
+        """Initializes the StressComputer.
+
+        Args:
+            u (Function): The velocity field.
+            p (Function): The pressure field.
+            nu (float): The kinematic viscosity.
+            mesh (Mesh): The mesh on which to compute stress.
+        """
+        boundary_ds = Measure("ds", domain=mesh)
         boundary_mesh = BoundaryMesh(mesh, 'exterior')
         self.bmV = VectorFunctionSpace(boundary_mesh, 'CG', 1)
 
@@ -132,9 +181,9 @@ class STRESS:
         self.Ftv = Function(vector)
         self.Ft = Function(scalar)
 
-        self.Ln = 1 / scaling * v * Fn * ds
-        self.Ltv = 1 / (2 * scaling) * inner(w, Ft) * ds
-        self.Lt = 1 / scaling * inner(v, self.norm_l2(self.Ftv)) * ds
+        self.Ln = 1 / scaling * v * Fn * boundary_ds
+        self.Ltv = 1 / (2 * scaling) * inner(w, Ft) * boundary_ds
+        self.Lt = 1 / scaling * inner(v, self.norm_l2(self.Ftv)) * boundary_ds
 
     def __call__(self):
         """
