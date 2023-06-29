@@ -648,6 +648,7 @@ def generate_mesh(surface, add_boundary_layer):
 
     # Full mesh
     mesh = meshGenerator.Mesh
+    print(f"--- Number of points and cells in mesh: {mesh.GetNumberOfPoints()}, {mesh.GetNumberOfCells()}")
 
     return mesh, remeshSurface
 

@@ -1,4 +1,5 @@
 import argparse
+import json
 import sys
 from os import path
 
@@ -222,6 +223,13 @@ def run_pre_processing(input_model, verbose_print, smoothing_method, smoothing_f
     elif smoothing_method == "no_smooth" or None:
         print("\n--- No smoothing of surface\n")
 
+    # Read in LAA point from .json
+    laa_path = "/Users/henriakj/PhD/Code/VaMPy/models/models_inria/LAA_POINTS_UKE.json"
+    with open(laa_path) as f:
+        info = json.load(f)
+    casename = dir_path.rsplit("/", 1)[1]
+    region_points = info[casename][0]
+    print(f"-- Loading LAA points for {casename}")
     if refine_region:
         get_refine_region(capped_surface, case_name, centerlines, dir_path,
                           file_name_refine_region_centerlines, file_name_region_centerlines,
@@ -264,7 +272,7 @@ def run_pre_processing(input_model, verbose_print, smoothing_method, smoothing_f
             surface_extended = add_flow_extension(surface_extended, centerlines, include_outlet=True,
                                                   extension_length=outlet_flow_extension_length)
 
-            surface_extended = vmtk_smooth_surface(surface_extended, "laplace", iterations=75)
+            surface_extended = vmtk_smooth_surface(surface_extended, "laplace", iterations=150)
             write_polydata(surface_extended, file_name_model_flow_ext)
         else:
             surface_extended = read_polydata(file_name_model_flow_ext)
