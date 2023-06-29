@@ -9,6 +9,7 @@ from morphman import get_uncapped_surface, write_polydata, get_parameters, vtk_c
     get_vtk_point_locator, extract_single_line, vtk_merge_polydata, get_point_data_array, smooth_voronoi_diagram, \
     create_new_surface, compute_centers, vmtk_smooth_surface, str2bool, vmtk_compute_voronoi_diagram, \
     prepare_output_surface, vmtk_compute_geometric_features
+
 # Local imports
 from vampy.automatedPreprocessing import ToolRepairSTL
 from vampy.automatedPreprocessing.moving_common import get_point_map, project_displacement, save_displacement
@@ -224,12 +225,14 @@ def run_pre_processing(input_model, verbose_print, smoothing_method, smoothing_f
         print("\n--- No smoothing of surface\n")
 
     # Read in LAA point from .json
-    laa_path = "/Users/henriakj/PhD/Code/VaMPy/models/models_inria/LAA_POINTS_UKE.json"
-    with open(laa_path) as f:
-        info = json.load(f)
-    casename = dir_path.rsplit("/", 1)[1]
-    region_points = info[casename][0]
-    print(f"-- Loading LAA points for {casename}")
+    LA_UKE = False
+    if LA_UKE:
+        laa_path = "/Users/henriakj/PhD/Code/VaMPy/models/models_inria/LAA_POINTS_UKE.json"
+        with open(laa_path) as f:
+            info = json.load(f)
+        casename = dir_path.rsplit("/", 1)[1]
+        region_points = info[casename][0]
+        print(f"-- Loading LAA points for {casename}")
     if refine_region:
         get_refine_region(capped_surface, case_name, centerlines, dir_path,
                           file_name_refine_region_centerlines, file_name_region_centerlines,
