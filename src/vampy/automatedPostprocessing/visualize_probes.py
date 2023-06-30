@@ -104,19 +104,23 @@ def visualize_probes(case_path, probe_saving_frequency, T, dt, probes_to_plot, s
                 plt.show()
 
 
-def plot_spectrogram(k, ax, velocity):
+def plot_spectrogram(k, ax, velocity, color_map='jet', font_size=12):
     """
     Plots spectrogram at probe points.
 
     Args:
+        k (int): Current probe index.
+        ax (matplotlib.axis): The matplotlib axis to plot on.
         velocity(numpy.ndarray): Velocity data.
+        color_map (str): Color map for the spectrogram plot.
+        font_size (int): Font size for the labels.
     """
     # Filter out negative values
-    ax.specgram(velocity[k], NFFT=256, Fs=2, noverlap=128, cmap="jet")
+    ax.specgram(velocity[k], NFFT=256, Fs=2, noverlap=128, cmap=color_map)
 
     # Set axis labels
-    ax.set_ylabel("Frequency [Hz]", fontsize=12)
-    ax.set_xlabel("Time [ms]", fontsize=12)
+    ax.set_ylabel("Frequency [Hz]", fontsize=font_size)
+    ax.set_xlabel("Time [ms]", fontsize=font_size)
 
     # Set title to probe number
     ax.set_title('Probe {}'.format(k + 1), y=1.0, pad=-14)
@@ -127,16 +131,13 @@ def plot_energy_spectrum(k, ax, freq, kinetic_energy_spectrum, max_kes):
     Plots energy spectrum at probe points.
 
     Args:
-        case_path (str): Path to results from simulation.
+        k (int): Current probe index.
+        ax (matplotlib.axis): The matplotlib axis to plot on.
         freq (numpy.ndarray): Frequency data.
         kinetic_energy_spectrum (numpy.ndarray): Kinetic energy spectrum data.
         max_kes (float): Maximum value in the kinetic energy spectrum.
-        n_cols (int): Number of columns in the plot grid.
-        n_probes (int): Number of probe points.
-        n_rows (int): Number of rows in the plot grid.
-        save_figure (bool): Saves figure if True.
-        show_figure (bool): Shows figure if True.
     """
+
     # Create subplots
     ax.plot(freq, kinetic_energy_spectrum[k], color=colors[1], label="")
     ax.set_xscale("log")
@@ -162,6 +163,8 @@ def plot_kinetic_energy(k, ax, kinetic_energy, max_ke, max_tke, n_timesteps, tur
     Plots kinetic energy and turbulent kinetic energy at probe points.
 
     Args:
+        k (int): Current probe index.
+        ax (matplotlib.axis): The matplotlib axis to plot on.
         kinetic_energy (numpy.ndarray): Kinetic energy data.
         max_ke (float): Maximum kinetic energy value.
         max_tke (float): Maximum turbulent kinetic energy value.
@@ -169,7 +172,6 @@ def plot_kinetic_energy(k, ax, kinetic_energy, max_ke, max_tke, n_timesteps, tur
         turbulent_kinetic_energy (numpy.ndarray): Turbulent kinetic energy data.
     """
     # Generate plots for kinetic energy
-    # Create subplots
     ax_twinx = ax.twinx()
     time_interval = np.linspace(0, n_timesteps, n_timesteps)
     ax.plot(time_interval, kinetic_energy[k], color=colors[0], label="")
@@ -198,17 +200,13 @@ def plot_velocity_and_pressure(k, ax, max_P, max_U, mean_velocity, n_timesteps, 
     Plots velocity magnitude and pressure at probe points.
 
     Args:
-        case_path (str): Path to results from simulation.
+        k (int): Current probe index.
+        ax (matplotlib.axis): The matplotlib axis to plot on.
         max_P (float): Maximum pressure value.
         max_U (float): Maximum velocity value.
         mean_velocity (numpy.ndarray): Mean velocity data.
         n_timesteps (int): Number of time steps.
-        n_cols (int): Number of columns in the plot grid.
-        n_probes (int): Number of probe points.
-        n_rows (int): Number of rows in the plot grid.
         pressures (numpy.ndarray): Pressure data.
-        save_figure (bool): Saves figure if True.
-        show_figure (bool): Shows figure if True.
         velocity (numpy.ndarray): Velocity data.
     """
     # Generate plots
@@ -258,16 +256,12 @@ def compute_mean_velocity_and_kinetic_energy(T, dt, n_timesteps, n_probes, veloc
         numpy.ndarray: Mean velocity data.
         numpy.ndarray: Turbulent kinetic energy data.
     """
-    max_ke = 0
-    max_tke = 0
-    # FIXME: Revert
     saved_points_per_cycle = int(T / dt)
-    # saved_points_per_cycle = 951
+    # FIXME: Revert
+    saved_points_per_cycle = 951
     n_cycles = int(n_timesteps / saved_points_per_cycle)
+
     mean_velocity = np.zeros((n_probes, n_timesteps))
-    mean_velocity_u = np.zeros((n_probes, n_timesteps))
-    mean_velocity_v = np.zeros((n_probes, n_timesteps))
-    mean_velocity_w = np.zeros((n_probes, n_timesteps))
     kinetic_energy = np.zeros((n_probes, n_timesteps))
     turbulent_kinetic_energy = np.zeros((n_probes, n_timesteps))
     for k in range(n_probes):
@@ -275,43 +269,34 @@ def compute_mean_velocity_and_kinetic_energy(T, dt, n_timesteps, n_probes, veloc
         u = velocity_u[k]
         v = velocity_v[k]
         w = velocity_w[k]
-        u_mean = 0
-        u_mean_u = 0
-        u_mean_v = 0
-        u_mean_w = 0
-        for n in range(n_cycles):
-            u_mean += U[n * saved_points_per_cycle:(n + 1) * saved_points_per_cycle]
-            u_mean_u += u[n * saved_points_per_cycle:(n + 1) * saved_points_per_cycle]
-            u_mean_v += v[n * saved_points_per_cycle:(n + 1) * saved_points_per_cycle]
-            u_mean_w += w[n * saved_points_per_cycle:(n + 1) * saved_points_per_cycle]
 
-        u_mean_u = np.array(u_mean_u)
-        u_mean_v = np.array(u_mean_v)
-        u_mean_w = np.array(u_mean_w)
+        # Calculate mean velocities
+        u_mean = np.mean(U.reshape(-1, saved_points_per_cycle), axis=0)
+        u_mean_u = np.mean(u.reshape(-1, saved_points_per_cycle), axis=0)
+        u_mean_v = np.mean(v.reshape(-1, saved_points_per_cycle), axis=0)
+        u_mean_w = np.mean(w.reshape(-1, saved_points_per_cycle), axis=0)
 
-        u_mean /= n_cycles
-        u_mean_u /= n_cycles
-        u_mean_v /= n_cycles
-        u_mean_w /= n_cycles
-        mean_velocity[k] = list(u_mean) * n_cycles
-        mean_velocity_u[k] = list(u_mean_u) * n_cycles
-        mean_velocity_v[k] = list(u_mean_v) * n_cycles
-        mean_velocity_w[k] = list(u_mean_w) * n_cycles
+        # Replicate mean velocities to match original array shape
+        mean_velocity[k] = np.tile(u_mean, n_cycles)
+        u_mean_u = np.tile(u_mean_u, n_cycles)
+        u_mean_v = np.tile(u_mean_v, n_cycles)
+        u_mean_w = np.tile(u_mean_w, n_cycles)
 
         # Calculate total kinetic energy
-        kinetic_energy[k] = 0.5 * (u ** 2 + v ** 2 + w ** 3)
+        kinetic_energy[k] = 0.5 * (u ** 2 + v ** 2 + w ** 2)
 
         # Calculate fluctuating velocity
-        fluctuating_velocity_u = u - mean_velocity_u[k]
-        fluctuating_velocity_v = v - mean_velocity_v[k]
-        fluctuating_velocity_w = w - mean_velocity_w[k]
+        fluctuating_velocity_u = u - u_mean_u
+        fluctuating_velocity_v = v - u_mean_v
+        fluctuating_velocity_w = w - u_mean_w
 
         turbulent_kinetic_energy[k] = 0.5 * ((fluctuating_velocity_u ** 2) +
                                              (fluctuating_velocity_v ** 2) +
                                              (fluctuating_velocity_w ** 2))
 
-        max_ke = np.max(kinetic_energy) if np.max(kinetic_energy) > max_ke else max_ke
-        max_tke = np.max(turbulent_kinetic_energy) if np.max(turbulent_kinetic_energy) > max_tke else max_tke
+    max_ke = np.max(kinetic_energy)
+    max_tke = np.max(turbulent_kinetic_energy)
+
     return mean_velocity, kinetic_energy, turbulent_kinetic_energy, max_ke, max_tke
 
 
@@ -351,23 +336,12 @@ def load_probes(case_path, probe_saving_frequency):
     while True:
         tstep = probe_saving_frequency * (counter + 1)
 
-        # Load velocity component and pressure probes
-        u_path = path.join(case_path, "u_x_{}.probes".format(tstep))
-        v_path = path.join(case_path, "u_y_{}.probes".format(tstep))
-        w_path = path.join(case_path, "u_z_{}.probes".format(tstep))
-        p_path = path.join(case_path, "p_{}.probes".format(tstep))
-
-        try:
-            p = np.load(p_path, allow_pickle=True)
-            u = np.load(u_path, allow_pickle=True)
-            v = np.load(v_path, allow_pickle=True)
-            w = np.load(w_path, allow_pickle=True)
-        except Exception:
-            print("-- Finished reading in probes")
+        probe_data = load_probe_data(case_path, tstep)
+        if probe_data is None:
             break
 
-        # Create velocity magnitude
-        U = np.linalg.norm([u, v, w], axis=0)
+        p, U, u, v, w = probe_data
+
         if counter == 0:
             # Set plot parameters
             n_probes = u.shape[0]
@@ -402,12 +376,12 @@ def load_probes(case_path, probe_saving_frequency):
     velocity_w = np.array(velocity_w)
     pressures = np.array(pressures)
     # FIXME: Remove
-    # n_stop = 2853
-    # velocity = velocity[:, :n_stop]
-    # velocity_u = velocity_u[:, :n_stop]
-    # velocity_v = velocity_v[:, :n_stop]
-    # velocity_w = velocity_w[:, :n_stop]
-    # pressures = pressures[:, :n_stop]
+    n_stop = 2853
+    velocity = velocity[:, :n_stop]
+    velocity_u = velocity_u[:, :n_stop]
+    velocity_v = velocity_v[:, :n_stop]
+    velocity_w = velocity_w[:, :n_stop]
+    pressures = pressures[:, :n_stop]
 
     # Check if data is available
     if len(velocity[0]) > 0:
@@ -417,6 +391,39 @@ def load_probes(case_path, probe_saving_frequency):
         exit()
 
     return max_P, max_U, n_cols, n_probes, n_rows, pressures, velocity, velocity_u, velocity_v, velocity_w, n_timesteps
+
+
+def load_probe_data(case_path, tstep):
+    """
+    Loads probe data for a given timestep.
+
+    Args:
+        case_path (str): Path to results from simulation.
+        tstep (int): Current timestep.
+
+    Returns:
+        numpy.ndarray: Pressure data.
+        numpy.ndarray: Velocity data.
+    """
+    # Load velocity component and pressure probes
+    u_path = path.join(case_path, f"u_x_{tstep}.probes")
+    v_path = path.join(case_path, f"u_y_{tstep}.probes")
+    w_path = path.join(case_path, f"u_z_{tstep}.probes")
+    p_path = path.join(case_path, f"p_{tstep}.probes")
+
+    try:
+        p = np.load(p_path, allow_pickle=True)
+        u = np.load(u_path, allow_pickle=True)
+        v = np.load(v_path, allow_pickle=True)
+        w = np.load(w_path, allow_pickle=True)
+    except Exception:
+        print("-- Finished reading in probes")
+        return None
+
+    # Create velocity magnitude
+    U = np.linalg.norm([u, v, w], axis=0)
+
+    return p, U, u, v, w
 
 
 def compute_energy_spectrum(n_probes, velocity_u, velocity_v, velocity_w):
@@ -434,7 +441,6 @@ def compute_energy_spectrum(n_probes, velocity_u, velocity_v, velocity_w):
         numpy.ndarray: Frequency values.
         float: Maximum value in the kinetic energy spectrum.
     """
-    max_kes = 0
 
     # Define FFT function
     def get_fft(x):
@@ -450,8 +456,8 @@ def compute_energy_spectrum(n_probes, velocity_u, velocity_v, velocity_w):
     for k in range(n_probes):
         # FFT of the velocity signals
         fft_u, freq_u = get_fft(velocity_u[k])
-        fft_v, freq_v = get_fft(velocity_v[k])
-        fft_w, freq_w = get_fft(velocity_w[k])
+        fft_v, _ = get_fft(velocity_v[k])
+        fft_w, _ = get_fft(velocity_w[k])
 
         # Compute the energy spectrum (proportional to square of absolute fft values)
         E_u = np.abs(fft_u) ** 2
@@ -462,15 +468,15 @@ def compute_energy_spectrum(n_probes, velocity_u, velocity_v, velocity_w):
         E_total = E_u + E_v + E_w
 
         # Store positive values of total kinetic energy spectrum
-        positive_indices = freq_u > 0
-        freq = freq_u[positive_indices]
-        kinetic_energy_spectrum.append(E_total[positive_indices])
-        max_kes = np.max(kinetic_energy_spectrum) if np.max(kinetic_energy_spectrum) > max_kes else max_kes
+        kinetic_energy_spectrum.append(E_total[freq_u > 0])
 
     # Convert list to numpy array
     kinetic_energy_spectrum = np.array(kinetic_energy_spectrum)
 
-    return kinetic_energy_spectrum, freq, max_kes
+    # Compute the maximum value
+    max_kes = np.max(kinetic_energy_spectrum)
+
+    return kinetic_energy_spectrum, freq_u[freq_u > 0], max_kes
 
 
 def main_probe():
