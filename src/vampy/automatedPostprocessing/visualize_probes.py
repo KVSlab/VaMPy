@@ -1,5 +1,3 @@
-from __future__ import print_function
-
 from os import path
 
 import matplotlib.pyplot as plt
@@ -11,33 +9,30 @@ from vampy.automatedPostprocessing.postprocessing_common import read_command_lin
 colors = ['red', 'blue', 'purple']
 
 
-def visualize_probes(case_path, probe_saving_frequency, T, dt, show_figure=True, save_figure=False):
+def visualize_probes(case_path, probe_saving_frequency, T, dt, probes_to_plot, show_figure=True, save_figure=False):
     """
-    Loads probe points from completed CFD simulation,
-    and visualizes velocity (magnitude) and pressure at respective probes
-    Assuming results are in mm/s.
+    Loads probe points from completed CFD simulation and visualizes velocity (magnitude)
+    and pressure at respective probes. Assuming results are in mm/s.
 
     Args:
+        case_path (str): Path to results from simulation.
         probe_saving_frequency (int): Interval between saving probes.
-        case_path (str): Path to results from simulation
-        dt (float): Time step of simulation
-        T (float): One cardiac cycle, in [ms]
-        show_figure (bool): Shows figure if True
-        save_figure (bool): Saves figure if True
+        T (float): One cardiac cycle, in [ms].
+        dt (float): Time step of simulation.
+        show_figure (bool): Shows figure if True.
+        save_figure (bool): Saves figure if True.
     """
-    max_P, max_U, n_cols, n_probes, n_rows, pressures, velocity, velocity_u, velocity_v, velocity_w, n_timesteps \
-        = load_probes(case_path, probe_saving_frequency)
 
-    # Generate probe based flow quantities
-    kinetic_energy, max_ke, max_tke, mean_velocity, turbulent_kinetic_energy \
-        = compute_mean_velocity_and_kinetic_energy(T, dt, n_timesteps, n_probes, velocity, velocity_u,
-                                                   velocity_v, velocity_w)
+    max_P, max_U, n_cols, n_probes, n_rows, pressures, velocity, velocity_u, velocity_v, velocity_w, n_timesteps = load_probes(
+        case_path, probe_saving_frequency)
 
-    kinetic_energy_spectrum, freq, max_kes = compute_energy_spectrum(n_probes, velocity_u, velocity_v,
-                                                                     velocity_w)
+    mean_velocity, kinetic_energy, turbulent_kinetic_energy, max_ke, max_tke = compute_mean_velocity_and_kinetic_energy(
+        T, dt, n_timesteps, n_probes, velocity, velocity_u, velocity_v, velocity_w)
 
-    plot_velocity_and_pressure(case_path, max_P, max_U, mean_velocity, n_timesteps, n_cols, n_probes,
-                               n_rows, pressures, save_figure, show_figure, velocity)
+    kinetic_energy_spectrum, freq, max_kes = compute_energy_spectrum(n_probes, velocity_u, velocity_v, velocity_w)
+
+    plot_velocity_and_pressure(case_path, max_P, max_U, mean_velocity, n_timesteps, n_cols, n_probes, n_rows,
+                               pressures, save_figure, show_figure, velocity)
 
     plot_kinetic_energy(case_path, kinetic_energy, max_ke, max_tke, n_timesteps, n_cols, n_probes, n_rows,
                         save_figure, show_figure, turbulent_kinetic_energy)
@@ -52,6 +47,18 @@ def visualize_probes(case_path, probe_saving_frequency, T, dt, show_figure=True,
 
 
 def plot_spectrogram(case_path, n_cols, n_probes, n_rows, save_figure, show_figure, velocity_u):
+    """
+    Plots spectrogram at probe points.
+
+    Args:
+        case_path (str): Path to results from simulation.
+        n_cols (int): Number of columns in the plot grid.
+        n_probes (int): Number of probe points.
+        n_rows (int): Number of rows in the plot grid.
+        save_figure (bool): Saves figure if True.
+        show_figure (bool): Shows figure if True.
+        velocity_u (numpy.ndarray): Velocity data.
+    """
     # Generate plots
     for k in range(n_probes):
         # Create subplots
@@ -77,6 +84,20 @@ def plot_spectrogram(case_path, n_cols, n_probes, n_rows, save_figure, show_figu
 
 def plot_energy_spectrum(case_path, freq, kinetic_energy_spectrum, max_kes, n_cols, n_probes, n_rows,
                          save_figure, show_figure):
+    """
+    Plots energy spectrum at probe points.
+
+    Args:
+        case_path (str): Path to results from simulation.
+        freq (numpy.ndarray): Frequency data.
+        kinetic_energy_spectrum (numpy.ndarray): Kinetic energy spectrum data.
+        max_kes (float): Maximum value in the kinetic energy spectrum.
+        n_cols (int): Number of columns in the plot grid.
+        n_probes (int): Number of probe points.
+        n_rows (int): Number of rows in the plot grid.
+        save_figure (bool): Saves figure if True.
+        show_figure (bool): Shows figure if True.
+    """
     # Generate plots
     for k in range(n_probes):
         # Create subplots
@@ -103,12 +124,28 @@ def plot_energy_spectrum(case_path, freq, kinetic_energy_spectrum, max_kes, n_co
         print("-- Saving figure of energy spectrum at probes at {}".format(save_path))
         plt.savefig(save_path)
     if show_figure:
-        print("-- Plotting energy spectrm at probes")
+        print("-- Plotting energy spectrum at probes")
         plt.show()
 
 
 def plot_kinetic_energy(case_path, kinetic_energy, max_ke, max_tke, n_timesteps, n_cols, n_probes, n_rows,
                         save_figure, show_figure, turbulent_kinetic_energy):
+    """
+    Plots kinetic energy and turbulent kinetic energy at probe points.
+
+    Args:
+        case_path (str): Path to results from simulation.
+        kinetic_energy (numpy.ndarray): Kinetic energy data.
+        max_ke (float): Maximum kinetic energy value.
+        max_tke (float): Maximum turbulent kinetic energy value.
+        n_timesteps (int): Number of time steps.
+        n_cols (int): Number of columns in the plot grid.
+        n_probes (int): Number of probe points.
+        n_rows (int): Number of rows in the plot grid.
+        save_figure (bool): Saves figure if True.
+        show_figure (bool): Shows figure if True.
+        turbulent_kinetic_energy (numpy.ndarray): Turbulent kinetic energy data.
+    """
     # Generate plots for kinetic energy
     for k in range(n_probes):
         # Create subplots
@@ -144,6 +181,23 @@ def plot_kinetic_energy(case_path, kinetic_energy, max_ke, max_tke, n_timesteps,
 
 def plot_velocity_and_pressure(case_path, max_P, max_U, mean_velocity, n_timesteps, n_cols, n_probes,
                                n_rows, pressures, save_figure, show_figure, velocity):
+    """
+    Plots velocity magnitude and pressure at probe points.
+
+    Args:
+        case_path (str): Path to results from simulation.
+        max_P (float): Maximum pressure value.
+        max_U (float): Maximum velocity value.
+        mean_velocity (numpy.ndarray): Mean velocity data.
+        n_timesteps (int): Number of time steps.
+        n_cols (int): Number of columns in the plot grid.
+        n_probes (int): Number of probe points.
+        n_rows (int): Number of rows in the plot grid.
+        pressures (numpy.ndarray): Pressure data.
+        save_figure (bool): Saves figure if True.
+        show_figure (bool): Shows figure if True.
+        velocity (numpy.ndarray): Velocity data.
+    """
     # Generate plots
     for k in range(n_probes):
         # Create subplots
@@ -178,8 +232,28 @@ def plot_velocity_and_pressure(case_path, max_P, max_U, mean_velocity, n_timeste
         plt.show()
 
 
-def compute_mean_velocity_and_kinetic_energy(T, dt, n_timesteps, n_probes, velocity, velocity_u,
-                                             velocity_v, velocity_w):
+def compute_mean_velocity_and_kinetic_energy(T, dt, n_timesteps, n_probes, velocity, velocity_u, velocity_v,
+                                             velocity_w):
+    """
+    Computes mean velocity and kinetic energy at probe points.
+
+    Args:
+        T (float): One cardiac cycle, in [ms].
+        dt (float): Time step of simulation.
+        n_timesteps (int): Number of time steps.
+        n_probes (int): Number of probe points.
+        velocity (numpy.ndarray): Velocity data.
+        velocity_u (numpy.ndarray): Velocity component 'u' data.
+        velocity_v (numpy.ndarray): Velocity component 'v' data.
+        velocity_w (numpy.ndarray): Velocity component 'w' data.
+
+    Returns:
+        numpy.ndarray: Kinetic energy data.
+        float: Maximum kinetic energy value.
+        float: Maximum turbulent kinetic energy value.
+        numpy.ndarray: Mean velocity data.
+        numpy.ndarray: Turbulent kinetic energy data.
+    """
     max_ke = 0
     max_tke = 0
     # FIXME: Revert
@@ -234,10 +308,30 @@ def compute_mean_velocity_and_kinetic_energy(T, dt, n_timesteps, n_probes, veloc
 
         max_ke = np.max(kinetic_energy) if np.max(kinetic_energy) > max_ke else max_ke
         max_tke = np.max(turbulent_kinetic_energy) if np.max(turbulent_kinetic_energy) > max_tke else max_tke
-    return kinetic_energy, max_ke, max_tke, mean_velocity, turbulent_kinetic_energy
+    return mean_velocity, kinetic_energy, turbulent_kinetic_energy, max_ke, max_tke
 
 
 def load_probes(case_path, probe_saving_frequency):
+    """
+    Loads probe data from a completed CFD simulation.
+
+    Args:
+        case_path (str): Path to results from simulation.
+        probe_saving_frequency (int): Interval between saving probes.
+
+    Returns:
+        float: Maximum pressure value.
+        float: Maximum velocity value.
+        int: Number of columns in the plot grid.
+        int: Number of probe points.
+        int: Number of rows in the plot grid.
+        numpy.ndarray: Pressure data.
+        numpy.ndarray: Velocity data.
+        numpy.ndarray: Velocity component 'u' data.
+        numpy.ndarray: Velocity component 'v' data.
+        numpy.ndarray: Velocity component 'w' data.
+        int: Number of time steps.
+    """
     max_U = 0
     max_P = 0
     n_probes = 0
@@ -322,7 +416,20 @@ def load_probes(case_path, probe_saving_frequency):
 
 
 def compute_energy_spectrum(n_probes, velocity_u, velocity_v, velocity_w):
-    import numpy as np
+    """
+    Computes the energy spectrum for each probe based on velocity components.
+
+    Args:
+        n_probes (int): Number of probe points.
+        velocity_u (numpy.ndarray): Velocity component 'u' data for each probe.
+        velocity_v (numpy.ndarray): Velocity component 'v' data for each probe.
+        velocity_w (numpy.ndarray): Velocity component 'w' data for each probe.
+
+    Returns:
+        numpy.ndarray: Kinetic energy spectrum for each probe.
+        numpy.ndarray: Frequency values.
+        float: Maximum value in the kinetic energy spectrum.
+    """
     max_kes = 0
 
     # Define FFT function
@@ -363,10 +470,10 @@ def compute_energy_spectrum(n_probes, velocity_u, velocity_v, velocity_w):
 
 
 def main_probe():
-    folder, _, _, dt, _, _, probe_freq, T, _, _, _, _, _ = read_command_line()
-    visualize_probes(folder, probe_freq, T, dt, save_figure=True)
+    # Read command line arguments
+    folder, _, _, dt, _, _, probe_freq, T, _, _, _, _, _, probes_to_plot = read_command_line()
+    visualize_probes(folder, probe_freq, T, dt, probes_to_plot, save_figure=True)
 
 
 if __name__ == '__main__':
-    folder, _, _, dt, _, _, probe_freq, T, _, _, _, _, _ = read_command_line()
-    visualize_probes(folder, probe_freq, T, dt, save_figure=True)
+    main_probe()
