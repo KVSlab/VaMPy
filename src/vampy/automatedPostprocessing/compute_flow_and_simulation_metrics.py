@@ -3,6 +3,7 @@ from os import path
 import numpy as np
 from dolfin import FunctionSpace, Function, MPI, VectorFunctionSpace, Timer, project, sqrt, inner, HDF5File, XDMFFile, \
     assign, CellDiameter, Mesh, TestFunction, list_timings, TimingClear, TimingType
+
 from vampy.automatedPostprocessing.postprocessing_common import read_command_line, get_dataset_names, \
     rate_of_dissipation, rate_of_strain
 
@@ -518,15 +519,11 @@ def define_functions_and_iterate_dataset(time_to_average, dataset, dataset_avg, 
 
 def main_metrics():
     folder, nu, _, dt, velocity_degree, _, _, T, save_frequency, times_to_average, start_cycle, step, \
-        average_over_cycles = read_command_line()
+        average_over_cycles, _ = read_command_line()
 
     compute_flow_and_simulation_metrics(folder, nu, dt, velocity_degree, T, times_to_average, save_frequency,
                                         start_cycle, step, average_over_cycles)
 
 
 if __name__ == '__main__':
-    folder, nu, _, dt, velocity_degree, _, _, T, save_frequency, times_to_average, start_cycle, step, \
-        average_over_cycles = read_command_line()
-
-    compute_flow_and_simulation_metrics(folder, nu, dt, velocity_degree, T, times_to_average, save_frequency,
-                                        start_cycle, step, average_over_cycles)
+    main_metrics()

@@ -67,6 +67,13 @@ def read_command_line():
                         nargs="+",
                         help="Time(s) during cardiac cycle to average, in the interval [0,T). Measured in [ms].")
 
+    parser.add_argument('-pp', '--probes-to-plot',
+                        type=int,
+                        default=[],
+                        nargs="+",
+                        help="List of integers corresponding to probe numbers. " +
+                             "The probes are to visualized in separate probe plots. ")
+
     parser.add_argument('-sc', '--start-cycle',
                         type=int,
                         default=2,
@@ -85,8 +92,8 @@ def read_command_line():
     args = parser.parse_args()
 
     return args.case, args.nu, args.rho, args.dt, args.velocity_degree, args.pressure_degree, args.probe_frequency, \
-        args.T, args.save_frequency, args.times_to_average, args.start_cycle, args.sample_step, \
-        args.average_over_cycles
+           args.T, args.save_frequency, args.times_to_average, args.start_cycle, args.sample_step, \
+           args.average_over_cycles, args.probes_to_plot
 
 
 def epsilon(u):
