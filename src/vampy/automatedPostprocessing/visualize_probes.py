@@ -23,8 +23,8 @@ def visualize_probes(case_path, probe_saving_frequency, T, dt, probes_to_plot, s
         save_figure (bool): Saves figure if True.
     """
 
-    max_P, max_U, n_cols, n_probes, n_rows, pressures, velocity, velocity_u, velocity_v, velocity_w, n_timesteps = load_probes(
-        case_path, probe_saving_frequency)
+    max_P, max_U, n_cols, n_probes, n_rows, pressures, velocity, velocity_u, velocity_v, velocity_w, n_timesteps \
+        = load_probes(case_path, probe_saving_frequency)
 
     mean_velocity, kinetic_energy, turbulent_kinetic_energy, max_ke, max_tke = compute_mean_velocity_and_kinetic_energy(
         T, dt, n_timesteps, n_probes, velocity, velocity_u, velocity_v, velocity_w)
@@ -262,7 +262,7 @@ def compute_mean_velocity_and_kinetic_energy(T, dt, n_timesteps, n_probes, veloc
     max_tke = 0
     # FIXME: Revert
     saved_points_per_cycle = int(T / dt)
-    #saved_points_per_cycle = 951
+    saved_points_per_cycle = 951
     n_cycles = int(n_timesteps / saved_points_per_cycle)
     mean_velocity = np.zeros((n_probes, n_timesteps))
     mean_velocity_u = np.zeros((n_probes, n_timesteps))
@@ -402,12 +402,12 @@ def load_probes(case_path, probe_saving_frequency):
     velocity_w = np.array(velocity_w)
     pressures = np.array(pressures)
     # FIXME: Remove
-    # n_stop = 2853
-    # velocity = velocity[:, :n_stop]
-    # velocity_u = velocity_u[:, :n_stop]
-    # velocity_v = velocity_v[:, :n_stop]
-    # velocity_w = velocity_w[:, :n_stop]
-    # pressures = pressures[:, :n_stop]
+    n_stop = 2853
+    velocity = velocity[:, :n_stop]
+    velocity_u = velocity_u[:, :n_stop]
+    velocity_v = velocity_v[:, :n_stop]
+    velocity_w = velocity_w[:, :n_stop]
+    pressures = pressures[:, :n_stop]
 
     # Check if data is available
     if len(velocity[0]) > 0:
