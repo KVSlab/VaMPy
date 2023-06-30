@@ -31,59 +31,98 @@ def visualize_probes(case_path, probe_saving_frequency, T, dt, probes_to_plot, s
 
     kinetic_energy_spectrum, freq, max_kes = compute_energy_spectrum(n_probes, velocity_u, velocity_v, velocity_w)
 
-    plot_velocity_and_pressure(case_path, max_P, max_U, mean_velocity, n_timesteps, n_cols, n_probes, n_rows,
-                               pressures, save_figure, show_figure, velocity)
+    if not probes_to_plot:
+        # Plot all probes in same plot
 
-    plot_kinetic_energy(case_path, kinetic_energy, max_ke, max_tke, n_timesteps, n_cols, n_probes, n_rows,
-                        save_figure, show_figure, turbulent_kinetic_energy)
+        # Plot velocity
+        for k in range(n_probes):
+            ax = plt.subplot(n_rows, n_cols, k + 1)
+            plot_velocity_and_pressure(k, ax, max_P, max_U, mean_velocity, n_timesteps, pressures, velocity)
 
-    plot_energy_spectrum(case_path, freq, kinetic_energy_spectrum, max_kes, n_cols, n_probes, n_rows,
-                         save_figure, show_figure)
+        if save_figure:
+            save_path = path.join(case_path, "velocity_and_pressure.png")
+            print("-- Saving figure of velocity magnitude and pressure at probes at {}".format(save_path))
+            plt.savefig(save_path)
+        if show_figure:
+            print("-- Plotting velocity magnitude and pressure at probes")
+            plt.show()
 
-    plot_spectrogram(case_path, n_cols, n_probes, n_rows, save_figure, show_figure, velocity_u)
+        # Plot kinetic energy
+        for k in range(n_probes):
+            ax = plt.subplot(n_rows, n_cols, k + 1)
+            plot_kinetic_energy(k, ax, kinetic_energy, max_ke, max_tke, n_timesteps, turbulent_kinetic_energy)
 
-    # Clear plotting figure
-    plt.clf()
+        if save_figure:
+            save_path = path.join(case_path, "kinetic_energy.png")
+            print("-- Saving figure of kinetic energy and turbulent kinetic energy at probes at {}".format(save_path))
+            plt.savefig(save_path)
+        if show_figure:
+            print("-- Plotting kinetic energy and turbulent kinetic energy at probes")
+            plt.show()
+
+        # Plot energy spectrum
+        for k in range(n_probes):
+            ax = plt.subplot(n_rows, n_cols, k + 1)
+            plot_energy_spectrum(k, ax, freq, kinetic_energy_spectrum, max_kes)
+
+        if save_figure:
+            save_path = path.join(case_path, "energy_spectrum.png")
+            print("-- Saving figure of energy spectrum at probes at {}".format(save_path))
+            plt.savefig(save_path)
+        if show_figure:
+            print("-- Plotting energy spectrum at probes")
+            plt.show()
+
+        # Plot spectrogram
+        for k in range(n_probes):
+            ax = plt.subplot(n_rows, n_cols, k + 1)
+            plot_spectrogram(k, ax, velocity_u)
+
+        if save_figure:
+            save_path = path.join(case_path, "spectrogram.png")
+            print("-- Saving figure of spectrogram at probes at {}".format(save_path))
+            plt.savefig(save_path)
+        if show_figure:
+            print("-- Plotting spectrogram at probes")
+            plt.show()
+
+    else:
+        # Plot probes in separate plots
+        for k in probes_to_plot:
+            fig, ((ax1, ax2), (ax3, ax4)) = plt.subplots(2, 2)
+            plot_velocity_and_pressure(k, ax1, max_P, max_U, mean_velocity, n_timesteps, pressures, velocity)
+            plot_kinetic_energy(k, ax2, kinetic_energy, max_ke, max_tke, n_timesteps, turbulent_kinetic_energy)
+            plot_energy_spectrum(k, ax3, freq, kinetic_energy_spectrum, max_kes)
+            plot_spectrogram(k, ax4, velocity_u)
+
+            if save_figure:
+                save_path = path.join(case_path, f"probes_{k}.png")
+                print(f"-- Saving figure for probes at {save_path}")
+                plt.savefig(save_path)
+            if show_figure:
+                print(f"-- Plotting quantities for probe {k}")
+                plt.show()
 
 
-def plot_spectrogram(case_path, n_cols, n_probes, n_rows, save_figure, show_figure, velocity_u):
+def plot_spectrogram(k, ax, velocity):
     """
     Plots spectrogram at probe points.
 
     Args:
-        case_path (str): Path to results from simulation.
-        n_cols (int): Number of columns in the plot grid.
-        n_probes (int): Number of probe points.
-        n_rows (int): Number of rows in the plot grid.
-        save_figure (bool): Saves figure if True.
-        show_figure (bool): Shows figure if True.
-        velocity_u (numpy.ndarray): Velocity data.
+        velocity(numpy.ndarray): Velocity data.
     """
-    # Generate plots
-    for k in range(n_probes):
-        # Create subplots
-        ax0 = plt.subplot(n_rows, n_cols, k + 1)
+    # Filter out negative values
+    ax.specgram(velocity[k], NFFT=256, Fs=2, noverlap=128, cmap="jet")
 
-        # Filter out negative values
-        ax0.specgram(velocity_u[k], NFFT=256, Fs=2, noverlap=128, cmap="jet")
+    # Set axis labels
+    ax.set_ylabel("Frequency [Hz]", fontsize=12)
+    ax.set_xlabel("Time [ms]", fontsize=12)
 
-        # Set axis labels
-        ax0.set_ylabel("Frequency [Hz]", fontsize=12)
-        ax0.set_xlabel("Time [ms]", fontsize=12)
-
-        # Set title to probe number
-        ax0.set_title('Probe {}'.format(k + 1), y=1.0, pad=-14)
-    if save_figure:
-        save_path = path.join(case_path, "spectrogram.png")
-        print("-- Saving figure of spectrogram at probes at {}".format(save_path))
-        plt.savefig(save_path)
-    if show_figure:
-        print("-- Plotting spectrogram at probes")
-        plt.show()
+    # Set title to probe number
+    ax.set_title('Probe {}'.format(k + 1), y=1.0, pad=-14)
 
 
-def plot_energy_spectrum(case_path, freq, kinetic_energy_spectrum, max_kes, n_cols, n_probes, n_rows,
-                         save_figure, show_figure):
+def plot_energy_spectrum(k, ax, freq, kinetic_energy_spectrum, max_kes):
     """
     Plots energy spectrum at probe points.
 
@@ -98,89 +137,63 @@ def plot_energy_spectrum(case_path, freq, kinetic_energy_spectrum, max_kes, n_co
         save_figure (bool): Saves figure if True.
         show_figure (bool): Shows figure if True.
     """
-    # Generate plots
-    for k in range(n_probes):
-        # Create subplots
-        ax0 = plt.subplot(n_rows, n_cols, k + 1)
+    # Create subplots
+    ax.plot(freq, kinetic_energy_spectrum[k], color=colors[1], label="")
+    ax.set_xscale("log")
+    ax.set_yscale("log")
 
-        ax0.plot(freq, kinetic_energy_spectrum[k], color=colors[1], label="")
-        ax0.set_xscale("log")
-        ax0.set_yscale("log")
+    # Set axis limits
+    ax.set_ylim(None, max_kes * 1.1)
+    ax.set_xlim(min(freq), max(freq))
 
-        # Set axis limits (y-dir)
-        ax0.set_ylim(None, max_kes * 1.1)
+    # Set axis labels
+    ax.set_ylabel("E(k)", fontsize=12, color=colors[0])
+    ax.set_xlabel("k", fontsize=12)
 
-        # Set axis labels
-        ax0.set_ylabel("E(k)", fontsize=12, color=colors[0])
-        ax0.set_xlabel("k", fontsize=12)
+    # Color axis ticks
+    ax.tick_params(axis='y', which='major', labelsize=12, labelcolor=colors[0])
 
-        # Color axis ticks
-        ax0.tick_params(axis='y', which='major', labelsize=12, labelcolor=colors[0])
-
-        # Set title to probe number
-        ax0.set_title('Probe {}'.format(k + 1), y=1.0, pad=-14)
-    if save_figure:
-        save_path = path.join(case_path, "energy_spectrum.png")
-        print("-- Saving figure of energy spectrum at probes at {}".format(save_path))
-        plt.savefig(save_path)
-    if show_figure:
-        print("-- Plotting energy spectrum at probes")
-        plt.show()
+    # Set title to probe number
+    ax.set_title('Probe {}'.format(k + 1), y=1.0, pad=-14)
 
 
-def plot_kinetic_energy(case_path, kinetic_energy, max_ke, max_tke, n_timesteps, n_cols, n_probes, n_rows,
-                        save_figure, show_figure, turbulent_kinetic_energy):
+def plot_kinetic_energy(k, ax, kinetic_energy, max_ke, max_tke, n_timesteps, turbulent_kinetic_energy):
     """
     Plots kinetic energy and turbulent kinetic energy at probe points.
 
     Args:
-        case_path (str): Path to results from simulation.
         kinetic_energy (numpy.ndarray): Kinetic energy data.
         max_ke (float): Maximum kinetic energy value.
         max_tke (float): Maximum turbulent kinetic energy value.
         n_timesteps (int): Number of time steps.
-        n_cols (int): Number of columns in the plot grid.
-        n_probes (int): Number of probe points.
-        n_rows (int): Number of rows in the plot grid.
-        save_figure (bool): Saves figure if True.
-        show_figure (bool): Shows figure if True.
         turbulent_kinetic_energy (numpy.ndarray): Turbulent kinetic energy data.
     """
     # Generate plots for kinetic energy
-    for k in range(n_probes):
-        # Create subplots
-        ax0 = plt.subplot(n_rows, n_cols, k + 1)
-        ax1 = ax0.twinx()
-        time_interval = np.linspace(0, n_timesteps, n_timesteps)
-        ax0.plot(time_interval, kinetic_energy[k], color=colors[0], label="")
-        ax0.plot(time_interval, turbulent_kinetic_energy[k], color=colors[1], label="")
+    # Create subplots
+    ax_twinx = ax.twinx()
+    time_interval = np.linspace(0, n_timesteps, n_timesteps)
+    ax.plot(time_interval, kinetic_energy[k], color=colors[0], label="")
+    ax.plot(time_interval, turbulent_kinetic_energy[k], color=colors[1], label="")
 
-        # Set axis limits (y-dir)
-        ax0.set_ylim(-1E-2, max_ke * 1.1)
-        ax1.set_ylim(-1E-2, max_tke * 1.1)
+    # Set axis limits
+    ax.set_ylim(-1E-2, max_ke * 1.1)
+    ax_twinx.set_ylim(-1E-2, max_tke * 1.1)
+    ax.set_xlim(min(time_interval), max(time_interval))
 
-        # Set axis labels
-        ax0.set_ylabel("Kinetic energy [m$^2$/s$^2$]", fontsize=12, color=colors[0])
-        ax1.set_ylabel("Turbulent kinetic\n energy [m$^2$/s$^2$]", fontsize=12, color=colors[1])
-        ax0.set_xlabel("Time [s]", fontsize=12)
+    # Set axis labels
+    ax.set_ylabel("Kinetic energy [m$^2$/s$^2$]", fontsize=12, color=colors[0])
+    ax_twinx.set_ylabel("Turbulent kinetic\n energy [m$^2$/s$^2$]", fontsize=12, color=colors[1])
+    ax.set_xlabel("Time [s]", fontsize=12)
 
-        # Color axis ticks
-        ax0.tick_params(axis='y', which='major', labelsize=12, labelcolor=colors[0])
-        ax1.tick_params(axis='y', which='major', labelsize=12, labelcolor=colors[1])
+    # Color axis ticks
+    ax.tick_params(axis='y', which='major', labelsize=12, labelcolor=colors[0])
+    ax_twinx.tick_params(axis='y', which='major', labelsize=12, labelcolor=colors[1])
 
-        # Set title to probe number
-        ax0.set_title('Probe {}'.format(k + 1), y=1.0, pad=-14)
-    if save_figure:
-        save_path = path.join(case_path, "kinetic_energy.png")
-        print("-- Saving figure of kinetic energy and turbulent kinetic energy at probes at {}".format(save_path))
-        plt.savefig(save_path)
-    if show_figure:
-        print("-- Plotting kinetic energy and turbulent kinetic energy at probes")
-        plt.show()
+    # Set title to probe number
+    ax.set_title('Probe {}'.format(k + 1), y=1.0, pad=-14)
 
 
-def plot_velocity_and_pressure(case_path, max_P, max_U, mean_velocity, n_timesteps, n_cols, n_probes,
-                               n_rows, pressures, save_figure, show_figure, velocity):
+def plot_velocity_and_pressure(k, ax, max_P, max_U, mean_velocity, n_timesteps, pressures, velocity):
     """
     Plots velocity magnitude and pressure at probe points.
 
@@ -199,37 +212,28 @@ def plot_velocity_and_pressure(case_path, max_P, max_U, mean_velocity, n_timeste
         velocity (numpy.ndarray): Velocity data.
     """
     # Generate plots
-    for k in range(n_probes):
-        # Create subplots
-        ax0 = plt.subplot(n_rows, n_cols, k + 1)
-        ax1 = ax0.twinx()
-        time_interval = np.linspace(0, n_timesteps, n_timesteps)
-        ax0.plot(time_interval, velocity[k], color=colors[0], label="")
-        ax0.plot(time_interval, mean_velocity[k], color=colors[2], linestyle='--', label="")
-        ax1.plot(time_interval, pressures[k], color=colors[1], label="")
+    ax_twinx = ax.twinx()
+    time_interval = np.linspace(0, n_timesteps, n_timesteps)
+    ax.plot(time_interval, velocity[k], color=colors[0], label="")
+    ax.plot(time_interval, mean_velocity[k], color=colors[2], linestyle='--', label="")
+    ax_twinx.plot(time_interval, pressures[k], color=colors[1], label="")
 
-        # Set axis limits (y-dir)
-        ax0.set_ylim(-1E-2, max_U * 1.5)
-        ax1.set_ylim(-1E-2, max_P * 1.5)
+    # Set axis limits
+    ax.set_ylim(-1E-2, max_U * 1.5)
+    ax_twinx.set_ylim(-1E-2, max_P * 1.5)
+    ax.set_xlim(min(time_interval), max(time_interval))
 
-        # Set axis labels
-        ax0.set_ylabel("Velocity [m/s]", fontsize=12, color=colors[0])
-        ax1.set_ylabel("Pressure [Pa]", fontsize=12, color=colors[1])
-        ax0.set_xlabel("Time [s]", fontsize=12)
+    # Set axis labels
+    ax.set_ylabel("Velocity [m/s]", fontsize=12, color=colors[0])
+    ax_twinx.set_ylabel("Pressure [Pa]", fontsize=12, color=colors[1])
+    ax.set_xlabel("Time [s]", fontsize=12)
 
-        # Color axis ticks
-        ax0.tick_params(axis='y', which='major', labelsize=12, labelcolor=colors[0])
-        ax1.tick_params(axis='y', which='major', labelsize=12, labelcolor=colors[1])
+    # Color axis ticks
+    ax.tick_params(axis='y', which='major', labelsize=12, labelcolor=colors[0])
+    ax_twinx.tick_params(axis='y', which='major', labelsize=12, labelcolor=colors[1])
 
-        # Set title to probe number
-        ax0.set_title('Probe {}'.format(k + 1), y=1.0, pad=-14)
-    if save_figure:
-        save_path = path.join(case_path, "velocity_and_pressure.png")
-        print("-- Saving figure of velocity magnitude and pressure at probes at {}".format(save_path))
-        plt.savefig(save_path)
-    if show_figure:
-        print("-- Plotting velocity magnitude and pressure at probes")
-        plt.show()
+    # Set title to probe number
+    ax.set_title('Probe {}'.format(k + 1), y=1.0, pad=-14)
 
 
 def compute_mean_velocity_and_kinetic_energy(T, dt, n_timesteps, n_probes, velocity, velocity_u, velocity_v,
