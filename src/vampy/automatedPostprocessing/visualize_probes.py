@@ -8,6 +8,48 @@ import numpy as np
 from vampy.automatedPostprocessing.postprocessing_common import read_command_line
 
 
+
+def compute_energy_spectrum(num_probes, velocities_u, velocities_v, velocities_w):
+    import numpy as np
+    max_kes = 0
+
+    # Define FFT function
+    def get_fft(x):
+        n = len(x)
+        fft = np.fft.fft(x)
+        freq = np.fft.fftfreq(n)
+        return fft, freq
+
+    # Create empty list to store kinetic energy spectrum
+    kinetic_energy_spectrum = []
+
+    # Iterate over each probe
+    for k in range(num_probes):
+        # FFT of the velocity signals
+        fft_u, freq_u = get_fft(velocities_u[k])
+        fft_v, freq_v = get_fft(velocities_v[k])
+        fft_w, freq_w = get_fft(velocities_w[k])
+
+        # Compute the energy spectrum (proportional to square of absolute fft values)
+        E_u = np.abs(fft_u) ** 2
+        E_v = np.abs(fft_v) ** 2
+        E_w = np.abs(fft_w) ** 2
+
+        # Summing up energy spectrum from all 3 velocity components
+        E_total = E_u + E_v + E_w
+
+        # Store positive values of total kinetic energy spectrum
+        positive_indices = freq_u > 0
+        freq = freq_u[positive_indices]
+        kinetic_energy_spectrum.append(E_total[positive_indices])
+        max_kes = np.max(kinetic_energy_spectrum) if np.max(kinetic_energy_spectrum) > max_kes else max_kes
+
+    # Convert list to numpy array
+    kinetic_energy_spectrum = np.array(kinetic_energy_spectrum)
+
+    return kinetic_energy_spectrum, freq, max_kes
+
+
 def visualize_probes(case_path, probe_saving_frequency, T, dt, show_figure=True, save_figure=False):
     """
     Loads probe points from completed CFD simulation,
@@ -163,6 +205,9 @@ def visualize_probes(case_path, probe_saving_frequency, T, dt, show_figure=True,
         max_ke = np.max(kinetic_energy) if np.max(kinetic_energy) > max_ke else max_ke
         max_tke = np.max(turbulent_kinetic_energy) if np.max(turbulent_kinetic_energy) > max_tke else max_tke
 
+    kinetic_energy_spectrum, freq, max_kes = compute_energy_spectrum(num_probes, velocities_u, velocities_v,
+                                                                     velocities_w)
+
     # Generate plots
     for k in range(num_probes):
         # Create subplots
@@ -230,6 +275,61 @@ def visualize_probes(case_path, probe_saving_frequency, T, dt, show_figure=True,
 
     if show_figure:
         print("-- Plotting kinetic energy and turbulent kinetic energy at probes")
+        plt.show()
+
+    # Generate plots
+    for k in range(num_probes):
+        # Create subplots
+        ax0 = plt.subplot(num_rows, num_cols, k + 1)
+
+        ax0.plot(freq, kinetic_energy_spectrum[k], color=colors[1], label="")
+        ax0.set_xscale("log")
+        ax0.set_yscale("log")
+
+        # Set axis limits (y-dir)
+        ax0.set_ylim(None, max_kes * 1.1)
+
+        # Set axis labels
+        ax0.set_ylabel("E(k)", fontsize=12, color=colors[0])
+        ax0.set_xlabel("k", fontsize=12)
+
+        # Color axis ticks
+        ax0.tick_params(axis='y', which='major', labelsize=12, labelcolor=colors[0])
+
+        # Set title to probe number
+        ax0.set_title('Probe {}'.format(k + 1), y=1.0, pad=-14)
+
+    if save_figure:
+        save_path = path.join(case_path, "energy_spectrum.png")
+        print("-- Saving figure of energy spectrum at probes at {}".format(save_path))
+        plt.savefig(save_path)
+
+    if show_figure:
+        print("-- Plotting energy spectrm at probes")
+        plt.show()
+
+    # Generate plots
+    for k in range(num_probes):
+        # Create subplots
+        ax0 = plt.subplot(num_rows, num_cols, k + 1)
+
+        # Filter out negative values
+        ax0.specgram(velocities_u[k], NFFT=256, Fs=2, noverlap=128, cmap="jet")
+
+        # Set axis labels
+        ax0.set_ylabel("Frequency [Hz]", fontsize=12)
+        ax0.set_xlabel("Time [ms]", fontsize=12)
+
+        # Set title to probe number
+        ax0.set_title('Probe {}'.format(k + 1), y=1.0, pad=-14)
+
+    if save_figure:
+        save_path = path.join(case_path, "spectrogram.png")
+        print("-- Saving figure of spectrogram at probes at {}".format(save_path))
+        plt.savefig(save_path)
+
+    if show_figure:
+        print("-- Plotting spectrogram at probes")
         plt.show()
 
     # Clear plotting figure
