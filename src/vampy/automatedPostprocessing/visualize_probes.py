@@ -262,7 +262,7 @@ def compute_mean_velocity_and_kinetic_energy(T, dt, n_timesteps, n_probes, veloc
     max_tke = 0
     # FIXME: Revert
     saved_points_per_cycle = int(T / dt)
-    #saved_points_per_cycle = 951
+    # saved_points_per_cycle = 951
     n_cycles = int(n_timesteps / saved_points_per_cycle)
     mean_velocity = np.zeros((n_probes, n_timesteps))
     mean_velocity_u = np.zeros((n_probes, n_timesteps))
