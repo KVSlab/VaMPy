@@ -2,6 +2,7 @@ from os import path
 
 import matplotlib.pyplot as plt
 import numpy as np
+from numpy.fft import fftn
 
 from vampy.automatedPostprocessing.postprocessing_common import read_command_line
 
@@ -31,7 +32,7 @@ def visualize_probes(case_path, probe_saving_frequency, T, dt, probes_to_plot, s
         = compute_mean_velocity_and_kinetic_energy(T, dt, n_timesteps, n_probes, velocity, velocity_u, velocity_v,
                                                    velocity_w)
 
-    kinetic_energy_spectrum, freq, max_kes = compute_energy_spectrum(n_probes, velocity_u, velocity_v, velocity_w)
+    kinetic_energy_spectrum, freq, max_kes = compute_energy_spectrum(n_probes, velocity_u, velocity_v, velocity_w, dt)
 
     if not probes_to_plot:
         # Plot all probes in same plot
@@ -141,9 +142,26 @@ def plot_energy_spectrum(k, ax, freq, kinetic_energy_spectrum, max_kes):
     """
 
     # Create subplots
+    def E(k):
+        """
+        Computes the energy spectrum E(k) of turbulent flow, using Kolmogorov's -5/3 law.
+
+        Parameters:
+        k (numpy.array): List of wave numbers in Hz.
+
+        Returns:
+        E_k (numpy.array): Energy spectrum E(k) at the given wave numbers.
+        """
+        return k ** (-5 / 3)
+
+    energy_spectrum = E(freq)
+    print(energy_spectrum)
+    ax.plot(freq, energy_spectrum, color="black", linestyle="--", linewidth=3, label="")
     ax.plot(freq, kinetic_energy_spectrum[k], color=colors[1], label="")
     ax.set_xscale("log")
     ax.set_yscale("log")
+    ax.annotate('$k^{-5/3}$', xy=(np.mean(freq) / 4, np.mean(kinetic_energy_spectrum[k])), xycoords='data',
+                textcoords='data', color='black', fontsize=15)
 
     # Set axis limits
     ax.set_ylim(None, max_kes * 1.1)
@@ -430,7 +448,7 @@ def load_probe_data(case_path, tstep):
     return p, U, u, v, w
 
 
-def compute_energy_spectrum(n_probes, velocity_u, velocity_v, velocity_w):
+def compute_energy_spectrum(n_probes, velocity_u, velocity_v, velocity_w, dt):
     """
     Computes the energy spectrum for each probe based on velocity components.
 
@@ -439,6 +457,7 @@ def compute_energy_spectrum(n_probes, velocity_u, velocity_v, velocity_w):
         velocity_u (numpy.ndarray): Velocity component 'u' data for each probe.
         velocity_v (numpy.ndarray): Velocity component 'v' data for each probe.
         velocity_w (numpy.ndarray): Velocity component 'w' data for each probe.
+        dt (float): Sampling rate at probes
 
     Returns:
         numpy.ndarray: Kinetic energy spectrum for each probe.
@@ -458,21 +477,26 @@ def compute_energy_spectrum(n_probes, velocity_u, velocity_v, velocity_w):
 
     # Iterate over each probe
     for k in range(n_probes):
-        # FFT of the velocity signals
-        fft_u, freq_u = get_fft(velocity_u[k])
-        fft_v, _ = get_fft(velocity_v[k])
-        fft_w, _ = get_fft(velocity_w[k])
+        # Compute the Fourier Transform of the velocity fields
+        Fu = np.fft.fft(velocity_u[k])
+        Fv = np.fft.fft(velocity_v[k])
+        Fw = np.fft.fft(velocity_w[k])
 
-        # Compute the energy spectrum (proportional to square of absolute fft values)
-        E_u = np.abs(fft_u) ** 2
-        E_v = np.abs(fft_v) ** 2
-        E_w = np.abs(fft_w) ** 2
+        # Compute the energy density
+        Eu = np.abs(Fu) ** 2
+        Ev = np.abs(Fv) ** 2
+        Ew = np.abs(Fw) ** 2
+        E_total = 0.5 * (Eu + Ev + Ew)
 
-        # Summing up energy spectrum from all 3 velocity components
-        E_total = E_u + E_v + E_w
+        # Compute the frequencies for each time point
+        N = velocity_u[k].size
+        freqs = np.fft.fftfreq(N, dt)
 
         # Store positive values of total kinetic energy spectrum
-        kinetic_energy_spectrum.append(E_total[freq_u > 0])
+        freq = freqs[:N // 2]
+        E_total = E_total[:N // 2]
+
+        kinetic_energy_spectrum.append(E_total)
 
     # Convert list to numpy array
     kinetic_energy_spectrum = np.array(kinetic_energy_spectrum)
@@ -480,7 +504,7 @@ def compute_energy_spectrum(n_probes, velocity_u, velocity_v, velocity_w):
     # Compute the maximum value
     max_kes = np.max(kinetic_energy_spectrum)
 
-    return kinetic_energy_spectrum, freq_u[freq_u > 0], max_kes
+    return kinetic_energy_spectrum, freq, max_kes
 
 
 def main_probe():
