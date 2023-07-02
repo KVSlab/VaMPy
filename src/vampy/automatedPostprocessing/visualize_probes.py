@@ -11,8 +11,9 @@ colors = ['red', 'blue', 'purple']
 
 def visualize_probes(case_path, probe_saving_frequency, T, dt, probes_to_plot, show_figure=False, save_figure=False):
     """
-    Loads probe points from completed CFD simulation and visualizes velocity (magnitude)
-    and pressure at respective probes. Assuming results are in mm/s.
+    Loads probe points from completed CFD simulation and visualizes (1) velocity (magnitude), mean velocity,
+    and pressure, (2) kinetic energy, turbulent kinetic energy, and turbulence intensity, (3) kinetic energy spectrum,
+    and (4) spectrogram of velocity (u-component) at respective probes. Assuming results are in m/s.
 
     Args:
         case_path: Path to results from simulation.
@@ -26,8 +27,9 @@ def visualize_probes(case_path, probe_saving_frequency, T, dt, probes_to_plot, s
     max_P, max_U, n_cols, n_probes, n_rows, pressures, velocity, velocity_u, velocity_v, velocity_w, n_timesteps \
         = load_probes(case_path, probe_saving_frequency)
 
-    mean_velocity, kinetic_energy, turbulent_kinetic_energy, turbulence_intensity, max_ke, max_tke = compute_mean_velocity_and_kinetic_energy(
-        T, dt, n_timesteps, n_probes, velocity, velocity_u, velocity_v, velocity_w)
+    mean_velocity, kinetic_energy, turbulent_kinetic_energy, turbulence_intensity, max_ke, max_tke \
+        = compute_mean_velocity_and_kinetic_energy(T, dt, n_timesteps, n_probes, velocity, velocity_u, velocity_v,
+                                                   velocity_w)
 
     kinetic_energy_spectrum, freq, max_kes = compute_energy_spectrum(n_probes, velocity_u, velocity_v, velocity_w)
 
@@ -259,7 +261,7 @@ def compute_mean_velocity_and_kinetic_energy(T, dt, n_timesteps, n_probes, veloc
     """
     saved_points_per_cycle = int(T / dt)
     # FIXME: Revert
-    # saved_points_per_cycle = 951
+    saved_points_per_cycle = 951
     n_cycles = int(n_timesteps / saved_points_per_cycle)
 
     mean_velocity = np.zeros((n_probes, n_timesteps))
@@ -381,12 +383,12 @@ def load_probes(case_path, probe_saving_frequency):
     velocity_w = np.array(velocity_w)
     pressures = np.array(pressures)
     # # # FIXME: Remove
-    # n_stop = 2853
-    # velocity = velocity[:, :n_stop]
-    # velocity_u = velocity_u[:, :n_stop]
-    # velocity_v = velocity_v[:, :n_stop]
-    # velocity_w = velocity_w[:, :n_stop]
-    # pressures = pressures[:, :n_stop]
+    n_stop = 2853
+    velocity = velocity[:, :n_stop]
+    velocity_u = velocity_u[:, :n_stop]
+    velocity_v = velocity_v[:, :n_stop]
+    velocity_w = velocity_w[:, :n_stop]
+    pressures = pressures[:, :n_stop]
 
     # Check if data is available
     if len(velocity[0]) > 0:
