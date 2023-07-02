@@ -182,9 +182,6 @@ def plot_kinetic_energy(k, ax, kinetic_energy, max_ke, max_tke, n_timesteps, tur
     ax.set_ylim(-1E-2, max_ke * 1.1)
     ax.set_xlim(min(time_interval), max(time_interval))
 
-    # Scale axis
-    ax_twinx.set_yscale("log")
-
     # Set axis labels
     ax.set_ylabel("Energy [m$^2$/s$^2$]", fontsize=12)
     ax_twinx.set_ylabel("Turbulence intensity [-]", fontsize=12, color=colors[2])
