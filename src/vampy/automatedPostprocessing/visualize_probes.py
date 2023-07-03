@@ -2,7 +2,6 @@ from os import path
 
 import matplotlib.pyplot as plt
 import numpy as np
-from numpy.fft import fftn
 
 from vampy.automatedPostprocessing.postprocessing_common import read_command_line
 
