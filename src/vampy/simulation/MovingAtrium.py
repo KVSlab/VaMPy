@@ -59,7 +59,7 @@ def problem_parameters(commandline_kwargs, NS_parameters, scalar_components, Sch
             # Simulation parameters
             cardiac_cycle=cardiac_cycle,  # Run simulation for 1 cardiac cycles [ms]
             # FIXME: For scaling only
-            T=25,  # Total simulation length
+            T=2,  # Total simulation length
             dt=1,  # # Time step size [ms]
             # Frequencies to save data
             dump_probe_frequency=500,  # Dump frequency for sampling velocity & pressure at probes along the centerline
@@ -98,24 +98,32 @@ def mesh(mesh_path, **NS_namespace):
 class Surface_counter(UserExpression):
     def __init__(self, points, cycle, **kwargs):
         self.motion = {}
+        self.motion_mapping = {}
         self.counter = -1
         self.points = points
-        self.time = np.linspace(0, cycle, self.points.shape[-1])
+        self.num_points = self.points.shape[0]
+        self.num_samples = self.points.shape[-1]
+        self.time = np.linspace(0, cycle, self.num_samples)
+        self.motion = self.precompute_splines()
         super().__init__(**kwargs)
 
-    def get_motion(self):
-        return self.motion
+    def get_motion_mapping(self):
+        return self.motion_mapping
+
+    def precompute_splines(self):
+        motion = {}
+        s = 2.5  # Inria Atrium
+        for index in range(self.num_points):
+            x_ = splrep(self.time, self.points[index, 0, :], s=s, per=True)
+            y_ = splrep(self.time, self.points[index, 1, :], s=s, per=True)
+            z_ = splrep(self.time, self.points[index, 2, :], s=s, per=True)
+            motion[index] = [x_, y_, z_]
+        return motion
 
     def eval(self, _, x):
         self.counter += 1
         index = distance.cdist([x], self.points[:, :, 0]).argmin()
-        # s = 1E2, per=False  4 blad
-
-        s = 1E-3
-        x_ = splrep(self.time, self.points[index, 0, :], s=s, per=True)
-        y_ = splrep(self.time, self.points[index, 1, :], s=s, per=True)
-        z_ = splrep(self.time, self.points[index, 2, :], s=s, per=True)
-        self.motion[self.counter] = [x_, y_, z_]
+        self.motion_mapping[self.counter] = self.motion[index]
 
 
 class Wall_motion(UserExpression):
@@ -196,7 +204,8 @@ def create_bcs(NS_expressions, dynamic_mesh, x_, cardiac_cycle, backflow_facets,
         if MPI.rank(MPI.comm_world) == 0:
             print("Loading displacement points")
         points = np.load(mesh_path.split(".xml")[0] + "_points.np", allow_pickle=True)
-
+        if MPI.rank(MPI.comm_world) == 0:
+            print("Creating splines for displacement")
         # Define wall movement
         wall_counter = Surface_counter(points, cardiac_cycle, element=V.ufl_element())
         bc_tmp = DirichletBC(V, wall_counter, boundary, id_wall)
@@ -204,10 +213,13 @@ def create_bcs(NS_expressions, dynamic_mesh, x_, cardiac_cycle, backflow_facets,
         x_["u0"].zero()
 
         wall_counter_max = wall_counter.counter
-        wall_motion = wall_counter.get_motion()
+        wall_motion = wall_counter.get_motion_mapping()
 
         # Remove explicitly from memory.
         del wall_counter
+
+        if MPI.rank(MPI.comm_world) == 0:
+            print("Creating wall boundary conditions")
 
         for i, coord in enumerate(coords):
             wall_ = Wall_motion(t, wall_motion, wall_counter_max, i, cardiac_cycle, element=V.ufl_element())
@@ -344,6 +356,7 @@ def temporal_hook(mesh, id_wall, id_out, cardiac_cycle, dt, t, save_solution_fre
                   eval_dict, dump_probe_frequency, p_, save_solution_at_tstep, nu, D_mitral, U, u_mean0, u_mean1,
                   u_mean2, save_flow_metrics_frequency, save_volume_frequency, save_solution_frequency_xdmf, u_vec,
                   viz_U, boundary, outlet_area, **NS_namespace):
+    print(f"Timestep: {tstep}")
     if tstep % save_volume_frequency == 0:
         compute_volume(mesh, t, newfolder)
 
