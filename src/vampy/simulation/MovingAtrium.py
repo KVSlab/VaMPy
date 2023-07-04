@@ -77,8 +77,7 @@ def problem_parameters(commandline_kwargs, NS_parameters, scalar_components, Sch
             max_iter=2,
             velocity_degree=1,
             pressure_degree=1,
-            use_krylov_solvers=True,
-            krylov_solvers=dict(monitor_convergence=False)
+            use_krylov_solvers=True
         )
 
     if MPI.rank(MPI.comm_world) == 0:
@@ -146,6 +145,7 @@ class Wall_motion(UserExpression):
 
 def create_bcs(NS_expressions, dynamic_mesh, x_, cardiac_cycle, backflow_facets, mesh, mesh_path, nu, t,
                V, Q, id_in, id_out, **NS_namespace):
+    rank = MPI.rank(MPI.comm_world)
     coords = ['x', 'y', 'z']
     # Variables needed during the simulation
     boundary = MeshFunction("size_t", mesh, mesh.geometry().dim() - 1, mesh.domains())
@@ -182,17 +182,17 @@ def create_bcs(NS_expressions, dynamic_mesh, x_, cardiac_cycle, backflow_facets,
         # Create Womersley boundary condition at inlet
         inlet = make_womersley_bcs(t_values, Q_scaled, mesh, nu, tmp_area, tmp_center, tmp_radius, tmp_normal,
                                    V.ufl_element())
-        NS_expressions["inlet_{}".format(ID)] = inlet
+        NS_expressions[f"inlet_{ID}"] = inlet
 
     # Initial condition
     for ID in id_in:
         for i in [0, 1, 2]:
-            NS_expressions["inlet_{}".format(ID)][i].set_t(t)
+            NS_expressions[f"inlet_{ID}"][i].set_t(t)
 
     # Create inlet boundary conditions
     bc_inlets = {}
     for ID in id_in:
-        bc_inlet = [DirichletBC(V, NS_expressions["inlet_{}".format(ID)][i], boundary, ID) for i in range(3)]
+        bc_inlet = [DirichletBC(V, NS_expressions[f"inlet_{ID}"][i], boundary, ID) for i in range(3)]
         bc_inlets[ID] = bc_inlet
 
     # Set outlet boundary conditions, assuming one outlet (Mitral Valve)
@@ -201,10 +201,10 @@ def create_bcs(NS_expressions, dynamic_mesh, x_, cardiac_cycle, backflow_facets,
     # Set wall boundary conditions
     if dynamic_mesh:
         # Moving walls
-        if MPI.rank(MPI.comm_world) == 0:
+        if rank == 0:
             print("Loading displacement points")
         points = np.load(mesh_path.split(".xml")[0] + "_points.np", allow_pickle=True)
-        if MPI.rank(MPI.comm_world) == 0:
+        if rank == 0:
             print("Creating splines for displacement")
         # Define wall movement
         wall_counter = Surface_counter(points, cardiac_cycle, element=V.ufl_element())
@@ -218,7 +218,7 @@ def create_bcs(NS_expressions, dynamic_mesh, x_, cardiac_cycle, backflow_facets,
         # Remove explicitly from memory.
         del wall_counter
 
-        if MPI.rank(MPI.comm_world) == 0:
+        if rank == 0:
             print("Creating wall boundary conditions")
 
         for i, coord in enumerate(coords):
@@ -262,10 +262,6 @@ def pre_solve_hook(u_components, id_in, id_out, dynamic_mesh, V, Q, cardiac_cycl
     viz_U, viz_b = get_visualization_writers(newfolder, ['velocity', 'blood'])
 
     # Extract dof map and coordinates
-    VV = VectorFunctionSpace(mesh, "CG", velocity_degree)
-    u_vec = Function(VV, name="Velocity")
-
-    # Extract dof map and coordinates
     coordinates = mesh.coordinates()
     if velocity_degree == 1:
         dof_map = vertex_to_dof_map(V)
@@ -291,6 +287,12 @@ def pre_solve_hook(u_components, id_in, id_out, dynamic_mesh, V, Q, cardiac_cycl
     # Save mesh as HDF5 file for post-processing
     with HDF5File(MPI.comm_world, files["mesh"], "w") as mesh_file:
         mesh_file.write(mesh, "mesh")
+
+    # Create Probes path
+    probes_folder = path.join(newfolder, "Probes")
+    if MPI.rank(MPI.comm_world) == 0:
+        if not path.exists(probes_folder):
+            makedirs(probes_folder)
 
     # Create vector function for storing velocity
     Vv = VectorFunctionSpace(mesh, "CG", velocity_degree)
@@ -336,36 +338,34 @@ def pre_solve_hook(u_components, id_in, id_out, dynamic_mesh, V, Q, cardiac_cycl
 
     return dict(outlet_area=outlet_area, id_wall=id_wall, D_mitral=D_mitral, n=n, eval_dict=eval_dict, U=U,
                 u_mean=u_mean, u_mean0=u_mean0, u_mean1=u_mean1, u_mean2=u_mean2, boundary=boundary, bc_mesh=bc_mesh,
-                coordinates=coordinates, viz_U=viz_U, u_vec=u_vec, save_solution_at_tstep=save_solution_at_tstep,
-                dof_map=dof_map, viz_b=viz_b)
+                coordinates=coordinates, viz_U=viz_U, save_solution_at_tstep=save_solution_at_tstep,
+                dof_map=dof_map, viz_b=viz_b, probes_folder=probes_folder)
 
 
 def update_boundary_conditions(t, dynamic_mesh, NS_expressions, id_in, **NS_namespace):
     # Update inlet condition
     for ID in id_in:
         for i in [0, 1, 2]:
-            NS_expressions["inlet_{}".format(ID)][i].set_t(t)
+            NS_expressions[f"inlet_{ID}"][i].set_t(t)
 
     if dynamic_mesh:
         # Update wall motion BCs
         for coord in ["x", "y", "z"]:
-            NS_expressions["wall_{}".format(coord)].t = t
+            NS_expressions[f"wall_{coord}"].t = t
 
 
 def temporal_hook(mesh, id_wall, id_out, cardiac_cycle, dt, t, save_solution_frequency, u_, id_in, tstep, newfolder,
                   eval_dict, dump_probe_frequency, p_, save_solution_at_tstep, nu, D_mitral, U, u_mean0, u_mean1,
-                  u_mean2, save_flow_metrics_frequency, save_volume_frequency, save_solution_frequency_xdmf, u_vec,
-                  viz_U, boundary, outlet_area, **NS_namespace):
-    print(f"Timestep: {tstep}")
+                  u_mean2, save_flow_metrics_frequency, save_volume_frequency, save_solution_frequency_xdmf, viz_U,
+                  boundary, outlet_area, probes_folder, **NS_namespace):
     if tstep % save_volume_frequency == 0:
         compute_volume(mesh, t, newfolder)
 
     if tstep % save_solution_frequency_xdmf == 0:
-        assign(u_vec.sub(0), u_[0])
-        assign(u_vec.sub(1), u_[1])
-        assign(u_vec.sub(2), u_[2])
+        for i in range(3):
+            assign(U.sub(i), u_[i])
 
-        viz_U.write(u_vec, t)
+        viz_U.write(U, t)
 
     if tstep % save_flow_metrics_frequency == 0:
         h = mesh.hmin()
@@ -382,36 +382,22 @@ def temporal_hook(mesh, id_wall, id_out, cardiac_cycle, dt, t, save_solution_fre
     if tstep % dump_probe_frequency == 0:
         # Save variables along the centerline for CFD simulation
         # diagnostics and light-weight post-processing
-        filepath = path.join(newfolder, "Probes")
-        if MPI.rank(MPI.comm_world) == 0:
-            if not path.exists(filepath):
-                makedirs(filepath)
-
-        arr_u_x = eval_dict["centerline_u_x_probes"].array()
-        arr_u_y = eval_dict["centerline_u_y_probes"].array()
-        arr_u_z = eval_dict["centerline_u_z_probes"].array()
-        arr_p = eval_dict["centerline_p_probes"].array()
-
-        # Dump stats
-        if MPI.rank(MPI.comm_world) == 0:
-            arr_u_x.dump(path.join(filepath, "u_x_%s.probes" % str(tstep)))
-            arr_u_y.dump(path.join(filepath, "u_y_%s.probes" % str(tstep)))
-            arr_u_z.dump(path.join(filepath, "u_z_%s.probes" % str(tstep)))
-            arr_p.dump(path.join(filepath, "p_%s.probes" % str(tstep)))
+        for component in ["u_x", "u_y", "u_z", "p"]:
+            arr = eval_dict[f"centerline_{component}_probes"].array()
+            if MPI.rank(MPI.comm_world) == 0:
+                # Dump stats
+                arr.dump(path.join(probes_folder, f"{component}_{str(tstep)}.probes"))
 
         # Clear stats
         MPI.barrier(MPI.comm_world)
-        eval_dict["centerline_u_x_probes"].clear()
-        eval_dict["centerline_u_y_probes"].clear()
-        eval_dict["centerline_u_z_probes"].clear()
-        eval_dict["centerline_p_probes"].clear()
+        for component in ["u_x", "u_y", "u_z", "p"]:
+            eval_dict[f"centerline_{component}_probes"].clear()
 
     # Save velocity and pressure for post-processing
     if tstep % save_solution_frequency == 0 and tstep >= save_solution_at_tstep:
         # Assign velocity components to vector solution
-        assign(U.sub(0), u_[0])
-        assign(U.sub(1), u_[1])
-        assign(U.sub(2), u_[2])
+        for i in range(3):
+            assign(U.sub(i), u_[i])
 
         # Get save paths
         files = NS_parameters['files']
