@@ -58,7 +58,8 @@ def problem_parameters(commandline_kwargs, NS_parameters, scalar_components, Sch
             id_out=[],  # Outlet boundary IDs
             # Simulation parameters
             cardiac_cycle=cardiac_cycle,  # Run simulation for 1 cardiac cycles [ms]
-            T=number_of_cycles * cardiac_cycle,  # Number of cycles
+            # FIXME: For scaling only
+            T=25,  # Total simulation length
             dt=1,  # # Time step size [ms]
             # Frequencies to save data
             dump_probe_frequency=500,  # Dump frequency for sampling velocity & pressure at probes along the centerline
@@ -73,7 +74,7 @@ def problem_parameters(commandline_kwargs, NS_parameters, scalar_components, Sch
             folder="results_moving_atrium",
             mesh_path=commandline_kwargs["mesh_path"],
             # Solver parameters
-            max_iter=1,
+            max_iter=2,
             velocity_degree=1,
             pressure_degree=1,
             use_krylov_solvers=True,
