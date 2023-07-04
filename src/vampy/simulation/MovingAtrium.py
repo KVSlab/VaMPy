@@ -4,8 +4,9 @@ from os import makedirs
 from pprint import pprint
 
 from oasismove.problems.NSfracStep import *
-from oasismove.problems.NSfracStep.MovingAtriumCommon import Surface_counter, Wall_motion
 from oasismove.problems.NSfracStep.MovingCommon import get_visualization_writers
+from scipy.interpolate import splrep, splev
+from scipy.spatial import distance
 
 from vampy.simulation.Probe import Probes  # type: ignore
 from vampy.simulation.Womersley import make_womersley_bcs, compute_boundary_geometry_acrn
@@ -79,19 +80,6 @@ def problem_parameters(commandline_kwargs, NS_parameters, scalar_components, Sch
             krylov_solvers=dict(monitor_convergence=False)
         )
 
-    mesh_file = NS_parameters["mesh_path"].split("/")[-1]
-    case_name = mesh_file.split(".")[0]
-    NS_parameters["folder"] = path.join(NS_parameters["folder"], case_name)
-
-    point_path = NS_parameters["mesh_path"].split(".xml")[0] + "_flowext_points.npy"
-    points = np.load(point_path)
-    p_MV = points[0]
-    p_FE = points[1]
-    FE_rad = points[2][0]
-    NS_parameters["p_MV"] = p_MV
-    NS_parameters["p_FE"] = p_FE
-    NS_parameters["FE_rad"] = FE_rad
-
     if MPI.rank(MPI.comm_world) == 0:
         print("=== Starting simulation for MovingAtrium.py ===")
         print("Running with the following parameters:")
@@ -104,6 +92,47 @@ def mesh(mesh_path, **NS_namespace):
     print_mesh_information(atrium_mesh)
 
     return atrium_mesh
+
+
+class Surface_counter(UserExpression):
+    def __init__(self, points, cycle, **kwargs):
+        self.motion = {}
+        self.counter = -1
+        self.points = points
+        self.time = np.linspace(0, cycle, self.points.shape[-1])
+        super().__init__(**kwargs)
+
+    def get_motion(self):
+        return self.motion
+
+    def eval(self, _, x):
+        self.counter += 1
+        index = distance.cdist([x], self.points[:, :, 0]).argmin()
+        # s = 1E2, per=False  4 blad
+
+        s = 1E-3
+        x_ = splrep(self.time, self.points[index, 0, :], s=s, per=True)
+        y_ = splrep(self.time, self.points[index, 1, :], s=s, per=True)
+        z_ = splrep(self.time, self.points[index, 2, :], s=s, per=True)
+        self.motion[self.counter] = [x_, y_, z_]
+
+
+class Wall_motion(UserExpression):
+    def __init__(self, t, motion, max_counter, direction, cycle, **kwargs):
+        self.t = t
+        self.motion = motion
+        self.max_counter = max_counter
+        self.counter = -1
+        self.direction = direction
+        self.cycle = cycle
+        super().__init__(**kwargs)
+
+    def eval(self, values, _):
+        self.counter += 1
+        # No motion for inlet/outlet
+        values[:] = splev(self.t % self.cycle, self.motion[self.counter][self.direction], der=1)
+        if self.counter == self.max_counter:
+            self.counter = -1
 
 
 def create_bcs(NS_expressions, dynamic_mesh, x_, cardiac_cycle, backflow_facets, mesh, mesh_path, nu, t,
