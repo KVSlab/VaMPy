@@ -273,7 +273,7 @@ def pre_solve_hook(u_components, id_in, id_out, dynamic_mesh, V, Q, cardiac_cycl
     probe_points = np.load(rel_path, encoding='latin1', fix_imports=True, allow_pickle=True)
 
     # Define xdmf writers
-    viz_U = get_visualization_writers(newfolder, ['velocity'])
+    viz_U = get_visualization_writers(newfolder, ['velocity'])[0]
 
     # Extract dof map and coordinates
     coordinates = mesh.coordinates()
