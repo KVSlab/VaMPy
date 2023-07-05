@@ -152,6 +152,11 @@ class Wall_motion(UserExpression):
 
 def create_bcs(NS_expressions, dynamic_mesh, x_, cardiac_cycle, backflow_facets, mesh, mesh_path, nu, t,
                V, Q, id_in, id_out, **NS_namespace):
+    if mesh_path.endswith(".xml") or mesh_path.endswith(".xml.gz"):
+        mesh_filename = ".xml"
+    elif mesh_path.endswith(".h5"):
+        mesh_filename = ".h5"
+
     rank = MPI.rank(MPI.comm_world)
     coords = ['x', 'y', 'z']
     # Variables needed during the simulation
@@ -161,7 +166,7 @@ def create_bcs(NS_expressions, dynamic_mesh, x_, cardiac_cycle, backflow_facets,
             f.read(boundary, "boundary")
 
     # Get IDs for inlet(s) and outlet(s)
-    info_path = mesh_path.split(".xml")[0] + "_info.json"
+    info_path = mesh_path.split(mesh_filename)[0] + "_info.json"
     with open(info_path) as f:
         info = json.load(f)
 
@@ -178,9 +183,9 @@ def create_bcs(NS_expressions, dynamic_mesh, x_, cardiac_cycle, backflow_facets,
 
     # Load normalized time and flow rate values
     if dynamic_mesh:
-        flow_rate_path = mesh_path.split(".xml")[0] + "_flowrate_moving.txt"
+        flow_rate_path = mesh_path.split(mesh_filename)[0] + "_flowrate_moving.txt"
     else:
-        flow_rate_path = mesh_path.split(".xml")[0] + "_flowrate_rigid.txt"
+        flow_rate_path = mesh_path.split(mesh_filename)[0] + "_flowrate_rigid.txt"
 
     t_values, Q_ = np.loadtxt(flow_rate_path).T
     t_values *= 1000  # Scale time in normalised flow wave form to [ms]
@@ -213,7 +218,7 @@ def create_bcs(NS_expressions, dynamic_mesh, x_, cardiac_cycle, backflow_facets,
         # Moving walls
         if rank == 0:
             print("Loading displacement points")
-        points = np.load(mesh_path.split(".xml")[0] + "_points.np", allow_pickle=True)
+        points = np.load(mesh_path.split(mesh_filename)[0] + "_points.np", allow_pickle=True)
         if rank == 0:
             print("Creating splines for displacement")
         # Define wall movement
@@ -253,7 +258,8 @@ def pre_solve_hook(u_components, id_in, id_out, dynamic_mesh, V, Q, cardiac_cycl
                    restart_folder, **NS_namespace):
     id_wall = min(id_in + id_out) - 1
     # Extract diameter at mitral valve
-    info_path = mesh_path.split(".xml")[0] + "_info.json"
+    mesh_filename=".h5"
+    info_path = mesh_path.split(mesh_filename)[0] + "_info.json"
     with open(info_path) as f:
         info = json.load(f)
 
@@ -263,7 +269,7 @@ def pre_solve_hook(u_components, id_in, id_out, dynamic_mesh, V, Q, cardiac_cycl
     # Create point for evaluation
     n = FacetNormal(mesh)
     eval_dict = {}
-    rel_path = mesh_path.split(".xml")[0] + "_probe_point"
+    rel_path = mesh_path.split(mesh_filename)[0] + "_probe_point"
     probe_points = np.load(rel_path, encoding='latin1', fix_imports=True, allow_pickle=True)
 
     # Define xdmf writers
