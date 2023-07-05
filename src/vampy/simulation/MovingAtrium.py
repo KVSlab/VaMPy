@@ -258,7 +258,11 @@ def pre_solve_hook(u_components, id_in, id_out, dynamic_mesh, V, Q, cardiac_cycl
                    restart_folder, **NS_namespace):
     id_wall = min(id_in + id_out) - 1
     # Extract diameter at mitral valve
-    mesh_filename=".h5"
+    if mesh_path.endswith(".xml") or mesh_path.endswith(".xml.gz"):
+        mesh_filename = ".xml"
+    elif mesh_path.endswith(".h5"):
+        mesh_filename = ".h5"
+
     info_path = mesh_path.split(mesh_filename)[0] + "_info.json"
     with open(info_path) as f:
         info = json.load(f)
