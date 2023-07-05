@@ -89,10 +89,16 @@ def problem_parameters(commandline_kwargs, NS_parameters, scalar_components, Sch
 
 def mesh(mesh_path, **NS_namespace):
     # Read mesh and print mesh information
-    atrium_mesh = Mesh(mesh_path)
-    print_mesh_information(atrium_mesh)
+    if mesh_path.endswith(".xml") or mesh_path.endswith(".xml.gz"):
+        mesh = Mesh(mesh_path)
+    elif mesh_path.endswith(".h5"):
+        mesh = Mesh()
+        with HDF5File(MPI.comm_world, mesh_path, "r") as f:
+            f.read(mesh, "mesh", False)
 
-    return atrium_mesh
+    print_mesh_information(mesh)
+
+    return mesh
 
 
 class Surface_counter(UserExpression):
@@ -150,6 +156,9 @@ def create_bcs(NS_expressions, dynamic_mesh, x_, cardiac_cycle, backflow_facets,
     coords = ['x', 'y', 'z']
     # Variables needed during the simulation
     boundary = MeshFunction("size_t", mesh, mesh.geometry().dim() - 1, mesh.domains())
+    if mesh_path.endswith(".h5"):
+        with HDF5File(MPI.comm_world, mesh_path, "r") as f:
+            f.read(boundary, "boundary")
 
     # Get IDs for inlet(s) and outlet(s)
     info_path = mesh_path.split(".xml")[0] + "_info.json"
