@@ -221,6 +221,7 @@ def create_bcs(NS_expressions, dynamic_mesh, x_, cardiac_cycle, backflow_facets,
         points = np.load(mesh_path.split(mesh_filename)[0] + "_points.np", allow_pickle=True)
         if rank == 0:
             print("Creating splines for displacement")
+
         # Define wall movement
         wall_counter = Surface_counter(points, cardiac_cycle, element=V.ufl_element())
         bc_tmp = DirichletBC(V, wall_counter, boundary, id_wall)
@@ -232,6 +233,7 @@ def create_bcs(NS_expressions, dynamic_mesh, x_, cardiac_cycle, backflow_facets,
 
         # Remove explicitly from memory.
         del wall_counter
+        del points
 
         if rank == 0:
             print("Creating wall boundary conditions")
