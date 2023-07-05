@@ -308,29 +308,20 @@ def pre_solve_hook(u_components, id_in, id_out, dynamic_mesh, V, Q, cardiac_cycl
     if dynamic_mesh:
         # Set wall motion BCS
         bc_mesh = dict((ui, []) for ui in u_components)
-        bcu_in_x = []
-        bcu_in_y = []
-        bcu_in_z = []
 
+        # Zero wall velocity at inlet and outlet
         noslip = Constant(0.0)
-
-        bc_out_x = DirichletBC(V, noslip, boundary, id_out[0])
-        bc_out_y = DirichletBC(V, noslip, boundary, id_out[0])
-        bc_out_z = DirichletBC(V, noslip, boundary, id_out[0])
-        for i, ID in enumerate(id_in):
-            bcu = DirichletBC(V, noslip, boundary, ID)
-            bcu_in_x.append(bcu)
-            bcu_in_y.append(bcu)
-            bcu_in_z.append(bcu)
+        bc_out = [DirichletBC(V, noslip, boundary, ID) for ID in id_out]
+        bcu_in = [DirichletBC(V, noslip, boundary, ID) for ID in id_in]
 
         # Add wall movement to wall
         bcu_wall_x = DirichletBC(V, NS_expressions["wall_x"], boundary, id_wall)
         bcu_wall_y = DirichletBC(V, NS_expressions["wall_y"], boundary, id_wall)
         bcu_wall_z = DirichletBC(V, NS_expressions["wall_z"], boundary, id_wall)
 
-        bc_mesh["u0"] = [bcu_wall_x] + [bc_out_x] + bcu_in_x
-        bc_mesh["u1"] = [bcu_wall_y] + [bc_out_y] + bcu_in_y
-        bc_mesh["u2"] = [bcu_wall_z] + [bc_out_z] + bcu_in_z
+        bc_mesh["u0"] = [bcu_wall_x] + bc_out + bcu_in
+        bc_mesh["u1"] = [bcu_wall_y] + bc_out + bcu_in
+        bc_mesh["u2"] = [bcu_wall_z] + bc_out + bcu_in
     else:
         bc_mesh = {}
 
