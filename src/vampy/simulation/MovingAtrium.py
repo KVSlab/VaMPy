@@ -235,9 +235,7 @@ def create_bcs(NS_expressions, dynamic_mesh, x_, cardiac_cycle, backflow_facets,
     bc_u1 = [bc_inlets[ID][1] for ID in id_in] + [bc_wall[1]]
     bc_u2 = [bc_inlets[ID][2] for ID in id_in] + [bc_wall[2]]
 
-    bc_blood = [DirichletBC(V, Constant(0.0), boundary, ID) for ID in id_in]
-
-    return dict(u0=bc_u0, u1=bc_u1, u2=bc_u2, p=bc_p, blood=bc_blood)
+    return dict(u0=bc_u0, u1=bc_u1, u2=bc_u2, p=bc_p)
 
 
 def pre_solve_hook(u_components, id_in, id_out, dynamic_mesh, V, Q, cardiac_cycle, dt,
@@ -259,7 +257,7 @@ def pre_solve_hook(u_components, id_in, id_out, dynamic_mesh, V, Q, cardiac_cycl
     probe_points = np.load(rel_path, encoding='latin1', fix_imports=True, allow_pickle=True)
 
     # Define xdmf writers
-    viz_U, viz_b = get_visualization_writers(newfolder, ['velocity', 'blood'])
+    viz_U = get_visualization_writers(newfolder, ['velocity'])
 
     # Extract dof map and coordinates
     coordinates = mesh.coordinates()
@@ -339,7 +337,7 @@ def pre_solve_hook(u_components, id_in, id_out, dynamic_mesh, V, Q, cardiac_cycl
     return dict(outlet_area=outlet_area, id_wall=id_wall, D_mitral=D_mitral, n=n, eval_dict=eval_dict, U=U,
                 u_mean=u_mean, u_mean0=u_mean0, u_mean1=u_mean1, u_mean2=u_mean2, boundary=boundary, bc_mesh=bc_mesh,
                 coordinates=coordinates, viz_U=viz_U, save_solution_at_tstep=save_solution_at_tstep,
-                dof_map=dof_map, viz_b=viz_b, probes_folder=probes_folder)
+                dof_map=dof_map, probes_folder=probes_folder)
 
 
 def update_boundary_conditions(t, dynamic_mesh, NS_expressions, id_in, **NS_namespace):
