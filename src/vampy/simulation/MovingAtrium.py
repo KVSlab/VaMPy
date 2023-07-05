@@ -26,6 +26,7 @@ def problem_parameters(commandline_kwargs, NS_parameters, scalar_components, Sch
     results/solutions from the second cycle are stored to avoid non-physiological effects from the first cycle.
     One cardiac cycle is set to 0.951 s from [1], and scaled by a factor of 1000, hence all parameters are in
     [mm] or [ms].
+    The script has been adjusted to handle moving domains.
 
     [1] Hoi, Yiemeng, et al. "Characterization of volumetric flow rate waveforms at the carotid bifurcations of older
         adults." Physiological measurement 31.3 (2010): 291.
@@ -59,8 +60,8 @@ def problem_parameters(commandline_kwargs, NS_parameters, scalar_components, Sch
             # Simulation parameters
             cardiac_cycle=cardiac_cycle,  # Run simulation for 1 cardiac cycles [ms]
             # FIXME: For scaling only
-            T=2,  # Total simulation length
-            dt=1,  # # Time step size [ms]
+            T=10,  # Total simulation length
+            dt=0.2,  # # Time step size [ms]
             # Frequencies to save data
             dump_probe_frequency=500,  # Dump frequency for sampling velocity & pressure at probes along the centerline
             save_solution_frequency=5,  # Save frequency for velocity and pressure field
