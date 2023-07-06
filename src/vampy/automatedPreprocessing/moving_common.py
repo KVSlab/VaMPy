@@ -2,8 +2,9 @@ from os import listdir, mkdir
 
 from morphman.common import *
 from scipy.interpolate import interp1d
-from vampy.automatedPreprocessing.preprocessing_common import scale_surface
 from vtk.numpy_interface import dataset_adapter as dsa
+
+from vampy.automatedPreprocessing.preprocessing_common import scale_surface
 
 # Global array names
 radiusArrayName = 'MaximumInscribedSphereRadius'
@@ -175,7 +176,7 @@ def save_displacement(file_name_displacement_points, points):
         file_name_displacement_points (str): Path to numpy point path
         points (ndarray): Numpy array consisting of displacement surface points
     """
-    N = 200
+    N = 100
     periodic = True
     if periodic:
         points[:, :, -1] = points[:, :, 0]
@@ -186,7 +187,7 @@ def save_displacement(file_name_displacement_points, points):
     move = np.zeros((points.shape[0], points.shape[1], N + 1))
     time_r = np.linspace(0, 1, N + 1)
     # Use interp1d if smooth displacement
-    smooth_displacement = False
+    smooth_displacement = True
     if smooth_displacement:
         x = interp1d(time, points[:, 0, :], axis=1)
         y = interp1d(time, points[:, 1, :], axis=1)
