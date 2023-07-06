@@ -9,8 +9,9 @@ from morphman import get_uncapped_surface, write_polydata, get_parameters, vtk_c
     get_vtk_point_locator, extract_single_line, vtk_merge_polydata, get_point_data_array, smooth_voronoi_diagram, \
     create_new_surface, compute_centers, vmtk_smooth_surface, str2bool, vmtk_compute_voronoi_diagram, \
     prepare_output_surface, vmtk_compute_geometric_features
-
 # Local imports
+from vmtk import vmtkscripts
+
 from vampy.automatedPreprocessing import ToolRepairSTL
 from vampy.automatedPreprocessing.moving_common import get_point_map, project_displacement, save_displacement
 from vampy.automatedPreprocessing.preprocessing_common import read_polydata, get_centers_for_meshing, \
@@ -77,6 +78,7 @@ def run_pre_processing(input_model, verbose_print, smoothing_method, smoothing_f
     file_name_voronoi_surface = base_path + "_voronoi_surface.vtp"
     file_name_surface_smooth = base_path + "_smooth.vtp"
     file_name_model_flow_ext = base_path + "_flowext.vtp"
+    file_name_model_flow_ext_capped = base_path + "_flowext_capped.vtp"
     file_name_clipped_model = base_path + "_clippedmodel.vtp"
     file_name_flow_centerlines = base_path + "_flow_cl.vtp"
     file_name_surface_name = base_path + "_remeshed_surface.vtp"
@@ -283,7 +285,7 @@ def run_pre_processing(input_model, verbose_print, smoothing_method, smoothing_f
         surface_extended = surface
 
     # Capp surface with flow extensions
-    capped_surface = vmtk_cap_polydata(surface_extended)
+    capped_surface = vmtk_surfacecapper(surface_extended)
 
     if dynamic_mesh:
         print("--- Computing mesh displacement and saving points to file")
@@ -312,7 +314,6 @@ def run_pre_processing(input_model, verbose_print, smoothing_method, smoothing_f
             target = inlet if is_atrium else outlets
             centerlines, _, _ = compute_centerlines(source, target, file_name_flow_centerlines, capped_surface,
                                                     resampling=resampling_step)
-
         else:
             centerlines = read_polydata(file_name_flow_centerlines)
 
@@ -447,6 +448,19 @@ def get_refine_region(capped_surface, case_name, centerlines, dir_path, file_nam
         misr_max.append(tmp_misr.max())
 
     return refine_region_centerline
+
+
+def vmtk_surfacecapper(surface_extended):
+    capper = vmtkscripts.vmtkSurfaceCapper()
+    capper.Surface = surface_extended
+    capper.Method = "smooth"
+    capper.ConstraintFactor = 0
+    capper.TriangleOutput = 0
+    capper.Interactive = 0
+    capper.NumberOfRings = 32
+    capper.Execute()
+
+    return capper.Surface
 
 
 def read_command_line(input_path=None):
