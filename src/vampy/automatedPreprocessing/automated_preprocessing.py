@@ -88,7 +88,7 @@ def run_pre_processing(input_model, verbose_print, smoothing_method, smoothing_f
     file_name_displacement_points = path.join(dir_path, case_name + "_points.np")
     folder_moved_surfaces = path.join(dir_path, case_name + "_moved")
     folder_extended_surfaces = path.join(dir_path, case_name + "_extended")
-    condition = "sr"  # or "sr"
+    condition = "af"  # or "sr"
     folder_moved_surfaces += f"_{condition}"
 
     print("\n--- Working on case:", case_name, "\n")
@@ -225,7 +225,7 @@ def run_pre_processing(input_model, verbose_print, smoothing_method, smoothing_f
         print("\n--- No smoothing of surface\n")
 
     # Read in LAA point from .json
-    LA_UKE = False
+    LA_UKE = True
     if LA_UKE:
         laa_path = "/Users/henriakj/PhD/Code/VaMPy/models/models_inria/LAA_POINTS_UKE.json"
         with open(laa_path) as f:
@@ -257,7 +257,7 @@ def run_pre_processing(input_model, verbose_print, smoothing_method, smoothing_f
             surface = dist_sphere_constant(surface, centerlines, region_center, misr_max,
                                            file_name_distance_to_sphere_diam_pre, edge_length)
 
-            remeshed = remesh_surface(surface, edge_length)
+            remeshed = remesh_surface(surface, edge_length, "edgelengtharray")
             remeshed = vtk_clean_polydata(remeshed)
             write_polydata(remeshed, file_name_remeshed)
     else:

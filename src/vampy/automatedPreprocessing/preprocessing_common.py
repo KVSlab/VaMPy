@@ -923,7 +923,7 @@ def scale_surface(surface, scale_factor):
     return scaled_surface
 
 
-def remesh_surface(surface, edge_length, exclude=None):
+def remesh_surface(surface, edge_length, element_size_mode="edgelength", exclude=None):
     surface = dsa.WrapDataObject(surface)
     if cellEntityArrayName not in surface.CellData.keys():
         surface.CellData.append(np.zeros(surface.VTKObject.GetNumberOfCells()) + 1, cellEntityArrayName)
@@ -935,13 +935,11 @@ def remesh_surface(surface, edge_length, exclude=None):
     remeshing.MinEdgeLength = 0.0
     remeshing.TargetEdgeLengthFactor = 1.0
     remeshing.TriangleSplitFactor = 5.0
-    bladder = False
-    if bladder:
-        remeshing.ElementSizeMode = "edgelengtharray"  # Variable size mesh
-        remeshing.TargetEdgeLengthArrayName = "Size"  # Variable size mesh
-    else:
-        remeshing.ElementSizeMode = "edgelength"
+    remeshing.ElementSizeMode = element_size_mode
+    if element_size_mode == "edgelength":
         remeshing.TargetEdgeLengthArrayName = ""
+    else:
+        remeshing.TargetEdgeLengthArrayName = "Size"  # Variable size mesh
 
     if exclude is not None:
         remeshing.ExcludeEntityIds = exclude
