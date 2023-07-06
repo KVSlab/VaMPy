@@ -8,15 +8,13 @@ from oasismove.problems.NSfracStep.MovingCommon import get_visualization_writers
 from scipy.interpolate import splrep, splev
 from scipy.spatial import KDTree
 
-from vampy.simulation.Probe import Probes  # type: ignore
+from oasismove.problems.NSfracStep.Probe import Probes  # type: ignore
 from vampy.simulation.Womersley import make_womersley_bcs, compute_boundary_geometry_acrn
 from vampy.simulation.simulation_common import store_u_mean, get_file_paths, print_mesh_information
 
-# FEniCS specific command to control the desired level of logging, here set to critical errors
-set_log_level(50)
 
-
-def problem_parameters(commandline_kwargs, NS_parameters, scalar_components, Schmidt, NS_expressions, **NS_namespace):
+# Override some problem specific parameters
+def problem_parameters(commandline_kwargs, NS_parameters, **NS_namespace):
     """
     Problem file for running CFD simulation in left atrial models consisting of arbitrary number of pulmonary veins (PV)
     (normally 3 to 7), and one outlet being the mitral valve. A Womersley velocity profile is applied at the inlets,
@@ -47,7 +45,7 @@ def problem_parameters(commandline_kwargs, NS_parameters, scalar_components, Sch
 
         NS_parameters.update(
             # Moving atrium parameters
-            dynamic_mesh=True,  # Run moving mesh simulation
+            dynamic_mesh=False,  # Run moving mesh simulation
             compute_velocity_and_pressure=True,  # Only solve mesh equations
             # Backflow parameters
             backflow_beta=0.2,
@@ -60,7 +58,7 @@ def problem_parameters(commandline_kwargs, NS_parameters, scalar_components, Sch
             # Simulation parameters
             cardiac_cycle=cardiac_cycle,  # Run simulation for 1 cardiac cycles [ms]
             # FIXME: For scaling only
-            T=0.2 * 50,  # Total simulation length
+            T=0.2 * 2,  # Total simulation length
             dt=0.2,  # # Time step size [ms]
             # Frequencies to save data
             dump_probe_frequency=500,  # Dump frequency for sampling velocity & pressure at probes along the centerline
@@ -71,7 +69,7 @@ def problem_parameters(commandline_kwargs, NS_parameters, scalar_components, Sch
             save_flow_metrics_frequency=4e10,  # Frequency for storing flow metrics
             # Oasis specific parameters
             checkpoint=50000,  # Overwrite solution in Checkpoint folder each checkpoint
-            print_intermediate_info=200,
+            print_intermediate_info=2,
             folder="results_moving_atrium",
             mesh_path=commandline_kwargs["mesh_path"],
             # Solver parameters
