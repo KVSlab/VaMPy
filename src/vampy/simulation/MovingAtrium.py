@@ -6,7 +6,7 @@ from pprint import pprint
 from oasismove.problems.NSfracStep import *
 from oasismove.problems.NSfracStep.MovingCommon import get_visualization_writers
 from scipy.interpolate import splrep, splev
-from scipy.spatial import distance
+from scipy.spatial import KDTree
 
 from vampy.simulation.Probe import Probes  # type: ignore
 from vampy.simulation.Womersley import make_womersley_bcs, compute_boundary_geometry_acrn
@@ -60,8 +60,8 @@ def problem_parameters(commandline_kwargs, NS_parameters, scalar_components, Sch
             # Simulation parameters
             cardiac_cycle=cardiac_cycle,  # Run simulation for 1 cardiac cycles [ms]
             # FIXME: For scaling only
-            T=200,  # Total simulation length
-            dt=1,  # # Time step size [ms]
+            T=0.2 * 50,  # Total simulation length
+            dt=0.2,  # # Time step size [ms]
             # Frequencies to save data
             dump_probe_frequency=500,  # Dump frequency for sampling velocity & pressure at probes along the centerline
             save_solution_frequency=5e10,  # Save frequency for velocity and pressure field
@@ -109,14 +109,19 @@ class Surface_counter(UserExpression):
         self.num_points = self.points.shape[0]
         self.num_samples = self.points.shape[-1]
         self.time = np.linspace(0, cycle, self.num_samples)
+        self.tree = self.create_kd_tree()
         super().__init__(**kwargs)
 
     def get_motion_mapping(self):
         return self.motion_mapping
 
+    def create_kd_tree(self):
+        tree = KDTree(self.points[:, :, 0])
+        return tree
+
     def eval(self, _, x):
         self.counter += 1
-        index = distance.cdist([x], self.points[:, :, 0]).argmin()
+        _, index = self.tree.query(x)
 
         s = 1E-2
         x_ = splrep(self.time, self.points[index, 0, :], s=s, per=True)
