@@ -48,7 +48,7 @@ def problem_parameters(commandline_kwargs, NS_parameters, scalar_components, Sch
         NS_parameters.update(
             # Moving atrium parameters
             dynamic_mesh=True,  # Run moving mesh simulation
-            compute_velocity_and_pressure=False,  # Only solve mesh equations
+            compute_velocity_and_pressure=True,  # Only solve mesh equations
             # Backflow parameters
             backflow_beta=0.2,
             backflow_facets=[],
@@ -65,7 +65,7 @@ def problem_parameters(commandline_kwargs, NS_parameters, scalar_components, Sch
             # Frequencies to save data
             dump_probe_frequency=500,  # Dump frequency for sampling velocity & pressure at probes along the centerline
             save_solution_frequency=5e10,  # Save frequency for velocity and pressure field
-            save_solution_frequency_xdmf=1,  # Save frequency for velocity and pressure field
+            save_solution_frequency_xdmf=5,  # Save frequency for velocity and pressure field
             save_solution_after_cycle=0,  # Store solution after 1 cardiac cycle
             save_volume_frequency=1e10,  # Save frequency for storing volume
             save_flow_metrics_frequency=4e10,  # Frequency for storing flow metrics
@@ -75,7 +75,7 @@ def problem_parameters(commandline_kwargs, NS_parameters, scalar_components, Sch
             folder="results_moving_atrium",
             mesh_path=commandline_kwargs["mesh_path"],
             # Solver parameters
-            max_iter=1,
+            max_iter=2,
             velocity_degree=1,
             pressure_degree=1,
             use_krylov_solvers=True
