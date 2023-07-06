@@ -48,7 +48,7 @@ def problem_parameters(commandline_kwargs, NS_parameters, scalar_components, Sch
         NS_parameters.update(
             # Moving atrium parameters
             dynamic_mesh=True,  # Run moving mesh simulation
-            compute_velocity_and_pressure=True,  # Only solve mesh equations
+            compute_velocity_and_pressure=False,  # Only solve mesh equations
             # Backflow parameters
             backflow_beta=0.2,
             backflow_facets=[],
@@ -60,12 +60,12 @@ def problem_parameters(commandline_kwargs, NS_parameters, scalar_components, Sch
             # Simulation parameters
             cardiac_cycle=cardiac_cycle,  # Run simulation for 1 cardiac cycles [ms]
             # FIXME: For scaling only
-            T=10,  # Total simulation length
-            dt=0.2,  # # Time step size [ms]
+            T=200,  # Total simulation length
+            dt=1,  # # Time step size [ms]
             # Frequencies to save data
             dump_probe_frequency=500,  # Dump frequency for sampling velocity & pressure at probes along the centerline
-            save_solution_frequency=5,  # Save frequency for velocity and pressure field
-            save_solution_frequency_xdmf=5,  # Save frequency for velocity and pressure field
+            save_solution_frequency=5e10,  # Save frequency for velocity and pressure field
+            save_solution_frequency_xdmf=1,  # Save frequency for velocity and pressure field
             save_solution_after_cycle=0,  # Store solution after 1 cardiac cycle
             save_volume_frequency=1e10,  # Save frequency for storing volume
             save_flow_metrics_frequency=4e10,  # Frequency for storing flow metrics
@@ -75,7 +75,7 @@ def problem_parameters(commandline_kwargs, NS_parameters, scalar_components, Sch
             folder="results_moving_atrium",
             mesh_path=commandline_kwargs["mesh_path"],
             # Solver parameters
-            max_iter=2,
+            max_iter=1,
             velocity_degree=1,
             pressure_degree=1,
             use_krylov_solvers=True
@@ -103,33 +103,27 @@ def mesh(mesh_path, **NS_namespace):
 
 class Surface_counter(UserExpression):
     def __init__(self, points, cycle, **kwargs):
-        self.motion = {}
         self.motion_mapping = {}
         self.counter = -1
         self.points = points
         self.num_points = self.points.shape[0]
         self.num_samples = self.points.shape[-1]
         self.time = np.linspace(0, cycle, self.num_samples)
-        self.motion = self.precompute_splines()
         super().__init__(**kwargs)
 
     def get_motion_mapping(self):
         return self.motion_mapping
 
-    def precompute_splines(self):
-        motion = {}
-        s = 2.5  # Inria Atrium
-        for index in range(self.num_points):
-            x_ = splrep(self.time, self.points[index, 0, :], s=s, per=True)
-            y_ = splrep(self.time, self.points[index, 1, :], s=s, per=True)
-            z_ = splrep(self.time, self.points[index, 2, :], s=s, per=True)
-            motion[index] = [x_, y_, z_]
-        return motion
-
     def eval(self, _, x):
         self.counter += 1
         index = distance.cdist([x], self.points[:, :, 0]).argmin()
-        self.motion_mapping[self.counter] = self.motion[index]
+
+        s = 1E-2
+        x_ = splrep(self.time, self.points[index, 0, :], s=s, per=True)
+        y_ = splrep(self.time, self.points[index, 1, :], s=s, per=True)
+        z_ = splrep(self.time, self.points[index, 2, :], s=s, per=True)
+
+        self.motion_mapping[self.counter] = [x_, y_, z_]
 
 
 class Wall_motion(UserExpression):
