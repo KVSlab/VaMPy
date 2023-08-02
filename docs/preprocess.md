@@ -41,7 +41,7 @@ If your input model is not in mm, you may scale it by adding the `--scale-factor
 value. To scale your model from m to mm you can run the following command:
 
 ``` console
-$ vampy-mesh -i models/artery/artery.vtp -c 1.3 --scaling-factor 1000
+$ vampy-mesh -i models/artery/artery.vtp -c 1.3 --scale-factor 1000
 ```
 
 ## Smoothing
@@ -57,7 +57,7 @@ default, no smoothing is performed. To perform Laplacian smoothing using the art
 command:
 
 ``` console
-$ vampy-mesh -i models/artery/artery.vtp -c 1.3 --smoothing-method laplace -si 800
+$ vampy-mesh -i models/artery/artery.vtp -c 1.3 --smoothing-method laplace -si 800 -sf 0.75
 ```
 
 In {numref}`smoothing`, we have shown a comparison of all the smoothing methods using `-si 800` and `-sf 0.75`, and
@@ -73,14 +73,14 @@ From left to right: the original artery model in red, and a comparison of the th
 ## Flow extensions
 
 Prior to mesh generation, flow extensions may be appended to the input model, often to assure that flow is fully
-developed as it enters and leaves the domain during CFD simulation. In VaMPy, this is controlled by
-the `--add-flowextensions` (`-f`)
-argument, which takes a boolean value and is `True` by default. The user may also supply the length of the flow
-extensions at what is considered to be the inlet(s) and outlet(s), controlled by the `--inlet-flowextension` (`-fli`)
-and `--outlet-flowextension` (`-flo`) command line arguments. Both are set to `5` by default, corresponding to a flow
-extension length equal to five times the length of the local radius at the boundary (inlet/outlet). To demonstrate, the
-following command will apply flow extensions to the artery model that are two and four times the local radius in length
-at the inlet and outlet, respectively:
+developed as it enters and leaves the domain during CFD simulation. It is also essential to add cylindrical flow
+extensions when applying velocity profiles that assume a circular inlet. In VaMPy, this is controlled by
+the `--add-flowextensions` (`-f`) argument, which takes a boolean value and is `True` by default. The user may also
+supply the length of the flow extensions at what is considered to be the inlet(s) and outlet(s), controlled by
+the `--inlet-flowextension` (`-fli`) and `--outlet-flowextension` (`-flo`) command line arguments. Both are set to `5`
+by default, corresponding to a flow extension length equal to five times the length of the local radius at the
+boundary (inlet/outlet). To demonstrate, the following command will apply flow extensions to the artery model that are
+two and four times the local radius in length at the inlet and outlet, respectively:
 
 ``` console
 $ vampy-mesh -i models/artery/artery.vtp -c 1.3 --add-flowextensions True -fli 2 -flo 4

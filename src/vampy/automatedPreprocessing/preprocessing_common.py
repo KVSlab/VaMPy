@@ -1,3 +1,4 @@
+import gzip
 from os import path
 
 import numpy as np
@@ -6,6 +7,7 @@ from morphman import vtk_clean_polydata, vtk_triangulate_surface, get_parameters
     get_distance, get_number_of_arrays, vmtk_smooth_surface, get_point_data_array, create_vtk_array, \
     get_vtk_point_locator, vtk_extract_feature_edges, get_uncapped_surface, vtk_compute_connectivity, \
     vtk_compute_mass_properties, extract_single_line, get_centerline_tolerance
+
 from vampy.automatedPreprocessing import ImportData
 from vampy.automatedPreprocessing.NetworkBoundaryConditions import FlowSplitting
 from vampy.automatedPreprocessing.vmtk_pointselector import vmtkPickPointSeedSelector
@@ -539,6 +541,7 @@ def generate_mesh(surface, add_boundary_layer):
     meshGenerator.Surface = surface
     meshGenerator.ElementSizeMode = "edgelengtharray"  # Variable size mesh
     meshGenerator.TargetEdgeLengthArrayName = "Size"  # Variable size mesh
+    meshGenerator.LogOn = 0
     if add_boundary_layer:
         meshGenerator.BoundaryLayer = 1
         meshGenerator.NumberOfSubLayers = 4
@@ -730,13 +733,27 @@ def write_mesh(compress_mesh, file_name_surface_name, file_name_vtu_mesh, file_n
     write_polydata(mesh, file_name_vtu_mesh)
 
     # Write mesh to FEniCS to format
-    meshWriter = vmtkscripts.vmtkMeshWriter()
-    meshWriter.CellEntityIdsArrayName = "CellEntityIds"
-    meshWriter.Mesh = mesh
-    meshWriter.Mode = "ascii"
-    meshWriter.Compressed = compress_mesh
-    meshWriter.OutputFileName = file_name_xml_mesh
-    meshWriter.Execute()
+    if compress_mesh:
+        file_name_xml_mesh += '.gz'
+    writer = vtkvmtk.vtkvmtkDolfinWriter()
+    writer.SetInputData(mesh)
+    writer.SetFileName(file_name_xml_mesh)
+    writer.SetBoundaryDataArrayName("CellEntityIds")
+    writer.SetBoundaryDataIdOffset(-1)
+    writer.SetStoreCellMarkers(0)
+
+    print('--- Writing Dolfin file')
+    writer.Write()
+
+    # Compress mesh locally to bypass VMTK issue
+    if compress_mesh:
+        file = open(file_name_xml_mesh, 'rb')
+        xml = file.read()
+        file.close()
+
+        gzfile = gzip.open(file_name_xml_mesh, 'wb')
+        gzfile.write(xml)
+        gzfile.close()
 
 
 def add_flow_extension(surface, centerlines, include_outlet, extension_length=2.0,
@@ -818,3 +835,42 @@ def scale_surface(surface, scale_factor):
     scaled_surface = surface_scaler.Surface
 
     return scaled_surface
+
+
+def get_furtest_surface_point(inlet, surface):
+    """
+    Calculates the furthest point on a given surface from a specified inlet point.
+    It iterates over each point on the surface, calculating its distance from the inlet and updates
+    the furthest distance accordingly.
+
+    Args:
+        inlet (list): A list with the inlet point.
+        surface (vtkPolyData): The surface to check for the furthest point.
+
+    Returns:
+        outlets (list): The x, y, z coordinates of the furthest point on the surface from the inlet.
+    """
+    outlets = []
+    end_point_distance = 0
+    for i in range(surface.GetNumberOfPoints()):
+        tmp_p = list(surface.GetPoint(i))
+        dx = get_distance(inlet, tmp_p)
+        if dx > end_point_distance:
+            end_point_distance = dx
+            outlets = tmp_p
+    return outlets
+
+
+def check_if_closed_surface(surface):
+    """
+      Checks if the given surface is capped (i.e., has no feature edges).
+
+      Args:
+          surface (vtkPolyData): The surface to check for capping.
+
+      Returns:
+          bool: True if the surface is capped, False otherwise.
+      """
+
+    cells = vtk_extract_feature_edges(surface)
+    return cells.GetNumberOfCells() == 0

@@ -1,12 +1,40 @@
-cff-version: 1.2.0
-message: "If you use VaMPy, please cite it as below."
+cff-version: "1.2.0"
 authors:
-- family-names: "Kjeldsberg"
-  given-names: "Henrik A."
-  orcid: "0000-0002-7764-4248"
-- family-names: "Bergersen"
-  given-names: "Aslak W."
-  orcid: "0000-0001-5063-3680"
-title: "VaMPy"
-version: "1.0.0"
-date-released: 2023-03-07
+- family-names: Kjeldsberg
+  given-names: Henrik A.
+  orcid: "https://orcid.org/0000-0002-7764-4248"
+- family-names: Bergersen
+  given-names: Aslak W.
+  orcid: "https://orcid.org/0000-0001-5063-3680"
+- family-names: Valen-Sendstad
+  given-names: Kristian
+  orcid: "https://orcid.org/0000-0002-2907-0171"
+doi: 10.5281/zenodo.7950605
+message: If you use this software, please cite our article in the
+  Journal of Open Source Software.
+preferred-citation:
+  authors:
+  - family-names: Kjeldsberg
+    given-names: Henrik A.
+    orcid: "https://orcid.org/0000-0002-7764-4248"
+  - family-names: Bergersen
+    given-names: Aslak W.
+    orcid: "https://orcid.org/0000-0001-5063-3680"
+  - family-names: Valen-Sendstad
+    given-names: Kristian
+    orcid: "https://orcid.org/0000-0002-2907-0171"
+  date-published: 2023-05-19
+  doi: 10.21105/joss.05278
+  issn: 2475-9066
+  issue: 85
+  journal: Journal of Open Source Software
+  publisher:
+    name: Open Journals
+  start: 5278
+  title: "VaMPy: An Automated and Objective Pipeline for Modeling
+    Vascular Geometries"
+  type: article
+  url: "https://joss.theoj.org/papers/10.21105/joss.05278"
+  volume: 8
+title: "VaMPy: An Automated and Objective Pipeline for Modeling Vascular
+  Geometries"
