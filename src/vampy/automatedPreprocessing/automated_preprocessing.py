@@ -8,7 +8,6 @@ from morphman import get_uncapped_surface, write_polydata, get_parameters, vtk_c
     get_vtk_point_locator, extract_single_line, vtk_merge_polydata, get_point_data_array, smooth_voronoi_diagram, \
     create_new_surface, compute_centers, vmtk_smooth_surface, str2bool, vmtk_compute_voronoi_diagram, \
     prepare_output_surface, vmtk_compute_geometric_features
-
 # Local imports
 from vampy.automatedPreprocessing import ToolRepairSTL
 from vampy.automatedPreprocessing.preprocessing_common import read_polydata, get_centers_for_meshing, \
@@ -256,10 +255,18 @@ def run_pre_processing(input_model, verbose_print, smoothing_method, smoothing_f
             print("--- Adding flow extensions\n")
             # Add extension normal on boundary for atrium models
             extension = "centerlinedirection" if is_atrium else "boundarynormal"
-            surface_extended = add_flow_extension(surface, centerlines, include_outlet=False,
+            if is_atrium:
+                # Flip lengths if model is atrium
+                inlet_flow_extension_length, outlet_flow_extension_length = \
+                    outlet_flow_extension_length, inlet_flow_extension_length
+
+            # Add extensions to inlet (artery)
+            surface_extended = add_flow_extension(surface, centerlines, is_inlet=True,
                                                   extension_length=inlet_flow_extension_length,
                                                   extension_mode=extension)
-            surface_extended = add_flow_extension(surface_extended, centerlines, include_outlet=True,
+
+            # Add extensions to outlets (artery)
+            surface_extended = add_flow_extension(surface_extended, centerlines, is_inlet=False,
                                                   extension_length=outlet_flow_extension_length)
 
             surface_extended = vmtk_smooth_surface(surface_extended, "laplace", iterations=200)

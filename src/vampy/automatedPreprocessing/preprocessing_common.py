@@ -7,7 +7,6 @@ from morphman import vtk_clean_polydata, vtk_triangulate_surface, get_parameters
     get_distance, get_number_of_arrays, vmtk_smooth_surface, get_point_data_array, create_vtk_array, \
     get_vtk_point_locator, vtk_extract_feature_edges, get_uncapped_surface, vtk_compute_connectivity, \
     vtk_compute_mass_properties, extract_single_line, get_centerline_tolerance
-
 from vampy.automatedPreprocessing import ImportData
 from vampy.automatedPreprocessing.NetworkBoundaryConditions import FlowSplitting
 from vampy.automatedPreprocessing.vmtk_pointselector import vmtkPickPointSeedSelector
@@ -191,10 +190,10 @@ def compute_centers_for_meshing(surface, is_atrium, case_path=None, test_capped=
 
         write_parameters(info, case_path)
 
-    boundary_center = center[boundary_id].tolist()  # center of the outlet
+    boundary_center = center[boundary_id].tolist()  # center of the inlet (artery) / outlet (atrium)
     center.pop(boundary_id)
 
-    center_ = [item for sublist in center for item in sublist]  # centers of the inlets
+    center_ = [item for sublist in center for item in sublist]  # centers of the outlets (artery) / inlets (atrium)
 
     return center_, boundary_center
 
@@ -756,15 +755,14 @@ def write_mesh(compress_mesh, file_name_surface_name, file_name_vtu_mesh, file_n
         gzfile.close()
 
 
-def add_flow_extension(surface, centerlines, include_outlet, extension_length=2.0,
-                       extension_mode="boundarynormal"):
+def add_flow_extension(surface, centerlines, is_inlet, extension_length=2.0, extension_mode="boundarynormal"):
     """
     Adds flow extensions to either all inlets or all outlets with specified extension length.
 
     Args:
         surface (vtkPolyData): Surface model to extend
-        centerlines (vtkPolyData): Centerlines in model
-        include_outlet (bool): Determines if outlet should be included or not
+        centerlines (vtkPolyData): Centerlines in model.
+        is_inlet (bool): Determines if inlet or outlet is to be extended.
         extension_length (float): Determines length of flow extensions.
                                 Factor is multiplied with MISR at relevant boundary
         extension_mode (str): Determines how extensions are place, either normal to boundary
@@ -783,14 +781,15 @@ def add_flow_extension(surface, centerlines, include_outlet, extension_length=2.
     lengths = []
     for i in range(boundaries.GetNumberOfCells()):
         lengths.append(get_curvilinear_coordinate(boundaries.GetCell(i))[-1])
-    outlet_id = lengths.index(max(lengths))
+
+    inlet_id = lengths.index(max(lengths))
 
     # Exclude outlet or inlets
     boundaryIds = vtk.vtkIdList()
     for i in range(centerlines.GetNumberOfLines() + 1):
-        if include_outlet and i == outlet_id:
+        if is_inlet and i == inlet_id:
             boundaryIds.InsertNextId(i)
-        if not include_outlet and i != outlet_id:
+        if not is_inlet and i != inlet_id:
             boundaryIds.InsertNextId(i)
 
     flowExtensionsFilter = vtkvmtk.vtkvmtkPolyDataFlowExtensionsFilter()
