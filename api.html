@@ -446,14 +446,14 @@ flow rates at inlet and outlet based on flow network model.</p>
 
 <span class="target" id="module-vampy.automatedPreprocessing.preprocessing_common"></span><dl class="py function">
 <dt class="sig sig-object py" id="vampy.automatedPreprocessing.preprocessing_common.add_flow_extension">
-<span class="sig-prename descclassname"><span class="pre">vampy.automatedPreprocessing.preprocessing_common.</span></span><span class="sig-name descname"><span class="pre">add_flow_extension</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">surface</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">centerlines</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">include_outlet</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">extension_length</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">2.0</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">extension_mode</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">'boundarynormal'</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/vampy/automatedPreprocessing/preprocessing_common.html#add_flow_extension"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#vampy.automatedPreprocessing.preprocessing_common.add_flow_extension" title="Permalink to this definition">#</a></dt>
+<span class="sig-prename descclassname"><span class="pre">vampy.automatedPreprocessing.preprocessing_common.</span></span><span class="sig-name descname"><span class="pre">add_flow_extension</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">surface</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">centerlines</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">is_inlet</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">extension_length</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">2.0</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">extension_mode</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">'boundarynormal'</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/vampy/automatedPreprocessing/preprocessing_common.html#add_flow_extension"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#vampy.automatedPreprocessing.preprocessing_common.add_flow_extension" title="Permalink to this definition">#</a></dt>
 <dd><p>Adds flow extensions to either all inlets or all outlets with specified extension length.</p>
 <dl class="field-list simple">
 <dt class="field-odd">Parameters</dt>
 <dd class="field-odd"><ul class="simple">
 <li><p><strong>surface</strong> (<em>vtkPolyData</em>) – Surface model to extend</p></li>
-<li><p><strong>centerlines</strong> (<em>vtkPolyData</em>) – Centerlines in model</p></li>
-<li><p><strong>include_outlet</strong> (<em>bool</em>) – Determines if outlet should be included or not</p></li>
+<li><p><strong>centerlines</strong> (<em>vtkPolyData</em>) – Centerlines in model.</p></li>
+<li><p><strong>is_inlet</strong> (<em>bool</em>) – Determines if inlet or outlet is to be extended.</p></li>
 <li><p><strong>extension_length</strong> (<em>float</em>) – Determines length of flow extensions.
 Factor is multiplied with MISR at relevant boundary</p></li>
 <li><p><strong>extension_mode</strong> (<em>str</em>) – Determines how extensions are place, either normal to boundary
@@ -2119,7 +2119,7 @@ By Henrik A. Kjeldsberg
   
   <div class="footer-item">
     <p class="last-updated">
-  Last updated on Jul 05, 2023.
+  Last updated on Aug 07, 2023.
   <br/>
 </p>
   </div>

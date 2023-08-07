@@ -336,7 +336,6 @@ document.write(`
     <span class="n">get_vtk_point_locator</span><span class="p">,</span> <span class="n">extract_single_line</span><span class="p">,</span> <span class="n">vtk_merge_polydata</span><span class="p">,</span> <span class="n">get_point_data_array</span><span class="p">,</span> <span class="n">smooth_voronoi_diagram</span><span class="p">,</span> \
     <span class="n">create_new_surface</span><span class="p">,</span> <span class="n">compute_centers</span><span class="p">,</span> <span class="n">vmtk_smooth_surface</span><span class="p">,</span> <span class="n">str2bool</span><span class="p">,</span> <span class="n">vmtk_compute_voronoi_diagram</span><span class="p">,</span> \
     <span class="n">prepare_output_surface</span><span class="p">,</span> <span class="n">vmtk_compute_geometric_features</span>
-
 <span class="c1"># Local imports</span>
 <span class="kn">from</span> <span class="nn">vampy.automatedPreprocessing</span> <span class="kn">import</span> <span class="n">ToolRepairSTL</span>
 <span class="kn">from</span> <span class="nn">vampy.automatedPreprocessing.preprocessing_common</span> <span class="kn">import</span> <span class="n">read_polydata</span><span class="p">,</span> <span class="n">get_centers_for_meshing</span><span class="p">,</span> \
@@ -584,10 +583,18 @@ document.write(`
             <span class="nb">print</span><span class="p">(</span><span class="s2">&quot;--- Adding flow extensions</span><span class="se">\n</span><span class="s2">&quot;</span><span class="p">)</span>
             <span class="c1"># Add extension normal on boundary for atrium models</span>
             <span class="n">extension</span> <span class="o">=</span> <span class="s2">&quot;centerlinedirection&quot;</span> <span class="k">if</span> <span class="n">is_atrium</span> <span class="k">else</span> <span class="s2">&quot;boundarynormal&quot;</span>
-            <span class="n">surface_extended</span> <span class="o">=</span> <span class="n">add_flow_extension</span><span class="p">(</span><span class="n">surface</span><span class="p">,</span> <span class="n">centerlines</span><span class="p">,</span> <span class="n">include_outlet</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span>
+            <span class="k">if</span> <span class="n">is_atrium</span><span class="p">:</span>
+                <span class="c1"># Flip lengths if model is atrium</span>
+                <span class="n">inlet_flow_extension_length</span><span class="p">,</span> <span class="n">outlet_flow_extension_length</span> <span class="o">=</span> \
+                    <span class="n">outlet_flow_extension_length</span><span class="p">,</span> <span class="n">inlet_flow_extension_length</span>
+
+            <span class="c1"># Add extensions to inlet (artery)</span>
+            <span class="n">surface_extended</span> <span class="o">=</span> <span class="n">add_flow_extension</span><span class="p">(</span><span class="n">surface</span><span class="p">,</span> <span class="n">centerlines</span><span class="p">,</span> <span class="n">is_inlet</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span>
                                                   <span class="n">extension_length</span><span class="o">=</span><span class="n">inlet_flow_extension_length</span><span class="p">,</span>
                                                   <span class="n">extension_mode</span><span class="o">=</span><span class="n">extension</span><span class="p">)</span>
-            <span class="n">surface_extended</span> <span class="o">=</span> <span class="n">add_flow_extension</span><span class="p">(</span><span class="n">surface_extended</span><span class="p">,</span> <span class="n">centerlines</span><span class="p">,</span> <span class="n">include_outlet</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span>
+
+            <span class="c1"># Add extensions to outlets (artery)</span>
+            <span class="n">surface_extended</span> <span class="o">=</span> <span class="n">add_flow_extension</span><span class="p">(</span><span class="n">surface_extended</span><span class="p">,</span> <span class="n">centerlines</span><span class="p">,</span> <span class="n">is_inlet</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span>
                                                   <span class="n">extension_length</span><span class="o">=</span><span class="n">outlet_flow_extension_length</span><span class="p">)</span>
 
             <span class="n">surface_extended</span> <span class="o">=</span> <span class="n">vmtk_smooth_surface</span><span class="p">(</span><span class="n">surface_extended</span><span class="p">,</span> <span class="s2">&quot;laplace&quot;</span><span class="p">,</span> <span class="n">iterations</span><span class="o">=</span><span class="mi">200</span><span class="p">)</span>
@@ -940,7 +947,7 @@ By Henrik A. Kjeldsberg
   
   <div class="footer-item">
     <p class="last-updated">
-  Last updated on Jul 05, 2023.
+  Last updated on Aug 07, 2023.
   <br/>
 </p>
   </div>

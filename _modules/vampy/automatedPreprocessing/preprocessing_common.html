@@ -335,7 +335,6 @@ document.write(`
     <span class="n">get_distance</span><span class="p">,</span> <span class="n">get_number_of_arrays</span><span class="p">,</span> <span class="n">vmtk_smooth_surface</span><span class="p">,</span> <span class="n">get_point_data_array</span><span class="p">,</span> <span class="n">create_vtk_array</span><span class="p">,</span> \
     <span class="n">get_vtk_point_locator</span><span class="p">,</span> <span class="n">vtk_extract_feature_edges</span><span class="p">,</span> <span class="n">get_uncapped_surface</span><span class="p">,</span> <span class="n">vtk_compute_connectivity</span><span class="p">,</span> \
     <span class="n">vtk_compute_mass_properties</span><span class="p">,</span> <span class="n">extract_single_line</span><span class="p">,</span> <span class="n">get_centerline_tolerance</span>
-
 <span class="kn">from</span> <span class="nn">vampy.automatedPreprocessing</span> <span class="kn">import</span> <span class="n">ImportData</span>
 <span class="kn">from</span> <span class="nn">vampy.automatedPreprocessing.NetworkBoundaryConditions</span> <span class="kn">import</span> <span class="n">FlowSplitting</span>
 <span class="kn">from</span> <span class="nn">vampy.automatedPreprocessing.vmtk_pointselector</span> <span class="kn">import</span> <span class="n">vmtkPickPointSeedSelector</span>
@@ -519,10 +518,10 @@ document.write(`
 
         <span class="n">write_parameters</span><span class="p">(</span><span class="n">info</span><span class="p">,</span> <span class="n">case_path</span><span class="p">)</span>
 
-    <span class="n">boundary_center</span> <span class="o">=</span> <span class="n">center</span><span class="p">[</span><span class="n">boundary_id</span><span class="p">]</span><span class="o">.</span><span class="n">tolist</span><span class="p">()</span>  <span class="c1"># center of the outlet</span>
+    <span class="n">boundary_center</span> <span class="o">=</span> <span class="n">center</span><span class="p">[</span><span class="n">boundary_id</span><span class="p">]</span><span class="o">.</span><span class="n">tolist</span><span class="p">()</span>  <span class="c1"># center of the inlet (artery) / outlet (atrium)</span>
     <span class="n">center</span><span class="o">.</span><span class="n">pop</span><span class="p">(</span><span class="n">boundary_id</span><span class="p">)</span>
 
-    <span class="n">center_</span> <span class="o">=</span> <span class="p">[</span><span class="n">item</span> <span class="k">for</span> <span class="n">sublist</span> <span class="ow">in</span> <span class="n">center</span> <span class="k">for</span> <span class="n">item</span> <span class="ow">in</span> <span class="n">sublist</span><span class="p">]</span>  <span class="c1"># centers of the inlets</span>
+    <span class="n">center_</span> <span class="o">=</span> <span class="p">[</span><span class="n">item</span> <span class="k">for</span> <span class="n">sublist</span> <span class="ow">in</span> <span class="n">center</span> <span class="k">for</span> <span class="n">item</span> <span class="ow">in</span> <span class="n">sublist</span><span class="p">]</span>  <span class="c1"># centers of the outlets (artery) / inlets (atrium)</span>
 
     <span class="k">return</span> <span class="n">center_</span><span class="p">,</span> <span class="n">boundary_center</span></div>
 
@@ -1084,15 +1083,14 @@ document.write(`
         <span class="n">gzfile</span><span class="o">.</span><span class="n">close</span><span class="p">()</span></div>
 
 
-<div class="viewcode-block" id="add_flow_extension"><a class="viewcode-back" href="../../../api.html#vampy.automatedPreprocessing.preprocessing_common.add_flow_extension">[docs]</a><span class="k">def</span> <span class="nf">add_flow_extension</span><span class="p">(</span><span class="n">surface</span><span class="p">,</span> <span class="n">centerlines</span><span class="p">,</span> <span class="n">include_outlet</span><span class="p">,</span> <span class="n">extension_length</span><span class="o">=</span><span class="mf">2.0</span><span class="p">,</span>
-                       <span class="n">extension_mode</span><span class="o">=</span><span class="s2">&quot;boundarynormal&quot;</span><span class="p">):</span>
+<div class="viewcode-block" id="add_flow_extension"><a class="viewcode-back" href="../../../api.html#vampy.automatedPreprocessing.preprocessing_common.add_flow_extension">[docs]</a><span class="k">def</span> <span class="nf">add_flow_extension</span><span class="p">(</span><span class="n">surface</span><span class="p">,</span> <span class="n">centerlines</span><span class="p">,</span> <span class="n">is_inlet</span><span class="p">,</span> <span class="n">extension_length</span><span class="o">=</span><span class="mf">2.0</span><span class="p">,</span> <span class="n">extension_mode</span><span class="o">=</span><span class="s2">&quot;boundarynormal&quot;</span><span class="p">):</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">    Adds flow extensions to either all inlets or all outlets with specified extension length.</span>
 
 <span class="sd">    Args:</span>
 <span class="sd">        surface (vtkPolyData): Surface model to extend</span>
-<span class="sd">        centerlines (vtkPolyData): Centerlines in model</span>
-<span class="sd">        include_outlet (bool): Determines if outlet should be included or not</span>
+<span class="sd">        centerlines (vtkPolyData): Centerlines in model.</span>
+<span class="sd">        is_inlet (bool): Determines if inlet or outlet is to be extended.</span>
 <span class="sd">        extension_length (float): Determines length of flow extensions.</span>
 <span class="sd">                                Factor is multiplied with MISR at relevant boundary</span>
 <span class="sd">        extension_mode (str): Determines how extensions are place, either normal to boundary</span>
@@ -1111,14 +1109,15 @@ document.write(`
     <span class="n">lengths</span> <span class="o">=</span> <span class="p">[]</span>
     <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="n">boundaries</span><span class="o">.</span><span class="n">GetNumberOfCells</span><span class="p">()):</span>
         <span class="n">lengths</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">get_curvilinear_coordinate</span><span class="p">(</span><span class="n">boundaries</span><span class="o">.</span><span class="n">GetCell</span><span class="p">(</span><span class="n">i</span><span class="p">))[</span><span class="o">-</span><span class="mi">1</span><span class="p">])</span>
-    <span class="n">outlet_id</span> <span class="o">=</span> <span class="n">lengths</span><span class="o">.</span><span class="n">index</span><span class="p">(</span><span class="nb">max</span><span class="p">(</span><span class="n">lengths</span><span class="p">))</span>
+
+    <span class="n">inlet_id</span> <span class="o">=</span> <span class="n">lengths</span><span class="o">.</span><span class="n">index</span><span class="p">(</span><span class="nb">max</span><span class="p">(</span><span class="n">lengths</span><span class="p">))</span>
 
     <span class="c1"># Exclude outlet or inlets</span>
     <span class="n">boundaryIds</span> <span class="o">=</span> <span class="n">vtk</span><span class="o">.</span><span class="n">vtkIdList</span><span class="p">()</span>
     <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="n">centerlines</span><span class="o">.</span><span class="n">GetNumberOfLines</span><span class="p">()</span> <span class="o">+</span> <span class="mi">1</span><span class="p">):</span>
-        <span class="k">if</span> <span class="n">include_outlet</span> <span class="ow">and</span> <span class="n">i</span> <span class="o">==</span> <span class="n">outlet_id</span><span class="p">:</span>
+        <span class="k">if</span> <span class="n">is_inlet</span> <span class="ow">and</span> <span class="n">i</span> <span class="o">==</span> <span class="n">inlet_id</span><span class="p">:</span>
             <span class="n">boundaryIds</span><span class="o">.</span><span class="n">InsertNextId</span><span class="p">(</span><span class="n">i</span><span class="p">)</span>
-        <span class="k">if</span> <span class="ow">not</span> <span class="n">include_outlet</span> <span class="ow">and</span> <span class="n">i</span> <span class="o">!=</span> <span class="n">outlet_id</span><span class="p">:</span>
+        <span class="k">if</span> <span class="ow">not</span> <span class="n">is_inlet</span> <span class="ow">and</span> <span class="n">i</span> <span class="o">!=</span> <span class="n">inlet_id</span><span class="p">:</span>
             <span class="n">boundaryIds</span><span class="o">.</span><span class="n">InsertNextId</span><span class="p">(</span><span class="n">i</span><span class="p">)</span>
 
     <span class="n">flowExtensionsFilter</span> <span class="o">=</span> <span class="n">vtkvmtk</span><span class="o">.</span><span class="n">vtkvmtkPolyDataFlowExtensionsFilter</span><span class="p">()</span>
@@ -1252,7 +1251,7 @@ By Henrik A. Kjeldsberg
   
   <div class="footer-item">
     <p class="last-updated">
-  Last updated on Jul 05, 2023.
+  Last updated on Aug 07, 2023.
   <br/>
 </p>
   </div>
