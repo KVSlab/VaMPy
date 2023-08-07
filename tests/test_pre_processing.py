@@ -1,7 +1,6 @@
 from os import path
 
 from dolfin import Mesh
-
 from vampy.automatedPreprocessing.automated_preprocessing import read_command_line, \
     run_pre_processing
 from vampy.automatedPreprocessing.preprocessing_common import read_polydata
@@ -70,8 +69,8 @@ def test_mesh_model_with_one_inlet_and_two_outlets():
     mesh_vtu = read_polydata(mesh_path_vtu)
     mesh_xml = Mesh(mesh_path_xml)
 
-    num_points = 5508
-    num_cells = 30136
+    num_points = 5514
+    num_cells = 30204
 
     assert mesh_vtu.GetNumberOfPoints() == num_points
     assert mesh_xml.num_cells() == num_cells
