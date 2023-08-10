@@ -231,23 +231,23 @@ class WomersleyComponent(UserExpression):
         value[0] = -self.normal_component * self.scale_value * wom
 
 
-def make_womersley_bcs(t, Q, nu, center, radius, normal, element, coeffstype="Q", 
+def make_womersley_bcs(t, Q, nu, center, radius, normal, element, coeffstype="Q",
                        N=1001, num_fourier_coefficients=20, Cn=None, **NS_namespace):
     """
     Generate a list of expressions for the components of a Womersley profile.
-    Users can specify either the flow rate or fourier coefficients of the flow rate 
+    Users can specify either the flow rate or fourier coefficients of the flow rate
     depending on if Cn is None or not.
     """
     # period is usually the lenght of a cardiac cycle (0.951 s)
     # If t is a list or numpy array, then period is the maximum value of t
     # If not, simply assign t as period
-    try :
+    try:
         period = max(t)
     except TypeError:
         period = t
 
     # Compute fourier coefficients of transient profile if Cn is None
-    if Cn is None:    
+    if Cn is None:
         # Compute transient profile as interpolation of given coefficients
         transient_profile = UnivariateSpline(t, Q, s=0, k=1)
 
