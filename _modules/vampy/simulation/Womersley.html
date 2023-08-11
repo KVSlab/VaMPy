@@ -559,18 +559,30 @@ document.write(`
         <span class="n">value</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span> <span class="o">=</span> <span class="o">-</span><span class="bp">self</span><span class="o">.</span><span class="n">normal_component</span> <span class="o">*</span> <span class="bp">self</span><span class="o">.</span><span class="n">scale_value</span> <span class="o">*</span> <span class="n">wom</span></div></div>
 
 
-<div class="viewcode-block" id="make_womersley_bcs"><a class="viewcode-back" href="../../../api.html#vampy.simulation.Womersley.make_womersley_bcs">[docs]</a><span class="k">def</span> <span class="nf">make_womersley_bcs</span><span class="p">(</span><span class="n">t</span><span class="p">,</span> <span class="n">Q</span><span class="p">,</span> <span class="n">mesh</span><span class="p">,</span> <span class="n">nu</span><span class="p">,</span> <span class="n">area</span><span class="p">,</span> <span class="n">center</span><span class="p">,</span> <span class="n">radius</span><span class="p">,</span> <span class="n">normal</span><span class="p">,</span>
-                       <span class="n">element</span><span class="p">,</span> <span class="n">scale_to</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">coeffstype</span><span class="o">=</span><span class="s2">&quot;Q&quot;</span><span class="p">,</span>
-                       <span class="n">N</span><span class="o">=</span><span class="mi">1001</span><span class="p">,</span> <span class="n">num_fourier_coefficients</span><span class="o">=</span><span class="mi">20</span><span class="p">,</span> <span class="o">**</span><span class="n">NS_namespace</span><span class="p">):</span>
-<span class="w">    </span><span class="sd">&quot;&quot;&quot;Generate a list of expressions for the components of a Womersley profile.&quot;&quot;&quot;</span>
-    <span class="c1"># Compute transient profile as interpolation of given coefficients</span>
-    <span class="n">period</span> <span class="o">=</span> <span class="nb">max</span><span class="p">(</span><span class="n">t</span><span class="p">)</span>
-    <span class="n">transient_profile</span> <span class="o">=</span> <span class="n">UnivariateSpline</span><span class="p">(</span><span class="n">t</span><span class="p">,</span> <span class="n">Q</span><span class="p">,</span> <span class="n">s</span><span class="o">=</span><span class="mi">0</span><span class="p">,</span> <span class="n">k</span><span class="o">=</span><span class="mi">1</span><span class="p">)</span>
+<div class="viewcode-block" id="make_womersley_bcs"><a class="viewcode-back" href="../../../api.html#vampy.simulation.Womersley.make_womersley_bcs">[docs]</a><span class="k">def</span> <span class="nf">make_womersley_bcs</span><span class="p">(</span><span class="n">t</span><span class="p">,</span> <span class="n">Q</span><span class="p">,</span> <span class="n">nu</span><span class="p">,</span> <span class="n">center</span><span class="p">,</span> <span class="n">radius</span><span class="p">,</span> <span class="n">normal</span><span class="p">,</span> <span class="n">element</span><span class="p">,</span> <span class="n">coeffstype</span><span class="o">=</span><span class="s2">&quot;Q&quot;</span><span class="p">,</span>
+                       <span class="n">N</span><span class="o">=</span><span class="mi">1001</span><span class="p">,</span> <span class="n">num_fourier_coefficients</span><span class="o">=</span><span class="mi">20</span><span class="p">,</span> <span class="n">Cn</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="o">**</span><span class="n">NS_namespace</span><span class="p">):</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Generate a list of expressions for the components of a Womersley profile.</span>
+<span class="sd">    Users can specify either the flow rate or fourier coefficients of the flow rate</span>
+<span class="sd">    depending on if Cn is None or not.</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="c1"># period is usually the lenght of a cardiac cycle (0.951 s)</span>
+    <span class="c1"># If t is a list or numpy array, then period is the maximum value of t</span>
+    <span class="c1"># If not, simply assign t as period</span>
+    <span class="k">try</span><span class="p">:</span>
+        <span class="n">period</span> <span class="o">=</span> <span class="nb">max</span><span class="p">(</span><span class="n">t</span><span class="p">)</span>
+    <span class="k">except</span> <span class="ne">TypeError</span><span class="p">:</span>
+        <span class="n">period</span> <span class="o">=</span> <span class="n">t</span>
 
-    <span class="c1"># Compute fourier coefficients of transient profile</span>
-    <span class="n">timedisc</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">linspace</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="n">period</span><span class="p">,</span> <span class="n">N</span><span class="p">)</span>
+    <span class="c1"># Compute fourier coefficients of transient profile if Cn is None</span>
+    <span class="k">if</span> <span class="n">Cn</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
+        <span class="c1"># Compute transient profile as interpolation of given coefficients</span>
+        <span class="n">transient_profile</span> <span class="o">=</span> <span class="n">UnivariateSpline</span><span class="p">(</span><span class="n">t</span><span class="p">,</span> <span class="n">Q</span><span class="p">,</span> <span class="n">s</span><span class="o">=</span><span class="mi">0</span><span class="p">,</span> <span class="n">k</span><span class="o">=</span><span class="mi">1</span><span class="p">)</span>
 
-    <span class="n">Cn</span> <span class="o">=</span> <span class="n">fourier_coefficients</span><span class="p">(</span><span class="n">timedisc</span><span class="p">,</span> <span class="n">transient_profile</span><span class="p">,</span> <span class="n">period</span><span class="p">,</span> <span class="n">num_fourier_coefficients</span><span class="p">)</span>
+        <span class="c1"># Compute fourier coefficients of transient profile</span>
+        <span class="n">timedisc</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">linspace</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="n">period</span><span class="p">,</span> <span class="n">N</span><span class="p">)</span>
+
+        <span class="n">Cn</span> <span class="o">=</span> <span class="n">fourier_coefficients</span><span class="p">(</span><span class="n">timedisc</span><span class="p">,</span> <span class="n">transient_profile</span><span class="p">,</span> <span class="n">period</span><span class="p">,</span> <span class="n">num_fourier_coefficients</span><span class="p">)</span>
 
     <span class="c1"># Create Expressions for each direction</span>
     <span class="n">expressions</span> <span class="o">=</span> <span class="p">[]</span>
@@ -635,7 +647,7 @@ By Henrik A. Kjeldsberg
   
   <div class="footer-item">
     <p class="last-updated">
-  Last updated on Aug 07, 2023.
+  Last updated on Aug 11, 2023.
   <br/>
 </p>
   </div>

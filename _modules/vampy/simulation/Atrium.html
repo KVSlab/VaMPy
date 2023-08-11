@@ -444,7 +444,7 @@ document.write(`
         <span class="n">Q_scaled</span> <span class="o">=</span> <span class="n">Q_values</span> <span class="o">*</span> <span class="n">tmp_area</span> <span class="o">/</span> <span class="n">area_total</span>
 
         <span class="c1"># Create Womersley boundary condition at inlet</span>
-        <span class="n">inlet</span> <span class="o">=</span> <span class="n">make_womersley_bcs</span><span class="p">(</span><span class="n">t_values</span><span class="p">,</span> <span class="n">Q_scaled</span><span class="p">,</span> <span class="n">mesh</span><span class="p">,</span> <span class="n">nu</span><span class="p">,</span> <span class="n">tmp_area</span><span class="p">,</span> <span class="n">tmp_center</span><span class="p">,</span> <span class="n">tmp_radius</span><span class="p">,</span> <span class="n">tmp_normal</span><span class="p">,</span>
+        <span class="n">inlet</span> <span class="o">=</span> <span class="n">make_womersley_bcs</span><span class="p">(</span><span class="n">t_values</span><span class="p">,</span> <span class="n">Q_scaled</span><span class="p">,</span> <span class="n">nu</span><span class="p">,</span> <span class="n">tmp_center</span><span class="p">,</span> <span class="n">tmp_radius</span><span class="p">,</span> <span class="n">tmp_normal</span><span class="p">,</span>
                                    <span class="n">V</span><span class="o">.</span><span class="n">ufl_element</span><span class="p">())</span>
         <span class="n">NS_expressions</span><span class="p">[</span><span class="s2">&quot;inlet_</span><span class="si">{}</span><span class="s2">&quot;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">ID</span><span class="p">)]</span> <span class="o">=</span> <span class="n">inlet</span>
 
@@ -677,7 +677,7 @@ By Henrik A. Kjeldsberg
   
   <div class="footer-item">
     <p class="last-updated">
-  Last updated on Aug 07, 2023.
+  Last updated on Aug 11, 2023.
   <br/>
 </p>
   </div>
