@@ -5,7 +5,8 @@ _________________
 [![codecov](https://codecov.io/gh/KVSlab/VaMPy/branch/master/graph/badge.svg?token=M2NMX6HOSZ)](https://codecov.io/gh/KVSlab/VaMPy)
 [![CI](https://github.com/kvslab/vampy/actions/workflows/check_and_test_package.yml/badge.svg)](https://github.com/kvslab/vampy/actions/workflows/check_and_test_package.yml)
 [![GitHub pages](https://github.com/kvslab/vampy/actions/workflows/deploy_pages.yml/badge.svg)](https://github.com/kvslab/vampy/actions/workflows/deploy_pages.yml)
-[![DOI](https://zenodo.org/badge/DOI/10.5281/zenodo.7707855.svg)](https://doi.org/10.5281/zenodo.7707855)
+[![DOI](https://joss.theoj.org/papers/10.21105/joss.05278/status.svg)](https://doi.org/10.21105/joss.05278)
+[![DOI](https://zenodo.org/badge/DOI/10.5281/zenodo.7950605.svg)](https://doi.org/10.5281/zenodo.7950605)
 
 _________________
 

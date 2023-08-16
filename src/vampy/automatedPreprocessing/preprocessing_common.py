@@ -1,5 +1,5 @@
-from os import path
 import gzip
+from os import path
 
 import numpy as np
 from morphman import vtk_clean_polydata, vtk_triangulate_surface, get_parameters, write_parameters, read_polydata, \
@@ -190,10 +190,10 @@ def compute_centers_for_meshing(surface, is_atrium, case_path=None, test_capped=
 
         write_parameters(info, case_path)
 
-    boundary_center = center[boundary_id].tolist()  # center of the outlet
+    boundary_center = center[boundary_id].tolist()  # center of the inlet (artery) / outlet (atrium)
     center.pop(boundary_id)
 
-    center_ = [item for sublist in center for item in sublist]  # centers of the inlets
+    center_ = [item for sublist in center for item in sublist]  # centers of the outlets (artery) / inlets (atrium)
 
     return center_, boundary_center
 
@@ -755,15 +755,14 @@ def write_mesh(compress_mesh, file_name_surface_name, file_name_vtu_mesh, file_n
         gzfile.close()
 
 
-def add_flow_extension(surface, centerlines, include_outlet, extension_length=2.0,
-                       extension_mode="boundarynormal"):
+def add_flow_extension(surface, centerlines, is_inlet, extension_length=2.0, extension_mode="boundarynormal"):
     """
     Adds flow extensions to either all inlets or all outlets with specified extension length.
 
     Args:
         surface (vtkPolyData): Surface model to extend
-        centerlines (vtkPolyData): Centerlines in model
-        include_outlet (bool): Determines if outlet should be included or not
+        centerlines (vtkPolyData): Centerlines in model.
+        is_inlet (bool): Determines if inlet or outlet is to be extended.
         extension_length (float): Determines length of flow extensions.
                                 Factor is multiplied with MISR at relevant boundary
         extension_mode (str): Determines how extensions are place, either normal to boundary
@@ -782,14 +781,15 @@ def add_flow_extension(surface, centerlines, include_outlet, extension_length=2.
     lengths = []
     for i in range(boundaries.GetNumberOfCells()):
         lengths.append(get_curvilinear_coordinate(boundaries.GetCell(i))[-1])
-    outlet_id = lengths.index(max(lengths))
+
+    inlet_id = lengths.index(max(lengths))
 
     # Exclude outlet or inlets
     boundaryIds = vtk.vtkIdList()
     for i in range(centerlines.GetNumberOfLines() + 1):
-        if include_outlet and i == outlet_id:
+        if is_inlet and i == inlet_id:
             boundaryIds.InsertNextId(i)
-        if not include_outlet and i != outlet_id:
+        if not is_inlet and i != inlet_id:
             boundaryIds.InsertNextId(i)
 
     flowExtensionsFilter = vtkvmtk.vtkvmtkPolyDataFlowExtensionsFilter()
@@ -834,3 +834,42 @@ def scale_surface(surface, scale_factor):
     scaled_surface = surface_scaler.Surface
 
     return scaled_surface
+
+
+def get_furtest_surface_point(inlet, surface):
+    """
+    Calculates the furthest point on a given surface from a specified inlet point.
+    It iterates over each point on the surface, calculating its distance from the inlet and updates
+    the furthest distance accordingly.
+
+    Args:
+        inlet (list): A list with the inlet point.
+        surface (vtkPolyData): The surface to check for the furthest point.
+
+    Returns:
+        outlets (list): The x, y, z coordinates of the furthest point on the surface from the inlet.
+    """
+    outlets = []
+    end_point_distance = 0
+    for i in range(surface.GetNumberOfPoints()):
+        tmp_p = list(surface.GetPoint(i))
+        dx = get_distance(inlet, tmp_p)
+        if dx > end_point_distance:
+            end_point_distance = dx
+            outlets = tmp_p
+    return outlets
+
+
+def check_if_closed_surface(surface):
+    """
+      Checks if the given surface is capped (i.e., has no feature edges).
+
+      Args:
+          surface (vtkPolyData): The surface to check for capping.
+
+      Returns:
+          bool: True if the surface is capped, False otherwise.
+      """
+
+    cells = vtk_extract_feature_edges(surface)
+    return cells.GetNumberOfCells() == 0
