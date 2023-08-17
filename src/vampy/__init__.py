@@ -8,7 +8,7 @@ from .automatedPostprocessing import compute_velocity_and_pressure
 from .automatedPostprocessing import postprocessing_common
 from .automatedPostprocessing import visualize_probes
 # Imports from pre-processing
-try :
+try:
     from .automatedPreprocessing import DisplayData
     from .automatedPreprocessing import ImportData
     from .automatedPreprocessing import NetworkBoundaryConditions
@@ -18,17 +18,17 @@ try :
     from .automatedPreprocessing import simulate
     from .automatedPreprocessing import visualize
     from .automatedPreprocessing import vmtk_pointselector
-except ModuleNotFoundError :
-    print("morphman is not installed, automated preprocessing is not available")
+except ModuleNotFoundError:
+    print("WARNING: morphMan is not installed, automated preprocessing is not available")
 # Imports from simulation scripts
-try :
+try:
     from .simulation import Artery
     from .simulation import Atrium
     from .simulation import Probe
     from .simulation import Womersley
     from .simulation import simulation_common
-except ModuleNotFoundError :
-    print("oasis is not installed, running CFD is not available")
+except ModuleNotFoundError:
+    print("Oasis is not installed, running CFD is not available")
 
 
 meta = metadata("vampy")
