@@ -28,7 +28,7 @@ try:
     from .simulation import Womersley
     from .simulation import simulation_common
 except ModuleNotFoundError:
-    print("Oasis is not installed, running CFD is not available")
+    print("WARNING: Oasis is not installed, running CFD is not available")
 
 
 meta = metadata("vampy")
