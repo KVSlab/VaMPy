@@ -739,7 +739,7 @@ def write_mesh(compress_mesh, file_name_surface_name, file_name_vtu_mesh, file_n
     writer.SetFileName(file_name_xml_mesh)
     writer.SetBoundaryDataArrayName("CellEntityIds")
     writer.SetBoundaryDataIdOffset(-1)
-    writer.SetStoreCellMarkers(0)
+    writer.SetStoreCellMarkers(1)
 
     print('--- Writing Dolfin file')
     writer.Write()
