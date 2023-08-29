@@ -112,8 +112,8 @@ def compute_hemodynamic_indices(case_path, nu, rheology_model, rho, dt, velocity
         try:
             f = HDF5File(MPI.comm_world, file_path_u.__str__(), "r")
             vec_name = "/velocity/vector_%d" % file_counter
-            timestamp = f.attributes(vec_name)["timestamp"]
-            print("=" * 10, "Timestep: {}".format(timestamp), "=" * 10)
+            tstep = f.attributes(vec_name)["timestamp"]
+            print("=" * 10, "Timestep: {}".format(tstep), "=" * 10)
             f.read(u, vec_name)
             if(rheology_model != "Newtonian"):
                 g = HDF5File(MPI.comm_world, file_path_nunn.__str__(), "r")
@@ -151,7 +151,7 @@ def compute_hemodynamic_indices(case_path, nu, rheology_model, rho, dt, velocity
 
         # Save instantaneous WSS
         tau.rename("WSS", "WSS")
-        wss_writer.write(tau, timestamp*dt)#dt * file_counter)
+        wss_writer.write(tau, tstep*dt)#dt * file_counter)
 
         # Update file_counter
         file_counter += step

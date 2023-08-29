@@ -1,4 +1,7 @@
 from argparse import ArgumentParser
+from time import time
+
+from dolfin import parameters, MPI, assemble, interpolate, Measure, FacetNormal, Identity, VectorFunctionSpace, BoundaryMesh, Function, FacetArea, TestFunction, FunctionSpace, grad, inner, sqrt
 
 try:
     from dolfin import *
@@ -16,7 +19,7 @@ def read_command_line():
     parser = ArgumentParser()
 
     parser.add_argument('--case', type=str, default="simulation/results_folder/model/data/1/Solutions",
-                        help="Path to simulation results", metavar="PATH")
+                        help="Path to simulation results (PostProc folder for executing compute_hemodynamic_indices.py and h5_files folder for executing compute_differences_h5_files.py): mesh.h5, u.h5, p.h5, nu.h5", metavar="PATH")    
     parser.add_argument('--nu', type=float, default=3.3018e-3,
                         help="Kinematic viscosity used in simulation, measured in [mm^2/ms]")
     parser.add_argument('--rheology_model', type=str, default="Newtonian",
@@ -25,11 +28,12 @@ def read_command_line():
                         help="Fluid density used in simulation, measured in [kg/m^3]")
     parser.add_argument('--dt', type=float, default=0.0951, help="Time step of simulation, measured in [ms]")
     parser.add_argument('--velocity-degree', type=int, default=1, help="Degree of velocity element")
-    parser.add_argument('--probe-frequency', type=int, default=100, help="Frequency of saving probes to file")
+    parser.add_argument('--probe-frequency', type=int, default=100, help="Frequency of saving probes to file")    
 
     args = parser.parse_args()
 
     return args.case, args.nu, args.rheology_model, args.rho, args.dt, args.velocity_degree, args.probe_frequency
+
 
 
 def epsilon(u):
@@ -115,4 +119,5 @@ class STRESS:
         Returns:
             norm (Power): Norm as expression
         """
-        return pow(inner(u, u), 0.5)
+        return pow(inner(u, u), 0.5)    
+
