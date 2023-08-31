@@ -1017,26 +1017,26 @@ document.write(`
     <span class="k">return</span> <span class="n">network</span><span class="p">,</span> <span class="n">probe_points</span></div>
 
 
-<div class="viewcode-block" id="compute_flow_rate"><a class="viewcode-back" href="../../../api.html#vampy.automatedPreprocessing.preprocessing_common.compute_flow_rate">[docs]</a><span class="k">def</span> <span class="nf">compute_flow_rate</span><span class="p">(</span><span class="n">is_atrium</span><span class="p">,</span> <span class="n">inlet</span><span class="p">,</span> <span class="n">parameters</span><span class="p">):</span>
+<div class="viewcode-block" id="compute_flow_rate"><a class="viewcode-back" href="../../../api.html#vampy.automatedPreprocessing.preprocessing_common.compute_flow_rate">[docs]</a><span class="k">def</span> <span class="nf">compute_flow_rate</span><span class="p">(</span><span class="n">is_atrium</span><span class="p">,</span> <span class="n">inlet</span><span class="p">,</span> <span class="n">parameters</span><span class="p">,</span> <span class="n">flow_rate_factor</span><span class="p">):</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
-<span class="sd">    Computes mean flow rate used as boundary condition for pulsatile flow condition</span>
+<span class="sd">    Computes mean flow rate used as a boundary condition for pulsatile flow condition</span>
 
 <span class="sd">    Args:</span>
 <span class="sd">        is_atrium (bool): Determines if model is atrium or artery</span>
 <span class="sd">        inlet (list): List of points representing midpoint of boundaries</span>
 <span class="sd">        parameters (dict): Dictionary containing model parameters</span>
+<span class="sd">        flow_rate_factor (float): Factor to adjust flow rate calculation</span>
 
 <span class="sd">    Returns:</span>
 <span class="sd">        mean_inflow_rate (float): Mean inflow rate</span>
 <span class="sd">    &quot;&quot;&quot;</span>
     <span class="c1"># FIXME: Add plausible boundary conditions for atrial flow</span>
-    <span class="n">flow_rate_factor</span> <span class="o">=</span> <span class="mf">0.27</span>
     <span class="k">if</span> <span class="n">is_atrium</span><span class="p">:</span>
-        <span class="n">Total_inlet_area</span> <span class="o">=</span> <span class="mi">0</span>
+        <span class="n">total_inlet_area</span> <span class="o">=</span> <span class="mf">0.0</span>
         <span class="n">num_inlets</span> <span class="o">=</span> <span class="nb">len</span><span class="p">(</span><span class="n">inlet</span><span class="p">)</span> <span class="o">//</span> <span class="mi">3</span>
         <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="n">num_inlets</span><span class="p">):</span>
-            <span class="n">Total_inlet_area</span> <span class="o">+=</span> <span class="n">parameters</span><span class="p">[</span><span class="s2">&quot;inlet</span><span class="si">%s</span><span class="s2">_area&quot;</span> <span class="o">%</span> <span class="n">i</span><span class="p">]</span>
-        <span class="n">mean_inflow_rate</span> <span class="o">=</span> <span class="n">flow_rate_factor</span> <span class="o">*</span> <span class="n">Total_inlet_area</span>
+            <span class="n">total_inlet_area</span> <span class="o">+=</span> <span class="n">parameters</span><span class="p">[</span><span class="s2">&quot;inlet</span><span class="si">%s</span><span class="s2">_area&quot;</span> <span class="o">%</span> <span class="n">i</span><span class="p">]</span>
+        <span class="n">mean_inflow_rate</span> <span class="o">=</span> <span class="n">flow_rate_factor</span> <span class="o">*</span> <span class="n">total_inlet_area</span>
     <span class="k">else</span><span class="p">:</span>
         <span class="n">mean_inflow_rate</span> <span class="o">=</span> <span class="n">flow_rate_factor</span> <span class="o">*</span> <span class="n">parameters</span><span class="p">[</span><span class="s2">&quot;inlet_area&quot;</span><span class="p">]</span>
 
@@ -1251,7 +1251,7 @@ By Henrik A. Kjeldsberg
   
   <div class="footer-item">
     <p class="last-updated">
-  Last updated on Aug 18, 2023.
+  Last updated on Aug 31, 2023.
   <br/>
 </p>
   </div>
