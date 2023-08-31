@@ -21,7 +21,8 @@ from vampy.automatedPreprocessing.visualize import visualize_model
 def run_pre_processing(input_model, verbose_print, smoothing_method, smoothing_factor, smoothing_iterations,
                        meshing_method, refine_region, is_atrium, add_flow_extensions, visualize, config_path,
                        coarsening_factor, inlet_flow_extension_length, outlet_flow_extension_length, edge_length,
-                       region_points, compress_mesh, add_boundary_layer, scale_factor, resampling_step):
+                       region_points, compress_mesh, add_boundary_layer, scale_factor, resampling_step,
+                       flow_rate_factor):
     """
     Automatically generate mesh of surface model in .vtu and .xml format, including prescribed
     flow rates at inlet and outlet based on flow network model.
@@ -49,6 +50,7 @@ def run_pre_processing(input_model, verbose_print, smoothing_method, smoothing_f
         add_boundary_layer (bool): Adds boundary layers to walls if True
         scale_factor (float): Scale input model by this factor
         resampling_step (float): Float value determining the resampling step for centerline computations, in [m]
+        flow_rate_factor (float): Flow rate factor
     """
     # Get paths
     case_name = input_model.rsplit(path.sep, 1)[-1].rsplit('.')[0]
@@ -359,7 +361,7 @@ def run_pre_processing(input_model, verbose_print, smoothing_method, smoothing_f
     parameters = get_parameters(base_path)
 
     print("--- Computing flow rates and flow split, and setting boundary IDs\n")
-    mean_inflow_rate = compute_flow_rate(is_atrium, inlet, parameters)
+    mean_inflow_rate = compute_flow_rate(is_atrium, inlet, parameters, flow_rate_factor)
 
     find_boundaries(base_path, mean_inflow_rate, network, mesh, verbose_print, is_atrium)
 
@@ -526,6 +528,11 @@ def read_command_line(input_path=None):
                         type=float,
                         help="Resampling step used to resample centerline in [m].")
 
+    parser.add_argument('-fr', '--flow-rate-factor',
+                        default=0.27,
+                        type=float,
+                        help="Flow rate factor.")
+
     # Parse path to get default values
     if required:
         args = parser.parse_args()
@@ -560,7 +567,8 @@ def read_command_line(input_path=None):
                 coarsening_factor=args.coarsening_factor, inlet_flow_extension_length=args.inlet_flowextension,
                 visualize=args.visualize, region_points=args.region_points, compress_mesh=args.compress_mesh,
                 outlet_flow_extension_length=args.outlet_flowextension, add_boundary_layer=args.add_boundary_layer,
-                scale_factor=args.scale_factor, resampling_step=args.resampling_step)
+                scale_factor=args.scale_factor, resampling_step=args.resampling_step,
+                flow_rate_factor=args.flow_rate_factor)
 
 
 def main_meshing():
