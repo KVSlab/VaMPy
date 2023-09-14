@@ -689,26 +689,26 @@ def setup_model_network(centerlines, file_name_probe_points, region_center, verb
     return network, probe_points
 
 
-def compute_flow_rate(is_atrium, inlet, parameters):
+def compute_flow_rate(is_atrium, inlet, parameters, flow_rate_factor):
     """
-    Computes mean flow rate used as boundary condition for pulsatile flow condition
+    Computes mean flow rate used as a boundary condition for pulsatile flow condition
 
     Args:
         is_atrium (bool): Determines if model is atrium or artery
         inlet (list): List of points representing midpoint of boundaries
         parameters (dict): Dictionary containing model parameters
+        flow_rate_factor (float): Factor to adjust flow rate calculation
 
     Returns:
         mean_inflow_rate (float): Mean inflow rate
     """
     # FIXME: Add plausible boundary conditions for atrial flow
-    flow_rate_factor = 0.27
     if is_atrium:
-        Total_inlet_area = 0
+        total_inlet_area = 0.0
         num_inlets = len(inlet) // 3
         for i in range(num_inlets):
-            Total_inlet_area += parameters["inlet%s_area" % i]
-        mean_inflow_rate = flow_rate_factor * Total_inlet_area
+            total_inlet_area += parameters["inlet%s_area" % i]
+        mean_inflow_rate = flow_rate_factor * total_inlet_area
     else:
         mean_inflow_rate = flow_rate_factor * parameters["inlet_area"]
 
@@ -739,7 +739,7 @@ def write_mesh(compress_mesh, file_name_surface_name, file_name_vtu_mesh, file_n
     writer.SetFileName(file_name_xml_mesh)
     writer.SetBoundaryDataArrayName("CellEntityIds")
     writer.SetBoundaryDataIdOffset(-1)
-    writer.SetStoreCellMarkers(0)
+    writer.SetStoreCellMarkers(1)
 
     print('--- Writing Dolfin file')
     writer.Write()
