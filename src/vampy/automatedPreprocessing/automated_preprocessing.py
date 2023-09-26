@@ -271,11 +271,20 @@ def run_pre_processing(input_model, verbose_print, smoothing_method, smoothing_f
             print("--- Adding flow extensions\n")
             # Add extension normal on boundary for atrium models
             extension = "centerlinedirection" if is_atrium else "boundarynormal"
+            if is_atrium:
+                # Flip lengths if model is atrium
+                inlet_flow_extension_length, outlet_flow_extension_length = \
+                    outlet_flow_extension_length, inlet_flow_extension_length
+
+            # Add extensions to inlet (artery)
             surface_extended = add_flow_extension(remeshed, centerlines, include_outlet=False,
                                                   extension_length=inlet_flow_extension_length,
                                                   extension_mode=extension)
+
+            # Add extensions to outlets (artery)
             surface_extended = add_flow_extension(surface_extended, centerlines, include_outlet=True,
                                                   extension_length=outlet_flow_extension_length)
+
 
             surface_extended = vmtk_smooth_surface(surface_extended, "laplace", iterations=150)
             write_polydata(surface_extended, file_name_model_flow_ext)
