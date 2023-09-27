@@ -1,5 +1,6 @@
 import gzip
 from os import path
+import json
 
 import numpy as np
 from morphman import vtk_clean_polydata, vtk_triangulate_surface, get_parameters, write_parameters, read_polydata, \
@@ -676,9 +677,11 @@ def setup_model_network(centerlines, file_name_probe_points, region_center, verb
 
         print("--- Saving probes points in: %s\n" % file_name_probe_points)
         probe_points = np.array(listProbePoints)
-        probe_points.dump(file_name_probe_points)
+        with open(file_name_probe_points, 'w') as outfile:
+            json.dump(probe_points.tolist(), outfile)
     else:
-        probe_points = np.load(file_name_probe_points, allow_pickle=True)
+        with open(file_name_probe_points, 'r') as infile:
+            probe_points = np.array(json.load(infile))
 
     # Set the flow split and inlet boundary condition
     # Compute the outlet boundary condition percentages.
