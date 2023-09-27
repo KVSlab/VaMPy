@@ -161,8 +161,9 @@ def pre_solve_hook(mesh, V, Q, newfolder, mesh_path, restart_folder, velocity_de
     # Create point for evaluation
     n = FacetNormal(mesh)
     eval_dict = {}
-    rel_path = mesh_path.split(".xml")[0] + "_probe_point"
-    probe_points = np.load(rel_path, encoding='latin1', fix_imports=True, allow_pickle=True)
+    rel_path = mesh_path.split(".xml")[0] + "_probe_point.json"
+    with open(rel_path, 'r') as infile:
+        probe_points = np.array(json.load(infile))
 
     # Store points file in checkpoint
     if MPI.rank(MPI.comm_world) == 0:
