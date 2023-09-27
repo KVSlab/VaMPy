@@ -65,7 +65,7 @@ def run_pre_processing(input_model, verbose_print, smoothing_method, smoothing_f
     file_name_distance_to_sphere_diam = base_path + "_distance_to_sphere_diam.vtp"
     file_name_distance_to_sphere_const = base_path + "_distance_to_sphere_const.vtp"
     file_name_distance_to_sphere_curv = base_path + "_distance_to_sphere_curv.vtp"
-    file_name_probe_points = base_path + "_probe_point"
+    file_name_probe_points = base_path + "_probe_point.json"
     file_name_voronoi = base_path + "_voronoi.vtp"
     file_name_voronoi_smooth = base_path + "_voronoi_smooth.vtp"
     file_name_voronoi_surface = base_path + "_voronoi_surface.vtp"
@@ -85,6 +85,7 @@ def run_pre_processing(input_model, verbose_print, smoothing_method, smoothing_f
     # Scale surface
     if scale_factor is not None:
         surface = scale_surface(surface, scale_factor)
+        resampling_step *= scale_factor
 
     # Check if surface is closed and uncapps model if True
     is_capped = check_if_closed_surface(surface)
