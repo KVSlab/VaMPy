@@ -9,9 +9,6 @@ from morphman import get_uncapped_surface, write_polydata, get_parameters, vtk_c
     get_vtk_point_locator, extract_single_line, vtk_merge_polydata, get_point_data_array, smooth_voronoi_diagram, \
     create_new_surface, compute_centers, vmtk_smooth_surface, str2bool, vmtk_compute_voronoi_diagram, \
     prepare_output_surface, vmtk_compute_geometric_features
-# Local imports
-from vmtk import vmtkscripts
-
 from vampy.automatedPreprocessing import ToolRepairSTL
 from vampy.automatedPreprocessing.moving_common import get_point_map, project_displacement, save_displacement
 from vampy.automatedPreprocessing.preprocessing_common import read_polydata, get_centers_for_meshing, \
@@ -21,6 +18,8 @@ from vampy.automatedPreprocessing.preprocessing_common import read_polydata, get
     get_furtest_surface_point
 from vampy.automatedPreprocessing.simulate import run_simulation
 from vampy.automatedPreprocessing.visualize import visualize_model
+# Local imports
+from vmtk import vmtkscripts
 
 
 def run_pre_processing(input_model, verbose_print, smoothing_method, smoothing_factor, smoothing_iterations,
@@ -90,7 +89,13 @@ def run_pre_processing(input_model, verbose_print, smoothing_method, smoothing_f
     file_name_displacement_points = path.join(dir_path, case_name + "_points.np")
     folder_moved_surfaces = path.join(dir_path, case_name + "_moved")
     folder_extended_surfaces = path.join(dir_path, case_name + "_extended")
-    condition = "af"  # or "sr"
+    if "af" in input_model:
+        condition = "af"  # or "sr"
+        print("--- Condition: AF")
+    else:
+        condition = "sr"  # or "sr"
+        print("--- Condition: SR")
+
     folder_moved_surfaces += f"_{condition}"
 
     print("\n--- Working on case:", case_name, "\n")
@@ -153,15 +158,13 @@ def run_pre_processing(input_model, verbose_print, smoothing_method, smoothing_f
 
     source = outlets if is_atrium else inlet
     target = inlet if is_atrium else outlets
-
     centerlines, voronoi, _ = compute_centerlines(source, target, file_name_centerlines, capped_surface,
-                                                  resampling=resampling_step)
+                                                  resampling=resampling_step)  # ,end_point=0)
     tol = get_centerline_tolerance(centerlines)
 
     # Get 'center' and 'radius' of the regions(s)
     region_center = []
     misr_max = []
-
     # Smooth surface
     if smoothing_method == "voronoi":
         print("--- Smooth surface: Voronoi smoothing\n")
@@ -227,13 +230,19 @@ def run_pre_processing(input_model, verbose_print, smoothing_method, smoothing_f
         print("\n--- No smoothing of surface\n")
 
     # Read in LAA point from .json
-    LA_UKE = True
+    if "artery" in case_name or "aneu" in case_name:
+        LA_UKE = False
+    else:
+        LA_UKE = True
     if LA_UKE:
-        laa_path = "/Users/henriakj/PhD/Code/VaMPy/models/models_inria/LAA_POINTS_UKE.json"
+        laa_path = f"/Users/henriakj/PhD/Code/VaMPy/models/models_inria_{condition}/LAA_POINTS_UKE_{condition.upper()}.json"
         with open(laa_path) as f:
             info = json.load(f)
         casename = dir_path.rsplit("/", 1)[1]
-        region_points = info[casename][0]
+        if 1 <= len(str(int(casename))) <= 2:
+            region_points = info["{:02d}".format(int(casename))][0]
+        else:
+            region_points = info[casename][0]
         print(f"-- Loading LAA points for {casename}")
     if refine_region:
         get_refine_region(capped_surface, case_name, centerlines, dir_path,
@@ -271,20 +280,22 @@ def run_pre_processing(input_model, verbose_print, smoothing_method, smoothing_f
             print("--- Adding flow extensions\n")
             # Add extension normal on boundary for atrium models
             extension = "centerlinedirection" if is_atrium else "boundarynormal"
+            if "1038" in input_model or "0029" in input_model or "0023" in input_model:
+                print("--  Using Boundarynormal for inlet flow extensions (atrium)")
+                extension = "boundarynormal"
             if is_atrium:
                 # Flip lengths if model is atrium
                 inlet_flow_extension_length, outlet_flow_extension_length = \
                     outlet_flow_extension_length, inlet_flow_extension_length
 
-            # Add extensions to inlet (artery)
-            surface_extended = add_flow_extension(remeshed, centerlines, include_outlet=False,
-                                                  extension_length=inlet_flow_extension_length,
+            # Add extensions to inlet (artery) / outlets (atrium)
+            surface_extended = add_flow_extension(remeshed, centerlines, is_inlet=True,
+                                                  extension_length=inlet_flow_extension_length)
+
+            # Add extensions to outlets (artery) / inlets (atrium)
+            surface_extended = add_flow_extension(surface_extended, centerlines, is_inlet=False,
+                                                  extension_length=outlet_flow_extension_length,
                                                   extension_mode=extension)
-
-            # Add extensions to outlets (artery)
-            surface_extended = add_flow_extension(surface_extended, centerlines, include_outlet=True,
-                                                  extension_length=outlet_flow_extension_length)
-
 
             surface_extended = vmtk_smooth_surface(surface_extended, "laplace", iterations=150)
             write_polydata(surface_extended, file_name_model_flow_ext)
@@ -292,9 +303,6 @@ def run_pre_processing(input_model, verbose_print, smoothing_method, smoothing_f
             surface_extended = read_polydata(file_name_model_flow_ext)
     else:
         surface_extended = surface
-
-    # Capp surface with flow extensions
-    capped_surface = vmtk_surfacecapper(surface_extended)
 
     if dynamic_mesh:
         print("--- Computing mesh displacement and saving points to file")
@@ -307,11 +315,28 @@ def run_pre_processing(input_model, verbose_print, smoothing_method, smoothing_f
 
         # Save displacement to numpy array
         save_displacement(file_name_displacement_points, points)
+    if "0022" in input_model or "0024" in input_model:
+
+        value = None
+        if condition == "af":
+            value = 28
+        elif condition == "sr":
+            value = 47
+        elif "0024" in input_model and condition == "sr":
+            value = 41
+        if value is not None:
+            num = 88 - value
+
+            surface_extended = read_polydata(f"0024/model_extended/model_moved_{num}.vtp")
+            print("-- Using custom extended model")
 
     # Get new centerlines with the flow extensions
     if add_flow_extensions:
         if not path.isfile(file_name_flow_centerlines):
             print("--- Compute the model centerlines with flow extension.\n")
+            # Capp surface with flow extensions
+            capped_surface = vmtk_surfacecapper(surface_extended)
+
             # Compute the centerlines.
             if has_outlet:
                 inlet, outlets = get_centers_for_meshing(surface_extended, is_atrium, base_path,
@@ -325,7 +350,6 @@ def run_pre_processing(input_model, verbose_print, smoothing_method, smoothing_f
                                                     resampling=resampling_step)
         else:
             centerlines = read_polydata(file_name_flow_centerlines)
-
     # Clip centerline if only one inlet to avoid refining model surface
     if not has_outlet:
         line = extract_single_line(centerlines, 0)

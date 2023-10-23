@@ -2,9 +2,8 @@ from os import listdir, mkdir
 
 from morphman.common import *
 from scipy.interpolate import interp1d
-from vtk.numpy_interface import dataset_adapter as dsa
-
 from vampy.automatedPreprocessing.preprocessing_common import scale_surface
+from vtk.numpy_interface import dataset_adapter as dsa
 
 # Global array names
 radiusArrayName = 'MaximumInscribedSphereRadius'
@@ -79,6 +78,7 @@ def get_point_map(remeshed, remeshed_extended):
         point = remeshed_extended.Points[num_re + i]
         tmp_id = -1
         tmp_cross_norm = 1e16
+        tmp_p_norm = 1e16
         # Some hacks to find the correct corresponding points
         for region_id in range(len(outer_features)):
             region_id_out = boundary_map[region_id]
@@ -92,11 +92,15 @@ def get_point_map(remeshed, remeshed_extended):
             p_a = np.array(p_i) - np.array(point)
             p_b = np.array(p_o) - np.array(point)
             p_cross = np.cross(p_a, p_b)
-            p_cross_norm = np.linalg.norm(p_cross)
-            if p_cross_norm < tmp_cross_norm:
-                tmp_cross_norm = p_cross_norm
-                tmp_id = region_id
+            # p_cross_norm = np.linalg.norm(p_cross)
+            # if p_cross_norm < tmp_cross_norm:
+            #     tmp_cross_norm = p_cross_norm
+            #     tmp_id = region_id
 
+            p_norm = np.linalg.norm(p_b) + np.linalg.norm(p_a)
+            if p_norm < tmp_p_norm:
+                tmp_id = region_id
+                tmp_p_norm = p_norm
         regionId = tmp_id
         regionId_out = boundary_map[regionId]
         inner_id = inner_locators[regionId].FindClosestPoint(point)
@@ -105,13 +109,18 @@ def get_point_map(remeshed, remeshed_extended):
         dist_to_boundary = get_distance(point, outer_regions[regionId_out].Points[outer_id])
         dist_between_boundaries = get_distance(inner_regions[regionId].Points[inner_id],
                                                outer_regions[regionId_out].Points[outer_id])
-        distances[i] = dist_to_boundary / dist_between_boundaries
+        #distances[i] = easing_cos(dist_to_boundary, dist_between_boundaries)
+        distances[i] = (dist_to_boundary / dist_between_boundaries)
         point_map[i] = locator_remeshed.FindClosestPoint(inner_regions[regionId].Points[inner_id])
 
     # Let the points corresponding to the caps have distance 0
     point_map = point_map.astype(int)
 
     return distances, point_map
+
+
+def easing_cos(dist_b, dist_bb):
+    return - 0.5 * (np.cos(np.pi * dist_b / dist_bb) - 1)
 
 
 def move_surface_model(surface, original, remeshed, remeshed_extended, distance, point_map, file_path, i, points,
@@ -155,7 +164,30 @@ def move_surface_model(surface, original, remeshed, remeshed_extended, distance,
     new_surface = dsa.WrapDataObject(new_surface)
 
     # Manipulate displacement in the extensions
-    displacement = new_surface.PointData["displacement"]
+    # Case - Condition - Percentage reduction
+    # 6, SR?, 40%
+    # 20, SR?, 50%
+    # 31, SR?, 80%
+    # 33, SR?, 75%
+    # 35, SR?, 40%
+    # 1029, SR?, 50%
+    # 1030, SR, 35%
+    # 1030, AF, 50%
+    # NEW:
+    # 0023, AF, 75%
+    # 0022, AF, 75%
+    # 0007, SR, 75%
+    # 0008, SR, 75%
+    # 0019, SR, 80%
+    # 0022, SR, 50%
+    # 0025, SR, 50%
+    # 0024, SR, 50%
+    # 0076, SR, 65%
+    # 2022, SR, 50%
+    # 2022, AF, 50%
+    # 1037, SR, 80%
+    SCALE = 1.00
+    displacement = new_surface.PointData["displacement"] * SCALE
     if clamp_boundaries:
         displacement[remeshed.Points.shape[0]:] = distance * displacement[point_map]
     else:
@@ -235,6 +267,7 @@ def project_displacement(clamp_boundaries, distance, folder_extended_surfaces, f
             continue
 
         tmp_surface = read_polydata(model_path)
+        # tmp_surface = vtk_clean_polydata(tmp_surface)
         if scale_factor is not None:
             tmp_surface = scale_surface(tmp_surface, scale_factor)
 
