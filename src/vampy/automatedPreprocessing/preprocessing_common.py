@@ -1,8 +1,9 @@
 import gzip
-from os import path
 import json
+from os import path
 
 import numpy as np
+import vtkmodules.numpy_interface.dataset_adapter as dsa
 from morphman import vtk_clean_polydata, vtk_triangulate_surface, get_parameters, write_parameters, read_polydata, \
     vmtkscripts, vtk, write_polydata, vtkvmtk, get_curvilinear_coordinate, vtk_compute_threshold, get_vtk_array, \
     get_distance, get_number_of_arrays, vmtk_smooth_surface, get_point_data_array, create_vtk_array, \
@@ -15,6 +16,7 @@ from vampy.automatedPreprocessing.vmtk_pointselector import vmtkPickPointSeedSel
 # Global array names
 distanceToSpheresArrayName = "DistanceToSpheres"
 radiusArrayName = 'MaximumInscribedSphereRadius'
+cellEntityArrayName = "CellEntityIds"
 
 
 def get_regions_to_refine(surface, provided_points, dir_path):
@@ -876,3 +878,44 @@ def check_if_closed_surface(surface):
 
     cells = vtk_extract_feature_edges(surface)
     return cells.GetNumberOfCells() == 0
+
+
+def remesh_surface(surface, edge_length, element_size_mode="edgelength", exclude=None):
+    """
+    Remeshes a given surface based on the specified parameters.
+
+    Args:
+        surface (vtkPolyData): The input surface to be remeshed.
+        edge_length (float): The target edge length for remeshing.
+        element_size_mode (str, optional): Determines the method for sizing elements during remeshing.
+        exclude (list, optional): A list of entity IDs to be excluded during remeshing. Defaults to None.
+
+    Returns:
+        remeshed_surface (vtkPolyData): The remeshed surface.
+    """
+    surface = dsa.WrapDataObject(surface)
+    if cellEntityArrayName not in surface.CellData.keys():
+        surface.CellData.append(np.zeros(surface.VTKObject.GetNumberOfCells()) + 1, cellEntityArrayName)
+
+    remeshing = vmtkscripts.vmtkSurfaceRemeshing()
+    remeshing.Surface = surface.VTKObject
+    remeshing.CellEntityIdsArrayName = cellEntityArrayName
+    remeshing.TargetEdgeLength = edge_length
+    remeshing.MaxEdgeLength = 1e6
+    remeshing.MinEdgeLength = 0.0
+    remeshing.TargetEdgeLengthFactor = 1.0
+    remeshing.TriangleSplitFactor = 5.0
+    remeshing.ElementSizeMode = element_size_mode
+    if element_size_mode == "edgelength":
+        remeshing.TargetEdgeLengthArrayName = ""
+    else:
+        remeshing.TargetEdgeLengthArrayName = "Size"  # Variable size mesh
+
+    if exclude is not None:
+        remeshing.ExcludeEntityIds = exclude
+
+    remeshing.Execute()
+
+    remeshed_surface = remeshing.Surface
+
+    return remeshed_surface
