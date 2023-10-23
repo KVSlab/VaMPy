@@ -1,6 +1,6 @@
 # Left atrium model for moving domain simulations
 
-The provided left atrium model (`model.vtp`) is manually created in MeshMixer by Henrik A. Kjeldsberg, and can be meshed
+The provided left atrium model (`model.vtp`) is manually created in MeshMixer by [Henrik A. Kjeldsberg](https://github.com/hkjeldsberg/) , and can be meshed
 and simulated using VaMPy given that `OasisMove` is installed.
 
 In addition, the folder `model_moved` contains several displaced surface models, where `model_moved_00.vtp`
