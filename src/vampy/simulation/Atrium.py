@@ -1,6 +1,7 @@
 import json
 import pickle
 from pprint import pprint
+from dolfin import set_log_level, MPI
 
 import numpy as np
 from oasis.problems.NSfracStep import *

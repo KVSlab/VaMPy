@@ -2,8 +2,9 @@ from os import listdir, mkdir
 
 from morphman.common import *
 from scipy.interpolate import interp1d
-from vampy.automatedPreprocessing.preprocessing_common import scale_surface
 from vtk.numpy_interface import dataset_adapter as dsa
+
+from vampy.automatedPreprocessing.preprocessing_common import scale_surface
 
 
 ##############################################################
@@ -68,7 +69,7 @@ def get_point_map(remeshed, remeshed_extended, profile="linear"):
             p_i = inner_features[region_id].GetPoint(id_i)
             p_o = outer_features[region_id_out].GetPoint(id_o)
 
-            # Compute norm of cross product between vectors pointing to surface point (on cylinder)
+            # Compute distances from current point to boundaries
             p_a = np.array(p_i) - np.array(point)
             p_b = np.array(p_o) - np.array(point)
             p_norm = np.linalg.norm(p_b) + np.linalg.norm(p_a)
@@ -130,10 +131,6 @@ def move_surface_model(surface, original, remeshed, remeshed_extended, distance,
 
     Returns:
         None: The function writes results to a file and modifies the points array in place.
-
-    Notes:
-        Uses the vmtkSurfaceProjection script for the projection process.
-        Removes the "displacement" array if it already exists in the original and remeshed_extended surfaces.
     """
     surface = dsa.WrapDataObject(surface)
     original = dsa.WrapDataObject(original)

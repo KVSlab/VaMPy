@@ -2,20 +2,17 @@ import json
 import pickle
 from os import makedirs
 from pprint import pprint
+from dolfin import set_log_level, UserExpression
 
+from oasismove.problems.NSfracStep import *
+from oasismove.problems.NSfracStep.MovingCommon import get_visualization_writers
 from scipy.interpolate import splrep, splev
 from scipy.spatial import KDTree
 
-from vampy.simulation.Probe import Probes
+from vampy.simulation.Probe import Probes  # type: ignore
 from vampy.simulation.Womersley import make_womersley_bcs, compute_boundary_geometry_acrn
 from vampy.simulation.simulation_common import store_u_mean, get_file_paths, print_mesh_information, \
     store_velocity_and_pressure_h5, dump_probes
-
-try:
-    from oasismove.problems.NSfracStep import *
-    from oasismove.problems.NSfracStep.MovingCommon import get_visualization_writers
-except ImportError:
-    raise ImportError("ERROR: OasisMove is not installed. Cannot run MovingAtrium problem.")
 
 # FEniCS specific command to control the desired level of logging, here set to critical errors
 set_log_level(50)
