@@ -5,22 +5,6 @@ from scipy.interpolate import interp1d
 from vampy.automatedPreprocessing.preprocessing_common import scale_surface
 from vtk.numpy_interface import dataset_adapter as dsa
 
-# Global array names
-radiusArrayName = 'MaximumInscribedSphereRadius'
-parallelTransportNormalsArrayName = 'ParallelTransportNormals'
-groupIDsArrayName = "GroupIds"
-abscissasArrayName = 'Abscissas'
-clippingArrayName = 'ClippingArray'
-branchClippingArrayName = 'BranchClippingArray'
-distanceToTubeArrayName = 'DistanceToTubeFunction'
-closedArrayName = 'ClosedSection'
-eikonalSolutionArrayName = 'EikonalSolutionArray'
-edgeArrayName = 'EdgeArray'
-edgePCoordArrayName = 'EdgePCoordArray'
-costFunctionArrayName = 'CostFunctionArray'
-distanceToSpheresArrayName = "DistanceToSpheres"
-cellEntityArrayName = "CellEntityIds"
-
 
 ##############################################################
 # A Collection of utility scripts for moving mesh generation #
