@@ -1,15 +1,14 @@
 import json
 import pickle
-from os import makedirs
 from pprint import pprint
-from dolfin import set_log_level
 
 import numpy as np
 from oasis.problems.NSfracStep import *
 
 from vampy.simulation.Probe import Probes  # type: ignore
 from vampy.simulation.Womersley import make_womersley_bcs, compute_boundary_geometry_acrn
-from vampy.simulation.simulation_common import get_file_paths, store_u_mean, print_mesh_information
+from vampy.simulation.simulation_common import get_file_paths, store_u_mean, print_mesh_information, \
+    store_velocity_and_pressure_h5, dump_probes
 
 # FEniCS specific command to control the desired level of logging, here set to critical errors
 set_log_level(50)
@@ -124,11 +123,12 @@ def create_bcs(t, NS_expressions, V, Q, area_ratio, area_inlet, mesh, mesh_path,
     ds = Measure("ds", domain=mesh, subdomain_data=boundary)
     for i, ind in enumerate(id_out):
         dsi = ds(ind)
-        area_out.append(assemble(Constant(1.0, name="one") * dsi))
+        area_out.append(assemble(Constant(1.0) * dsi))
 
     bc_p = []
     if MPI.rank(MPI.comm_world) == 0:
         print("=== Initial pressure and area fraction ===")
+
     for i, ID in enumerate(id_out):
         p_initial = area_out[i] / sum(area_out)
         outflow = Expression("p", p=p_initial, degree=pressure_degree)
@@ -136,7 +136,7 @@ def create_bcs(t, NS_expressions, V, Q, area_ratio, area_inlet, mesh, mesh_path,
         bc_p.append(bc)
         NS_expressions[ID] = outflow
         if MPI.rank(MPI.comm_world) == 0:
-            print(("Boundary ID={:d}, pressure: {:0.6f}, area fraction: {:0.4f}".format(ID, p_initial, area_ratio[i])))
+            print(f"Boundary ID={ID}, pressure: {p_initial:.5f}, area fraction: {area_ratio[i]:0.5f}")
 
     # No slip condition at wall
     wall = Constant(0.0)
@@ -219,12 +219,11 @@ def temporal_hook(u_, p_, mesh, tstep, dump_probe_frequency, eval_dict, newfolde
         diam_inlet = np.sqrt(4 * area_inlet[0] / np.pi)
         Re = U_mean * diam_inlet / nu
         print("=" * 10, "Time step " + str(tstep), "=" * 10)
-        print("Sum of Q_out = {:0.4f}, Q_in = {:0.4f}, mean velocity (inlet): {:0.4f}, Reynolds number (inlet): {:0.4f}"
-              .format(sum(Q_outs), Q_in, U_mean, Re))
+        print(f"Sum of Q_out = {sum(Q_outs):.4f}, Q_in = {Q_in:.4f}, mean velocity (inlet): {U_mean:.4f}, " +
+              f"Reynolds number (inlet): {Re:.4f}")
         for i, out_id in enumerate(id_out):
-            print(("For outlet with boundary ID={:d}: target flow rate: {:0.4f} mL/s, " +
-                   "computed flow rate: {:0.4f} mL/s, pressure updated to: {:0.4f}")
-                  .format(out_id, Q_ideals[i], Q_outs[i], NS_expressions[out_id].p))
+            print("For outlet with boundary ID={out_id}: target flow rate: {Q_ideals[i]:.4f} mL/s, " +
+                  f"computed flow rate: {Q_outs[i]:.4f} mL/s, pressure updated to: {NS_parameters[out_id].p:.4f}")
         print()
 
     # Sample velocity and pressure in points/probes
@@ -235,59 +234,11 @@ def temporal_hook(u_, p_, mesh, tstep, dump_probe_frequency, eval_dict, newfolde
 
     # Store sampled velocity and pressure
     if tstep % dump_probe_frequency == 0:
-        # Save variables along the centerline for CFD simulation
-        # diagnostics and light-weight post-processing
-        filepath = path.join(newfolder, "Probes")
-        if MPI.rank(MPI.comm_world) == 0:
-            if not path.exists(filepath):
-                makedirs(filepath)
-
-        arr_u_x = eval_dict["centerline_u_x_probes"].array()
-        arr_u_y = eval_dict["centerline_u_y_probes"].array()
-        arr_u_z = eval_dict["centerline_u_z_probes"].array()
-        arr_p = eval_dict["centerline_p_probes"].array()
-
-        # Dump stats
-        if MPI.rank(MPI.comm_world) == 0:
-            arr_u_x.dump(path.join(filepath, "u_x_%s.probes" % str(tstep)))
-            arr_u_y.dump(path.join(filepath, "u_y_%s.probes" % str(tstep)))
-            arr_u_z.dump(path.join(filepath, "u_z_%s.probes" % str(tstep)))
-            arr_p.dump(path.join(filepath, "p_%s.probes" % str(tstep)))
-
-        # Clear stats
-        MPI.barrier(MPI.comm_world)
-        eval_dict["centerline_u_x_probes"].clear()
-        eval_dict["centerline_u_y_probes"].clear()
-        eval_dict["centerline_u_z_probes"].clear()
-        eval_dict["centerline_p_probes"].clear()
+        dump_probes(eval_dict, newfolder, tstep)
 
     # Save velocity and pressure for post-processing
     if tstep % save_solution_frequency == 0 and tstep >= save_solution_at_tstep:
-        # Assign velocity components to vector solution
-        assign(U.sub(0), u_[0])
-        assign(U.sub(1), u_[1])
-        assign(U.sub(2), u_[2])
-
-        # Get save paths
-        files = NS_parameters['files']
-        p_path = files['p']
-        u_path = files['u']
-        file_mode = "w" if not path.exists(p_path) else "a"
-
-        # Save pressure
-        viz_p = HDF5File(MPI.comm_world, p_path, file_mode=file_mode)
-        viz_p.write(p_, "/pressure", tstep)
-        viz_p.close()
-
-        # Save velocity
-        viz_u = HDF5File(MPI.comm_world, u_path, file_mode=file_mode)
-        viz_u.write(U, "/velocity", tstep)
-        viz_u.close()
-
-        # Accumulate velocity
-        u_mean0.vector().axpy(1, u_[0].vector())
-        u_mean1.vector().axpy(1, u_[1].vector())
-        u_mean2.vector().axpy(1, u_[2].vector())
+        store_velocity_and_pressure_h5(NS_parameters, U, p_, tstep, u_, u_mean0, u_mean1, u_mean2)
 
 
 # Oasis hook called after the simulation has finished

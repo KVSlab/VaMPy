@@ -1,15 +1,14 @@
 import json
 import pickle
-from os import makedirs
 from pprint import pprint
-from dolfin import set_log_level, MPI
 
 import numpy as np
 from oasis.problems.NSfracStep import *
 
 from vampy.simulation.Probe import Probes  # type: ignore
 from vampy.simulation.Womersley import make_womersley_bcs, compute_boundary_geometry_acrn
-from vampy.simulation.simulation_common import store_u_mean, get_file_paths, print_mesh_information
+from vampy.simulation.simulation_common import store_u_mean, get_file_paths, print_mesh_information, \
+    store_velocity_and_pressure_h5, dump_probes
 
 # FEniCS specific command to control the desired level of logging, here set to critical errors
 set_log_level(50)
@@ -116,19 +115,18 @@ def create_bcs(NS_expressions, mesh, mesh_path, nu, t, V, Q, id_in, id_out, **NS
         Q_scaled = Q_values * tmp_area / area_total
 
         # Create Womersley boundary condition at inlet
-        inlet = make_womersley_bcs(t_values, Q_scaled, nu, tmp_center, tmp_radius, tmp_normal,
-                                   V.ufl_element())
-        NS_expressions["inlet_{}".format(ID)] = inlet
+        inlet = make_womersley_bcs(t_values, Q_scaled, nu, tmp_center, tmp_radius, tmp_normal, V.ufl_element())
+        NS_expressions[f"inlet_{ID}"] = inlet
 
     # Initial condition
     for ID in id_in:
         for i in [0, 1, 2]:
-            NS_expressions["inlet_{}".format(ID)][i].set_t(t)
+            NS_expressions[f"inlet_{ID}"][i].set_t(t)
 
     # Create inlet boundary conditions
     bc_inlets = {}
     for ID in id_in:
-        bc_inlet = [DirichletBC(V, NS_expressions["inlet_{}".format(ID)][i], boundary, ID) for i in range(3)]
+        bc_inlet = [DirichletBC(V, NS_expressions[f"inlet_{ID}"][i], boundary, ID) for i in range(3)]
         bc_inlets[ID] = bc_inlet
 
     # Set outlet boundary conditions, assuming one outlet (Mitral Valve)
@@ -240,59 +238,11 @@ def temporal_hook(mesh, dt, t, save_solution_frequency, u_, NS_expressions, id_i
 
     # Store sampled velocity and pressure
     if tstep % dump_probe_frequency == 0:
-        # Save variables along the centerline for CFD simulation
-        # diagnostics and light-weight post-processing
-        filepath = path.join(newfolder, "Probes")
-        if MPI.rank(MPI.comm_world) == 0:
-            if not path.exists(filepath):
-                makedirs(filepath)
-
-        arr_u_x = eval_dict["centerline_u_x_probes"].array()
-        arr_u_y = eval_dict["centerline_u_y_probes"].array()
-        arr_u_z = eval_dict["centerline_u_z_probes"].array()
-        arr_p = eval_dict["centerline_p_probes"].array()
-
-        # Dump stats
-        if MPI.rank(MPI.comm_world) == 0:
-            arr_u_x.dump(path.join(filepath, "u_x_%s.probes" % str(tstep)))
-            arr_u_y.dump(path.join(filepath, "u_y_%s.probes" % str(tstep)))
-            arr_u_z.dump(path.join(filepath, "u_z_%s.probes" % str(tstep)))
-            arr_p.dump(path.join(filepath, "p_%s.probes" % str(tstep)))
-
-        # Clear stats
-        MPI.barrier(MPI.comm_world)
-        eval_dict["centerline_u_x_probes"].clear()
-        eval_dict["centerline_u_y_probes"].clear()
-        eval_dict["centerline_u_z_probes"].clear()
-        eval_dict["centerline_p_probes"].clear()
+        dump_probes(eval_dict, newfolder, tstep)
 
     # Save velocity and pressure for post-processing
     if tstep % save_solution_frequency == 0 and tstep >= save_solution_at_tstep:
-        # Assign velocity components to vector solution
-        assign(U.sub(0), u_[0])
-        assign(U.sub(1), u_[1])
-        assign(U.sub(2), u_[2])
-
-        # Get save paths
-        files = NS_parameters['files']
-        p_path = files['p']
-        u_path = files['u']
-        file_mode = "w" if not path.exists(p_path) else "a"
-
-        # Save pressure
-        viz_p = HDF5File(MPI.comm_world, p_path, file_mode=file_mode)
-        viz_p.write(p_, "/pressure", tstep)
-        viz_p.close()
-
-        # Save velocity
-        viz_u = HDF5File(MPI.comm_world, u_path, file_mode=file_mode)
-        viz_u.write(U, "/velocity", tstep)
-        viz_u.close()
-
-        # Accumulate velocity
-        u_mean0.vector().axpy(1, u_[0].vector())
-        u_mean1.vector().axpy(1, u_[1].vector())
-        u_mean2.vector().axpy(1, u_[2].vector())
+        store_velocity_and_pressure_h5(NS_parameters, U, p_, tstep, u_, u_mean0, u_mean1, u_mean2)
 
 
 # Oasis hook called after the simulation has finished

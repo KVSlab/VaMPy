@@ -1,21 +1,26 @@
 import json
 import pickle
 from os import makedirs
+from pprint import pprint
 
 from scipy.interpolate import splrep, splev
 from scipy.spatial import KDTree
 
+from vampy.simulation.Probe import Probes
 from vampy.simulation.Womersley import make_womersley_bcs, compute_boundary_geometry_acrn
-from vampy.simulation.simulation_common import store_u_mean, get_file_paths, print_mesh_information
+from vampy.simulation.simulation_common import store_u_mean, get_file_paths, print_mesh_information, \
+    store_velocity_and_pressure_h5, dump_probes
 
 try:
     from oasismove.problems.NSfracStep import *
     from oasismove.problems.NSfracStep.MovingCommon import get_visualization_writers
-except ImportError as error:
-    raise ImportError("Cannot import OasisMove. The MovingAtrium problem requires OasisMove to be installed.")
+except ImportError:
+    raise ImportError("ERROR: OasisMove is not installed. Cannot run MovingAtrium problem.")
+
+# FEniCS specific command to control the desired level of logging, here set to critical errors
+set_log_level(50)
 
 
-# Override some problem specific parameters
 def problem_parameters(commandline_kwargs, scalar_components, Schmidt, NS_parameters, **NS_namespace):
     """
     Problem file for running CFD simulation in left atrial models consisting of arbitrary number of pulmonary veins (PV)
@@ -92,6 +97,11 @@ def problem_parameters(commandline_kwargs, scalar_components, Schmidt, NS_parame
             print("-- Computing blood residence time --")
         scalar_components += ["blood"]
 
+    if MPI.rank(MPI.comm_world) == 0:
+        print("=== Starting simulation for MovingAtrium.py ===")
+        print("Running with the following parameters:")
+        pprint(NS_parameters)
+
 
 def scalar_source(scalar_components, **NS_namespace):
     """Return a dictionary of scalar sources."""
@@ -133,7 +143,7 @@ class MeshMotionMapping(UserExpression):
     def eval(self, _, x):
         self.counter += 1
         _, index = self.tree.query(x)
-
+        # FIXME: Set spline parameter objectively
         s = 1E-2
         x_ = splrep(self.time, self.points[index, 0, :], s=s, per=True)
         y_ = splrep(self.time, self.points[index, 1, :], s=s, per=True)
@@ -183,6 +193,8 @@ def create_bcs(NS_expressions, dynamic_mesh, x_, cardiac_cycle, backflow_facets,
     id_in[:] = info['inlet_ids']
     id_out[:] = info['outlet_id']
     id_wall = min(id_in + id_out) - 1
+
+    # Apply backflow at the outlet (Mitral valve)
     backflow_facets[:] = info['outlet_id']
 
     # Find corresponding areas
@@ -197,14 +209,16 @@ def create_bcs(NS_expressions, dynamic_mesh, x_, cardiac_cycle, backflow_facets,
     else:
         flow_rate_path = mesh_path.split(mesh_filename)[0] + "_flowrate_rigid.txt"
 
+    Q_mean = info['mean_flow_rate']
     t_values, Q_ = np.loadtxt(flow_rate_path).T
+    Q_values = Q_ * Q_mean  # Scale normalized flow rate by mean flow rate
     t_values *= 1000  # Scale time in normalised flow wave form to [ms]
 
     for ID in id_in:
         tmp_area, tmp_center, tmp_radius, tmp_normal = compute_boundary_geometry_acrn(mesh, ID, boundary)
-        Q_scaled = Q_ * tmp_area / area_total
+        Q_scaled = Q_values * tmp_area / area_total
 
-        # Create Womersley boundary condition at inlet
+        # Create Womersley boundary condition at inlets
         inlet = make_womersley_bcs(t_values, Q_scaled, nu, tmp_center, tmp_radius, tmp_normal, V.ufl_element())
         NS_expressions[f"inlet_{ID}"] = inlet
 
@@ -289,22 +303,18 @@ def pre_solve_hook(u_components, id_in, id_out, dynamic_mesh, V, Q, cardiac_cycl
     # Create point for evaluation
     n = FacetNormal(mesh)
     eval_dict = {}
-    rel_path = mesh_path.split(mesh_filename)[0] + "_probe_point"
-    probe_points = np.load(rel_path, encoding='latin1', fix_imports=True, allow_pickle=True)
-
-    # Define xdmf writers
-    viz_U, viz_blood = get_visualization_writers(newfolder, ['velocity', 'blood'])
-
-    # Extract dof map and coordinates
-    coordinates = mesh.coordinates()
-    if velocity_degree == 1:
-        dof_map = vertex_to_dof_map(V)
-    else:
-        dof_map = V.dofmap().entity_dofs(mesh, 0)
+    rel_path = mesh_path.split(mesh_filename)[0] + "_probe_point.json"
+    with open(rel_path, 'r') as infile:
+        probe_points = np.array(json.load(infile))
 
     # Store points file in checkpoint
     if MPI.rank(MPI.comm_world) == 0:
         probe_points.dump(path.join(newfolder, "Checkpoint", "points"))
+
+    eval_dict["centerline_u_x_probes"] = Probes(probe_points.flatten(), V)
+    eval_dict["centerline_u_y_probes"] = Probes(probe_points.flatten(), V)
+    eval_dict["centerline_u_z_probes"] = Probes(probe_points.flatten(), V)
+    eval_dict["centerline_p_probes"] = Probes(probe_points.flatten(), Q)
 
     if restart_folder is None:
         # Get files to store results
@@ -322,6 +332,16 @@ def pre_solve_hook(u_components, id_in, id_out, dynamic_mesh, V, Q, cardiac_cycl
     if MPI.rank(MPI.comm_world) == 0:
         if not path.exists(probes_folder):
             makedirs(probes_folder)
+
+    # Define xdmf writers
+    viz_U, viz_blood = get_visualization_writers(newfolder, ['velocity', 'blood'])
+
+    # Extract dof map and coordinates
+    coordinates = mesh.coordinates()
+    if velocity_degree == 1:
+        dof_map = vertex_to_dof_map(V)
+    else:
+        dof_map = V.dofmap().entity_dofs(mesh, 0)
 
     # Create vector function for storing velocity
     Vv = VectorFunctionSpace(mesh, "CG", velocity_degree)
@@ -394,32 +414,19 @@ def temporal_hook(mesh, id_wall, id_out, cardiac_cycle, dt, t, save_solution_fre
         compute_flow_quantities(u_, D_mitral, nu, mesh, t, tstep, dt, h, outlet_area, boundary, id_out, id_in, id_wall,
                                 period=cardiac_cycle, newfolder=newfolder, dynamic_mesh=False, write_to_file=True)
 
+    # Sample velocity and pressure in points/probes
+    eval_dict["centerline_u_x_probes"](u_[0])
+    eval_dict["centerline_u_y_probes"](u_[1])
+    eval_dict["centerline_u_z_probes"](u_[2])
+    eval_dict["centerline_p_probes"](p_)
+
+    # Store sampled velocity and pressure
+    if tstep % dump_probe_frequency == 0:
+        dump_probes(eval_dict, newfolder, tstep)
+
     # Save velocity and pressure for post-processing
     if tstep % save_solution_frequency == 0 and tstep >= save_solution_at_tstep:
-        # Assign velocity components to vector solution
-        for i in range(3):
-            assign(U.sub(i), u_[i])
-
-        # Get save paths
-        files = NS_parameters['files']
-        p_path = files['p']
-        u_path = files['u']
-        file_mode = "w" if not path.exists(p_path) else "a"
-
-        # Save pressure
-        viz_p = HDF5File(MPI.comm_world, p_path, file_mode=file_mode)
-        viz_p.write(p_, "/pressure", tstep)
-        viz_p.close()
-
-        # Save velocity
-        viz_u = HDF5File(MPI.comm_world, u_path, file_mode=file_mode)
-        viz_u.write(U, "/velocity", tstep)
-        viz_u.close()
-
-        # Accumulate velocity
-        u_mean0.vector().axpy(1, u_[0].vector())
-        u_mean1.vector().axpy(1, u_[1].vector())
-        u_mean2.vector().axpy(1, u_[2].vector())
+        store_velocity_and_pressure_h5(NS_parameters, U, p_, tstep, u_, u_mean0, u_mean1, u_mean2)
 
 
 # Oasis hook called after the simulation has finished
