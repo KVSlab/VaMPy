@@ -11,5 +11,6 @@ dependencies:
   - python >=3.8
   - git
   - pip:
+      - scipy
       - cppimport
       - git+https://github.com/mikaem/Oasis

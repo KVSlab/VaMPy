@@ -4,11 +4,15 @@ from os import makedirs
 
 from scipy.interpolate import splrep, splev
 from scipy.spatial import KDTree
+
 from vampy.simulation.Womersley import make_womersley_bcs, compute_boundary_geometry_acrn
 from vampy.simulation.simulation_common import store_u_mean, get_file_paths, print_mesh_information
 
-from oasismove.problems.NSfracStep import *
-from oasismove.problems.NSfracStep.MovingCommon import get_visualization_writers
+try:
+    from oasismove.problems.NSfracStep import *
+    from oasismove.problems.NSfracStep.MovingCommon import get_visualization_writers
+except ImportError as error:
+    raise ImportError("Cannot import OasisMove. The MovingAtrium problem requires OasisMove to be installed.")
 
 
 # Override some problem specific parameters
@@ -40,13 +44,13 @@ def problem_parameters(commandline_kwargs, scalar_components, Schmidt, NS_parame
         # Override some problem specific parameters
         # Parameters are in mm and ms
         cardiac_cycle = float(commandline_kwargs.get("cardiac_cycle", 1000))
-        number_of_cycles = float(commandline_kwargs.get("number_of_cycles", 1))
+        number_of_cycles = int(commandline_kwargs.get("number_of_cycles", 2))
         track_blood = True
 
         NS_parameters.update(
             # Moving atrium parameters
             dynamic_mesh=True,  # Run moving mesh simulation
-            compute_velocity_and_pressure=True,  # Only solve mesh equations
+            compute_velocity_and_pressure=True,  # Only solve mesh equations (For volume computation)
             # Blood residence time
             track_blood=track_blood,
             # Backflow parameters
@@ -59,19 +63,17 @@ def problem_parameters(commandline_kwargs, scalar_components, Schmidt, NS_parame
             id_out=[],  # Outlet boundary IDs
             # Simulation parameters
             cardiac_cycle=cardiac_cycle,  # Run simulation for 1 cardiac cycles [ms]
-            # FIXME: For strong scaling only
             T=cardiac_cycle * number_of_cycles,  # Total simulation length
-            dt=1,  # # Time step size [ms]
+            dt=0.1,  # # Time step size [ms]
             # Frequencies to save data
             dump_probe_frequency=500,  # Dump frequency for sampling velocity & pressure at probes along the centerline
-            save_solution_frequency=5e10,  # Save frequency for velocity and pressure field
-            save_solution_frequency_xdmf=5e10,  # Save frequency for velocity and pressure field
-            save_step=5e10,
+            save_solution_frequency=10,  # Save frequency for velocity and pressure field
+            save_solution_frequency_xdmf=10,  # Save frequency for velocity and pressure field
             save_solution_after_cycle=0,  # Store solution after 1 cardiac cycle
-            save_volume_frequency=5e10,  # Save frequency for storing volume
-            save_flow_metrics_frequency=5e10,  # Frequency for storing flow metrics
+            save_volume_frequency=1e10,  # Save frequency for storing volume
+            save_flow_metrics_frequency=100,  # Frequency for storing flow metrics
             # Oasis specific parameters
-            checkpoint=50000,  # Overwrite solution in Checkpoint folder each checkpoint
+            checkpoint=1000,  # Overwrite solution in Checkpoint folder each checkpoint
             print_intermediate_info=500,
             folder="results_moving_atrium",
             mesh_path=commandline_kwargs["mesh_path"],
@@ -110,7 +112,7 @@ def mesh(mesh_path, **NS_namespace):
     return mesh
 
 
-class Surface_counter(UserExpression):
+class MeshMotionMapping(UserExpression):
     def __init__(self, points, cycle, **kwargs):
         self.motion_mapping = {}
         self.counter = -1
@@ -140,7 +142,7 @@ class Surface_counter(UserExpression):
         self.motion_mapping[self.counter] = [x_, y_, z_]
 
 
-class Wall_motion(UserExpression):
+class WallMotion(UserExpression):
     def __init__(self, t, motion, max_counter, direction, cycle, **kwargs):
         self.t = t
         self.motion = motion
@@ -230,23 +232,23 @@ def create_bcs(NS_expressions, dynamic_mesh, x_, cardiac_cycle, backflow_facets,
             print("Creating splines for displacement")
 
         # Define wall movement
-        wall_counter = Surface_counter(points, cardiac_cycle, element=V.ufl_element())
-        bc_tmp = DirichletBC(V, wall_counter, boundary, id_wall)
+        motion_mapping = MeshMotionMapping(points, cardiac_cycle, element=V.ufl_element())
+        bc_tmp = DirichletBC(V, motion_mapping, boundary, id_wall)
         bc_tmp.apply(x_["u0"])
         x_["u0"].zero()
 
-        wall_counter_max = wall_counter.counter
-        wall_motion = wall_counter.get_motion_mapping()
+        wall_counter_max = motion_mapping.counter
+        wall_motion = motion_mapping.get_motion_mapping()
 
         # Remove explicitly from memory.
-        del wall_counter
+        del motion_mapping
         del points
 
         if rank == 0:
             print("Creating wall boundary conditions")
 
         for i, coord in enumerate(coords):
-            wall_ = Wall_motion(t, wall_motion, wall_counter_max, i, cardiac_cycle, element=V.ufl_element())
+            wall_ = WallMotion(t, wall_motion, wall_counter_max, i, cardiac_cycle, element=V.ufl_element())
             NS_expressions["wall_%s" % coord] = wall_
 
         bc_wall = [DirichletBC(V, NS_expressions["wall_%s" % coord], boundary, id_wall) for coord in coords]

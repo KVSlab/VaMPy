@@ -11,7 +11,8 @@ readme = "README.md"
 dependencies = [
     'numpy',
     'matplotlib',
-    'cppimport'
+    'cppimport',
+    'scipy'
 ]
 
 [project.scripts]
