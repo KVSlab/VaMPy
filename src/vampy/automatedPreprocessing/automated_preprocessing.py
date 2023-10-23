@@ -8,6 +8,7 @@ from morphman import get_uncapped_surface, write_polydata, get_parameters, vtk_c
     get_vtk_point_locator, extract_single_line, vtk_merge_polydata, get_point_data_array, smooth_voronoi_diagram, \
     create_new_surface, compute_centers, vmtk_smooth_surface, str2bool, vmtk_compute_voronoi_diagram, \
     prepare_output_surface, vmtk_compute_geometric_features
+
 # Local imports
 from vampy.automatedPreprocessing import ToolRepairSTL
 from vampy.automatedPreprocessing.moving_common import get_point_map, project_displacement, save_displacement
@@ -23,10 +24,7 @@ def run_pre_processing(input_model, verbose_print, smoothing_method, smoothing_f
                        meshing_method, refine_region, is_atrium, add_flow_extensions, visualize, config_path,
                        coarsening_factor, inlet_flow_extension_length, outlet_flow_extension_length, edge_length,
                        region_points, compress_mesh, add_boundary_layer, scale_factor, resampling_step,
-                       flow_rate_factor,
-                       moving_mesh,
-                       clamp_boundaries
-                       ):
+                       flow_rate_factor, moving_mesh, clamp_boundaries):
     """
     Automatically generate mesh of surface model in .vtu and .xml format, including prescribed
     flow rates at inlet and outlet based on flow network model.
@@ -55,7 +53,7 @@ def run_pre_processing(input_model, verbose_print, smoothing_method, smoothing_f
         scale_factor (float): Scale input model by this factor
         resampling_step (float): Float value determining the resampling step for centerline computations, in [m]
         flow_rate_factor (float): Flow rate factor
-        dynamic_mesh (bool): Computes projected movement for displaced surfaces located in [filename_model]_moved folder
+        moving_mesh (bool): Computes projected movement for displaced surfaces located in [filename_model]_moved folder
         clamp_boundaries (bool): Clamps inlet(s) and outlet(s) if true
     """
     # Get paths
