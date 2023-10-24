@@ -575,7 +575,7 @@ def read_command_line(input_path=None):
                         type=float,
                         help="Flow rate factor.")
 
-    parser.add_argument('-dm', '--moving-mesh',
+    parser.add_argument('-mm', '--moving-mesh',
                         action="store_true",
                         default=False,
                         help="If true, assumes a dynamic/moving mesh and will perform computation of projection " +
