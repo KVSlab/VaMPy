@@ -69,7 +69,7 @@ const thebe_selector_output = ".output, .cell_output"
     <link rel="prev" title="Features and issues" href="features.html" />
   <meta name="viewport" content="width=device-width, initial-scale=1"/>
   <meta name="docsearch:language" content="en"/>
-    <meta name="docbuild:last-update" content="Sep 27, 2023"/>
+    <meta name="docbuild:last-update" content="Oct 24, 2023"/>
   </head>
   
   
@@ -177,6 +177,7 @@ const thebe_selector_output = ".output, .cell_output"
 <p aria-level="2" class="caption" role="heading"><span class="caption-text">Using VaMPy</span></p>
 <ul class="nav bd-sidenav">
 <li class="toctree-l1"><a class="reference internal" href="preprocess.html">Pre-processing</a></li>
+<li class="toctree-l1"><a class="reference internal" href="movingpreprocess.html">Pre-processing for moving domains</a></li>
 <li class="toctree-l1"><a class="reference internal" href="simulation.html">Computational fluid dynamics</a></li>
 <li class="toctree-l1"><a class="reference internal" href="postprocess.html">Post-processing</a></li>
 <li class="toctree-l1"><a class="reference internal" href="quantities.html">Computed quantities</a></li>
@@ -188,6 +189,7 @@ const thebe_selector_output = ".output, .cell_output"
 <li class="toctree-l1 current active"><a class="current reference internal" href="#">Tutorials</a></li>
 <li class="toctree-l1"><a class="reference internal" href="artery.html">High-resolution CFD simulation in the internal carotid artery</a></li>
 <li class="toctree-l1"><a class="reference internal" href="atrium.html">Hemodynamic simulation in the left atrium and left atrial appendage</a></li>
+<li class="toctree-l1"><a class="reference internal" href="movingatrium.html">Moving domain simulation of the left atrium</a></li>
 </ul>
 <p aria-level="2" class="caption" role="heading"><span class="caption-text">Python API</span></p>
 <ul class="nav bd-sidenav">
@@ -400,21 +402,26 @@ document.write(`
   <section class="tex2jax_ignore mathjax_ignore" id="tutorials">
 <h1>Tutorials<a class="headerlink" href="#tutorials" title="Permalink to this heading">#</a></h1>
 <p>These tutorials are meant to guide the user through the basic steps of performing a computational fluid dynamic (CFD)
-simulation in a vascular body. The tutorials are divided into two main problems where we will first consider a model of
-the <a class="reference external" href="https://en.wikipedia.org/wiki/Internal_carotid_artery">internal carotid artery</a> (ICA)
+simulation in a vascular body. The tutorials are divided into three main problems where we will first consider a model
+of the <a class="reference external" href="https://en.wikipedia.org/wiki/Internal_carotid_artery">internal carotid artery</a> (ICA)
 with an aneurysm, followed by a model of the <a class="reference external" href="https://en.wikipedia.org/wiki/Atrium_(heart)">left atrium</a>. For the ICA,
 we will demonstrate different approaches for meshing and pre-processing of the model, followed by a CFD simulation using
 the Oasis software, before post-processing the results. For the left atrium model, we will investigate local refinement
-in a user-defined region, also followed by CFD simulation and post-processing of the results.</p>
+in a user-defined region, also followed by CFD simulation and post-processing of the results. In the third tutorial,
+we’ll explore a moving domain simulation for a simplified left atrium model, and examine blood residence time by
+simultaneously solving a scalar transport equation during the simulation.</p>
 <p>We assume that you have VaMPy installed, meaning you have a working version
-of <a class="reference external" href="https://github.com/KVSlab/morphMan">morphMan</a> and <a class="reference external" href="https://github.com/mikaem/Oasis">Oasis</a> on your computer. It is
-also beneficial, but not necessary, that you are familiar with the <a class="reference external" href="https://www.paraview.org/">ParaView</a>
-visualization software, which we will frequently be using to visualize the geometries and results.</p>
+of <a class="reference external" href="https://github.com/KVSlab/morphMan">morphMan</a> and <a class="reference external" href="https://github.com/mikaem/Oasis">Oasis</a> on your computer. For the
+moving domain tutorial you will need to install <a class="reference external" href="https://github.com/KVSlab/OasisMove">OasisMove</a>, a modified version
+of <code class="docutils literal notranslate"><span class="pre">Oasis</span></code> for moving domain simulations. It is also beneficial, but not necessary, that you are familiar with
+the <a class="reference external" href="https://www.paraview.org/">ParaView</a> visualization software, which we will frequently be using to visualize the
+geometries and results.</p>
 <section id="link-to-tutorials">
 <h2>Link to tutorials<a class="headerlink" href="#link-to-tutorials" title="Permalink to this heading">#</a></h2>
 <ul class="simple">
 <li><p><a class="reference internal" href="artery.html#tutorial-artery"><span class="std std-ref">Internal carotid artery</span></a></p></li>
 <li><p><a class="reference internal" href="atrium.html#tutorial-atrium"><span class="std std-ref">Left atrium</span></a></p></li>
+<li><p><a class="reference internal" href="movingatrium.html#tutorial-movingatrium"><span class="std std-ref">Moving domain simulation in the Left atrium</span></a></p></li>
 </ul>
 </section>
 </section>
@@ -515,7 +522,7 @@ By Henrik A. Kjeldsberg
   
   <div class="footer-item">
     <p class="last-updated">
-  Last updated on Sep 27, 2023.
+  Last updated on Oct 24, 2023.
   <br/>
 </p>
   </div>

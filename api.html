@@ -65,10 +65,10 @@ const thebe_selector_output = ".output, .cell_output"
     <script>DOCUMENTATION_OPTIONS.pagename = 'api';</script>
     <link rel="index" title="Index" href="genindex.html" />
     <link rel="search" title="Search" href="search.html" />
-    <link rel="prev" title="Hemodynamic simulation in the left atrium and left atrial appendage" href="atrium.html" />
+    <link rel="prev" title="Moving domain simulation of the left atrium" href="movingatrium.html" />
   <meta name="viewport" content="width=device-width, initial-scale=1"/>
   <meta name="docsearch:language" content="en"/>
-    <meta name="docbuild:last-update" content="Sep 27, 2023"/>
+    <meta name="docbuild:last-update" content="Oct 24, 2023"/>
   </head>
   
   
@@ -176,6 +176,7 @@ const thebe_selector_output = ".output, .cell_output"
 <p aria-level="2" class="caption" role="heading"><span class="caption-text">Using VaMPy</span></p>
 <ul class="nav bd-sidenav">
 <li class="toctree-l1"><a class="reference internal" href="preprocess.html">Pre-processing</a></li>
+<li class="toctree-l1"><a class="reference internal" href="movingpreprocess.html">Pre-processing for moving domains</a></li>
 <li class="toctree-l1"><a class="reference internal" href="simulation.html">Computational fluid dynamics</a></li>
 <li class="toctree-l1"><a class="reference internal" href="postprocess.html">Post-processing</a></li>
 <li class="toctree-l1"><a class="reference internal" href="quantities.html">Computed quantities</a></li>
@@ -187,6 +188,7 @@ const thebe_selector_output = ".output, .cell_output"
 <li class="toctree-l1"><a class="reference internal" href="tutorials.html">Tutorials</a></li>
 <li class="toctree-l1"><a class="reference internal" href="artery.html">High-resolution CFD simulation in the internal carotid artery</a></li>
 <li class="toctree-l1"><a class="reference internal" href="atrium.html">Hemodynamic simulation in the left atrium and left atrial appendage</a></li>
+<li class="toctree-l1"><a class="reference internal" href="movingatrium.html">Moving domain simulation of the left atrium</a></li>
 </ul>
 <p aria-level="2" class="caption" role="heading"><span class="caption-text">Python API</span></p>
 <ul class="current nav bd-sidenav">
@@ -423,7 +425,7 @@ only return default values.</p>
 
 <dl class="py function">
 <dt class="sig sig-object py" id="vampy.automatedPreprocessing.automated_preprocessing.run_pre_processing">
-<span class="sig-prename descclassname"><span class="pre">vampy.automatedPreprocessing.automated_preprocessing.</span></span><span class="sig-name descname"><span class="pre">run_pre_processing</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">input_model</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">verbose_print</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">smoothing_method</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">smoothing_factor</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">smoothing_iterations</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">meshing_method</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">refine_region</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">is_atrium</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">add_flow_extensions</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">visualize</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">config_path</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">coarsening_factor</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">inlet_flow_extension_length</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">outlet_flow_extension_length</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">edge_length</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">region_points</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">compress_mesh</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">add_boundary_layer</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">scale_factor</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">resampling_step</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">flow_rate_factor</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/vampy/automatedPreprocessing/automated_preprocessing.html#run_pre_processing"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#vampy.automatedPreprocessing.automated_preprocessing.run_pre_processing" title="Permalink to this definition">#</a></dt>
+<span class="sig-prename descclassname"><span class="pre">vampy.automatedPreprocessing.automated_preprocessing.</span></span><span class="sig-name descname"><span class="pre">run_pre_processing</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">input_model</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">verbose_print</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">smoothing_method</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">smoothing_factor</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">smoothing_iterations</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">meshing_method</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">refine_region</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">is_atrium</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">add_flow_extensions</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">visualize</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">config_path</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">coarsening_factor</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">inlet_flow_extension_length</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">outlet_flow_extension_length</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">edge_length</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">region_points</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">compress_mesh</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">add_boundary_layer</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">scale_factor</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">resampling_step</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">flow_rate_factor</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">moving_mesh</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">clamp_boundaries</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/vampy/automatedPreprocessing/automated_preprocessing.html#run_pre_processing"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#vampy.automatedPreprocessing.automated_preprocessing.run_pre_processing" title="Permalink to this definition">#</a></dt>
 <dd><p>Automatically generate mesh of surface model in .vtu and .xml format, including prescribed
 flow rates at inlet and outlet based on flow network model.</p>
 <p>Runs simulation of meshed case on a remote ssh server if server configuration is provided.</p>
@@ -451,6 +453,8 @@ flow rates at inlet and outlet based on flow network model.</p>
 <li><p><strong>scale_factor</strong> (<em>float</em>) – Scale input model by this factor</p></li>
 <li><p><strong>resampling_step</strong> (<em>float</em>) – Float value determining the resampling step for centerline computations, in [m]</p></li>
 <li><p><strong>flow_rate_factor</strong> (<em>float</em>) – Flow rate factor</p></li>
+<li><p><strong>moving_mesh</strong> (<em>bool</em>) – Computes projected movement for displaced surfaces located in [filename_model]_moved folder</p></li>
+<li><p><strong>clamp_boundaries</strong> (<em>bool</em>) – Clamps inlet(s) and outlet(s) if true</p></li>
 </ul>
 </dd>
 </dl>
@@ -811,6 +815,28 @@ the furthest distance accordingly.</p>
 </dd></dl>
 
 <dl class="py function">
+<dt class="sig sig-object py" id="vampy.automatedPreprocessing.preprocessing_common.remesh_surface">
+<span class="sig-prename descclassname"><span class="pre">vampy.automatedPreprocessing.preprocessing_common.</span></span><span class="sig-name descname"><span class="pre">remesh_surface</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">surface</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">edge_length</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">element_size_mode</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">'edgelength'</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">exclude</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/vampy/automatedPreprocessing/preprocessing_common.html#remesh_surface"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#vampy.automatedPreprocessing.preprocessing_common.remesh_surface" title="Permalink to this definition">#</a></dt>
+<dd><p>Remeshes a given surface based on the specified parameters.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>surface</strong> (<em>vtkPolyData</em>) – The input surface to be remeshed.</p></li>
+<li><p><strong>edge_length</strong> (<em>float</em>) – The target edge length for remeshing.</p></li>
+<li><p><strong>element_size_mode</strong> (<em>str</em><em>, </em><em>optional</em>) – Determines the method for sizing elements during remeshing.</p></li>
+<li><p><strong>exclude</strong> (<em>list</em><em>, </em><em>optional</em>) – A list of entity IDs to be excluded during remeshing. Defaults to None.</p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns</dt>
+<dd class="field-even"><p>The remeshed surface.</p>
+</dd>
+<dt class="field-odd">Return type</dt>
+<dd class="field-odd"><p>remeshed_surface (vtkPolyData)</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py function">
 <dt class="sig sig-object py" id="vampy.automatedPreprocessing.preprocessing_common.scale_surface">
 <span class="sig-prename descclassname"><span class="pre">vampy.automatedPreprocessing.preprocessing_common.</span></span><span class="sig-name descname"><span class="pre">scale_surface</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">surface</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">scale_factor</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/vampy/automatedPreprocessing/preprocessing_common.html#scale_surface"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#vampy.automatedPreprocessing.preprocessing_common.scale_surface" title="Permalink to this definition">#</a></dt>
 <dd><p>Scale the input surface by a factor scale_factor.</p>
@@ -869,6 +895,121 @@ probe_points (ndarray): Probe points where velocity and pressure is to be sample
 </ul>
 </dd>
 </dl>
+</dd></dl>
+
+<span class="target" id="module-vampy.automatedPreprocessing.moving_common"></span><dl class="py function">
+<dt class="sig sig-object py" id="vampy.automatedPreprocessing.moving_common.easing_cos">
+<span class="sig-prename descclassname"><span class="pre">vampy.automatedPreprocessing.moving_common.</span></span><span class="sig-name descname"><span class="pre">easing_cos</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">dist_b</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">dist_bb</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/vampy/automatedPreprocessing/moving_common.html#easing_cos"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#vampy.automatedPreprocessing.moving_common.easing_cos" title="Permalink to this definition">#</a></dt>
+<dd><p>A simple easing function between 0 and 1 for creating a sinusoidal profile
+:param dist_b: Distance to boundary for current point
+:type dist_b: ndarray
+:param dist_bb: Distance between boundaries
+:type dist_bb: ndarray</p>
+<dl class="field-list simple">
+<dt class="field-odd">Returns</dt>
+<dd class="field-odd"><p>Sinusoidal profile based on distance between point and boundary</p>
+</dd>
+<dt class="field-even">Return type</dt>
+<dd class="field-even"><p>distances (ndarray)</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="vampy.automatedPreprocessing.moving_common.get_point_map">
+<span class="sig-prename descclassname"><span class="pre">vampy.automatedPreprocessing.moving_common.</span></span><span class="sig-name descname"><span class="pre">get_point_map</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">remeshed</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">remeshed_extended</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">profile</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">'linear'</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/vampy/automatedPreprocessing/moving_common.html#get_point_map"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#vampy.automatedPreprocessing.moving_common.get_point_map" title="Permalink to this definition">#</a></dt>
+<dd><p>Create a map between original surface model and model with
+flow extensions; remeshed_extended, for clamping the inlet(s)
+and outlet. A linear or sinusodial profile for movement between endpoints
+and moving domain is prescribed.
+:param remeshed: Input surface
+:type remeshed: vtkPolyData
+:param remeshed_extended: Input surface with flow extensions
+:type remeshed_extended: vtkPolyData
+:param profile: ‘linear’ or ‘sine’ for respective profiles
+:type profile: str</p>
+<dl class="field-list simple">
+<dt class="field-odd">Returns</dt>
+<dd class="field-odd"><p>Array of linear or sinusodial profile between boundary and moving mesh
+point_map (ndarray): Mapping between surface IDs and points along extension</p>
+</dd>
+<dt class="field-even">Return type</dt>
+<dd class="field-even"><p>distances (ndarray)</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="vampy.automatedPreprocessing.moving_common.move_surface_model">
+<span class="sig-prename descclassname"><span class="pre">vampy.automatedPreprocessing.moving_common.</span></span><span class="sig-name descname"><span class="pre">move_surface_model</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">surface</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">original</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">remeshed</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">remeshed_extended</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">distance</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">point_map</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">file_path</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">i</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">points</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">clamp_boundaries</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/vampy/automatedPreprocessing/moving_common.html#move_surface_model"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#vampy.automatedPreprocessing.moving_common.move_surface_model" title="Permalink to this definition">#</a></dt>
+<dd><p>Computes and applies the displacement between the original and the given surface, then projects this
+displacement onto a remeshed surface. The displaced points of the remeshed surface are then saved
+to a specified file path.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>surface</strong> (<em>vtkPolyData</em>) – The source surface used to compute the displacement.</p></li>
+<li><p><strong>original</strong> (<em>vtkPolyData</em>) – The reference surface for computing the displacement.</p></li>
+<li><p><strong>remeshed</strong> (<em>vtkPolyData</em>) – A remeshed version of the original surface.</p></li>
+<li><p><strong>remeshed_extended</strong> (<em>vtkPolyData</em>) – An extended version of the remeshed surface.</p></li>
+<li><p><strong>distance</strong> (<em>float</em>) – Scalar factor for the displacement.</p></li>
+<li><p><strong>point_map</strong> (<em>ndarray</em>) – Mapping of the points from remeshed to remeshed_extended.</p></li>
+<li><p><strong>file_path</strong> (<em>str</em>) – Path to save the displaced points of the remeshed surface.</p></li>
+<li><p><strong>i</strong> (<em>int</em>) – Index to specify where in the ‘points’ array the data should be saved.</p></li>
+<li><p><strong>points</strong> (<em>ndarray</em>) – An array where the displaced points will be saved.</p></li>
+<li><p><strong>clamp_boundaries</strong> (<em>bool</em>) – If True, the displacement will be clamped by the distance in the extensions.</p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns</dt>
+<dd class="field-even"><p>The function writes results to a file and modifies the points array in place.</p>
+</dd>
+<dt class="field-odd">Return type</dt>
+<dd class="field-odd"><p>None</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="vampy.automatedPreprocessing.moving_common.project_displacement">
+<span class="sig-prename descclassname"><span class="pre">vampy.automatedPreprocessing.moving_common.</span></span><span class="sig-name descname"><span class="pre">project_displacement</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">clamp_boundaries</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">distance</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">folder_extended_surfaces</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">folder_moved_surfaces</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">point_map</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">surface</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">surface_extended</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">remeshed</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">scale_factor</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/vampy/automatedPreprocessing/moving_common.html#project_displacement"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#vampy.automatedPreprocessing.moving_common.project_displacement" title="Permalink to this definition">#</a></dt>
+<dd><p>Projects the displacement of moved surfaces located in a specified folder onto an extended surface. The projected
+surfaces are then saved to a designated output directory.
+Only processes files in “folder_moved_surfaces” that end with “.vtp” or “.stl”.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>clamp_boundaries</strong> (<em>bool</em>) – If True, the displacement will be clamped by the distance in the extensions.</p></li>
+<li><p><strong>distance</strong> (<em>float</em>) – Scalar factor for the displacement.</p></li>
+<li><p><strong>folder_extended_surfaces</strong> (<em>str</em>) – Path to the directory where extended surfaces will be saved.</p></li>
+<li><p><strong>folder_moved_surfaces</strong> (<em>str</em>) – Path to the directory containing the moved surfaces to be projected.</p></li>
+<li><p><strong>point_map</strong> (<em>ndarray</em>) – Mapping of the points from remeshed to surface_extended.</p></li>
+<li><p><strong>surface</strong> (<em>vtkPolyData</em>) – The reference surface for computing the displacement.</p></li>
+<li><p><strong>surface_extended</strong> (<em>vtkPolyData</em>) – An extended version of the reference surface.</p></li>
+<li><p><strong>remeshed</strong> (<em>vtkPolyData</em>) – A remeshed version of the original surface.</p></li>
+<li><p><strong>scale_factor</strong> (<em>float</em>) – Factor to scale the surfaces.</p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns</dt>
+<dd class="field-even"><p>A 3D numpy array where the displaced points will be saved. The shape is
+(num_points, 3, num_surfaces).</p>
+</dd>
+<dt class="field-odd">Return type</dt>
+<dd class="field-odd"><p>array</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="vampy.automatedPreprocessing.moving_common.save_displacement">
+<span class="sig-prename descclassname"><span class="pre">vampy.automatedPreprocessing.moving_common.</span></span><span class="sig-name descname"><span class="pre">save_displacement</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">file_name_displacement_points</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">points</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">number_of_points</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">100</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/vampy/automatedPreprocessing/moving_common.html#save_displacement"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#vampy.automatedPreprocessing.moving_common.save_displacement" title="Permalink to this definition">#</a></dt>
+<dd><p>Resample displacement points and write them
+to numpy data array
+:param file_name_displacement_points: Path to numpy point path
+:type file_name_displacement_points: str
+:param points: Numpy array consisting of displacement surface points
+:type points: ndarray
+:param number_of_points: Number of points to interpolate displacement points over
+:type number_of_points: int</p>
 </dd></dl>
 
 <span class="target" id="module-vampy.automatedPreprocessing.DisplayData"></span><dl class="py class">
@@ -1991,6 +2132,24 @@ the projection of x onto the plane defined by c and n.</p>
 </dd></dl>
 
 <span class="target" id="module-vampy.simulation.simulation_common"></span><dl class="py function">
+<dt class="sig sig-object py" id="vampy.simulation.simulation_common.dump_probes">
+<span class="sig-prename descclassname"><span class="pre">vampy.simulation.simulation_common.</span></span><span class="sig-name descname"><span class="pre">dump_probes</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">eval_dict</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">newfolder</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">tstep</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/vampy/simulation/simulation_common.html#dump_probes"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#vampy.simulation.simulation_common.dump_probes" title="Permalink to this definition">#</a></dt>
+<dd><p>Save variables along the centerline for CFD simulation diagnostics and light-weight post-processing.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>eval_dict</strong> (<em>dict</em>) – Dictionary with probe arrays for velocity components and pressure along the centerline.</p></li>
+<li><p><strong>newfolder</strong> (<em>str</em>) – The path to the folder where the probe data will be saved.</p></li>
+<li><p><strong>tstep</strong> (<em>float</em>) – The current time step.</p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns</dt>
+<dd class="field-even"><p>None</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py function">
 <dt class="sig sig-object py" id="vampy.simulation.simulation_common.get_file_paths">
 <span class="sig-prename descclassname"><span class="pre">vampy.simulation.simulation_common.</span></span><span class="sig-name descname"><span class="pre">get_file_paths</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">folder</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/vampy/simulation/simulation_common.html#get_file_paths"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#vampy.simulation.simulation_common.get_file_paths" title="Permalink to this definition">#</a></dt>
 <dd><p>Create folder where data and solutions (velocity, mesh, pressure) is stored</p>
@@ -2038,6 +2197,29 @@ the projection of x onto the plane defined by c and n.</p>
 </dl>
 </dd></dl>
 
+<dl class="py function">
+<dt class="sig sig-object py" id="vampy.simulation.simulation_common.store_velocity_and_pressure_h5">
+<span class="sig-prename descclassname"><span class="pre">vampy.simulation.simulation_common.</span></span><span class="sig-name descname"><span class="pre">store_velocity_and_pressure_h5</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">NS_parameters</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">U</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">p_</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">tstep</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">u_</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">u_mean0</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">u_mean1</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">u_mean2</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/vampy/simulation/simulation_common.html#store_velocity_and_pressure_h5"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#vampy.simulation.simulation_common.store_velocity_and_pressure_h5" title="Permalink to this definition">#</a></dt>
+<dd><p>Store the velocity and pressure values to an HDF5 file.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>NS_parameters</strong> (<em>dict</em>) – A dictionary containing the parameters for Navier-Stokes equations.</p></li>
+<li><p><strong>U</strong> (<em>Function</em>) – A vector function space to assign the velocity components.</p></li>
+<li><p><strong>p</strong> (<em>Function</em>) – The pressure function.</p></li>
+<li><p><strong>tstep</strong> (<em>int</em>) – The current time step.</p></li>
+<li><p><strong>u</strong> (<em>List</em><em>[</em><em>Function</em><em>]</em>) – A list containing the velocity components.</p></li>
+<li><p><strong>u_mean0</strong> (<em>Function</em>) – The accumulated x-component of the velocity.</p></li>
+<li><p><strong>u_mean1</strong> (<em>Function</em>) – The accumulated y-component of the velocity.</p></li>
+<li><p><strong>u_mean2</strong> (<em>Function</em>) – The accumulated z-component of the velocity.</p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns</dt>
+<dd class="field-even"><p>None</p>
+</dd>
+</dl>
+</dd></dl>
+
 </section>
 </section>
 
@@ -2072,12 +2254,12 @@ the projection of x onto the plane defined by c and n.</p>
                   <!-- Previous / next buttons -->
 <div class="prev-next-area">
     <a class="left-prev"
-       href="atrium.html"
+       href="movingatrium.html"
        title="previous page">
       <i class="fa-solid fa-angle-left"></i>
       <div class="prev-next-info">
         <p class="prev-next-subtitle">previous</p>
-        <p class="prev-next-title">Hemodynamic simulation in the left atrium and left atrial appendage</p>
+        <p class="prev-next-title">Moving domain simulation of the left atrium</p>
       </div>
     </a>
 </div>
@@ -2130,7 +2312,7 @@ By Henrik A. Kjeldsberg
   
   <div class="footer-item">
     <p class="last-updated">
-  Last updated on Sep 27, 2023.
+  Last updated on Oct 24, 2023.
   <br/>
 </p>
   </div>

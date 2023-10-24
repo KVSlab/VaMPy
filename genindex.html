@@ -66,7 +66,7 @@ const thebe_selector_output = ".output, .cell_output"
     <link rel="search" title="Search" href="search.html" />
   <meta name="viewport" content="width=device-width, initial-scale=1"/>
   <meta name="docsearch:language" content="en"/>
-    <meta name="docbuild:last-update" content="Sep 27, 2023"/>
+    <meta name="docbuild:last-update" content="Oct 24, 2023"/>
   </head>
   
   
@@ -174,6 +174,7 @@ const thebe_selector_output = ".output, .cell_output"
 <p aria-level="2" class="caption" role="heading"><span class="caption-text">Using VaMPy</span></p>
 <ul class="nav bd-sidenav">
 <li class="toctree-l1"><a class="reference internal" href="preprocess.html">Pre-processing</a></li>
+<li class="toctree-l1"><a class="reference internal" href="movingpreprocess.html">Pre-processing for moving domains</a></li>
 <li class="toctree-l1"><a class="reference internal" href="simulation.html">Computational fluid dynamics</a></li>
 <li class="toctree-l1"><a class="reference internal" href="postprocess.html">Post-processing</a></li>
 <li class="toctree-l1"><a class="reference internal" href="quantities.html">Computed quantities</a></li>
@@ -185,6 +186,7 @@ const thebe_selector_output = ".output, .cell_output"
 <li class="toctree-l1"><a class="reference internal" href="tutorials.html">Tutorials</a></li>
 <li class="toctree-l1"><a class="reference internal" href="artery.html">High-resolution CFD simulation in the internal carotid artery</a></li>
 <li class="toctree-l1"><a class="reference internal" href="atrium.html">Hemodynamic simulation in the left atrium and left atrial appendage</a></li>
+<li class="toctree-l1"><a class="reference internal" href="movingatrium.html">Moving domain simulation of the left atrium</a></li>
 </ul>
 <p aria-level="2" class="caption" role="heading"><span class="caption-text">Python API</span></p>
 <ul class="nav bd-sidenav">
@@ -466,13 +468,15 @@ document.write(`
 </li>
       <li><a href="api.html#vampy.automatedPreprocessing.DisplayData.DisplayModel.DisplayProbesAndModel">DisplayProbesAndModel() (vampy.automatedPreprocessing.DisplayData.DisplayModel method)</a>
 </li>
-  </ul></td>
-  <td style="width: 33%; vertical-align: top;"><ul>
       <li><a href="api.html#vampy.automatedPreprocessing.preprocessing_common.dist_sphere_constant">dist_sphere_constant() (in module vampy.automatedPreprocessing.preprocessing_common)</a>
 </li>
+  </ul></td>
+  <td style="width: 33%; vertical-align: top;"><ul>
       <li><a href="api.html#vampy.automatedPreprocessing.preprocessing_common.dist_sphere_curvature">dist_sphere_curvature() (in module vampy.automatedPreprocessing.preprocessing_common)</a>
 </li>
       <li><a href="api.html#vampy.automatedPreprocessing.preprocessing_common.dist_sphere_diam">dist_sphere_diam() (in module vampy.automatedPreprocessing.preprocessing_common)</a>
+</li>
+      <li><a href="api.html#vampy.simulation.simulation_common.dump_probes">dump_probes() (in module vampy.simulation.simulation_common)</a>
 </li>
       <li><a href="api.html#vampy.automatedPreprocessing.ToolRepairSTL.DumpQualityStats">DumpQualityStats() (in module vampy.automatedPreprocessing.ToolRepairSTL)</a>
 </li>
@@ -482,14 +486,16 @@ document.write(`
 <h2 id="E">E</h2>
 <table style="width: 100%" class="indextable genindextable"><tr>
   <td style="width: 33%; vertical-align: top;"><ul>
+      <li><a href="api.html#vampy.automatedPreprocessing.moving_common.easing_cos">easing_cos() (in module vampy.automatedPreprocessing.moving_common)</a>
+</li>
       <li><a href="api.html#vampy.automatedPreprocessing.ImportData.Element">Element (class in vampy.automatedPreprocessing.ImportData)</a>
 </li>
       <li><a href="api.html#vampy.automatedPostprocessing.postprocessing_common.epsilon">epsilon() (in module vampy.automatedPostprocessing.postprocessing_common)</a>
 </li>
-      <li><a href="api.html#vampy.simulation.Womersley.WomersleyComponent.eval">eval() (vampy.simulation.Womersley.WomersleyComponent method)</a>
-</li>
   </ul></td>
   <td style="width: 33%; vertical-align: top;"><ul>
+      <li><a href="api.html#vampy.simulation.Womersley.WomersleyComponent.eval">eval() (vampy.simulation.Womersley.WomersleyComponent method)</a>
+</li>
       <li><a href="api.html#vampy.automatedPreprocessing.vmtk_pointselector.vmtkPickPointSeedSelector.Execute">Execute() (vampy.automatedPreprocessing.vmtk_pointselector.vmtkPickPointSeedSelector method)</a>
 
       <ul>
@@ -533,6 +539,8 @@ document.write(`
       <li><a href="api.html#vampy.automatedPostprocessing.compute_flow_and_simulation_metrics.get_files_for_phase_averaging">get_files_for_phase_averaging() (in module vampy.automatedPostprocessing.compute_flow_and_simulation_metrics)</a>
 </li>
       <li><a href="api.html#vampy.automatedPreprocessing.preprocessing_common.get_furtest_surface_point">get_furtest_surface_point() (in module vampy.automatedPreprocessing.preprocessing_common)</a>
+</li>
+      <li><a href="api.html#vampy.automatedPreprocessing.moving_common.get_point_map">get_point_map() (in module vampy.automatedPreprocessing.moving_common)</a>
 </li>
       <li><a href="api.html#vampy.automatedPreprocessing.preprocessing_common.get_regions_to_refine">get_regions_to_refine() (in module vampy.automatedPreprocessing.preprocessing_common)</a>
 </li>
@@ -672,6 +680,8 @@ document.write(`
 </li>
         <li><a href="api.html#module-vampy.automatedPreprocessing.ImportData">vampy.automatedPreprocessing.ImportData</a>
 </li>
+        <li><a href="api.html#module-vampy.automatedPreprocessing.moving_common">vampy.automatedPreprocessing.moving_common</a>
+</li>
         <li><a href="api.html#module-vampy.automatedPreprocessing.NetworkBoundaryConditions">vampy.automatedPreprocessing.NetworkBoundaryConditions</a>
 </li>
         <li><a href="api.html#module-vampy.automatedPreprocessing.preprocessing_common">vampy.automatedPreprocessing.preprocessing_common</a>
@@ -693,6 +703,10 @@ document.write(`
         <li><a href="api.html#module-vampy.simulation.Womersley">vampy.simulation.Womersley</a>
 </li>
       </ul></li>
+  </ul></td>
+  <td style="width: 33%; vertical-align: top;"><ul>
+      <li><a href="api.html#vampy.automatedPreprocessing.moving_common.move_surface_model">move_surface_model() (in module vampy.automatedPreprocessing.moving_common)</a>
+</li>
   </ul></td>
 </tr></table>
 
@@ -731,6 +745,8 @@ document.write(`
         <li><a href="api.html#vampy.simulation.Atrium.problem_parameters">(in module vampy.simulation.Atrium)</a>
 </li>
       </ul></li>
+      <li><a href="api.html#vampy.automatedPreprocessing.moving_common.project_displacement">project_displacement() (in module vampy.automatedPreprocessing.moving_common)</a>
+</li>
       <li><a href="api.html#vampy.automatedPreprocessing.preprocessing_common.provide_region_points">provide_region_points() (in module vampy.automatedPreprocessing.preprocessing_common)</a>
 </li>
   </ul></td>
@@ -751,6 +767,8 @@ document.write(`
       </ul></li>
   </ul></td>
   <td style="width: 33%; vertical-align: top;"><ul>
+      <li><a href="api.html#vampy.automatedPreprocessing.preprocessing_common.remesh_surface">remesh_surface() (in module vampy.automatedPreprocessing.preprocessing_common)</a>
+</li>
       <li><a href="api.html#vampy.automatedPreprocessing.DisplayData.DisplayModel.renderWindow">renderWindow() (vampy.automatedPreprocessing.DisplayData.DisplayModel method)</a>
 </li>
       <li><a href="api.html#vampy.automatedPreprocessing.ToolRepairSTL.repairSTL">repairSTL() (in module vampy.automatedPreprocessing.ToolRepairSTL)</a>
@@ -765,6 +783,8 @@ document.write(`
 <h2 id="S">S</h2>
 <table style="width: 100%" class="indextable genindextable"><tr>
   <td style="width: 33%; vertical-align: top;"><ul>
+      <li><a href="api.html#vampy.automatedPreprocessing.moving_common.save_displacement">save_displacement() (in module vampy.automatedPreprocessing.moving_common)</a>
+</li>
       <li><a href="api.html#vampy.automatedPreprocessing.preprocessing_common.scale_surface">scale_surface() (in module vampy.automatedPreprocessing.preprocessing_common)</a>
 </li>
       <li><a href="api.html#vampy.simulation.Womersley.WomersleyComponent.set_t">set_t() (vampy.simulation.Womersley.WomersleyComponent method)</a>
@@ -816,6 +836,8 @@ document.write(`
       <li><a href="api.html#vampy.automatedPreprocessing.ImportData.Element.SetVtkGroupIdList">SetVtkGroupIdList() (vampy.automatedPreprocessing.ImportData.Element method)</a>
 </li>
       <li><a href="api.html#vampy.simulation.simulation_common.store_u_mean">store_u_mean() (in module vampy.simulation.simulation_common)</a>
+</li>
+      <li><a href="api.html#vampy.simulation.simulation_common.store_velocity_and_pressure_h5">store_velocity_and_pressure_h5() (in module vampy.simulation.simulation_common)</a>
 </li>
       <li><a href="api.html#vampy.automatedPostprocessing.postprocessing_common.STRESS">STRESS (class in vampy.automatedPostprocessing.postprocessing_common)</a>
 </li>
@@ -916,6 +938,13 @@ document.write(`
 </li>
       </ul></li>
       <li>
+    vampy.automatedPreprocessing.moving_common
+
+      <ul>
+        <li><a href="api.html#module-vampy.automatedPreprocessing.moving_common">module</a>
+</li>
+      </ul></li>
+      <li>
     vampy.automatedPreprocessing.NetworkBoundaryConditions
 
       <ul>
@@ -929,6 +958,8 @@ document.write(`
         <li><a href="api.html#module-vampy.automatedPreprocessing.preprocessing_common">module</a>
 </li>
       </ul></li>
+  </ul></td>
+  <td style="width: 33%; vertical-align: top;"><ul>
       <li>
     vampy.automatedPreprocessing.simulate
 
@@ -936,8 +967,6 @@ document.write(`
         <li><a href="api.html#module-vampy.automatedPreprocessing.simulate">module</a>
 </li>
       </ul></li>
-  </ul></td>
-  <td style="width: 33%; vertical-align: top;"><ul>
       <li>
     vampy.automatedPreprocessing.ToolRepairSTL
 
@@ -1074,7 +1103,7 @@ By Henrik A. Kjeldsberg
   
   <div class="footer-item">
     <p class="last-updated">
-  Last updated on Sep 27, 2023.
+  Last updated on Oct 24, 2023.
   <br/>
 </p>
   </div>

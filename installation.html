@@ -69,7 +69,7 @@ const thebe_selector_output = ".output, .cell_output"
     <link rel="prev" title="VaMPy - The Vascular Modeling Pypeline" href="index.html" />
   <meta name="viewport" content="width=device-width, initial-scale=1"/>
   <meta name="docsearch:language" content="en"/>
-    <meta name="docbuild:last-update" content="Sep 27, 2023"/>
+    <meta name="docbuild:last-update" content="Oct 24, 2023"/>
   </head>
   
   
@@ -177,6 +177,7 @@ const thebe_selector_output = ".output, .cell_output"
 <p aria-level="2" class="caption" role="heading"><span class="caption-text">Using VaMPy</span></p>
 <ul class="nav bd-sidenav">
 <li class="toctree-l1"><a class="reference internal" href="preprocess.html">Pre-processing</a></li>
+<li class="toctree-l1"><a class="reference internal" href="movingpreprocess.html">Pre-processing for moving domains</a></li>
 <li class="toctree-l1"><a class="reference internal" href="simulation.html">Computational fluid dynamics</a></li>
 <li class="toctree-l1"><a class="reference internal" href="postprocess.html">Post-processing</a></li>
 <li class="toctree-l1"><a class="reference internal" href="quantities.html">Computed quantities</a></li>
@@ -188,6 +189,7 @@ const thebe_selector_output = ".output, .cell_output"
 <li class="toctree-l1"><a class="reference internal" href="tutorials.html">Tutorials</a></li>
 <li class="toctree-l1"><a class="reference internal" href="artery.html">High-resolution CFD simulation in the internal carotid artery</a></li>
 <li class="toctree-l1"><a class="reference internal" href="atrium.html">Hemodynamic simulation in the left atrium and left atrial appendage</a></li>
+<li class="toctree-l1"><a class="reference internal" href="movingatrium.html">Moving domain simulation of the left atrium</a></li>
 </ul>
 <p aria-level="2" class="caption" role="heading"><span class="caption-text">Python API</span></p>
 <ul class="nav bd-sidenav">
@@ -403,8 +405,9 @@ document.write(`
 <h1>Installation<a class="headerlink" href="#installation" title="Permalink to this heading">#</a></h1>
 <p><code class="docutils literal notranslate"><span class="pre">VaMPy</span></code> is a pure Python package that combines the morphological processing tools of
 <a class="reference external" href="https://github.com/KVSlab/morphMan">morphMan</a> and <a class="reference external" href="http://www.vmtk.org/">vmtk</a>, the computational fluid dynamics
-solver <a class="reference external" href="https://github.com/mikaem/Oasis">Oasis</a>, and the finite element computing
-platform <a class="reference external" href="https://fenicsproject.org/">FEniCS</a> into a powerful and user-friendly computational fluid dynamics pipeline.</p>
+solver <a class="reference external" href="https://github.com/mikaem/Oasis">Oasis</a>/<a class="reference external" href="https://github.com/KVSlab/OasisMove">OasisMove</a>, and the finite element
+computing platform <a class="reference external" href="https://fenicsproject.org/">FEniCS</a> into a powerful and user-friendly computational fluid dynamics
+pipeline.</p>
 <section id="dependencies">
 <h2>Dependencies<a class="headerlink" href="#dependencies" title="Permalink to this heading">#</a></h2>
 <p>The dependencies of <code class="docutils literal notranslate"><span class="pre">VaMPy</span></code> are:</p>
@@ -413,16 +416,15 @@ platform <a class="reference external" href="https://fenicsproject.org/">FEniCS<
 <li><p>FEniCS &gt;= 2018.1</p></li>
 <li><p>morphMan &gt;= 1.2</p></li>
 <li><p>vmtk &gt;= 1.4.0</p></li>
-<li><p>Oasis &gt;= 2018.1</p></li>
+<li><p>Oasis &gt;= 2018.1 OR OasisMove &gt;= 0.2.0</p></li>
 <li><p>paramiko &gt;= 3.0</p></li>
 <li><p>cppimport &gt;= 22.8.2</p></li>
 </ul>
 </section>
 <section id="installing-with-conda">
 <h2>Installing with <code class="docutils literal notranslate"><span class="pre">conda</span></code><a class="headerlink" href="#installing-with-conda" title="Permalink to this heading">#</a></h2>
-<p>To install <code class="docutils literal notranslate"><span class="pre">VaMPy</span></code> and all its dependencies to a <em>local environment</em>, we recommend using <code class="docutils literal notranslate"><span class="pre">conda</span></code>.
-Instructions for installing <code class="docutils literal notranslate"><span class="pre">VaMPy</span></code>
-with <code class="docutils literal notranslate"><span class="pre">conda</span></code> can be found <a class="reference internal" href="conda.html#install-conda"><span class="std std-ref">here</span></a>.</p>
+<p>To install <code class="docutils literal notranslate"><span class="pre">VaMPy</span></code> and all its dependencies to a <em>local environment</em>, we recommend using <code class="docutils literal notranslate"><span class="pre">conda</span></code>. Instructions for
+installing <code class="docutils literal notranslate"><span class="pre">VaMPy</span></code> with <code class="docutils literal notranslate"><span class="pre">conda</span></code> can be found <a class="reference internal" href="conda.html#install-conda"><span class="std std-ref">here</span></a>.</p>
 </section>
 <section id="installing-with-docker">
 <h2>Installing with Docker<a class="headerlink" href="#installing-with-docker" title="Permalink to this heading">#</a></h2>
@@ -529,7 +531,7 @@ By Henrik A. Kjeldsberg
   
   <div class="footer-item">
     <p class="last-updated">
-  Last updated on Sep 27, 2023.
+  Last updated on Oct 24, 2023.
   <br/>
 </p>
   </div>

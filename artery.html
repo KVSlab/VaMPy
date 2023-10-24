@@ -71,7 +71,7 @@ const thebe_selector_output = ".output, .cell_output"
     <link rel="prev" title="Tutorials" href="tutorials.html" />
   <meta name="viewport" content="width=device-width, initial-scale=1"/>
   <meta name="docsearch:language" content="en"/>
-    <meta name="docbuild:last-update" content="Sep 27, 2023"/>
+    <meta name="docbuild:last-update" content="Oct 24, 2023"/>
   </head>
   
   
@@ -179,6 +179,7 @@ const thebe_selector_output = ".output, .cell_output"
 <p aria-level="2" class="caption" role="heading"><span class="caption-text">Using VaMPy</span></p>
 <ul class="nav bd-sidenav">
 <li class="toctree-l1"><a class="reference internal" href="preprocess.html">Pre-processing</a></li>
+<li class="toctree-l1"><a class="reference internal" href="movingpreprocess.html">Pre-processing for moving domains</a></li>
 <li class="toctree-l1"><a class="reference internal" href="simulation.html">Computational fluid dynamics</a></li>
 <li class="toctree-l1"><a class="reference internal" href="postprocess.html">Post-processing</a></li>
 <li class="toctree-l1"><a class="reference internal" href="quantities.html">Computed quantities</a></li>
@@ -190,6 +191,7 @@ const thebe_selector_output = ".output, .cell_output"
 <li class="toctree-l1"><a class="reference internal" href="tutorials.html">Tutorials</a></li>
 <li class="toctree-l1 current active"><a class="current reference internal" href="#">High-resolution CFD simulation in the internal carotid artery</a></li>
 <li class="toctree-l1"><a class="reference internal" href="atrium.html">Hemodynamic simulation in the left atrium and left atrial appendage</a></li>
+<li class="toctree-l1"><a class="reference internal" href="movingatrium.html">Moving domain simulation of the left atrium</a></li>
 </ul>
 <p aria-level="2" class="caption" role="heading"><span class="caption-text">Python API</span></p>
 <ul class="nav bd-sidenav">
@@ -418,11 +420,11 @@ with an edge length of 0.3 mm, run the following command after downloading the C
 </div>
 <p>Note that we have also applied the <code class="docutils literal notranslate"><span class="pre">-bl</span> <span class="pre">False</span></code>, meaning we do not add boundary layers to the model. For this particular
 model, adding boundary layers would have required a smaller edge length because of the tiny arteries that the model
-harbours. The resulting volumetric mesh is shown in <a class="reference internal" href="#mesh-constant"><span class="std std-numref">Fig. 11</span></a>, with a zoomed in view on the aneurysm.</p>
+harbours. The resulting volumetric mesh is shown in <a class="reference internal" href="#mesh-constant"><span class="std std-numref">Fig. 12</span></a>, with a zoomed in view on the aneurysm.</p>
 <figure class="align-default" id="mesh-constant">
 <img alt="_images/constant_vol.png" src="_images/constant_vol.png" />
 <figcaption>
-<p><span class="caption-number">Fig. 11 </span><span class="caption-text">A constant density mesh, with a zoomed in view of the
+<p><span class="caption-number">Fig. 12 </span><span class="caption-text">A constant density mesh, with a zoomed in view of the
 aneurysm. Note that all tetrahedral cells are of equal
 size.</span><a class="headerlink" href="#mesh-constant" title="Permalink to this image">#</a></p>
 </figcaption>
@@ -440,11 +442,11 @@ a default value of 1.0. To generate a variable density mesh based on the surface
 <div class="highlight-console notranslate"><div class="highlight"><pre><span></span><span class="gp">$ </span>vampy-mesh<span class="w"> </span>-m<span class="w"> </span>curvature<span class="w"> </span>-c<span class="w"> </span><span class="m">1</span>.2<span class="w"> </span>-i<span class="w"> </span>C0001/model.vtp
 </pre></div>
 </div>
-<p>The resulting volumetric mesh is shown in <a class="reference internal" href="#mesh-variable"><span class="std std-numref">Fig. 12</span></a>, with a zoomed in view on the aneurysm.</p>
+<p>The resulting volumetric mesh is shown in <a class="reference internal" href="#mesh-variable"><span class="std std-numref">Fig. 13</span></a>, with a zoomed in view on the aneurysm.</p>
 <figure class="align-default" id="mesh-variable">
 <img alt="_images/curvature_vol.png" src="_images/curvature_vol.png" />
 <figcaption>
-<p><span class="caption-number">Fig. 12 </span><span class="caption-text">A variable density mesh based on the surface curvature, with
+<p><span class="caption-number">Fig. 13 </span><span class="caption-text">A variable density mesh based on the surface curvature, with
 a zoomed in view of the aneurysm. Note that the mesh is refined along
 the tiny, high-curvature artery, and coarser along the larger parent
 artery.</span><a class="headerlink" href="#mesh-variable" title="Permalink to this image">#</a></p>
@@ -456,26 +458,26 @@ artery.</span><a class="headerlink" href="#mesh-variable" title="Permalink to th
 <p>As an alternative to the curvature method, as explained above, meshing based on the centerline diameter can be practical
 in tubular structures such as arteries. To get an intuition for what is meant by <em>centerline diameter</em>, we are in fact
 describing the diameter of a maximally inscribed sphere along the centerline located inside the object. This means that
-for tiny arteries, the diameter will be small, and vice versa for larger arteries, as shown in <a class="reference internal" href="#misr"><span class="std std-numref">Fig. 13</span></a>.
+for tiny arteries, the diameter will be small, and vice versa for larger arteries, as shown in <a class="reference internal" href="#misr"><span class="std std-numref">Fig. 14</span></a>.
 Consequently, the mesh will be finer within tiny arteries, and coarser in larger arteries.</p>
 <figure class="align-default" id="misr">
 <img alt="_images/misr.png" src="_images/misr.png" />
 <figcaption>
-<p><span class="caption-number">Fig. 13 </span><span class="caption-text">The centerline inside the surface model, colored by it’s
+<p><span class="caption-number">Fig. 14 </span><span class="caption-text">The centerline inside the surface model, colored by it’s
 maximum inscribed sphere diameter.</span><a class="headerlink" href="#misr" title="Permalink to this image">#</a></p>
 </figcaption>
 </figure>
-<p>Meshing based on the centerline diameter is performed by supplying the
-<code class="docutils literal notranslate"><span class="pre">-m</span> <span class="pre">diameter</span></code> flag, and optionally the <code class="docutils literal notranslate"><span class="pre">--coarsening-factor</span></code> flag, as above. To generate a variable density mesh based on
-the centerline diameter, run the following command:</p>
+<p>Meshing based on the centerline diameter is performed by supplying the <code class="docutils literal notranslate"><span class="pre">-m</span> <span class="pre">diameter</span></code> flag, and optionally
+the <code class="docutils literal notranslate"><span class="pre">--coarsening-factor</span></code> flag, as above. To generate a variable density mesh based on the centerline diameter, run the
+following command:</p>
 <div class="highlight-console notranslate"><div class="highlight"><pre><span></span><span class="gp">$ </span>vampy-mesh<span class="w"> </span>-m<span class="w"> </span>diameter<span class="w"> </span>-c<span class="w"> </span><span class="m">1</span>.2<span class="w"> </span>-i<span class="w"> </span>C0001/model.vtp
 </pre></div>
 </div>
-<p>The resulting volumetric mesh is shown in <a class="reference internal" href="#mesh-diameter"><span class="std std-numref">Fig. 14</span></a>, with a zoomed in view on the aneurysm.</p>
+<p>The resulting volumetric mesh is shown in <a class="reference internal" href="#mesh-diameter"><span class="std std-numref">Fig. 15</span></a>, with a zoomed in view on the aneurysm.</p>
 <figure class="align-default" id="mesh-diameter">
 <img alt="_images/diameter_vol.png" src="_images/diameter_vol.png" />
 <figcaption>
-<p><span class="caption-number">Fig. 14 </span><span class="caption-text">A variable density mesh based on the centerline diameter ,
+<p><span class="caption-number">Fig. 15 </span><span class="caption-text">A variable density mesh based on the centerline diameter ,
 with a zoomed in view of the aneurysm. Note the difference in refinement
 between tiny and large arteries.</span><a class="headerlink" href="#mesh-diameter" title="Permalink to this image">#</a></p>
 </figcaption>
@@ -491,24 +493,24 @@ using a constant density mesh using the following command:</p>
 <div class="highlight-console notranslate"><div class="highlight"><pre><span></span><span class="gp">$ </span>vampy-mesh<span class="w"> </span>-m<span class="w"> </span>constant<span class="w"> </span>-el<span class="w"> </span><span class="m">0</span>.1<span class="w"> </span>-i<span class="w"> </span>C0001/model.vtp
 </pre></div>
 </div>
-<p>Running the command results in a volumetric mesh consisting of ~20M tetrahedral cells, as shown in <a class="reference internal" href="#mesh-20m"><span class="std std-numref">Fig. 15</span></a>.</p>
+<p>Running the command results in a volumetric mesh consisting of ~20M tetrahedral cells, as shown in <a class="reference internal" href="#mesh-20m"><span class="std std-numref">Fig. 16</span></a>.</p>
 <figure class="align-default" id="mesh-20m">
 <img alt="_images/mesh_20M.png" src="_images/mesh_20M.png" />
 <figcaption>
-<p><span class="caption-number">Fig. 15 </span><span class="caption-text">A constant density mesh consisting of approximately 20M
+<p><span class="caption-number">Fig. 16 </span><span class="caption-text">A constant density mesh consisting of approximately 20M
 tetrahedral cells, with a zoomed in view of the aneurysm.</span><a class="headerlink" href="#mesh-20m" title="Permalink to this image">#</a></p>
 </figcaption>
 </figure>
 <p>The mesh is used as input to the CFD simulations, followed by computation of the hemodynamic indices, which is initiated
 as described
 <a class="reference internal" href="postprocess.html#overview-post"><span class="std std-ref">here</span></a>. The simulation was run for one cardiac cycle, corresponding to 0.951 s, with <span class="math notranslate nohighlight">\(\Delta t =\)</span> 0.0951
-ms resulting in a total of 10 000 time steps per cycle. In <a class="reference internal" href="#artery"><span class="std std-numref">Fig. 16</span></a> we present the volumetric rendering of
+ms resulting in a total of 10 000 time steps per cycle. In <a class="reference internal" href="#artery"><span class="std std-numref">Fig. 17</span></a> we present the volumetric rendering of
 velocity, the pressure field, the Q-criterion displaying vortical structures, and three hemodynamic indices; the time
 averaged wall shear stress (TAWSS), the oscillatory shear index (OSI), and the relative residence time (RRT).</p>
 <figure class="align-default" id="artery">
 <img alt="_images/artery.png" src="_images/artery.png" />
 <figcaption>
-<p><span class="caption-number">Fig. 16 </span><span class="caption-text">From left to right: the volumetric rendering of velocity,
+<p><span class="caption-number">Fig. 17 </span><span class="caption-text">From left to right: the volumetric rendering of velocity,
 the pressure field, volumetric rendering of the Q-criterion, TAWSS, OSI,
 and RRT.</span><a class="headerlink" href="#artery" title="Permalink to this image">#</a></p>
 </figcaption>
@@ -615,7 +617,7 @@ By Henrik A. Kjeldsberg
   
   <div class="footer-item">
     <p class="last-updated">
-  Last updated on Sep 27, 2023.
+  Last updated on Oct 24, 2023.
   <br/>
 </p>
   </div>

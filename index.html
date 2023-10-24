@@ -68,7 +68,7 @@ const thebe_selector_output = ".output, .cell_output"
     <link rel="next" title="Installation" href="installation.html" />
   <meta name="viewport" content="width=device-width, initial-scale=1"/>
   <meta name="docsearch:language" content="en"/>
-    <meta name="docbuild:last-update" content="Sep 27, 2023"/>
+    <meta name="docbuild:last-update" content="Oct 24, 2023"/>
   </head>
   
   
@@ -176,6 +176,7 @@ const thebe_selector_output = ".output, .cell_output"
 <p aria-level="2" class="caption" role="heading"><span class="caption-text">Using VaMPy</span></p>
 <ul class="nav bd-sidenav">
 <li class="toctree-l1"><a class="reference internal" href="preprocess.html">Pre-processing</a></li>
+<li class="toctree-l1"><a class="reference internal" href="movingpreprocess.html">Pre-processing for moving domains</a></li>
 <li class="toctree-l1"><a class="reference internal" href="simulation.html">Computational fluid dynamics</a></li>
 <li class="toctree-l1"><a class="reference internal" href="postprocess.html">Post-processing</a></li>
 <li class="toctree-l1"><a class="reference internal" href="quantities.html">Computed quantities</a></li>
@@ -187,6 +188,7 @@ const thebe_selector_output = ".output, .cell_output"
 <li class="toctree-l1"><a class="reference internal" href="tutorials.html">Tutorials</a></li>
 <li class="toctree-l1"><a class="reference internal" href="artery.html">High-resolution CFD simulation in the internal carotid artery</a></li>
 <li class="toctree-l1"><a class="reference internal" href="atrium.html">Hemodynamic simulation in the left atrium and left atrial appendage</a></li>
+<li class="toctree-l1"><a class="reference internal" href="movingatrium.html">Moving domain simulation of the left atrium</a></li>
 </ul>
 <p aria-level="2" class="caption" role="heading"><span class="caption-text">Python API</span></p>
 <ul class="nav bd-sidenav">
@@ -403,10 +405,12 @@ document.write(`
 <p>The <a class="reference external" href="https://github.com/KVSlab/vampy">Vascular Modeling Pypeline</a> (VaMPy) is a collection of automated scripts to
 prepare, run, and analyze vascular morphologies. This includes pre-processing scripts for generating a volumetric mesh,
 defining physiological boundary conditions, and inserting probes for sampling velocity and pressure. For the
-computational fluid dynamics (CFD) simulation, we have included two <a class="reference external" href="https://github.com/mikaem/Oasis">Oasis</a> problem
-files for simulating flow in the <a class="reference external" href="https://en.wikipedia.org/wiki/Internal_carotid_artery">internal carotid artery</a> and
-the <a class="reference external" href="https://en.wikipedia.org/wiki/Atrium_(heart)">left atrium</a>. There are also a variety of post-processing scripts,
-which computes wall shear stress-based metrics, more advanced turbulence metrics, and a variety of geometric parameters.</p>
+computational fluid dynamics (CFD) simulation, we have included
+three <a class="reference external" href="https://github.com/mikaem/Oasis">Oasis</a>/<a class="reference external" href="https://github.com/KVSlab/OasisMove">OasisMove</a> problem files for
+simulating flow in the <a class="reference external" href="https://en.wikipedia.org/wiki/Internal_carotid_artery">internal carotid artery</a> and
+the <a class="reference external" href="https://en.wikipedia.org/wiki/Atrium_(heart)">left atrium</a>, including moving domain simulations in the atrium.
+There are also a variety of post-processing scripts, which computes wall shear stress-based metrics, more advanced
+turbulence metrics, and a variety of geometric parameters.</p>
 <section id="contents">
 <h2>Contents<a class="headerlink" href="#contents" title="Permalink to this heading">#</a></h2>
 <div class="toctree-wrapper compound">
@@ -422,6 +426,7 @@ which computes wall shear stress-based metrics, more advanced turbulence metrics
 <p aria-level="2" class="caption" role="heading"><span class="caption-text">Using VaMPy</span></p>
 <ul>
 <li class="toctree-l1"><a class="reference internal" href="preprocess.html">Pre-processing</a></li>
+<li class="toctree-l1"><a class="reference internal" href="movingpreprocess.html">Pre-processing for moving domains</a></li>
 <li class="toctree-l1"><a class="reference internal" href="simulation.html">Computational fluid dynamics</a></li>
 <li class="toctree-l1"><a class="reference internal" href="postprocess.html">Post-processing</a></li>
 <li class="toctree-l1"><a class="reference internal" href="quantities.html">Computed quantities</a></li>
@@ -435,6 +440,7 @@ which computes wall shear stress-based metrics, more advanced turbulence metrics
 <li class="toctree-l1"><a class="reference internal" href="tutorials.html">Tutorials</a></li>
 <li class="toctree-l1"><a class="reference internal" href="artery.html">High-resolution CFD simulation in the internal carotid artery</a></li>
 <li class="toctree-l1"><a class="reference internal" href="atrium.html">Hemodynamic simulation in the left atrium and left atrial appendage</a></li>
+<li class="toctree-l1"><a class="reference internal" href="movingatrium.html">Moving domain simulation of the left atrium</a></li>
 </ul>
 </div>
 <div class="toctree-wrapper compound">
@@ -535,7 +541,7 @@ By Henrik A. Kjeldsberg
   
   <div class="footer-item">
     <p class="last-updated">
-  Last updated on Sep 27, 2023.
+  Last updated on Oct 24, 2023.
   <br/>
 </p>
   </div>

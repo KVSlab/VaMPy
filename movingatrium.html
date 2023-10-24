@@ -1,0 +1,638 @@
+
+
+<!DOCTYPE html>
+
+
+<html lang="en" >
+
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" /><meta name="generator" content="Docutils 0.17.1: http://docutils.sourceforge.net/" />
+
+    <title>Moving domain simulation of the left atrium &#8212; VaMPy</title>
+  
+  
+  
+  <script data-cfasync="false">
+    document.documentElement.dataset.mode = localStorage.getItem("mode") || "";
+    document.documentElement.dataset.theme = localStorage.getItem("theme") || "light";
+  </script>
+  
+  <!-- Loaded before other Sphinx assets -->
+  <link href="_static/styles/theme.css?digest=ac02cc09edc035673794" rel="stylesheet" />
+<link href="_static/styles/bootstrap.css?digest=ac02cc09edc035673794" rel="stylesheet" />
+<link href="_static/styles/pydata-sphinx-theme.css?digest=ac02cc09edc035673794" rel="stylesheet" />
+
+  
+  <link href="_static/vendor/fontawesome/6.1.2/css/all.min.css?digest=ac02cc09edc035673794" rel="stylesheet" />
+  <link rel="preload" as="font" type="font/woff2" crossorigin href="_static/vendor/fontawesome/6.1.2/webfonts/fa-solid-900.woff2" />
+<link rel="preload" as="font" type="font/woff2" crossorigin href="_static/vendor/fontawesome/6.1.2/webfonts/fa-brands-400.woff2" />
+<link rel="preload" as="font" type="font/woff2" crossorigin href="_static/vendor/fontawesome/6.1.2/webfonts/fa-regular-400.woff2" />
+
+    <link rel="stylesheet" type="text/css" href="_static/pygments.css" />
+    <link rel="stylesheet" href="_static/styles/sphinx-book-theme.css?digest=14f4ca6b54d191a8c7657f6c759bf11a5fb86285" type="text/css" />
+    <link rel="stylesheet" type="text/css" href="_static/togglebutton.css" />
+    <link rel="stylesheet" type="text/css" href="_static/copybutton.css" />
+    <link rel="stylesheet" type="text/css" href="_static/mystnb.4510f1fc1dee50b3e5859aac5469c37c29e427902b24a333a5f9fcb2f0b3ac41.css" />
+    <link rel="stylesheet" type="text/css" href="_static/sphinx-thebe.css" />
+    <link rel="stylesheet" type="text/css" href="_static/design-style.4045f2051d55cab465a707391d5b2007.min.css" />
+  
+  <!-- Pre-loaded scripts that we'll load fully later -->
+  <link rel="preload" as="script" href="_static/scripts/bootstrap.js?digest=ac02cc09edc035673794" />
+<link rel="preload" as="script" href="_static/scripts/pydata-sphinx-theme.js?digest=ac02cc09edc035673794" />
+  <script src="_static/vendor/fontawesome/6.1.2/js/all.min.js?digest=ac02cc09edc035673794"></script>
+
+    <script data-url_root="./" id="documentation_options" src="_static/documentation_options.js"></script>
+    <script src="_static/jquery.js"></script>
+    <script src="_static/underscore.js"></script>
+    <script src="_static/_sphinx_javascript_frameworks_compat.js"></script>
+    <script src="_static/doctools.js"></script>
+    <script src="_static/clipboard.min.js"></script>
+    <script src="_static/copybutton.js"></script>
+    <script src="_static/scripts/sphinx-book-theme.js?digest=5a5c038af52cf7bc1a1ec88eea08e6366ee68824"></script>
+    <script>let toggleHintShow = 'Click to show';</script>
+    <script>let toggleHintHide = 'Click to hide';</script>
+    <script>let toggleOpenOnPrint = 'true';</script>
+    <script src="_static/togglebutton.js"></script>
+    <script>var togglebuttonSelector = '.toggle, .admonition.dropdown';</script>
+    <script src="_static/design-tabs.js"></script>
+    <script>const THEBE_JS_URL = "https://unpkg.com/thebe@0.8.2/lib/index.js"
+const thebe_selector = ".thebe,.cell"
+const thebe_selector_input = "pre"
+const thebe_selector_output = ".output, .cell_output"
+</script>
+    <script async="async" src="_static/sphinx-thebe.js"></script>
+    <script>window.MathJax = {"options": {"processHtmlClass": "tex2jax_process|mathjax_process|math|output_area"}}</script>
+    <script defer="defer" src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-mml-chtml.js"></script>
+    <script>DOCUMENTATION_OPTIONS.pagename = 'movingatrium';</script>
+    <link rel="index" title="Index" href="genindex.html" />
+    <link rel="search" title="Search" href="search.html" />
+    <link rel="next" title="API Reference" href="api.html" />
+    <link rel="prev" title="Hemodynamic simulation in the left atrium and left atrial appendage" href="atrium.html" />
+  <meta name="viewport" content="width=device-width, initial-scale=1"/>
+  <meta name="docsearch:language" content="en"/>
+    <meta name="docbuild:last-update" content="Oct 24, 2023"/>
+  </head>
+  
+  
+  <body data-bs-spy="scroll" data-bs-target=".bd-toc-nav" data-offset="180" data-bs-root-margin="0px 0px -60%" data-default-mode="">
+
+  
+  
+  <a class="skip-link" href="#main-content">Skip to main content</a>
+  
+  <div id="pst-scroll-pixel-helper"></div>
+
+  
+  <button type="button" class="btn rounded-pill" id="pst-back-to-top">
+    <i class="fa-solid fa-arrow-up"></i>
+    Back to top
+  </button>
+
+  
+  <input type="checkbox"
+          class="sidebar-toggle"
+          name="__primary"
+          id="__primary"/>
+  <label class="overlay overlay-primary" for="__primary"></label>
+  
+  <input type="checkbox"
+          class="sidebar-toggle"
+          name="__secondary"
+          id="__secondary"/>
+  <label class="overlay overlay-secondary" for="__secondary"></label>
+  
+  <div class="search-button__wrapper">
+    <div class="search-button__overlay"></div>
+    <div class="search-button__search-container">
+<form class="bd-search d-flex align-items-center"
+      action="search.html"
+      method="get">
+  <i class="fa-solid fa-magnifying-glass"></i>
+  <input type="search"
+         class="form-control"
+         name="q"
+         id="search-input"
+         placeholder="Search this book..."
+         aria-label="Search this book..."
+         autocomplete="off"
+         autocorrect="off"
+         autocapitalize="off"
+         spellcheck="false"/>
+  <span class="search-button__kbd-shortcut"><kbd class="kbd-shortcut__modifier">Ctrl</kbd>+<kbd>K</kbd></span>
+</form></div>
+  </div>
+  
+    <nav class="bd-header navbar navbar-expand-lg bd-navbar">
+    </nav>
+  
+  <div class="bd-container">
+    <div class="bd-container__inner bd-page-width">
+      
+      <div class="bd-sidebar-primary bd-sidebar">
+        
+
+  
+  <div class="sidebar-header-items sidebar-primary__section">
+    
+    
+    
+    
+  </div>
+  
+    <div class="sidebar-primary-items__start sidebar-primary__section">
+        <div class="sidebar-primary-item">
+  
+
+<a class="navbar-brand logo" href="index.html">
+  
+  
+  
+  
+    
+    
+      
+    
+    
+    <img src="_static/logo.png" class="logo__image only-light" alt="Logo image"/>
+    <script>document.write(`<img src="_static/logo.png" class="logo__image only-dark" alt="Logo image"/>`);</script>
+  
+  
+</a></div>
+        <div class="sidebar-primary-item"><nav class="bd-links" id="bd-docs-nav" aria-label="Main">
+    <div class="bd-toc-item navbar-nav active">
+        
+        <ul class="nav bd-sidenav bd-sidenav__home-link">
+            <li class="toctree-l1">
+                <a class="reference internal" href="index.html">
+                    VaMPy - The Vascular Modeling Pypeline
+                </a>
+            </li>
+        </ul>
+        <p aria-level="2" class="caption" role="heading"><span class="caption-text">Installation</span></p>
+<ul class="nav bd-sidenav">
+<li class="toctree-l1"><a class="reference internal" href="installation.html">Installation</a></li>
+<li class="toctree-l1"><a class="reference internal" href="conda.html">Installing with <code class="docutils literal notranslate"><span class="pre">conda</span></code></a></li>
+<li class="toctree-l1"><a class="reference internal" href="docker.html">Installing with Docker</a></li>
+<li class="toctree-l1"><a class="reference internal" href="issues.html">Known issues</a></li>
+</ul>
+<p aria-level="2" class="caption" role="heading"><span class="caption-text">Using VaMPy</span></p>
+<ul class="nav bd-sidenav">
+<li class="toctree-l1"><a class="reference internal" href="preprocess.html">Pre-processing</a></li>
+<li class="toctree-l1"><a class="reference internal" href="movingpreprocess.html">Pre-processing for moving domains</a></li>
+<li class="toctree-l1"><a class="reference internal" href="simulation.html">Computational fluid dynamics</a></li>
+<li class="toctree-l1"><a class="reference internal" href="postprocess.html">Post-processing</a></li>
+<li class="toctree-l1"><a class="reference internal" href="quantities.html">Computed quantities</a></li>
+<li class="toctree-l1"><a class="reference internal" href="cluster.html">Running a simulation on an HPC cluster</a></li>
+<li class="toctree-l1"><a class="reference internal" href="features.html">Features and issues</a></li>
+</ul>
+<p aria-level="2" class="caption" role="heading"><span class="caption-text">Tutorials</span></p>
+<ul class="current nav bd-sidenav">
+<li class="toctree-l1"><a class="reference internal" href="tutorials.html">Tutorials</a></li>
+<li class="toctree-l1"><a class="reference internal" href="artery.html">High-resolution CFD simulation in the internal carotid artery</a></li>
+<li class="toctree-l1"><a class="reference internal" href="atrium.html">Hemodynamic simulation in the left atrium and left atrial appendage</a></li>
+<li class="toctree-l1 current active"><a class="current reference internal" href="#">Moving domain simulation of the left atrium</a></li>
+</ul>
+<p aria-level="2" class="caption" role="heading"><span class="caption-text">Python API</span></p>
+<ul class="nav bd-sidenav">
+<li class="toctree-l1"><a class="reference internal" href="api.html">API Reference</a></li>
+</ul>
+
+    </div>
+</nav></div>
+    </div>
+  
+  
+  <div class="sidebar-primary-items__end sidebar-primary__section">
+  </div>
+  
+  <div id="rtd-footer-container"></div>
+
+
+      </div>
+      
+      <main id="main-content" class="bd-main">
+        
+        
+
+<div class="sbt-scroll-pixel-helper"></div>
+
+          <div class="bd-content">
+            <div class="bd-article-container">
+              
+              <div class="bd-header-article">
+<div class="header-article-items header-article__inner">
+  
+    <div class="header-article-items__start">
+      
+        <div class="header-article-item"><label class="sidebar-toggle primary-toggle btn btn-sm" for="__primary" title="Toggle primary sidebar" data-bs-placement="bottom" data-bs-toggle="tooltip">
+  <span class="fa-solid fa-bars"></span>
+</label></div>
+      
+    </div>
+  
+  
+    <div class="header-article-items__end">
+      
+        <div class="header-article-item">
+
+<div class="article-header-buttons">
+
+
+
+
+
+<div class="dropdown dropdown-source-buttons">
+  <button class="btn dropdown-toggle" type="button" data-bs-toggle="dropdown" aria-expanded="false" aria-label="Source repositories">
+    <i class="fab fa-github"></i>
+  </button>
+  <ul class="dropdown-menu">
+      
+      
+      
+      <li><a href="https://github.com/kvslab/VaMPy" target="_blank"
+   class="btn btn-sm btn-source-repository-button dropdown-item"
+   title="Source repository"
+   data-bs-placement="left" data-bs-toggle="tooltip"
+>
+  
+
+<span class="btn__icon-container">
+  <i class="fab fa-github"></i>
+  </span>
+<span class="btn__text-container">Repository</span>
+</a>
+</li>
+      
+      
+      
+      
+      <li><a href="https://github.com/kvslab/VaMPy/issues/new?title=Issue%20on%20page%20%2Fmovingatrium.html&body=Your%20issue%20content%20here." target="_blank"
+   class="btn btn-sm btn-source-issues-button dropdown-item"
+   title="Open an issue"
+   data-bs-placement="left" data-bs-toggle="tooltip"
+>
+  
+
+<span class="btn__icon-container">
+  <i class="fas fa-lightbulb"></i>
+  </span>
+<span class="btn__text-container">Open issue</span>
+</a>
+</li>
+      
+  </ul>
+</div>
+
+
+
+
+
+
+<div class="dropdown dropdown-download-buttons">
+  <button class="btn dropdown-toggle" type="button" data-bs-toggle="dropdown" aria-expanded="false" aria-label="Download this page">
+    <i class="fas fa-download"></i>
+  </button>
+  <ul class="dropdown-menu">
+      
+      
+      
+      <li><a href="_sources/movingatrium.md" target="_blank"
+   class="btn btn-sm btn-download-source-button dropdown-item"
+   title="Download source file"
+   data-bs-placement="left" data-bs-toggle="tooltip"
+>
+  
+
+<span class="btn__icon-container">
+  <i class="fas fa-file"></i>
+  </span>
+<span class="btn__text-container">.md</span>
+</a>
+</li>
+      
+      
+      
+      
+      <li>
+<button onclick="window.print()"
+  class="btn btn-sm btn-download-pdf-button dropdown-item"
+  title="Print to PDF"
+  data-bs-placement="left" data-bs-toggle="tooltip"
+>
+  
+
+<span class="btn__icon-container">
+  <i class="fas fa-file-pdf"></i>
+  </span>
+<span class="btn__text-container">.pdf</span>
+</button>
+</li>
+      
+  </ul>
+</div>
+
+
+
+
+<button onclick="toggleFullScreen()"
+  class="btn btn-sm btn-fullscreen-button"
+  title="Fullscreen mode"
+  data-bs-placement="bottom" data-bs-toggle="tooltip"
+>
+  
+
+<span class="btn__icon-container">
+  <i class="fas fa-expand"></i>
+  </span>
+
+</button>
+
+
+<script>
+document.write(`
+  <button class="btn btn-sm navbar-btn theme-switch-button" title="light/dark" aria-label="light/dark" data-bs-placement="bottom" data-bs-toggle="tooltip">
+    <span class="theme-switch nav-link" data-mode="light"><i class="fa-solid fa-sun fa-lg"></i></span>
+    <span class="theme-switch nav-link" data-mode="dark"><i class="fa-solid fa-moon fa-lg"></i></span>
+    <span class="theme-switch nav-link" data-mode="auto"><i class="fa-solid fa-circle-half-stroke fa-lg"></i></span>
+  </button>
+`);
+</script>
+
+<script>
+document.write(`
+  <button class="btn btn-sm navbar-btn search-button search-button__button" title="Search" aria-label="Search" data-bs-placement="bottom" data-bs-toggle="tooltip">
+    <i class="fa-solid fa-magnifying-glass fa-lg"></i>
+  </button>
+`);
+</script>
+<label class="sidebar-toggle secondary-toggle btn btn-sm" for="__secondary"title="Toggle secondary sidebar" data-bs-placement="bottom" data-bs-toggle="tooltip">
+    <span class="fa-solid fa-list"></span>
+</label>
+</div></div>
+      
+    </div>
+  
+</div>
+</div>
+              
+              
+
+<div id="jb-print-docs-body" class="onlyprint">
+    <h1>Moving domain simulation of the left atrium</h1>
+    <!-- Table of contents -->
+    <div id="print-main-content">
+        <div id="jb-print-toc">
+            
+            <div>
+                <h2> Contents </h2>
+            </div>
+            <nav aria-label="Page">
+                <ul class="visible nav section-nav flex-column">
+<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#moving-domain-meshing-of-the-left-atrium">Moving domain meshing of the left atrium</a></li>
+<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#the-displacement-field-and-model-points-np">The displacement field and <code class="docutils literal notranslate"><span class="pre">model_points.np</span></code></a></li>
+<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#quantifying-blood-residence-time">Quantifying blood residence time</a></li>
+<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#moving-domain-cfd-simulation">Moving domain CFD simulation</a></li>
+</ul>
+            </nav>
+        </div>
+    </div>
+</div>
+
+              
+                
+<div id="searchbox"></div>
+                <article class="bd-article" role="main">
+                  
+  <section class="tex2jax_ignore mathjax_ignore" id="moving-domain-simulation-of-the-left-atrium">
+<span id="tutorial-movingatrium"></span><h1>Moving domain simulation of the left atrium<a class="headerlink" href="#moving-domain-simulation-of-the-left-atrium" title="Permalink to this heading">#</a></h1>
+<p>The third tutorial considers a moving domain CFD simulation in a simplified left atrium geometry. This hand-crafted
+geometry, named <code class="docutils literal notranslate"><span class="pre">model.vtp</span></code>, can be found in the <code class="docutils literal notranslate"><span class="pre">models/moving_atrium</span></code> directory and was designed by the <code class="docutils literal notranslate"><span class="pre">VaMPy</span></code>
+authors using the <a class="reference external" href="https://meshmixer.com/">MeshMixer</a> software. This tutorial aims to showcase <code class="docutils literal notranslate"><span class="pre">VaMPy</span></code>’s versatility,
+highlighting its capabilities beyond rigid wall simulations, particularly in the context of atrial simulations.
+Additionally, the tutorial introduces the concept of blood residence time (<span class="math notranslate nohighlight">\(T_R\)</span>) – a metric that captures blood flow
+stasis by solving a scalar transport equation.</p>
+<section id="moving-domain-meshing-of-the-left-atrium">
+<h2>Moving domain meshing of the left atrium<a class="headerlink" href="#moving-domain-meshing-of-the-left-atrium" title="Permalink to this heading">#</a></h2>
+<p>The morphology of the simplified left atrium is depicted on the left side of <a class="reference internal" href="#simple-atrium"><span class="std std-numref">Fig. 22</span></a>. It features four
+pulmonary veins and a pouch-like structure representing the left atrial appendage. The left atrial appendage is
+particularly prone to blood clot formation, making it a significant region of interest within the left atrium. However,
+this tutorial focuses on showcasing the moving domain capabilities of <code class="docutils literal notranslate"><span class="pre">VaMPy</span></code>/<code class="docutils literal notranslate"><span class="pre">OasisMove</span></code>, so mesh refinement will not
+be discussed.</p>
+<p>To perform moving domain meshing for this model, execute the command below:</p>
+<div class="highlight-console notranslate"><div class="highlight"><pre><span></span><span class="gp">$ </span>vampy-mesh<span class="w"> </span>--moving-mesh<span class="w"> </span>-i<span class="w"> </span>models/moving_atrium/model.vtp<span class="w"> </span>-m<span class="w"> </span>constant<span class="w"> </span>-el<span class="w"> </span><span class="m">1</span>.3<span class="w"> </span>-fli<span class="w"> </span><span class="m">2</span><span class="w"> </span>-flo<span class="w"> </span><span class="m">1</span>.5<span class="w"> </span>-at<span class="w"> </span>
+</pre></div>
+</div>
+<p>In this command, the <code class="docutils literal notranslate"><span class="pre">-fli</span></code> and <code class="docutils literal notranslate"><span class="pre">-flo</span></code> flags determine the length of the flow extensions at the inlets and outlet,
+respectively, and the <code class="docutils literal notranslate"><span class="pre">-at</span></code> flag is used to notify the pipeline that an atrium model is being meshed.</p>
+<p>Upon successful execution, the meshing command will generate the standard output files. Additionally, it will produce
+the displacement matrix, stored in <code class="docutils literal notranslate"><span class="pre">model_points.np</span></code>, and the deformed surfaces with flow extensions in <code class="docutils literal notranslate"><span class="pre">model_extended</span></code>
+. The latter is illustrated in the middle figure of <a class="reference internal" href="#simple-atrium"><span class="std std-numref">Fig. 22</span></a>. The final volumetric mesh, inclusive of
+four boundary layers, is displayed on the right side of <a class="reference internal" href="#simple-atrium"><span class="std std-numref">Fig. 22</span></a>.</p>
+<figure class="align-default" id="simple-atrium">
+<img alt="_images/simpleatrium.gif" src="_images/simpleatrium.gif" />
+<figcaption>
+<p><span class="caption-number">Fig. 22 </span><span class="caption-text">From left to right: the surface model used in this tutorial, the deformed model with flow extensions, and the resulting volumetric mesh based on the provided meshing parameters.</span><a class="headerlink" href="#simple-atrium" title="Permalink to this image">#</a></p>
+</figcaption>
+</figure>
+</section>
+<section id="the-displacement-field-and-model-points-np">
+<h2>The displacement field and <code class="docutils literal notranslate"><span class="pre">model_points.np</span></code><a class="headerlink" href="#the-displacement-field-and-model-points-np" title="Permalink to this heading">#</a></h2>
+<p>The <code class="docutils literal notranslate"><span class="pre">model_points.np</span></code> file introduces a new input for the CFD simulation, describing the displacement field of each
+surface point. Each point within <code class="docutils literal notranslate"><span class="pre">model_points.np</span></code> is accomponied by its discrete displacement over a full cycle. For
+moving domain simulations driven by image-based motion, <code class="docutils literal notranslate"><span class="pre">OasisMove</span></code> utilizes this displacement field to define the wall
+boundary conditions. The process within <code class="docutils literal notranslate"><span class="pre">OasisMove</span></code> is as follows:</p>
+<ol class="arabic simple">
+<li><p><strong>Load displacement matrix</strong>: <code class="docutils literal notranslate"><span class="pre">OasisMove</span></code> identifies and loads the <code class="docutils literal notranslate"><span class="pre">model_points.np</span></code> file, storing the matrix in
+the <code class="docutils literal notranslate"><span class="pre">points</span></code> variable.</p></li>
+<li><p><strong>Spline interpolation</strong>: Using <code class="docutils literal notranslate"><span class="pre">SciPy</span></code>’s <code class="docutils literal notranslate"><span class="pre">splrep</span></code> method, spline interpolation is executed for each point, ensuring
+a continuous description of the deformation over one cycle (see the left-hand side of <a class="reference internal" href="#spline"><span class="std std-numref">Fig. 23</span></a>).</p></li>
+<li><p><strong>Mesh velocity computation</strong>: The first-order derivative of the spline is computed by <code class="docutils literal notranslate"><span class="pre">OasisMove</span></code>. This derivative
+represents the mesh velocity and is set as the wall boundary condition (see the right-hand side of <a class="reference internal" href="#spline"><span class="std std-numref">Fig. 23</span></a>).</p></li>
+</ol>
+<p>To exemplify, we may consider the deformation field of the demo model located in the <code class="docutils literal notranslate"><span class="pre">moving_atrium</span></code> directory. Focusing
+on the surface point at index 1, the displacement curve, its spline-interpolated counterpart, and the mesh velocity for
+the <span class="math notranslate nohighlight">\(x\)</span>-component are illustrated in <a class="reference internal" href="#spline"><span class="std std-numref">Fig. 23</span></a>.</p>
+<figure class="align-default" id="spline">
+<img alt="_images/spline.png" src="_images/spline.png" />
+<figcaption>
+<p><span class="caption-number">Fig. 23 </span><span class="caption-text">On the left: the discrete displacement profile (x) for the surface point at index 1, together with its spline representation (blue curve). On the right: the first-order derivative, denoting the mesh velocity for that specific point.</span><a class="headerlink" href="#spline" title="Permalink to this image">#</a></p>
+</figcaption>
+</figure>
+</section>
+<hr class="docutils" />
+<section id="quantifying-blood-residence-time">
+<h2>Quantifying blood residence time<a class="headerlink" href="#quantifying-blood-residence-time" title="Permalink to this heading">#</a></h2>
+<p>In the majority of patients with atrial fibrillation, there’s a risk of blood clot formation in the left atrial
+appendage. To further investigate this phenomenon using CFD simulations, it’s essential to assess the duration a blood
+particle remains within the left atrium and its appendage. This duration can be quantified by a scalar metric termed the
+blood residence time, <span class="math notranslate nohighlight">\(T_R\)</span>.</p>
+<p>The blood residence time, <span class="math notranslate nohighlight">\(T_R\)</span>, is determined throughout the computational domain by solving a forced passive scalar
+equation, as formulated by Rossini et al.<span id="id1">[<a class="reference internal" href="#id4" title="Lorenzo Rossini, Pablo Martinez-Legazpi, Vi Vu, Leticia Fernandez-Friera, Candelas Pérez Del Villar, Sara Rodriguez-Lopez, Yolanda Benito, Maria-Guadalupe Borja, David Pastor-Escuredo, Raquel Yotti, and others. A clinical method for mapping and quantifying blood stasis in the left ventricle. Journal of biomechanics, 49(11):2152–2161, 2016.">RMLV+16</a>]</span>:</p>
+<div class="math notranslate nohighlight" id="equation-transport">
+<span class="eqno">(1)<a class="headerlink" href="#equation-transport" title="Permalink to this equation">#</a></span>\[\frac{\partial T_R}{\partial t} + \mathbf u \cdot \nabla T_R = 1,\]</div>
+<p>At the onset of the simulation, <span class="math notranslate nohighlight">\(T_R\)</span> is initialized to zero everywhere in the domain, including at the pulmonary veins
+as a boundary condition. Within <code class="docutils literal notranslate"><span class="pre">OasisMove</span></code>, Equation <a class="reference internal" href="#equation-transport">(1)</a> is simulteneously solved as the Navier-Stokes
+equations, and incorperates a SUPG stabilization term to counteract the inherent instability of a purely advective
+transport equation.</p>
+</section>
+<hr class="docutils" />
+<section id="moving-domain-cfd-simulation">
+<h2>Moving domain CFD simulation<a class="headerlink" href="#moving-domain-cfd-simulation" title="Permalink to this heading">#</a></h2>
+<p>With the generated mesh, standard CFD input files, and the displacement field from <code class="docutils literal notranslate"><span class="pre">model_points.np</span></code>, we can start the
+moving domain CFD simulation. It’s important to note that such simulations are exclusively supported
+by <a class="reference external" href="https://github.com/KVSlab/OasisMove"><code class="docutils literal notranslate"><span class="pre">OasisMove</span></code></a>. The specifics of our CFD problem are outlined in
+the <a class="reference external" href="https://github.com/KVSlab/VaMPy/blob/master/src/vampy/simulation/MovingAtrium.py"><code class="docutils literal notranslate"><span class="pre">MovingAtrium.py</span></code></a> file, found in
+the <code class="docutils literal notranslate"><span class="pre">simulation</span></code> directory. The inlet boundary conditions are defined by the normalized flow rate values located in
+the  <code class="docutils literal notranslate"><span class="pre">PV_values</span></code> file, and are adjusted by the model’s mean flow rate. Meanwhile, the outlet is set with a zero-pressure
+boundary condition, and the wall boundary conditions are determined using the displacement field from <code class="docutils literal notranslate"><span class="pre">model_points.np</span></code>.</p>
+<p>To execute a moving domain CFD simulation of the left atrium model over four cardiac cycles, navigate to
+the <code class="docutils literal notranslate"><span class="pre">src/vampy/simulation</span></code> directory and run the following command:</p>
+<div class="highlight-console notranslate"><div class="highlight"><pre><span></span><span class="gp">$ </span>oasismove<span class="w"> </span>NSfracStepMove<span class="w"> </span><span class="nv">problem</span><span class="o">=</span>MovingAtrium<span class="w"> </span><span class="nv">mesh_path</span><span class="o">=</span>../../../models/moving_atrium/model.xml.gz<span class="w"> </span><span class="nv">number_of_cycles</span><span class="o">=</span><span class="m">4</span><span class="w"> </span><span class="nv">T</span><span class="o">=</span><span class="m">1000</span><span class="w"> </span><span class="nv">dt</span><span class="o">=</span><span class="m">1</span>
+</pre></div>
+</div>
+<p>Upon completion of the simulation, the results, along with the associated mesh, are stored in a concise HDF5 format.
+Additionally, the residence time <span class="math notranslate nohighlight">\(T_R\)</span> and the velocity field are saved in the XDMF files <code class="docutils literal notranslate"><span class="pre">blood.xdmf</span></code>
+and <code class="docutils literal notranslate"><span class="pre">velocity.xdmf</span></code>, respectively, which includes the mesh deformation. <code class="xref std std-numref docutils literal notranslate"><span class="pre">moving_results</span></code> presents the volumetric
+representation of the blood residence time and velocity field throughout the four cardiac cycles. It’s noteworthy to
+observe the accumulating <span class="math notranslate nohighlight">\(T_R\)</span> within the left atrial appendage over time.</p>
+<figure>
+<video controls style="width: 100%; height: auto;">
+    <source src="_static/videos/moving_results.mp4" type="video/mp4">
+</video>
+    <figcaption>From left to right: the volumetric depiction of the blood residence time, and corresponding velocity field over four cardiac cycles.</figcaption>
+</figure>
+<div class="docutils container" id="id2">
+<dl class="citation">
+<dt class="label" id="id4"><span class="brackets"><a class="fn-backref" href="#id1">RMLV+16</a></span></dt>
+<dd><p>Lorenzo Rossini, Pablo Martinez-Legazpi, Vi Vu, Leticia Fernandez-Friera, Candelas Pérez Del Villar, Sara Rodriguez-Lopez, Yolanda Benito, Maria-Guadalupe Borja, David Pastor-Escuredo, Raquel Yotti, and others. A clinical method for mapping and quantifying blood stasis in the left ventricle. <em>Journal of biomechanics</em>, 49(11):2152–2161, 2016.</p>
+</dd>
+</dl>
+</div>
+</section>
+</section>
+
+    <script type="text/x-thebe-config">
+    {
+        requestKernel: true,
+        binderOptions: {
+            repo: "binder-examples/jupyter-stacks-datascience",
+            ref: "master",
+        },
+        codeMirrorConfig: {
+            theme: "abcdef",
+            mode: "python"
+        },
+        kernelOptions: {
+            name: "python3",
+            path: "./."
+        },
+        predefinedOutput: true
+    }
+    </script>
+    <script>kernelName = 'python3'</script>
+
+                </article>
+              
+
+              
+              
+              
+              
+                <footer class="prev-next-footer">
+                  <!-- Previous / next buttons -->
+<div class="prev-next-area">
+    <a class="left-prev"
+       href="atrium.html"
+       title="previous page">
+      <i class="fa-solid fa-angle-left"></i>
+      <div class="prev-next-info">
+        <p class="prev-next-subtitle">previous</p>
+        <p class="prev-next-title">Hemodynamic simulation in the left atrium and left atrial appendage</p>
+      </div>
+    </a>
+    <a class="right-next"
+       href="api.html"
+       title="next page">
+      <div class="prev-next-info">
+        <p class="prev-next-subtitle">next</p>
+        <p class="prev-next-title">API Reference</p>
+      </div>
+      <i class="fa-solid fa-angle-right"></i>
+    </a>
+</div>
+                </footer>
+              
+            </div>
+            
+            
+              
+                <div class="bd-sidebar-secondary bd-toc"><div class="sidebar-secondary-items sidebar-secondary__inner">
+
+  <div class="sidebar-secondary-item">
+  <div class="page-toc tocsection onthispage">
+    <i class="fa-solid fa-list"></i> Contents
+  </div>
+  <nav class="bd-toc-nav page-toc">
+    <ul class="visible nav section-nav flex-column">
+<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#moving-domain-meshing-of-the-left-atrium">Moving domain meshing of the left atrium</a></li>
+<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#the-displacement-field-and-model-points-np">The displacement field and <code class="docutils literal notranslate"><span class="pre">model_points.np</span></code></a></li>
+<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#quantifying-blood-residence-time">Quantifying blood residence time</a></li>
+<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#moving-domain-cfd-simulation">Moving domain CFD simulation</a></li>
+</ul>
+  </nav></div>
+
+</div></div>
+              
+            
+          </div>
+          <footer class="bd-footer-content">
+            
+<div class="bd-footer-content__inner container">
+  
+  <div class="footer-item">
+    
+<p class="component-author">
+By Henrik A. Kjeldsberg
+</p>
+
+  </div>
+  
+  <div class="footer-item">
+    
+  <p class="copyright">
+    
+      © Copyright 2023.
+      <br/>
+    
+  </p>
+
+  </div>
+  
+  <div class="footer-item">
+    <p class="last-updated">
+  Last updated on Oct 24, 2023.
+  <br/>
+</p>
+  </div>
+  
+  <div class="footer-item">
+    
+  </div>
+  
+</div>
+          </footer>
+        
+
+      </main>
+    </div>
+  </div>
+  
+  <!-- Scripts loaded after <body> so the DOM is not blocked -->
+  <script src="_static/scripts/bootstrap.js?digest=ac02cc09edc035673794"></script>
+<script src="_static/scripts/pydata-sphinx-theme.js?digest=ac02cc09edc035673794"></script>
+
+  <footer class="bd-footer">
+  </footer>
+  </body>
+</html>

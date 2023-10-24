@@ -66,7 +66,7 @@ const thebe_selector_output = ".output, .cell_output"
     <link rel="search" title="Search" href="../../../search.html" />
   <meta name="viewport" content="width=device-width, initial-scale=1"/>
   <meta name="docsearch:language" content="en"/>
-    <meta name="docbuild:last-update" content="Sep 27, 2023"/>
+    <meta name="docbuild:last-update" content="Oct 24, 2023"/>
   </head>
   
   
@@ -174,6 +174,7 @@ const thebe_selector_output = ".output, .cell_output"
 <p aria-level="2" class="caption" role="heading"><span class="caption-text">Using VaMPy</span></p>
 <ul class="nav bd-sidenav">
 <li class="toctree-l1"><a class="reference internal" href="../../../preprocess.html">Pre-processing</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../movingpreprocess.html">Pre-processing for moving domains</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../../../simulation.html">Computational fluid dynamics</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../../../postprocess.html">Post-processing</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../../../quantities.html">Computed quantities</a></li>
@@ -185,6 +186,7 @@ const thebe_selector_output = ".output, .cell_output"
 <li class="toctree-l1"><a class="reference internal" href="../../../tutorials.html">Tutorials</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../../../artery.html">High-resolution CFD simulation in the internal carotid artery</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../../../atrium.html">Hemodynamic simulation in the left atrium and left atrial appendage</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../movingatrium.html">Moving domain simulation of the left atrium</a></li>
 </ul>
 <p aria-level="2" class="caption" role="heading"><span class="caption-text">Python API</span></p>
 <ul class="nav bd-sidenav">
@@ -339,7 +341,6 @@ document.write(`
   <h1>Source code for vampy.simulation.Artery</h1><div class="highlight"><pre>
 <span></span><span class="kn">import</span> <span class="nn">json</span>
 <span class="kn">import</span> <span class="nn">pickle</span>
-<span class="kn">from</span> <span class="nn">os</span> <span class="kn">import</span> <span class="n">makedirs</span>
 <span class="kn">from</span> <span class="nn">pprint</span> <span class="kn">import</span> <span class="n">pprint</span>
 <span class="kn">from</span> <span class="nn">dolfin</span> <span class="kn">import</span> <span class="n">set_log_level</span>
 
@@ -348,7 +349,8 @@ document.write(`
 
 <span class="kn">from</span> <span class="nn">vampy.simulation.Probe</span> <span class="kn">import</span> <span class="n">Probes</span>  <span class="c1"># type: ignore</span>
 <span class="kn">from</span> <span class="nn">vampy.simulation.Womersley</span> <span class="kn">import</span> <span class="n">make_womersley_bcs</span><span class="p">,</span> <span class="n">compute_boundary_geometry_acrn</span>
-<span class="kn">from</span> <span class="nn">vampy.simulation.simulation_common</span> <span class="kn">import</span> <span class="n">get_file_paths</span><span class="p">,</span> <span class="n">store_u_mean</span><span class="p">,</span> <span class="n">print_mesh_information</span>
+<span class="kn">from</span> <span class="nn">vampy.simulation.simulation_common</span> <span class="kn">import</span> <span class="n">get_file_paths</span><span class="p">,</span> <span class="n">store_u_mean</span><span class="p">,</span> <span class="n">print_mesh_information</span><span class="p">,</span> \
+    <span class="n">store_velocity_and_pressure_h5</span><span class="p">,</span> <span class="n">dump_probes</span>
 
 <span class="c1"># FEniCS specific command to control the desired level of logging, here set to critical errors</span>
 <span class="n">set_log_level</span><span class="p">(</span><span class="mi">50</span><span class="p">)</span>
@@ -463,11 +465,12 @@ document.write(`
     <span class="n">ds</span> <span class="o">=</span> <span class="n">Measure</span><span class="p">(</span><span class="s2">&quot;ds&quot;</span><span class="p">,</span> <span class="n">domain</span><span class="o">=</span><span class="n">mesh</span><span class="p">,</span> <span class="n">subdomain_data</span><span class="o">=</span><span class="n">boundary</span><span class="p">)</span>
     <span class="k">for</span> <span class="n">i</span><span class="p">,</span> <span class="n">ind</span> <span class="ow">in</span> <span class="nb">enumerate</span><span class="p">(</span><span class="n">id_out</span><span class="p">):</span>
         <span class="n">dsi</span> <span class="o">=</span> <span class="n">ds</span><span class="p">(</span><span class="n">ind</span><span class="p">)</span>
-        <span class="n">area_out</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">assemble</span><span class="p">(</span><span class="n">Constant</span><span class="p">(</span><span class="mf">1.0</span><span class="p">,</span> <span class="n">name</span><span class="o">=</span><span class="s2">&quot;one&quot;</span><span class="p">)</span> <span class="o">*</span> <span class="n">dsi</span><span class="p">))</span>
+        <span class="n">area_out</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">assemble</span><span class="p">(</span><span class="n">Constant</span><span class="p">(</span><span class="mf">1.0</span><span class="p">)</span> <span class="o">*</span> <span class="n">dsi</span><span class="p">))</span>
 
     <span class="n">bc_p</span> <span class="o">=</span> <span class="p">[]</span>
     <span class="k">if</span> <span class="n">MPI</span><span class="o">.</span><span class="n">rank</span><span class="p">(</span><span class="n">MPI</span><span class="o">.</span><span class="n">comm_world</span><span class="p">)</span> <span class="o">==</span> <span class="mi">0</span><span class="p">:</span>
         <span class="nb">print</span><span class="p">(</span><span class="s2">&quot;=== Initial pressure and area fraction ===&quot;</span><span class="p">)</span>
+
     <span class="k">for</span> <span class="n">i</span><span class="p">,</span> <span class="n">ID</span> <span class="ow">in</span> <span class="nb">enumerate</span><span class="p">(</span><span class="n">id_out</span><span class="p">):</span>
         <span class="n">p_initial</span> <span class="o">=</span> <span class="n">area_out</span><span class="p">[</span><span class="n">i</span><span class="p">]</span> <span class="o">/</span> <span class="nb">sum</span><span class="p">(</span><span class="n">area_out</span><span class="p">)</span>
         <span class="n">outflow</span> <span class="o">=</span> <span class="n">Expression</span><span class="p">(</span><span class="s2">&quot;p&quot;</span><span class="p">,</span> <span class="n">p</span><span class="o">=</span><span class="n">p_initial</span><span class="p">,</span> <span class="n">degree</span><span class="o">=</span><span class="n">pressure_degree</span><span class="p">)</span>
@@ -475,7 +478,7 @@ document.write(`
         <span class="n">bc_p</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">bc</span><span class="p">)</span>
         <span class="n">NS_expressions</span><span class="p">[</span><span class="n">ID</span><span class="p">]</span> <span class="o">=</span> <span class="n">outflow</span>
         <span class="k">if</span> <span class="n">MPI</span><span class="o">.</span><span class="n">rank</span><span class="p">(</span><span class="n">MPI</span><span class="o">.</span><span class="n">comm_world</span><span class="p">)</span> <span class="o">==</span> <span class="mi">0</span><span class="p">:</span>
-            <span class="nb">print</span><span class="p">((</span><span class="s2">&quot;Boundary ID=</span><span class="si">{:d}</span><span class="s2">, pressure: </span><span class="si">{:0.6f}</span><span class="s2">, area fraction: </span><span class="si">{:0.4f}</span><span class="s2">&quot;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">ID</span><span class="p">,</span> <span class="n">p_initial</span><span class="p">,</span> <span class="n">area_ratio</span><span class="p">[</span><span class="n">i</span><span class="p">])))</span>
+            <span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;Boundary ID=</span><span class="si">{</span><span class="n">ID</span><span class="si">}</span><span class="s2">, pressure: </span><span class="si">{</span><span class="n">p_initial</span><span class="si">:</span><span class="s2">.5f</span><span class="si">}</span><span class="s2">, area fraction: </span><span class="si">{</span><span class="n">area_ratio</span><span class="p">[</span><span class="n">i</span><span class="p">]</span><span class="si">:</span><span class="s2">0.5f</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span>
 
     <span class="c1"># No slip condition at wall</span>
     <span class="n">wall</span> <span class="o">=</span> <span class="n">Constant</span><span class="p">(</span><span class="mf">0.0</span><span class="p">)</span>
@@ -558,12 +561,11 @@ document.write(`
         <span class="n">diam_inlet</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">sqrt</span><span class="p">(</span><span class="mi">4</span> <span class="o">*</span> <span class="n">area_inlet</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span> <span class="o">/</span> <span class="n">np</span><span class="o">.</span><span class="n">pi</span><span class="p">)</span>
         <span class="n">Re</span> <span class="o">=</span> <span class="n">U_mean</span> <span class="o">*</span> <span class="n">diam_inlet</span> <span class="o">/</span> <span class="n">nu</span>
         <span class="nb">print</span><span class="p">(</span><span class="s2">&quot;=&quot;</span> <span class="o">*</span> <span class="mi">10</span><span class="p">,</span> <span class="s2">&quot;Time step &quot;</span> <span class="o">+</span> <span class="nb">str</span><span class="p">(</span><span class="n">tstep</span><span class="p">),</span> <span class="s2">&quot;=&quot;</span> <span class="o">*</span> <span class="mi">10</span><span class="p">)</span>
-        <span class="nb">print</span><span class="p">(</span><span class="s2">&quot;Sum of Q_out = </span><span class="si">{:0.4f}</span><span class="s2">, Q_in = </span><span class="si">{:0.4f}</span><span class="s2">, mean velocity (inlet): </span><span class="si">{:0.4f}</span><span class="s2">, Reynolds number (inlet): </span><span class="si">{:0.4f}</span><span class="s2">&quot;</span>
-              <span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="nb">sum</span><span class="p">(</span><span class="n">Q_outs</span><span class="p">),</span> <span class="n">Q_in</span><span class="p">,</span> <span class="n">U_mean</span><span class="p">,</span> <span class="n">Re</span><span class="p">))</span>
+        <span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;Sum of Q_out = </span><span class="si">{</span><span class="nb">sum</span><span class="p">(</span><span class="n">Q_outs</span><span class="p">)</span><span class="si">:</span><span class="s2">.4f</span><span class="si">}</span><span class="s2">, Q_in = </span><span class="si">{</span><span class="n">Q_in</span><span class="si">:</span><span class="s2">.4f</span><span class="si">}</span><span class="s2">, mean velocity (inlet): </span><span class="si">{</span><span class="n">U_mean</span><span class="si">:</span><span class="s2">.4f</span><span class="si">}</span><span class="s2">, &quot;</span> <span class="o">+</span>
+              <span class="sa">f</span><span class="s2">&quot;Reynolds number (inlet): </span><span class="si">{</span><span class="n">Re</span><span class="si">:</span><span class="s2">.4f</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span>
         <span class="k">for</span> <span class="n">i</span><span class="p">,</span> <span class="n">out_id</span> <span class="ow">in</span> <span class="nb">enumerate</span><span class="p">(</span><span class="n">id_out</span><span class="p">):</span>
-            <span class="nb">print</span><span class="p">((</span><span class="s2">&quot;For outlet with boundary ID=</span><span class="si">{:d}</span><span class="s2">: target flow rate: </span><span class="si">{:0.4f}</span><span class="s2"> mL/s, &quot;</span> <span class="o">+</span>
-                   <span class="s2">&quot;computed flow rate: </span><span class="si">{:0.4f}</span><span class="s2"> mL/s, pressure updated to: </span><span class="si">{:0.4f}</span><span class="s2">&quot;</span><span class="p">)</span>
-                  <span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">out_id</span><span class="p">,</span> <span class="n">Q_ideals</span><span class="p">[</span><span class="n">i</span><span class="p">],</span> <span class="n">Q_outs</span><span class="p">[</span><span class="n">i</span><span class="p">],</span> <span class="n">NS_expressions</span><span class="p">[</span><span class="n">out_id</span><span class="p">]</span><span class="o">.</span><span class="n">p</span><span class="p">))</span>
+            <span class="nb">print</span><span class="p">(</span><span class="s2">&quot;For outlet with boundary ID=</span><span class="si">{out_id}</span><span class="s2">: target flow rate: </span><span class="si">{Q_ideals[i]:.4f}</span><span class="s2"> mL/s, &quot;</span> <span class="o">+</span>
+                  <span class="sa">f</span><span class="s2">&quot;computed flow rate: </span><span class="si">{</span><span class="n">Q_outs</span><span class="p">[</span><span class="n">i</span><span class="p">]</span><span class="si">:</span><span class="s2">.4f</span><span class="si">}</span><span class="s2"> mL/s, pressure updated to: </span><span class="si">{</span><span class="n">NS_parameters</span><span class="p">[</span><span class="n">out_id</span><span class="p">]</span><span class="o">.</span><span class="n">p</span><span class="si">:</span><span class="s2">.4f</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span>
         <span class="nb">print</span><span class="p">()</span>
 
     <span class="c1"># Sample velocity and pressure in points/probes</span>
@@ -574,59 +576,11 @@ document.write(`
 
     <span class="c1"># Store sampled velocity and pressure</span>
     <span class="k">if</span> <span class="n">tstep</span> <span class="o">%</span> <span class="n">dump_probe_frequency</span> <span class="o">==</span> <span class="mi">0</span><span class="p">:</span>
-        <span class="c1"># Save variables along the centerline for CFD simulation</span>
-        <span class="c1"># diagnostics and light-weight post-processing</span>
-        <span class="n">filepath</span> <span class="o">=</span> <span class="n">path</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">newfolder</span><span class="p">,</span> <span class="s2">&quot;Probes&quot;</span><span class="p">)</span>
-        <span class="k">if</span> <span class="n">MPI</span><span class="o">.</span><span class="n">rank</span><span class="p">(</span><span class="n">MPI</span><span class="o">.</span><span class="n">comm_world</span><span class="p">)</span> <span class="o">==</span> <span class="mi">0</span><span class="p">:</span>
-            <span class="k">if</span> <span class="ow">not</span> <span class="n">path</span><span class="o">.</span><span class="n">exists</span><span class="p">(</span><span class="n">filepath</span><span class="p">):</span>
-                <span class="n">makedirs</span><span class="p">(</span><span class="n">filepath</span><span class="p">)</span>
-
-        <span class="n">arr_u_x</span> <span class="o">=</span> <span class="n">eval_dict</span><span class="p">[</span><span class="s2">&quot;centerline_u_x_probes&quot;</span><span class="p">]</span><span class="o">.</span><span class="n">array</span><span class="p">()</span>
-        <span class="n">arr_u_y</span> <span class="o">=</span> <span class="n">eval_dict</span><span class="p">[</span><span class="s2">&quot;centerline_u_y_probes&quot;</span><span class="p">]</span><span class="o">.</span><span class="n">array</span><span class="p">()</span>
-        <span class="n">arr_u_z</span> <span class="o">=</span> <span class="n">eval_dict</span><span class="p">[</span><span class="s2">&quot;centerline_u_z_probes&quot;</span><span class="p">]</span><span class="o">.</span><span class="n">array</span><span class="p">()</span>
-        <span class="n">arr_p</span> <span class="o">=</span> <span class="n">eval_dict</span><span class="p">[</span><span class="s2">&quot;centerline_p_probes&quot;</span><span class="p">]</span><span class="o">.</span><span class="n">array</span><span class="p">()</span>
-
-        <span class="c1"># Dump stats</span>
-        <span class="k">if</span> <span class="n">MPI</span><span class="o">.</span><span class="n">rank</span><span class="p">(</span><span class="n">MPI</span><span class="o">.</span><span class="n">comm_world</span><span class="p">)</span> <span class="o">==</span> <span class="mi">0</span><span class="p">:</span>
-            <span class="n">arr_u_x</span><span class="o">.</span><span class="n">dump</span><span class="p">(</span><span class="n">path</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">filepath</span><span class="p">,</span> <span class="s2">&quot;u_x_</span><span class="si">%s</span><span class="s2">.probes&quot;</span> <span class="o">%</span> <span class="nb">str</span><span class="p">(</span><span class="n">tstep</span><span class="p">)))</span>
-            <span class="n">arr_u_y</span><span class="o">.</span><span class="n">dump</span><span class="p">(</span><span class="n">path</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">filepath</span><span class="p">,</span> <span class="s2">&quot;u_y_</span><span class="si">%s</span><span class="s2">.probes&quot;</span> <span class="o">%</span> <span class="nb">str</span><span class="p">(</span><span class="n">tstep</span><span class="p">)))</span>
-            <span class="n">arr_u_z</span><span class="o">.</span><span class="n">dump</span><span class="p">(</span><span class="n">path</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">filepath</span><span class="p">,</span> <span class="s2">&quot;u_z_</span><span class="si">%s</span><span class="s2">.probes&quot;</span> <span class="o">%</span> <span class="nb">str</span><span class="p">(</span><span class="n">tstep</span><span class="p">)))</span>
-            <span class="n">arr_p</span><span class="o">.</span><span class="n">dump</span><span class="p">(</span><span class="n">path</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">filepath</span><span class="p">,</span> <span class="s2">&quot;p_</span><span class="si">%s</span><span class="s2">.probes&quot;</span> <span class="o">%</span> <span class="nb">str</span><span class="p">(</span><span class="n">tstep</span><span class="p">)))</span>
-
-        <span class="c1"># Clear stats</span>
-        <span class="n">MPI</span><span class="o">.</span><span class="n">barrier</span><span class="p">(</span><span class="n">MPI</span><span class="o">.</span><span class="n">comm_world</span><span class="p">)</span>
-        <span class="n">eval_dict</span><span class="p">[</span><span class="s2">&quot;centerline_u_x_probes&quot;</span><span class="p">]</span><span class="o">.</span><span class="n">clear</span><span class="p">()</span>
-        <span class="n">eval_dict</span><span class="p">[</span><span class="s2">&quot;centerline_u_y_probes&quot;</span><span class="p">]</span><span class="o">.</span><span class="n">clear</span><span class="p">()</span>
-        <span class="n">eval_dict</span><span class="p">[</span><span class="s2">&quot;centerline_u_z_probes&quot;</span><span class="p">]</span><span class="o">.</span><span class="n">clear</span><span class="p">()</span>
-        <span class="n">eval_dict</span><span class="p">[</span><span class="s2">&quot;centerline_p_probes&quot;</span><span class="p">]</span><span class="o">.</span><span class="n">clear</span><span class="p">()</span>
+        <span class="n">dump_probes</span><span class="p">(</span><span class="n">eval_dict</span><span class="p">,</span> <span class="n">newfolder</span><span class="p">,</span> <span class="n">tstep</span><span class="p">)</span>
 
     <span class="c1"># Save velocity and pressure for post-processing</span>
     <span class="k">if</span> <span class="n">tstep</span> <span class="o">%</span> <span class="n">save_solution_frequency</span> <span class="o">==</span> <span class="mi">0</span> <span class="ow">and</span> <span class="n">tstep</span> <span class="o">&gt;=</span> <span class="n">save_solution_at_tstep</span><span class="p">:</span>
-        <span class="c1"># Assign velocity components to vector solution</span>
-        <span class="n">assign</span><span class="p">(</span><span class="n">U</span><span class="o">.</span><span class="n">sub</span><span class="p">(</span><span class="mi">0</span><span class="p">),</span> <span class="n">u_</span><span class="p">[</span><span class="mi">0</span><span class="p">])</span>
-        <span class="n">assign</span><span class="p">(</span><span class="n">U</span><span class="o">.</span><span class="n">sub</span><span class="p">(</span><span class="mi">1</span><span class="p">),</span> <span class="n">u_</span><span class="p">[</span><span class="mi">1</span><span class="p">])</span>
-        <span class="n">assign</span><span class="p">(</span><span class="n">U</span><span class="o">.</span><span class="n">sub</span><span class="p">(</span><span class="mi">2</span><span class="p">),</span> <span class="n">u_</span><span class="p">[</span><span class="mi">2</span><span class="p">])</span>
-
-        <span class="c1"># Get save paths</span>
-        <span class="n">files</span> <span class="o">=</span> <span class="n">NS_parameters</span><span class="p">[</span><span class="s1">&#39;files&#39;</span><span class="p">]</span>
-        <span class="n">p_path</span> <span class="o">=</span> <span class="n">files</span><span class="p">[</span><span class="s1">&#39;p&#39;</span><span class="p">]</span>
-        <span class="n">u_path</span> <span class="o">=</span> <span class="n">files</span><span class="p">[</span><span class="s1">&#39;u&#39;</span><span class="p">]</span>
-        <span class="n">file_mode</span> <span class="o">=</span> <span class="s2">&quot;w&quot;</span> <span class="k">if</span> <span class="ow">not</span> <span class="n">path</span><span class="o">.</span><span class="n">exists</span><span class="p">(</span><span class="n">p_path</span><span class="p">)</span> <span class="k">else</span> <span class="s2">&quot;a&quot;</span>
-
-        <span class="c1"># Save pressure</span>
-        <span class="n">viz_p</span> <span class="o">=</span> <span class="n">HDF5File</span><span class="p">(</span><span class="n">MPI</span><span class="o">.</span><span class="n">comm_world</span><span class="p">,</span> <span class="n">p_path</span><span class="p">,</span> <span class="n">file_mode</span><span class="o">=</span><span class="n">file_mode</span><span class="p">)</span>
-        <span class="n">viz_p</span><span class="o">.</span><span class="n">write</span><span class="p">(</span><span class="n">p_</span><span class="p">,</span> <span class="s2">&quot;/pressure&quot;</span><span class="p">,</span> <span class="n">tstep</span><span class="p">)</span>
-        <span class="n">viz_p</span><span class="o">.</span><span class="n">close</span><span class="p">()</span>
-
-        <span class="c1"># Save velocity</span>
-        <span class="n">viz_u</span> <span class="o">=</span> <span class="n">HDF5File</span><span class="p">(</span><span class="n">MPI</span><span class="o">.</span><span class="n">comm_world</span><span class="p">,</span> <span class="n">u_path</span><span class="p">,</span> <span class="n">file_mode</span><span class="o">=</span><span class="n">file_mode</span><span class="p">)</span>
-        <span class="n">viz_u</span><span class="o">.</span><span class="n">write</span><span class="p">(</span><span class="n">U</span><span class="p">,</span> <span class="s2">&quot;/velocity&quot;</span><span class="p">,</span> <span class="n">tstep</span><span class="p">)</span>
-        <span class="n">viz_u</span><span class="o">.</span><span class="n">close</span><span class="p">()</span>
-
-        <span class="c1"># Accumulate velocity</span>
-        <span class="n">u_mean0</span><span class="o">.</span><span class="n">vector</span><span class="p">()</span><span class="o">.</span><span class="n">axpy</span><span class="p">(</span><span class="mi">1</span><span class="p">,</span> <span class="n">u_</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span><span class="o">.</span><span class="n">vector</span><span class="p">())</span>
-        <span class="n">u_mean1</span><span class="o">.</span><span class="n">vector</span><span class="p">()</span><span class="o">.</span><span class="n">axpy</span><span class="p">(</span><span class="mi">1</span><span class="p">,</span> <span class="n">u_</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span><span class="o">.</span><span class="n">vector</span><span class="p">())</span>
-        <span class="n">u_mean2</span><span class="o">.</span><span class="n">vector</span><span class="p">()</span><span class="o">.</span><span class="n">axpy</span><span class="p">(</span><span class="mi">1</span><span class="p">,</span> <span class="n">u_</span><span class="p">[</span><span class="mi">2</span><span class="p">]</span><span class="o">.</span><span class="n">vector</span><span class="p">())</span></div>
+        <span class="n">store_velocity_and_pressure_h5</span><span class="p">(</span><span class="n">NS_parameters</span><span class="p">,</span> <span class="n">U</span><span class="p">,</span> <span class="n">p_</span><span class="p">,</span> <span class="n">tstep</span><span class="p">,</span> <span class="n">u_</span><span class="p">,</span> <span class="n">u_mean0</span><span class="p">,</span> <span class="n">u_mean1</span><span class="p">,</span> <span class="n">u_mean2</span><span class="p">)</span></div>
 
 
 <span class="c1"># Oasis hook called after the simulation has finished</span>
@@ -751,7 +705,7 @@ By Henrik A. Kjeldsberg
   
   <div class="footer-item">
     <p class="last-updated">
-  Last updated on Sep 27, 2023.
+  Last updated on Oct 24, 2023.
   <br/>
 </p>
   </div>

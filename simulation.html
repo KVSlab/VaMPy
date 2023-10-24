@@ -66,10 +66,10 @@ const thebe_selector_output = ".output, .cell_output"
     <link rel="index" title="Index" href="genindex.html" />
     <link rel="search" title="Search" href="search.html" />
     <link rel="next" title="Post-processing" href="postprocess.html" />
-    <link rel="prev" title="Pre-processing" href="preprocess.html" />
+    <link rel="prev" title="Pre-processing for moving domains" href="movingpreprocess.html" />
   <meta name="viewport" content="width=device-width, initial-scale=1"/>
   <meta name="docsearch:language" content="en"/>
-    <meta name="docbuild:last-update" content="Sep 27, 2023"/>
+    <meta name="docbuild:last-update" content="Oct 24, 2023"/>
   </head>
   
   
@@ -177,6 +177,7 @@ const thebe_selector_output = ".output, .cell_output"
 <p aria-level="2" class="caption" role="heading"><span class="caption-text">Using VaMPy</span></p>
 <ul class="current nav bd-sidenav">
 <li class="toctree-l1"><a class="reference internal" href="preprocess.html">Pre-processing</a></li>
+<li class="toctree-l1"><a class="reference internal" href="movingpreprocess.html">Pre-processing for moving domains</a></li>
 <li class="toctree-l1 current active"><a class="current reference internal" href="#">Computational fluid dynamics</a></li>
 <li class="toctree-l1"><a class="reference internal" href="postprocess.html">Post-processing</a></li>
 <li class="toctree-l1"><a class="reference internal" href="quantities.html">Computed quantities</a></li>
@@ -188,6 +189,7 @@ const thebe_selector_output = ".output, .cell_output"
 <li class="toctree-l1"><a class="reference internal" href="tutorials.html">Tutorials</a></li>
 <li class="toctree-l1"><a class="reference internal" href="artery.html">High-resolution CFD simulation in the internal carotid artery</a></li>
 <li class="toctree-l1"><a class="reference internal" href="atrium.html">Hemodynamic simulation in the left atrium and left atrial appendage</a></li>
+<li class="toctree-l1"><a class="reference internal" href="movingatrium.html">Moving domain simulation of the left atrium</a></li>
 </ul>
 <p aria-level="2" class="caption" role="heading"><span class="caption-text">Python API</span></p>
 <ul class="nav bd-sidenav">
@@ -386,6 +388,7 @@ document.write(`
             <nav aria-label="Page">
                 <ul class="visible nav section-nav flex-column">
 <li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#simulations-in-oasis">Simulations in <code class="docutils literal notranslate"><span class="pre">Oasis</span></code></a></li>
+<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#simulations-in-oasismove">Simulations in <code class="docutils literal notranslate"><span class="pre">OasisMove</span></code></a></li>
 <li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#running-parallel-computational-fluid-dynamics-in-oasis">Running parallel computational fluid dynamics in <code class="docutils literal notranslate"><span class="pre">Oasis</span></code></a></li>
 <li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#adjusting-simulation-parameters">Adjusting simulation parameters</a></li>
 </ul>
@@ -404,8 +407,8 @@ document.write(`
 <section id="simulations-in-oasis">
 <h2>Simulations in <code class="docutils literal notranslate"><span class="pre">Oasis</span></code><a class="headerlink" href="#simulations-in-oasis" title="Permalink to this heading">#</a></h2>
 <p>Following pre-processing, the next step of using the Vascular Modeling Pypeline is performing the computational fluid
-dynamics (CFD) simulations with <code class="docutils literal notranslate"><span class="pre">oasis</span></code>. Assuming <code class="docutils literal notranslate"><span class="pre">oasis</span></code> has been installed, start by navigating to the <code class="docutils literal notranslate"><span class="pre">simulation</span></code>
-folder:</p>
+dynamics (CFD) simulations with <a class="reference external" href="https://github.com/mikaem/Oasis"><code class="docutils literal notranslate"><span class="pre">Oasis</span></code></a>. Assuming <code class="docutils literal notranslate"><span class="pre">oasis</span></code> has been installed, start
+by navigating to the <code class="docutils literal notranslate"><span class="pre">simulation</span></code> folder:</p>
 <div class="highlight-console notranslate"><div class="highlight"><pre><span></span><span class="gp">$ </span><span class="nb">cd</span><span class="w"> </span>src/vampy/simulation
 </pre></div>
 </div>
@@ -417,12 +420,25 @@ the following command:</p>
 <p>Running the simulations will create the result folder <code class="docutils literal notranslate"><span class="pre">results_artery</span></code> (specific to the <code class="docutils literal notranslate"><span class="pre">Artery.py</span></code> problem) located
 inside <code class="docutils literal notranslate"><span class="pre">src/vampy/simulation</span></code>, with the results and corresponding mesh saved compactly in HDF5 format.</p>
 </section>
+<section id="simulations-in-oasismove">
+<h2>Simulations in <code class="docutils literal notranslate"><span class="pre">OasisMove</span></code><a class="headerlink" href="#simulations-in-oasismove" title="Permalink to this heading">#</a></h2>
+<p>In case you decide to use <a class="reference external" href="https://github.com/KVSlab/OasisMove"><code class="docutils literal notranslate"><span class="pre">OasisMove</span></code></a> for CFD simulations, the command for
+running a (rigid wall) problem file is very similar to <code class="docutils literal notranslate"><span class="pre">Oasis</span></code>:</p>
+<div class="highlight-console notranslate"><div class="highlight"><pre><span></span><span class="gp">$ </span>oasismove<span class="w"> </span>NSfracStepMove<span class="w"> </span><span class="nv">problem</span><span class="o">=</span>Artery<span class="w"> </span><span class="nv">dynamic_mesh</span><span class="o">=</span>False<span class="w"> </span><span class="nv">mesh_path</span><span class="o">=</span>../../../models/artery/artery.xml.gz<span class="w"> </span><span class="nv">save_solution_after_cycle</span><span class="o">=</span><span class="m">0</span>
+</pre></div>
+</div>
+<p>For moving domain simulations (<code class="docutils literal notranslate"><span class="pre">MovingAtrium.py</span></code>), set <code class="docutils literal notranslate"><span class="pre">dynamic_mesh=True</span></code> and continue as usual:</p>
+<div class="highlight-console notranslate"><div class="highlight"><pre><span></span><span class="gp">$ </span>oasismove<span class="w"> </span>NSfracStepMove<span class="w"> </span><span class="nv">problem</span><span class="o">=</span>MovingAtrium<span class="w"> </span><span class="nv">dynamic_mesh</span><span class="o">=</span>True<span class="w"> </span><span class="nv">mesh_path</span><span class="o">=[</span>PATH_TO_ATRIUM_MODEL<span class="o">]</span><span class="w"> </span>
+</pre></div>
+</div>
+</section>
 <section id="running-parallel-computational-fluid-dynamics-in-oasis">
 <h2>Running parallel computational fluid dynamics in <code class="docutils literal notranslate"><span class="pre">Oasis</span></code><a class="headerlink" href="#running-parallel-computational-fluid-dynamics-in-oasis" title="Permalink to this heading">#</a></h2>
-<p>Oasis runs with <a class="reference external" href="https://mpi4py.readthedocs.io/en/stable/">MPI</a>, and problem files may be executed using MPI commands.
-To use MPI commands you will need to use an MPI interpreter, which is provided with the command <code class="docutils literal notranslate"><span class="pre">mpirun</span></code>, which is part
-of the Python MPI package <em>mpi4py</em>. On some systems this command is called <code class="docutils literal notranslate"><span class="pre">mpiexec</span></code> and <em>mpi4py</em> seems to include both.
-Assuming <em>mpi4py</em> is installed, you may run the CFD simulation in parallel using the <code class="docutils literal notranslate"><span class="pre">mpirun</span></code> command as follows:</p>
+<p><code class="docutils literal notranslate"><span class="pre">Oasis</span></code>/<code class="docutils literal notranslate"><span class="pre">OasisMove</span></code> runs with <a class="reference external" href="https://mpi4py.readthedocs.io/en/stable/">MPI</a>, and problem files may be executed using
+MPI commands. To use MPI commands you will need to use an MPI interpreter, which is provided with the command <code class="docutils literal notranslate"><span class="pre">mpirun</span></code>,
+which is part of the Python MPI package <em>mpi4py</em>. On some systems this command is called <code class="docutils literal notranslate"><span class="pre">mpiexec</span></code> and <em>mpi4py</em> seems to
+include both. Assuming <em>mpi4py</em> is installed, you may run the CFD simulation in parallel using the <code class="docutils literal notranslate"><span class="pre">mpirun</span></code> command as
+follows:</p>
 <div class="highlight-console notranslate"><div class="highlight"><pre><span></span><span class="gp">$ </span>mpirun<span class="w"> </span>-np<span class="w"> </span><span class="m">4</span><span class="w"> </span>oasis<span class="w"> </span>NSfracStep<span class="w"> </span><span class="nv">problem</span><span class="o">=</span>Artery<span class="w"> </span><span class="nv">mesh_path</span><span class="o">=</span>../../../models/artery/artery.xml.gz<span class="w"> </span><span class="nv">save_solution_after_cycle</span><span class="o">=</span><span class="m">0</span>
 </pre></div>
 </div>
@@ -506,12 +522,12 @@ we can run the following command:</p>
                   <!-- Previous / next buttons -->
 <div class="prev-next-area">
     <a class="left-prev"
-       href="preprocess.html"
+       href="movingpreprocess.html"
        title="previous page">
       <i class="fa-solid fa-angle-left"></i>
       <div class="prev-next-info">
         <p class="prev-next-subtitle">previous</p>
-        <p class="prev-next-title">Pre-processing</p>
+        <p class="prev-next-title">Pre-processing for moving domains</p>
       </div>
     </a>
     <a class="right-next"
@@ -539,6 +555,7 @@ we can run the following command:</p>
   <nav class="bd-toc-nav page-toc">
     <ul class="visible nav section-nav flex-column">
 <li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#simulations-in-oasis">Simulations in <code class="docutils literal notranslate"><span class="pre">Oasis</span></code></a></li>
+<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#simulations-in-oasismove">Simulations in <code class="docutils literal notranslate"><span class="pre">OasisMove</span></code></a></li>
 <li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#running-parallel-computational-fluid-dynamics-in-oasis">Running parallel computational fluid dynamics in <code class="docutils literal notranslate"><span class="pre">Oasis</span></code></a></li>
 <li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#adjusting-simulation-parameters">Adjusting simulation parameters</a></li>
 </ul>
@@ -573,7 +590,7 @@ By Henrik A. Kjeldsberg
   
   <div class="footer-item">
     <p class="last-updated">
-  Last updated on Sep 27, 2023.
+  Last updated on Oct 24, 2023.
   <br/>
 </p>
   </div>

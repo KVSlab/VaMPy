@@ -10,9 +10,8 @@ that VaMPy is also applicable to other vascular domains, not only tubular struct
 
 ```{attention} 
 Because VaMPy relies on `vtkPolyData` as input, the `.vtk` model needs
-to be converted to `.vtp` (or `.stl`) format, which can quicly be done in ParaView
-by using the `Extract Surface` filter, and saving the data as
-`LA_Endo_5.vtp`.
+to be converted to `.vtp` (or `.stl`) format, which can easily be performed in ParaView
+by using the `Extract Surface` filter, and saving the data as `LA_Endo_5.vtp`.
 ```
 
 ## Meshing an atrium with appendage refinement
