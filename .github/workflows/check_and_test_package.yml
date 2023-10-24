@@ -25,7 +25,7 @@ jobs:
       - name: Upgrade pip, setuptools, dependencies, and VaMPy
         run: |
           python3 -m pip install pip setuptools --upgrade
-          python3 -m pip types-paramiko .[test]
+          python3 -m pip install types-paramiko .[test]
 
       - name: Check code with Flake8
         run: python3 -m flake8
