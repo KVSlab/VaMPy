@@ -30,6 +30,11 @@ try:
 except ModuleNotFoundError:
     print("WARNING: Oasis is not installed, running CFD is not available")
 
+try:
+    from .simulation import MovingAtrium
+except ModuleNotFoundError:
+    print("WARNING: OasisMove is not installed, running moving domain simulations (MovingAtrium) is not available")
+
 
 meta = metadata("vampy")
 __version__ = meta["Version"]
@@ -58,4 +63,5 @@ __all__ = [
     "simulation_common",
     "Probe",
     "Womersley",
+    'MovingAtrium'
 ]
