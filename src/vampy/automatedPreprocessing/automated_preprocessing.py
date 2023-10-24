@@ -169,10 +169,10 @@ def run_pre_processing(input_model, verbose_print, smoothing_method, smoothing_f
         # Extract the region centerline
         refine_region_centerline = []
         info = get_parameters(base_path)
-        num_anu = info["number_of_regions"]
+        number_of_regions = info["number_of_regions"]
 
         # Compute mean distance between points
-        for i in range(num_anu):
+        for i in range(number_of_regions):
             if not path.isfile(file_name_region_centerlines.format(i)):
                 line = extract_single_line(centerline_region, i)
                 locator = get_vtk_point_locator(centerlines)
@@ -425,6 +425,9 @@ def run_pre_processing(input_model, verbose_print, smoothing_method, smoothing_f
         file_name_model_flow_ext, file_name_clipped_model, file_name_flow_centerlines, file_name_surface_name,
         file_name_remeshed, file_name_distance_to_sphere_initial
     ]
+    if refine_region:
+        files_to_remove += [file_name_region_centerlines.format(i) for i in range(number_of_regions)]
+
     for file in files_to_remove:
         if path.exists(file):
             remove(file)
