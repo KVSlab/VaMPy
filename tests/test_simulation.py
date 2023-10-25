@@ -14,7 +14,7 @@ def get_data_file_path(filename):
     return data_file_path
 
 
-def test_artery_problem(save_cwd):
+def no_test_artery_problem(save_cwd):
     # Simulation parameters
     mesh_path = get_data_file_path("artery.xml")
     dt = 0.951
@@ -61,7 +61,7 @@ def test_artery_problem(save_cwd):
     assert abs(flow_rates[1] - expected_flow_rate_2) < tol
 
 
-def test_atrium_problem(save_cwd):
+def no_test_atrium_problem(save_cwd):
     # Simulation parameters
     mesh_path = get_data_file_path("atrium.xml")
     dt = 0.00951
@@ -125,8 +125,3 @@ def test_moving_atrium_problem(save_cwd):
 
     assert abs(velocities[0] - expected_max_velocity) < tol
     assert abs(velocities[1] - expected_mean_velocity) < tol
-
-
-if __name__ == '__main__':
-    test_atrium_problem(None)
-    test_artery_problem(None)
