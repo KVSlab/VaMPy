@@ -11,7 +11,7 @@ on:
     - cron: "0 8 * * *"
 
 env:
-  CACHE_NUMBER: 5 # Increase to reset cache
+  CACHE_NUMBER: 6 # Increase to reset cache
 
 jobs:
   check-code:
