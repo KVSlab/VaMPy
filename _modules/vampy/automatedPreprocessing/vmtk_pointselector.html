@@ -358,7 +358,7 @@ document.write(`
         <span class="bp">self</span><span class="o">.</span><span class="n">text</span><span class="o">.</span><span class="n">SetDisplayPosition</span><span class="p">(</span><span class="mi">10</span><span class="p">,</span> <span class="mi">2</span><span class="p">)</span></div>
 
 
-<div class="viewcode-block" id="vmtkSeedSelector"><a class="viewcode-back" href="../../../api.html#vampy.automatedPreprocessing.vmtk_pointselector.vmtkSeedSelector">[docs]</a><span class="k">class</span> <span class="nc">vmtkSeedSelector</span><span class="p">():</span>
+<div class="viewcode-block" id="vmtkSeedSelector"><a class="viewcode-back" href="../../../api.html#vampy.automatedPreprocessing.vmtk_pointselector.vmtkSeedSelector">[docs]</a><span class="k">class</span> <span class="nc">vmtkSeedSelector</span><span class="p">():</span>  <span class="c1"># pragma: no cover</span>
     <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">_Surface</span> <span class="o">=</span> <span class="kc">None</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">_SeedIds</span> <span class="o">=</span> <span class="kc">None</span>
@@ -377,7 +377,7 @@ document.write(`
         <span class="k">pass</span></div></div>
 
 
-<div class="viewcode-block" id="vmtkPickPointSeedSelector"><a class="viewcode-back" href="../../../api.html#vampy.automatedPreprocessing.vmtk_pointselector.vmtkPickPointSeedSelector">[docs]</a><span class="k">class</span> <span class="nc">vmtkPickPointSeedSelector</span><span class="p">(</span><span class="n">vmtkSeedSelector</span><span class="p">):</span>
+<div class="viewcode-block" id="vmtkPickPointSeedSelector"><a class="viewcode-back" href="../../../api.html#vampy.automatedPreprocessing.vmtk_pointselector.vmtkPickPointSeedSelector">[docs]</a><span class="k">class</span> <span class="nc">vmtkPickPointSeedSelector</span><span class="p">(</span><span class="n">vmtkSeedSelector</span><span class="p">):</span>  <span class="c1"># pragma: no cover</span>
     <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
         <span class="n">vmtkSeedSelector</span><span class="o">.</span><span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">PickedSeedIds</span> <span class="o">=</span> <span class="n">vtk</span><span class="o">.</span><span class="n">vtkIdList</span><span class="p">()</span>

@@ -351,6 +351,7 @@ document.write(`
     <span class="n">get_distance</span><span class="p">,</span> <span class="n">get_number_of_arrays</span><span class="p">,</span> <span class="n">vmtk_smooth_surface</span><span class="p">,</span> <span class="n">get_point_data_array</span><span class="p">,</span> <span class="n">create_vtk_array</span><span class="p">,</span> \
     <span class="n">get_vtk_point_locator</span><span class="p">,</span> <span class="n">vtk_extract_feature_edges</span><span class="p">,</span> <span class="n">get_uncapped_surface</span><span class="p">,</span> <span class="n">vtk_compute_connectivity</span><span class="p">,</span> \
     <span class="n">vtk_compute_mass_properties</span><span class="p">,</span> <span class="n">extract_single_line</span><span class="p">,</span> <span class="n">get_centerline_tolerance</span>
+
 <span class="kn">from</span> <span class="nn">vampy.automatedPreprocessing</span> <span class="kn">import</span> <span class="n">ImportData</span>
 <span class="kn">from</span> <span class="nn">vampy.automatedPreprocessing.NetworkBoundaryConditions</span> <span class="kn">import</span> <span class="n">FlowSplitting</span>
 <span class="kn">from</span> <span class="nn">vampy.automatedPreprocessing.vmtk_pointselector</span> <span class="kn">import</span> <span class="n">vmtkPickPointSeedSelector</span>
@@ -1035,8 +1036,7 @@ document.write(`
     <span class="k">if</span> <span class="ow">not</span> <span class="n">is_atrium</span> <span class="ow">and</span> <span class="n">has_outlet</span><span class="p">:</span>
         <span class="n">flowSplitting</span><span class="o">.</span><span class="n">ComputeAlphas</span><span class="p">(</span><span class="n">network</span><span class="p">,</span> <span class="n">verbose_print</span><span class="p">)</span>
         <span class="n">flowSplitting</span><span class="o">.</span><span class="n">ComputeBetas</span><span class="p">(</span><span class="n">network</span><span class="p">,</span> <span class="n">verbose_print</span><span class="p">)</span>
-    <span class="k">else</span><span class="p">:</span>
-        <span class="n">flowSplitting</span><span class="o">.</span><span class="n">ComputeGammas</span><span class="p">(</span><span class="n">network</span><span class="p">,</span> <span class="n">verbose_print</span><span class="p">)</span>
+    <span class="n">flowSplitting</span><span class="o">.</span><span class="n">ComputeGammas</span><span class="p">(</span><span class="n">network</span><span class="p">,</span> <span class="n">verbose_print</span><span class="p">)</span>
     <span class="n">flowSplitting</span><span class="o">.</span><span class="n">CheckTotalFlowRate</span><span class="p">(</span><span class="n">network</span><span class="p">,</span> <span class="n">verbose_print</span><span class="p">)</span>
 
     <span class="k">return</span> <span class="n">network</span><span class="p">,</span> <span class="n">probe_points</span></div>

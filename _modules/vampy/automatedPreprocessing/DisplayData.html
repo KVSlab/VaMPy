@@ -354,8 +354,7 @@ document.write(`
 <span class="kn">import</span> <span class="nn">vtk</span>
 
 
-<div class="viewcode-block" id="VtkPointCloud"><a class="viewcode-back" href="../../../api.html#vampy.automatedPreprocessing.DisplayData.VtkPointCloud">[docs]</a><span class="k">class</span> <span class="nc">VtkPointCloud</span><span class="p">:</span>
-
+<div class="viewcode-block" id="VtkPointCloud"><a class="viewcode-back" href="../../../api.html#vampy.automatedPreprocessing.DisplayData.VtkPointCloud">[docs]</a><span class="k">class</span> <span class="nc">VtkPointCloud</span><span class="p">:</span>  <span class="c1"># pragma: no cover</span>
     <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">maxNumPoints</span><span class="o">=</span><span class="mf">1e6</span><span class="p">):</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">maxNumPoints</span> <span class="o">=</span> <span class="n">maxNumPoints</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">vtkPolyData</span> <span class="o">=</span> <span class="n">vtk</span><span class="o">.</span><span class="n">vtkPolyData</span><span class="p">()</span>
@@ -384,19 +383,7 @@ document.write(`
         <span class="bp">self</span><span class="o">.</span><span class="n">vtkPolyData</span><span class="o">.</span><span class="n">SetVerts</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">vtkCells</span><span class="p">)</span></div></div>
 
 
-<div class="viewcode-block" id="VtkText"><a class="viewcode-back" href="../../../api.html#vampy.automatedPreprocessing.DisplayData.VtkText">[docs]</a><span class="k">class</span> <span class="nc">VtkText</span><span class="p">:</span>
-
-    <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">guiText</span><span class="o">=</span><span class="s2">&quot;&quot;</span><span class="p">):</span>
-        <span class="bp">self</span><span class="o">.</span><span class="n">text</span> <span class="o">=</span> <span class="n">vtk</span><span class="o">.</span><span class="n">vtkTextActor</span><span class="p">()</span>
-        <span class="bp">self</span><span class="o">.</span><span class="n">text</span><span class="o">.</span><span class="n">SetInputData</span><span class="p">(</span><span class="n">guiText</span><span class="p">)</span>
-        <span class="n">textProperties</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">text</span><span class="o">.</span><span class="n">GetTextProperty</span><span class="p">()</span>
-        <span class="n">textProperties</span><span class="o">.</span><span class="n">SetFontSize</span><span class="p">(</span><span class="mi">15</span><span class="p">)</span>
-        <span class="n">textProperties</span><span class="o">.</span><span class="n">SetColor</span><span class="p">(</span><span class="mi">1</span><span class="p">,</span> <span class="mi">1</span><span class="p">,</span> <span class="mi">1</span><span class="p">)</span>
-        <span class="bp">self</span><span class="o">.</span><span class="n">text</span><span class="o">.</span><span class="n">SetDisplayPosition</span><span class="p">(</span><span class="mi">20</span><span class="p">,</span> <span class="mi">30</span><span class="p">)</span></div>
-
-
-<div class="viewcode-block" id="DisplayModel"><a class="viewcode-back" href="../../../api.html#vampy.automatedPreprocessing.DisplayData.DisplayModel">[docs]</a><span class="k">class</span> <span class="nc">DisplayModel</span><span class="p">(</span><span class="nb">object</span><span class="p">):</span>
-
+<div class="viewcode-block" id="DisplayModel"><a class="viewcode-back" href="../../../api.html#vampy.automatedPreprocessing.DisplayData.DisplayModel">[docs]</a><span class="k">class</span> <span class="nc">DisplayModel</span><span class="p">(</span><span class="nb">object</span><span class="p">):</span>  <span class="c1"># pragma: no cover</span>
 <div class="viewcode-block" id="DisplayModel.polyDataToActor"><a class="viewcode-back" href="../../../api.html#vampy.automatedPreprocessing.DisplayData.DisplayModel.polyDataToActor">[docs]</a>    <span class="k">def</span> <span class="nf">polyDataToActor</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">polyData</span><span class="p">,</span> <span class="n">opacity</span><span class="o">=</span><span class="mf">1.0</span><span class="p">):</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;Wrap the provided vtkPolyData object in a mapper and an actor,</span>
 <span class="sd">        returning the actor. &quot;&quot;&quot;</span>
