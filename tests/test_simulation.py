@@ -93,7 +93,7 @@ def test_atrium_problem(save_cwd):
     assert abs(velocities[1] - expected_mean_velocity) < tol
 
 
-def no_test_moving_atrium_problem(save_cwd):
+def test_moving_atrium_problem(save_cwd):
     # Simulation parameters
     mesh_path = get_data_file_path("atrium.xml")
     dt = 0.1
