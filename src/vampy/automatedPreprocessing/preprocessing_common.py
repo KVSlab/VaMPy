@@ -4,6 +4,7 @@ from os import path
 
 import numpy as np
 import vtkmodules.numpy_interface.dataset_adapter as dsa
+from IPython import embed
 from morphman import vtk_clean_polydata, vtk_triangulate_surface, get_parameters, write_parameters, read_polydata, \
     vmtkscripts, vtk, write_polydata, vtkvmtk, get_curvilinear_coordinate, vtk_compute_threshold, get_vtk_array, \
     get_distance, get_number_of_arrays, vmtk_smooth_surface, get_point_data_array, create_vtk_array, \
@@ -693,8 +694,7 @@ def setup_model_network(centerlines, file_name_probe_points, region_center, verb
     if not is_atrium and has_outlet:
         flowSplitting.ComputeAlphas(network, verbose_print)
         flowSplitting.ComputeBetas(network, verbose_print)
-    else:
-        flowSplitting.ComputeGammas(network, verbose_print)
+    flowSplitting.ComputeGammas(network, verbose_print)
     flowSplitting.CheckTotalFlowRate(network, verbose_print)
 
     return network, probe_points
