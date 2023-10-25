@@ -47,7 +47,7 @@ def problem_parameters(commandline_kwargs, scalar_components, Schmidt, NS_parame
         # Parameters are in mm and ms
         cardiac_cycle = float(commandline_kwargs.get("cardiac_cycle", 1000))
         number_of_cycles = int(commandline_kwargs.get("number_of_cycles", 2))
-        track_blood = True
+        track_blood = bool(commandline_kwargs.get("track_blood", False))
 
         NS_parameters.update(
             # Moving atrium parameters
@@ -89,6 +89,7 @@ def problem_parameters(commandline_kwargs, scalar_components, Schmidt, NS_parame
                             'relative_tolerance': 1e-8,
                             'absolute_tolerance': 1e-8}
         )
+
     if track_blood:
         if MPI.rank(MPI.comm_world) == 0:
             print("-- Computing blood residence time --")

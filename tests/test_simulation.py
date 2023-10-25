@@ -103,7 +103,7 @@ def test_moving_atrium_problem(save_cwd):
     chdir("src/vampy/simulation")
 
     cmd = ["oasismove", "NSfracStepMove", f"T={T}", f"dt={dt}", "problem=MovingAtrium", f"mesh_path={mesh_path}",
-           "save_flow_metrics_frequency=10"]
+           "save_flow_metrics_frequency=10", 'track_blood=False']
 
     # Run Oasis
     result = subprocess.run(cmd, capture_output=True, text=True)
