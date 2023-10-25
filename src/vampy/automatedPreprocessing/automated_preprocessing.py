@@ -396,7 +396,8 @@ def run_pre_processing(input_model, verbose_print, smoothing_method, smoothing_f
     else:
         mesh = read_polydata(file_name_vtu_mesh)
 
-    network, probe_points = setup_model_network(centerlines, file_name_probe_points, region_center, verbose_print)
+    network, probe_points = setup_model_network(centerlines, file_name_probe_points, region_center, verbose_print,
+                                                has_outlet, is_atrium)
 
     # Load updated parameters following meshing
     parameters = get_parameters(base_path)
