@@ -14,3 +14,4 @@ dependencies:
       - scipy
       - cppimport
       - git+https://github.com/mikaem/Oasis
+      - git+https://github.com/KVSlab/OasisMove.git@moving-la
