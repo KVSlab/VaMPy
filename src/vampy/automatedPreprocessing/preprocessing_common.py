@@ -653,7 +653,7 @@ def find_boundaries(model_path, mean_inflow_rate, network, mesh, verbose_print, 
     write_parameters(info, model_path)
 
 
-def setup_model_network(centerlines, file_name_probe_points, region_center, verbose_print):
+def setup_model_network(centerlines, file_name_probe_points, region_center, verbose_print, has_outlet, is_atrium):
     """
     Sets up network used for network boundary condition model.
 
@@ -662,6 +662,8 @@ def setup_model_network(centerlines, file_name_probe_points, region_center, verb
         file_name_probe_points (str): Save path of probe points
         region_center (list): List of points representing region of refinement
         verbose_print (bool): Prints additional info if True
+        has_outlet (bool): Determines if model has outlet or not
+        is_atrium (bool): Determines if model is atrium or artery
 
     Returns:
         network (Network): Network model
@@ -688,7 +690,11 @@ def setup_model_network(centerlines, file_name_probe_points, region_center, verb
     # Set the flow split and inlet boundary condition
     # Compute the outlet boundary condition percentages.
     flowSplitting = FlowSplitting()
-    flowSplitting.ComputeGammas(network, verbose_print)
+    if not is_atrium and has_outlet:
+        flowSplitting.ComputeAlphas(network, verbose_print)
+        flowSplitting.ComputeBetas(network, verbose_print)
+    else:
+        flowSplitting.ComputeGammas(network, verbose_print)
     flowSplitting.CheckTotalFlowRate(network, verbose_print)
 
     return network, probe_points
