@@ -4,6 +4,6 @@ from . import DisplayData
 from . import ImportData
 from . import NetworkBoundaryConditions
 from . import simulate
-from . import ToolRepairSTL
+from . import repair_tools
 from . import visualize
 from . import vmtk_pointselector
