@@ -2,6 +2,8 @@ import re
 import subprocess
 from os import chdir, path
 
+import pytest
+
 number_pattern = r"(\d+.\d+)"
 
 
@@ -14,7 +16,8 @@ def get_data_file_path(filename):
     return data_file_path
 
 
-def test_artery_problem(save_cwd):
+@pytest.mark.parametrize("num_processors", [2])
+def test_artery_problem(num_processors, save_cwd):
     # Simulation parameters
     mesh_path = get_data_file_path("artery.xml")
     dt = 0.951
@@ -23,8 +26,8 @@ def test_artery_problem(save_cwd):
     # Navigate to the simulation directory
     chdir("src/vampy/simulation")
 
-    cmd = ["oasismove", "NSfracStep", "solver=IPCS_ABCN", f"T={T}", f"dt={dt}", "problem=Artery",
-           f"mesh_path={mesh_path}", "dump_probe_frequency=10"]
+    cmd = ["mpirun", "-np", f"{num_processors}", "oasismove", "NSfracStep", "solver=IPCS_ABCN", f"T={T}", f"dt={dt}",
+           "problem=Artery", f"mesh_path={mesh_path}", "dump_probe_frequency=10"]
 
     # Run Oasis
     result = subprocess.run(cmd, capture_output=True, text=True)
