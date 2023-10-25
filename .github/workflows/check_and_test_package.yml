@@ -95,6 +95,9 @@ jobs:
       - name: Install VaMPy
         run: python3 -m pip install --editable .[test]
 
+      - name: Install OasisMove from specific branch for moving simulations
+        run: python3 -m pip install --editable git+https://github.com/KVSlab/OasisMove.git@moving-la#egg=OasisMove
+
       - name: Run tests
         run: python3 -m pytest tests
 

@@ -200,12 +200,14 @@ def create_bcs(NS_expressions, dynamic_mesh, x_, cardiac_cycle, backflow_facets,
     for ID in id_in:
         area_total += assemble(Constant(1.0) * ds_new(ID))
 
-    # Load normalized time and flow rate values
-    if dynamic_mesh:
-        flow_rate_path = mesh_path.split(mesh_filename)[0] + "_flowrate_moving.txt"
-    else:
-        flow_rate_path = mesh_path.split(mesh_filename)[0] + "_flowrate_rigid.txt"
+    setup = "moving" if dynamic_mesh else "rigid"
+    # Look for case specific flow rate
+    flow_rate_path = mesh_path.split(mesh_filename)[0] + f"_flowrate_{setup}.txt"
+    if not path.exists(flow_rate_path):
+        # Use default flow rate
+        flow_rate_path = path.join(path.dirname(path.abspath(__file__)), "PV_values")
 
+    # Load normalized time and flow rate values
     Q_mean = info['mean_flow_rate']
     t_values, Q_ = np.loadtxt(flow_rate_path).T
     Q_values = Q_ * Q_mean  # Scale normalized flow rate by mean flow rate

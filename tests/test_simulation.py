@@ -93,6 +93,41 @@ def test_atrium_problem(save_cwd):
     assert abs(velocities[1] - expected_mean_velocity) < tol
 
 
+def test_moving_atrium_problem(save_cwd):
+    # Simulation parameters
+    mesh_path = get_data_file_path("atrium.xml")
+    dt = 0.1
+    T = 10 * dt
+
+    # Navigate to the simulation directory
+    chdir("src/vampy/simulation")
+
+    cmd = ["oasismove", "NSfracStepMove", f"T={T}", f"dt={dt}", "problem=MovingAtrium", f"mesh_path={mesh_path}",
+           "save_flow_metrics_frequency=10"]
+
+    # Run Oasis
+    result = subprocess.run(cmd, capture_output=True, text=True)
+
+    # Assert successful simulation
+    assert result.returncode == 0
+
+    # Search for velocity value in print and assert
+    output = result.stdout
+    pattern = re.compile(r"velocity=" + number_pattern)
+    velocities = []
+    for match in pattern.finditer(str(output)):
+        velocities.append(eval(match.group(1)))
+
+    expected_max_velocity = 0.388
+    expected_mean_velocity = 0.163
+
+    tol = 1E-16
+
+    assert abs(velocities[0] - expected_max_velocity) < tol
+    assert abs(velocities[1] - expected_mean_velocity) < tol
+
+
 if __name__ == '__main__':
-    test_atrium_problem(1)
-    test_artery_problem(1)
+    test_atrium_problem(None)
+    test_artery_problem(None)
+    test_moving_atrium_problem(None)
