@@ -4,12 +4,12 @@ from os import path
 
 import numpy as np
 import vtkmodules.numpy_interface.dataset_adapter as dsa
-from IPython import embed
 from morphman import vtk_clean_polydata, vtk_triangulate_surface, get_parameters, write_parameters, read_polydata, \
     vmtkscripts, vtk, write_polydata, vtkvmtk, get_curvilinear_coordinate, vtk_compute_threshold, get_vtk_array, \
     get_distance, get_number_of_arrays, vmtk_smooth_surface, get_point_data_array, create_vtk_array, \
     get_vtk_point_locator, vtk_extract_feature_edges, get_uncapped_surface, vtk_compute_connectivity, \
     vtk_compute_mass_properties, extract_single_line, get_centerline_tolerance
+
 from vampy.automatedPreprocessing import ImportData
 from vampy.automatedPreprocessing.NetworkBoundaryConditions import FlowSplitting
 from vampy.automatedPreprocessing.vmtk_pointselector import vmtkPickPointSeedSelector
