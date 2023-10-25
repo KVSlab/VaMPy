@@ -95,11 +95,10 @@ jobs:
       - name: Install VaMPy
         run: python3 -m pip install --editable .[test]
 
-      - name: Export env variable for testing
-        run: export OASIS_MODE=TESTING
-
       - name: Run tests
         run: python3 -m pytest tests
+        env:
+          OASIS_MODE: TESTING
 
       - name: Upload coverage report to codecov
         if: matrix.os == 'ubuntu-latest'
