@@ -130,4 +130,3 @@ def no_test_moving_atrium_problem(save_cwd):
 if __name__ == '__main__':
     test_atrium_problem(None)
     test_artery_problem(None)
-    test_moving_atrium_problem(None)
