@@ -14,7 +14,7 @@ def get_data_file_path(filename):
     return data_file_path
 
 
-def no_test_artery_problem(save_cwd):
+def test_artery_problem(save_cwd):
     # Simulation parameters
     mesh_path = get_data_file_path("artery.xml")
     dt = 0.951
@@ -23,7 +23,8 @@ def no_test_artery_problem(save_cwd):
     # Navigate to the simulation directory
     chdir("src/vampy/simulation")
 
-    cmd = ["oasis", "NSfracStep", f"T={T}", f"dt={dt}", "problem=Artery", f"mesh_path={mesh_path}"]
+    cmd = ["oasismove", "NSfracStep", "solver=IPCS_ABCN", f"T={T}", f"dt={dt}", "problem=Artery",
+           f"mesh_path={mesh_path}"]
 
     # Run Oasis
     result = subprocess.run(cmd, capture_output=True, text=True)
@@ -61,7 +62,7 @@ def no_test_artery_problem(save_cwd):
     assert abs(flow_rates[1] - expected_flow_rate_2) < tol
 
 
-def no_test_atrium_problem(save_cwd):
+def test_atrium_problem(save_cwd):
     # Simulation parameters
     mesh_path = get_data_file_path("atrium.xml")
     dt = 0.00951
@@ -70,7 +71,8 @@ def no_test_atrium_problem(save_cwd):
     # Navigate to the simulation directory
     chdir("src/vampy/simulation")
 
-    cmd = ["oasis", "NSfracStep", f"T={T}", f"dt={dt}", "problem=Atrium", f"mesh_path={mesh_path}"]
+    cmd = ["oasismove", "NSfracStep", 'solver=IPCS_ABCN', f"T={T}", f"dt={dt}", "problem=Atrium",
+           f"mesh_path={mesh_path}"]
 
     # Run Oasis
     result = subprocess.run(cmd, capture_output=True, text=True)

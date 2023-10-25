@@ -1,10 +1,14 @@
 import json
+import os
 import pickle
 from pprint import pprint
 from dolfin import set_log_level
 
 import numpy as np
-from oasis.problems.NSfracStep import *
+if os.environ.get('OASIS_MODE') == 'TESTING':
+    from oasismove.problems.NSfracStep import *
+else:
+    from oasis.problems.NSfracStep import *
 
 from vampy.simulation.Probe import Probes  # type: ignore
 from vampy.simulation.Womersley import make_womersley_bcs, compute_boundary_geometry_acrn
