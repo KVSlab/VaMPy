@@ -12,7 +12,7 @@ try:
     from .automatedPreprocessing import DisplayData
     from .automatedPreprocessing import ImportData
     from .automatedPreprocessing import NetworkBoundaryConditions
-    from .automatedPreprocessing import ToolRepairSTL
+    from .automatedPreprocessing import repair_tools
     from .automatedPreprocessing import automated_preprocessing
     from .automatedPreprocessing import preprocessing_common
     from .automatedPreprocessing import simulate
@@ -55,7 +55,7 @@ __all__ = [
     "ImportData",
     "NetworkBoundaryConditions",
     "simulate",
-    "ToolRepairSTL",
+    "repair_tools",
     "visualize",
     "vmtk_pointselector",
     "Artery",

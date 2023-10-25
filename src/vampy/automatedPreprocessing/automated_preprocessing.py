@@ -10,12 +10,12 @@ from morphman import get_uncapped_surface, write_polydata, get_parameters, vtk_c
     prepare_output_surface, vmtk_compute_geometric_features
 
 # Local imports
-from vampy.automatedPreprocessing import ToolRepairSTL
 from vampy.automatedPreprocessing.moving_common import get_point_map, project_displacement, save_displacement
 from vampy.automatedPreprocessing.preprocessing_common import read_polydata, get_centers_for_meshing, \
     dist_sphere_diam, dist_sphere_curvature, dist_sphere_constant, get_regions_to_refine, add_flow_extension, \
     write_mesh, mesh_alternative, generate_mesh, find_boundaries, compute_flow_rate, setup_model_network, \
     radiusArrayName, scale_surface, get_furtest_surface_point, check_if_closed_surface, remesh_surface
+from vampy.automatedPreprocessing.repair_tools import find_and_delete_nan_triangles, clean_surface, print_surface_info
 from vampy.automatedPreprocessing.simulate import run_simulation
 from vampy.automatedPreprocessing.visualize import visualize_model
 
@@ -121,10 +121,10 @@ def run_pre_processing(input_model, verbose_print, smoothing_method, smoothing_f
         surface = vtk_triangulate_surface(surface)
 
         # Check the mesh if there is redundant nodes or NaN triangles.
-        ToolRepairSTL.surfaceOverview(surface)
-        ToolRepairSTL.foundAndDeleteNaNTriangles(surface)
-        surface = ToolRepairSTL.cleanTheSurface(surface)
-        foundNaN = ToolRepairSTL.foundAndDeleteNaNTriangles(surface)
+        print_surface_info(surface)
+        find_and_delete_nan_triangles(surface)
+        surface = clean_surface(surface)
+        foundNaN = find_and_delete_nan_triangles(surface)
         if foundNaN:
             raise RuntimeError(("There is an issue with the surface. "
                                 "Nan coordinates or some other shenanigans."))
