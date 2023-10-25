@@ -81,7 +81,7 @@ jobs:
         if: steps.cache.outputs.cache-hit != 'true'
 
       - name: Install VaMPy
-        run: python3 -m pip install .[test]
+        run: python3 -m pip install --editable .[test]
 
       - name: Run tests
         run: python3 -m pytest tests
