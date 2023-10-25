@@ -66,7 +66,7 @@ def test_artery_problem(num_processors, save_cwd):
     assert abs(flow_rates[1] - expected_flow_rate_2) < tol
 
 
-def notest_atrium_problem(save_cwd):
+def test_atrium_problem(save_cwd):
     # Simulation parameters
     mesh_path = get_data_file_path("atrium.xml")
     dt = 0.00951
@@ -99,7 +99,7 @@ def notest_atrium_problem(save_cwd):
     assert abs(velocities[1] - expected_mean_velocity) < tol
 
 
-def notest_moving_atrium_problem(save_cwd):
+def test_moving_atrium_problem(save_cwd):
     # Simulation parameters
     mesh_path = get_data_file_path("atrium.xml")
     dt = 0.1
