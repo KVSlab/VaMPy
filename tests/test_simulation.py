@@ -24,7 +24,7 @@ def test_artery_problem(save_cwd):
     chdir("src/vampy/simulation")
 
     cmd = ["oasismove", "NSfracStep", "solver=IPCS_ABCN", f"T={T}", f"dt={dt}", "problem=Artery",
-           f"mesh_path={mesh_path}"]
+           f"mesh_path={mesh_path}", "dump_probe_frequency=10"]
 
     # Run Oasis
     result = subprocess.run(cmd, capture_output=True, text=True)
