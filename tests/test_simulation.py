@@ -59,7 +59,8 @@ def test_artery_problem(num_processors, save_cwd):
     expected_flow_rate_1 = 0.2801
     expected_flow_rate_2 = 0.7219
 
-    tol = 1E-16
+    # Lower tolerance in parallel due to round off errors
+    tol = 1E-3
 
     assert abs(flow_rates[0] - expected_flow_rate_1) < tol
     assert abs(flow_rates[1] - expected_flow_rate_2) < tol
