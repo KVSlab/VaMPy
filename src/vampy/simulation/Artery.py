@@ -1,10 +1,14 @@
 import json
+import os
 import pickle
 from pprint import pprint
 from dolfin import set_log_level
 
 import numpy as np
-from oasis.problems.NSfracStep import *
+if os.environ.get('OASIS_MODE') == 'TESTING':
+    from oasismove.problems.NSfracStep import *
+else:
+    from oasis.problems.NSfracStep import *
 
 from vampy.simulation.Probe import Probes  # type: ignore
 from vampy.simulation.Womersley import make_womersley_bcs, compute_boundary_geometry_acrn
@@ -223,8 +227,8 @@ def temporal_hook(u_, p_, mesh, tstep, dump_probe_frequency, eval_dict, newfolde
         print(f"Sum of Q_out = {sum(Q_outs):.4f}, Q_in = {Q_in:.4f}, mean velocity (inlet): {U_mean:.4f}, " +
               f"Reynolds number (inlet): {Re:.4f}")
         for i, out_id in enumerate(id_out):
-            print("For outlet with boundary ID={out_id}: target flow rate: {Q_ideals[i]:.4f} mL/s, " +
-                  f"computed flow rate: {Q_outs[i]:.4f} mL/s, pressure updated to: {NS_parameters[out_id].p:.4f}")
+            print(f"For outlet with boundary ID={out_id}: target flow rate: {Q_ideals[i]:.4f} mL/s, " +
+                  f"computed flow rate: {Q_outs[i]:.4f} mL/s, pressure updated to: {NS_expressions[out_id].p:.4f}")
         print()
 
     # Sample velocity and pressure in points/probes

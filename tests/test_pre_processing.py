@@ -45,10 +45,10 @@ def test_mesh_model_with_one_inlet_and_two_outlets():
     model_path = "tests/test_data/artery/artery.stl"
     # Get default input parameters
     common_input = read_command_line(model_path)
-    common_input.update(dict(meshing_method="diameter",
+    common_input.update(dict(meshing_method="curvature",
                              smoothing_method="taubin",
                              refine_region=False,
-                             coarsening_factor=1.3,
+                             coarsening_factor=1.9,
                              visualize=False,
                              compress_mesh=False,
                              outlet_flow_extension_length=1,
@@ -69,8 +69,8 @@ def test_mesh_model_with_one_inlet_and_two_outlets():
     mesh_vtu = read_polydata(mesh_path_vtu)
     mesh_xml = Mesh(mesh_path_xml)
 
-    num_points = 5514
-    num_cells = 30204
+    num_points = 5733
+    num_cells = 31457
 
     assert mesh_vtu.GetNumberOfPoints() == num_points
     assert mesh_xml.num_cells() == num_cells

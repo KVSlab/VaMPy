@@ -31,6 +31,9 @@ except ModuleNotFoundError:
     print("WARNING: Oasis is not installed, running CFD is not available")
 
 try:
+    from .simulation import Probe
+    from .simulation import Womersley
+    from .simulation import simulation_common
     from .simulation import MovingAtrium
 except ModuleNotFoundError:
     print("WARNING: OasisMove is not installed, running moving domain simulations (MovingAtrium) is not available")

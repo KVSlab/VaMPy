@@ -9,6 +9,7 @@ from morphman import vtk_clean_polydata, vtk_triangulate_surface, get_parameters
     get_distance, get_number_of_arrays, vmtk_smooth_surface, get_point_data_array, create_vtk_array, \
     get_vtk_point_locator, vtk_extract_feature_edges, get_uncapped_surface, vtk_compute_connectivity, \
     vtk_compute_mass_properties, extract_single_line, get_centerline_tolerance
+
 from vampy.automatedPreprocessing import ImportData
 from vampy.automatedPreprocessing.NetworkBoundaryConditions import FlowSplitting
 from vampy.automatedPreprocessing.vmtk_pointselector import vmtkPickPointSeedSelector
@@ -693,8 +694,7 @@ def setup_model_network(centerlines, file_name_probe_points, region_center, verb
     if not is_atrium and has_outlet:
         flowSplitting.ComputeAlphas(network, verbose_print)
         flowSplitting.ComputeBetas(network, verbose_print)
-    else:
-        flowSplitting.ComputeGammas(network, verbose_print)
+    flowSplitting.ComputeGammas(network, verbose_print)
     flowSplitting.CheckTotalFlowRate(network, verbose_print)
 
     return network, probe_points

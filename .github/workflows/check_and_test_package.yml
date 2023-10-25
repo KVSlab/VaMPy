@@ -15,7 +15,7 @@ on:
     - cron: "0 8 * * *"
 
 env:
-  CACHE_NUMBER: 3 # Increase to reset cache
+  CACHE_NUMBER: 9 # Increase to reset cache
 
 jobs:
   check-code:
@@ -85,11 +85,11 @@ jobs:
       - uses: actions/cache@v2
         with:
           path: ${{ matrix.prefix }}
-          key: ${{ matrix.label }}-conda-${{ hashFiles('environment.yml') }}-${{ env.DATE }}-${{ env.CACHE_NUMBER }}
+          key: ${{ matrix.label }}-conda-${{ hashFiles('environment-test.yml') }}-${{ env.DATE }}-${{ env.CACHE_NUMBER }}
         id: cache
 
       - name: Update environment
-        run: mamba env update -n vampy -f environment.yml
+        run: mamba env update -n vampy -f environment-test.yml
         if: steps.cache.outputs.cache-hit != 'true'
 
       - name: Install VaMPy
@@ -97,6 +97,8 @@ jobs:
 
       - name: Run tests
         run: python3 -m pytest tests
+        env:
+          OASIS_MODE: TESTING
 
       - name: Upload coverage report to codecov
         if: matrix.os == 'ubuntu-latest'

@@ -47,7 +47,7 @@ def problem_parameters(commandline_kwargs, scalar_components, Schmidt, NS_parame
         # Parameters are in mm and ms
         cardiac_cycle = float(commandline_kwargs.get("cardiac_cycle", 1000))
         number_of_cycles = int(commandline_kwargs.get("number_of_cycles", 2))
-        track_blood = True
+        track_blood = bool(commandline_kwargs.get("track_blood", False))
 
         NS_parameters.update(
             # Moving atrium parameters
@@ -89,6 +89,7 @@ def problem_parameters(commandline_kwargs, scalar_components, Schmidt, NS_parame
                             'relative_tolerance': 1e-8,
                             'absolute_tolerance': 1e-8}
         )
+
     if track_blood:
         if MPI.rank(MPI.comm_world) == 0:
             print("-- Computing blood residence time --")
@@ -200,12 +201,14 @@ def create_bcs(NS_expressions, dynamic_mesh, x_, cardiac_cycle, backflow_facets,
     for ID in id_in:
         area_total += assemble(Constant(1.0) * ds_new(ID))
 
-    # Load normalized time and flow rate values
-    if dynamic_mesh:
-        flow_rate_path = mesh_path.split(mesh_filename)[0] + "_flowrate_moving.txt"
-    else:
-        flow_rate_path = mesh_path.split(mesh_filename)[0] + "_flowrate_rigid.txt"
+    setup = "moving" if dynamic_mesh else "rigid"
+    # Look for case specific flow rate
+    flow_rate_path = mesh_path.split(mesh_filename)[0] + f"_flowrate_{setup}.txt"
+    if not path.exists(flow_rate_path):
+        # Use default flow rate
+        flow_rate_path = path.join(path.dirname(path.abspath(__file__)), "PV_values")
 
+    # Load normalized time and flow rate values
     Q_mean = info['mean_flow_rate']
     t_values, Q_ = np.loadtxt(flow_rate_path).T
     Q_values = Q_ * Q_mean  # Scale normalized flow rate by mean flow rate
