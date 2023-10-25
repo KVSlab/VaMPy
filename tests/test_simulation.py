@@ -2,8 +2,6 @@ import re
 import subprocess
 from os import chdir, path
 
-import pytest
-
 number_pattern = r"(\d+.\d+)"
 
 
@@ -16,8 +14,7 @@ def get_data_file_path(filename):
     return data_file_path
 
 
-@pytest.mark.parametrize("num_processors", [1])
-def test_artery_problem(num_processors, save_cwd):
+def test_artery_problem(save_cwd):
     # Simulation parameters
     mesh_path = get_data_file_path("artery.xml")
     dt = 0.951
@@ -26,8 +23,7 @@ def test_artery_problem(num_processors, save_cwd):
     # Navigate to the simulation directory
     chdir("src/vampy/simulation")
 
-    cmd = ["mpirun", "-np", str(num_processors), "oasis", "NSfracStep", f"T={T}", f"dt={dt}", "problem=Artery",
-           f"mesh_path={mesh_path}"]
+    cmd = ["oasis", "NSfracStep", f"T={T}", f"dt={dt}", "problem=Artery", f"mesh_path={mesh_path}"]
 
     # Run Oasis
     result = subprocess.run(cmd, capture_output=True, text=True)
@@ -65,8 +61,7 @@ def test_artery_problem(num_processors, save_cwd):
     assert abs(flow_rates[1] - expected_flow_rate_2) < tol
 
 
-@pytest.mark.parametrize("num_processors", [1])
-def test_atrium_problem(num_processors, save_cwd):
+def test_atrium_problem(save_cwd):
     # Simulation parameters
     mesh_path = get_data_file_path("atrium.xml")
     dt = 0.00951
@@ -75,8 +70,7 @@ def test_atrium_problem(num_processors, save_cwd):
     # Navigate to the simulation directory
     chdir("src/vampy/simulation")
 
-    cmd = ["mpirun", "-np", str(num_processors), "oasis", "NSfracStep", f"T={T}", f"dt={dt}", "problem=Atrium",
-           f"mesh_path={mesh_path}"]
+    cmd = ["oasis", "NSfracStep", f"T={T}", f"dt={dt}", "problem=Atrium", f"mesh_path={mesh_path}"]
 
     # Run Oasis
     result = subprocess.run(cmd, capture_output=True, text=True)
