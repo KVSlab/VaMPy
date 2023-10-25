@@ -738,7 +738,8 @@ document.write(`
     <span class="k">else</span><span class="p">:</span>
         <span class="n">mesh</span> <span class="o">=</span> <span class="n">read_polydata</span><span class="p">(</span><span class="n">file_name_vtu_mesh</span><span class="p">)</span>
 
-    <span class="n">network</span><span class="p">,</span> <span class="n">probe_points</span> <span class="o">=</span> <span class="n">setup_model_network</span><span class="p">(</span><span class="n">centerlines</span><span class="p">,</span> <span class="n">file_name_probe_points</span><span class="p">,</span> <span class="n">region_center</span><span class="p">,</span> <span class="n">verbose_print</span><span class="p">)</span>
+    <span class="n">network</span><span class="p">,</span> <span class="n">probe_points</span> <span class="o">=</span> <span class="n">setup_model_network</span><span class="p">(</span><span class="n">centerlines</span><span class="p">,</span> <span class="n">file_name_probe_points</span><span class="p">,</span> <span class="n">region_center</span><span class="p">,</span> <span class="n">verbose_print</span><span class="p">,</span>
+                                                <span class="n">has_outlet</span><span class="p">,</span> <span class="n">is_atrium</span><span class="p">)</span>
 
     <span class="c1"># Load updated parameters following meshing</span>
     <span class="n">parameters</span> <span class="o">=</span> <span class="n">get_parameters</span><span class="p">(</span><span class="n">base_path</span><span class="p">)</span>

@@ -995,7 +995,7 @@ document.write(`
     <span class="n">write_parameters</span><span class="p">(</span><span class="n">info</span><span class="p">,</span> <span class="n">model_path</span><span class="p">)</span></div>
 
 
-<div class="viewcode-block" id="setup_model_network"><a class="viewcode-back" href="../../../api.html#vampy.automatedPreprocessing.preprocessing_common.setup_model_network">[docs]</a><span class="k">def</span> <span class="nf">setup_model_network</span><span class="p">(</span><span class="n">centerlines</span><span class="p">,</span> <span class="n">file_name_probe_points</span><span class="p">,</span> <span class="n">region_center</span><span class="p">,</span> <span class="n">verbose_print</span><span class="p">):</span>
+<div class="viewcode-block" id="setup_model_network"><a class="viewcode-back" href="../../../api.html#vampy.automatedPreprocessing.preprocessing_common.setup_model_network">[docs]</a><span class="k">def</span> <span class="nf">setup_model_network</span><span class="p">(</span><span class="n">centerlines</span><span class="p">,</span> <span class="n">file_name_probe_points</span><span class="p">,</span> <span class="n">region_center</span><span class="p">,</span> <span class="n">verbose_print</span><span class="p">,</span> <span class="n">has_outlet</span><span class="p">,</span> <span class="n">is_atrium</span><span class="p">):</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">    Sets up network used for network boundary condition model.</span>
 
@@ -1004,6 +1004,8 @@ document.write(`
 <span class="sd">        file_name_probe_points (str): Save path of probe points</span>
 <span class="sd">        region_center (list): List of points representing region of refinement</span>
 <span class="sd">        verbose_print (bool): Prints additional info if True</span>
+<span class="sd">        has_outlet (bool): Determines if model has outlet or not</span>
+<span class="sd">        is_atrium (bool): Determines if model is atrium or artery</span>
 
 <span class="sd">    Returns:</span>
 <span class="sd">        network (Network): Network model</span>
@@ -1030,7 +1032,11 @@ document.write(`
     <span class="c1"># Set the flow split and inlet boundary condition</span>
     <span class="c1"># Compute the outlet boundary condition percentages.</span>
     <span class="n">flowSplitting</span> <span class="o">=</span> <span class="n">FlowSplitting</span><span class="p">()</span>
-    <span class="n">flowSplitting</span><span class="o">.</span><span class="n">ComputeGammas</span><span class="p">(</span><span class="n">network</span><span class="p">,</span> <span class="n">verbose_print</span><span class="p">)</span>
+    <span class="k">if</span> <span class="ow">not</span> <span class="n">is_atrium</span> <span class="ow">and</span> <span class="n">has_outlet</span><span class="p">:</span>
+        <span class="n">flowSplitting</span><span class="o">.</span><span class="n">ComputeAlphas</span><span class="p">(</span><span class="n">network</span><span class="p">,</span> <span class="n">verbose_print</span><span class="p">)</span>
+        <span class="n">flowSplitting</span><span class="o">.</span><span class="n">ComputeBetas</span><span class="p">(</span><span class="n">network</span><span class="p">,</span> <span class="n">verbose_print</span><span class="p">)</span>
+    <span class="k">else</span><span class="p">:</span>
+        <span class="n">flowSplitting</span><span class="o">.</span><span class="n">ComputeGammas</span><span class="p">(</span><span class="n">network</span><span class="p">,</span> <span class="n">verbose_print</span><span class="p">)</span>
     <span class="n">flowSplitting</span><span class="o">.</span><span class="n">CheckTotalFlowRate</span><span class="p">(</span><span class="n">network</span><span class="p">,</span> <span class="n">verbose_print</span><span class="p">)</span>
 
     <span class="k">return</span> <span class="n">network</span><span class="p">,</span> <span class="n">probe_points</span></div>

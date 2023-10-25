@@ -859,7 +859,7 @@ the furthest distance accordingly.</p>
 
 <dl class="py function">
 <dt class="sig sig-object py" id="vampy.automatedPreprocessing.preprocessing_common.setup_model_network">
-<span class="sig-prename descclassname"><span class="pre">vampy.automatedPreprocessing.preprocessing_common.</span></span><span class="sig-name descname"><span class="pre">setup_model_network</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">centerlines</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">file_name_probe_points</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">region_center</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">verbose_print</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/vampy/automatedPreprocessing/preprocessing_common.html#setup_model_network"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#vampy.automatedPreprocessing.preprocessing_common.setup_model_network" title="Permalink to this definition">#</a></dt>
+<span class="sig-prename descclassname"><span class="pre">vampy.automatedPreprocessing.preprocessing_common.</span></span><span class="sig-name descname"><span class="pre">setup_model_network</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">centerlines</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">file_name_probe_points</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">region_center</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">verbose_print</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">has_outlet</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">is_atrium</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/vampy/automatedPreprocessing/preprocessing_common.html#setup_model_network"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#vampy.automatedPreprocessing.preprocessing_common.setup_model_network" title="Permalink to this definition">#</a></dt>
 <dd><p>Sets up network used for network boundary condition model.</p>
 <dl class="field-list simple">
 <dt class="field-odd">Parameters</dt>
@@ -868,6 +868,8 @@ the furthest distance accordingly.</p>
 <li><p><strong>file_name_probe_points</strong> (<em>str</em>) – Save path of probe points</p></li>
 <li><p><strong>region_center</strong> (<em>list</em>) – List of points representing region of refinement</p></li>
 <li><p><strong>verbose_print</strong> (<em>bool</em>) – Prints additional info if True</p></li>
+<li><p><strong>has_outlet</strong> (<em>bool</em>) – Determines if model has outlet or not</p></li>
+<li><p><strong>is_atrium</strong> (<em>bool</em>) – Determines if model is atrium or artery</p></li>
 </ul>
 </dd>
 <dt class="field-even">Returns</dt>
