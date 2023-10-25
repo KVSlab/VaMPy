@@ -20,8 +20,7 @@
 import math
 
 import numpy as np
-from dolfin import UserExpression, SubsetIterator, MPI, assemble, Constant, sqrt, FacetNormal, SpatialCoordinate, \
-    Measure
+from dolfin import UserExpression, assemble, Constant, FacetNormal, SpatialCoordinate, Measure
 from scipy.integrate import simps
 from scipy.interpolate import UnivariateSpline
 from scipy.special import jn
@@ -34,33 +33,12 @@ def x_to_r2(x, c, n):
         the projection of x onto the plane defined by c and n.
         """
     # Steps:
-    # rv = x - c
-    # rvn = rv . n
-    # rp = rv - (rv . n) n
-    # r2 = ||rp||**2
-
     rv = x - c
     rvn = rv.dot(n)
     rp = rv - rvn * n
     r2 = rp.dot(rp)
 
     return r2
-
-
-def compute_radius(mesh, facet_domains, ind, center):
-    d = len(center)
-    it = SubsetIterator(facet_domains, ind)
-    geom = mesh.geometry()
-    # maxr2 = -1.0
-    maxr2 = 0
-    for i, facet in enumerate(it):
-        ent = facet.entities(0)
-        for v in ent:
-            p = geom.point(v)
-            r2 = sum((p[j] - center[j]) ** 2 for j in range(d))
-            maxr2 = max(maxr2, r2)
-    r = MPI.max(MPI.comm_world, sqrt(maxr2))
-    return r
 
 
 def compute_boundary_geometry_acrn(mesh, ind, facet_domains):
@@ -87,25 +65,10 @@ def compute_boundary_geometry_acrn(mesh, ind, facet_domains):
     n_len = np.sqrt(sum([ni[i] ** 2 for i in range(d)]))  # Should always be 1!?
     normal = ni / n_len
 
-    # Compute radius by taking max radius of boundary points
-    # (assuming boundary points are on exact geometry)
-    # r = compute_radius(mesh, facet_domains, ind, c)
     # This old estimate is a few % lower because of boundary discretization errors
     r = np.sqrt(A / math.pi)
 
     return A, c, r, normal
-
-
-def compute_area(mesh, ind, facet_domains):
-    # Some convenient variables
-    assert facet_domains is not None
-    ds = Measure("ds", domain=mesh, subdomain_data=facet_domains)
-    dsi = ds(ind)
-
-    # Compute area of boundary tesselation by integrating 1.0 over all facets
-    A = assemble(Constant(1.0, name="one") * dsi)
-    assert A > 0.0, "Expecting positive area, probably mismatch between mesh and markers!"
-    return A
 
 
 def fourier_coefficients(x, y, T, N):
@@ -188,7 +151,6 @@ class WomersleyComponent(UserExpression):
         # Compute intermediate terms for womersley function
         r_dependent_coeffs = np.zeros(self.N, dtype=np.complex_)
         if hasattr(self, 'Vn'):
-            # r_dependent_coeffs[0] = (self.Vn[0]/2.0) * (1 - y**2)
             r_dependent_coeffs[0] = self.Vn[0] * (1 - y ** 2)
             for n in self.ns:
                 jn0b = self.jn0_betas[n]
