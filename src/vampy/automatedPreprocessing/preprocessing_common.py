@@ -18,6 +18,7 @@ from vampy.automatedPreprocessing.vmtk_pointselector import vmtkPickPointSeedSel
 distanceToSpheresArrayName = "DistanceToSpheres"
 radiusArrayName = 'MaximumInscribedSphereRadius'
 cellEntityArrayName = "CellEntityIds"
+dijkstraArrayName = "DijkstraDistanceToPoints"
 
 
 def get_regions_to_refine(surface, provided_points, dir_path):
@@ -925,3 +926,56 @@ def remesh_surface(surface, edge_length, element_size_mode="edgelength", exclude
     remeshed_surface = remeshing.Surface
 
     return remeshed_surface
+
+
+def geodesic_distance_from_point(surface, region_center, save_path, edge_length, max_distance):
+    """
+    Determines the target edge length for each cell on the surface, including
+    potential refinement or coarsening of certain user specified areas.
+    Level of refinement/coarseness is determined based on user selected region and the geodesic distance from it.
+
+    Args:
+        surface (vtkPolyData): Input surface model
+        region_center (list): Point representing region to refine
+        save_path (str): Location to store processed surface
+        edge_length (float): Target edge length
+        max_distance (float): Max distance of geodesic measure
+
+    Returns:
+        surface (vtkPolyData): Processed surface model with info on cell specific target edge length
+    """
+    # Define refine region point ID
+    locator = get_vtk_point_locator(surface)
+    point = region_center[0]
+    region_id = locator.FindClosestPoint(point)
+    region_ids = vtk.vtkIdList()
+    region_ids.InsertNextId(region_id)
+
+    # Compute geodesic distance to point
+    dijkstra = vtkvmtk.vtkvmtkPolyDataDijkstraDistanceToPoints()
+    dijkstra.SetInputData(surface)
+    dijkstra.SetSeedIds(region_ids)
+    dijkstra.SetDistanceOffset(0)
+    dijkstra.SetDistanceScale(1)
+    dijkstra.SetMinDistance(0)
+    dijkstra.SetMaxDistance(max_distance)
+    dijkstra.SetDijkstraDistanceToPointsArrayName(dijkstraArrayName)
+    dijkstra.Update()
+    geodesic_distance = dijkstra.GetOutput()
+
+    # Create smooth transition between LAA and LA lumen
+    N = surface.GetNumberOfPoints()
+    dist_array = geodesic_distance.GetPointData().GetArray(dijkstraArrayName)
+    for i in range(N):
+        dist = dist_array.GetComponent(i, 0) / max_distance
+        newDist = 1 / 3 * edge_length * (1 + 2 * dist ** 3)
+        dist_array.SetComponent(i, 0, newDist)
+
+    # Set element size based on geodesic distance
+    element_size = get_point_data_array(dijkstraArrayName, geodesic_distance)
+    vtk_array = create_vtk_array(element_size, "Size")
+    geodesic_distance.GetPointData().AddArray(vtk_array)
+
+    write_polydata(geodesic_distance, save_path)
+
+    return geodesic_distance

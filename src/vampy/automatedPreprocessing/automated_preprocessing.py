@@ -1,4 +1,5 @@
 import argparse
+import json
 import sys
 from os import remove, path
 
@@ -14,7 +15,8 @@ from vampy.automatedPreprocessing.moving_common import get_point_map, project_di
 from vampy.automatedPreprocessing.preprocessing_common import read_polydata, get_centers_for_meshing, \
     dist_sphere_diam, dist_sphere_curvature, dist_sphere_constant, get_regions_to_refine, add_flow_extension, \
     write_mesh, mesh_alternative, generate_mesh, find_boundaries, compute_flow_rate, setup_model_network, \
-    radiusArrayName, scale_surface, get_furtest_surface_point, check_if_closed_surface, remesh_surface
+    radiusArrayName, scale_surface, get_furtest_surface_point, check_if_closed_surface, remesh_surface, \
+    geodesic_distance_from_point
 from vampy.automatedPreprocessing.repair_tools import find_and_delete_nan_triangles, clean_surface, print_surface_info
 from vampy.automatedPreprocessing.simulate import run_simulation
 from vampy.automatedPreprocessing.visualize import visualize_model
@@ -24,7 +26,7 @@ def run_pre_processing(input_model, verbose_print, smoothing_method, smoothing_f
                        meshing_method, refine_region, is_atrium, add_flow_extensions, visualize, config_path,
                        coarsening_factor, inlet_flow_extension_length, outlet_flow_extension_length, edge_length,
                        region_points, compress_mesh, add_boundary_layer, scale_factor, resampling_step,
-                       flow_rate_factor, moving_mesh, clamp_boundaries):
+                       flow_rate_factor, moving_mesh, clamp_boundaries, distance_method):
     """
     Automatically generate mesh of surface model in .vtu and .xml format, including prescribed
     flow rates at inlet and outlet based on flow network model.
@@ -55,19 +57,28 @@ def run_pre_processing(input_model, verbose_print, smoothing_method, smoothing_f
         flow_rate_factor (float): Flow rate factor
         moving_mesh (bool): Computes projected movement for displaced surfaces located in [filename_model]_moved folder
         clamp_boundaries (bool): Clamps inlet(s) and outlet(s) if true
+        distance_method (str): Change between 'eulidean' and 'geodesic' distance measure
     """
     # Get paths
     case_name = input_model.rsplit(path.sep, 1)[-1].rsplit('.')[0]
     dir_path = input_model.rsplit(path.sep, 1)[0]
     print("\n--- Working on case:", case_name, "\n")
+    # TODO: Removeme (UKE spesific)
+    if "af" in input_model:
+        condition = "af"  # or "sr"
+        print("--- Condition: AF\n")
+    else:
+        condition = "sr"  # or "sr"
+        print("--- Condition: SR\n")
 
     # Naming conventions
     base_path = path.join(dir_path, case_name)
     file_name_centerlines = base_path + "_centerlines.vtp"
     file_name_refine_region_centerlines = base_path + "_refine_region_centerline.vtp"
-    file_name_region_centerlines = base_path + "_sac_centerline_{}.vtp"
+    file_name_region_centerlines = base_path + "_region_centerline_{}.vtp"
     file_name_distance_to_sphere_diam = base_path + "_distance_to_sphere_diam.vtp"
     file_name_distance_to_sphere_const = base_path + "_distance_to_sphere_const.vtp"
+    file_name_distance_to_sphere_geodesic = base_path + "_distance_to_sphere_geodesic.vtp"
     file_name_distance_to_sphere_curv = base_path + "_distance_to_sphere_curv.vtp"
     file_name_distance_to_sphere_initial = base_path + "_distance_to_sphere_initial.vtp"
     file_name_probe_points = base_path + "_probe_point.json"
@@ -155,6 +166,14 @@ def run_pre_processing(input_model, verbose_print, smoothing_method, smoothing_f
     region_center = []
     misr_max = []
 
+    # TODO: Removeme (UKE spesific) – Load LAA point
+    casename = dir_path.rsplit("/", 1)[1]
+    print(f"-- Loading LAA points for {casename}")
+    laa_apex_point_path = f"/Users/henriakj/PhD/Code/VaMPy/models/models_inria/laa_apex_points_{condition}.json"
+    with open(laa_apex_point_path) as f:
+        info = json.load(f)
+    region_points = info[casename][0]
+
     if refine_region:
         regions = get_regions_to_refine(capped_surface, region_points, base_path)
         for i in range(len(regions) // 3):
@@ -169,10 +188,10 @@ def run_pre_processing(input_model, verbose_print, smoothing_method, smoothing_f
         # Extract the region centerline
         refine_region_centerline = []
         info = get_parameters(base_path)
-        num_anu = info["number_of_regions"]
+        number_of_regions = info["number_of_regions"]
 
         # Compute mean distance between points
-        for i in range(num_anu):
+        for i in range(number_of_regions):
             if not path.isfile(file_name_region_centerlines.format(i)):
                 line = extract_single_line(centerline_region, i)
                 locator = get_vtk_point_locator(centerlines)
@@ -193,7 +212,7 @@ def run_pre_processing(input_model, verbose_print, smoothing_method, smoothing_f
             else:
                 refine_region_centerline.append(read_polydata(file_name_region_centerlines.format(i)))
 
-        # Merge the sac centerline
+        # Merge the refined region centerline
         region_centerlines = vtk_merge_polydata(refine_region_centerline)
 
         for region in refine_region_centerline:
@@ -270,9 +289,15 @@ def run_pre_processing(input_model, verbose_print, smoothing_method, smoothing_f
             remeshed = read_polydata(file_name_remeshed)
         else:
             print("\n--- Remeshing surface for moving mesh\n")
-            surface = dist_sphere_constant(surface, centerlines, region_center, misr_max,
-                                           file_name_distance_to_sphere_initial, edge_length)
+            if distance_method == "euclidean":
+                surface = dist_sphere_constant(surface, centerlines, region_center, misr_max,
+                                               file_name_distance_to_sphere_initial, edge_length)
+            elif distance_method == "geodesic":
+                max_distance = 50
+                surface = geodesic_distance_from_point(surface, region_center, file_name_distance_to_sphere_initial,
+                                                       edge_length, max_distance)
 
+            exit()
             remeshed = remesh_surface(surface, edge_length, "edgelengtharray")
             remeshed = vtk_clean_polydata(remeshed)
             write_polydata(remeshed, file_name_remeshed)
@@ -587,6 +612,12 @@ def read_command_line(input_path=None):
                         default=False,
                         help="Clamps boundaries at inlet(s) and outlet(s) if true. Only used for moving mesh.")
 
+    parser.add_argument('-dm', '--distance-method',
+                        type=str,
+                        choices=["euclidean", "geodesic"],
+                        default="geodesic",
+                        help="Determines method of computing distance between point of refinement and surface")
+
     # Parse path to get default values
     if required:
         args = parser.parse_args()
@@ -623,7 +654,7 @@ def read_command_line(input_path=None):
                 outlet_flow_extension_length=args.outlet_flowextension, add_boundary_layer=args.add_boundary_layer,
                 scale_factor=args.scale_factor, resampling_step=args.resampling_step,
                 flow_rate_factor=args.flow_rate_factor, moving_mesh=args.moving_mesh,
-                clamp_boundaries=args.clamp_boundaries)
+                clamp_boundaries=args.clamp_boundaries, distance_method=args.distance_method)
 
 
 def main_meshing():
