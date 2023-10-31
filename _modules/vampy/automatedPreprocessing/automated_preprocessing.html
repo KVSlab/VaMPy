@@ -18,12 +18,12 @@
   </script>
   
   <!-- Loaded before other Sphinx assets -->
-  <link href="../../../_static/styles/theme.css?digest=c5ced968eda925caa686" rel="stylesheet" />
-<link href="../../../_static/styles/bootstrap.css?digest=c5ced968eda925caa686" rel="stylesheet" />
-<link href="../../../_static/styles/pydata-sphinx-theme.css?digest=c5ced968eda925caa686" rel="stylesheet" />
+  <link href="../../../_static/styles/theme.css?digest=365ca57ee442770a23c6" rel="stylesheet" />
+<link href="../../../_static/styles/bootstrap.css?digest=365ca57ee442770a23c6" rel="stylesheet" />
+<link href="../../../_static/styles/pydata-sphinx-theme.css?digest=365ca57ee442770a23c6" rel="stylesheet" />
 
   
-  <link href="../../../_static/vendor/fontawesome/6.1.2/css/all.min.css?digest=c5ced968eda925caa686" rel="stylesheet" />
+  <link href="../../../_static/vendor/fontawesome/6.1.2/css/all.min.css?digest=365ca57ee442770a23c6" rel="stylesheet" />
   <link rel="preload" as="font" type="font/woff2" crossorigin href="../../../_static/vendor/fontawesome/6.1.2/webfonts/fa-solid-900.woff2" />
 <link rel="preload" as="font" type="font/woff2" crossorigin href="../../../_static/vendor/fontawesome/6.1.2/webfonts/fa-brands-400.woff2" />
 <link rel="preload" as="font" type="font/woff2" crossorigin href="../../../_static/vendor/fontawesome/6.1.2/webfonts/fa-regular-400.woff2" />
@@ -37,9 +37,9 @@
     <link rel="stylesheet" type="text/css" href="../../../_static/design-style.4045f2051d55cab465a707391d5b2007.min.css" />
   
   <!-- Pre-loaded scripts that we'll load fully later -->
-  <link rel="preload" as="script" href="../../../_static/scripts/bootstrap.js?digest=c5ced968eda925caa686" />
-<link rel="preload" as="script" href="../../../_static/scripts/pydata-sphinx-theme.js?digest=c5ced968eda925caa686" />
-  <script src="../../../_static/vendor/fontawesome/6.1.2/js/all.min.js?digest=c5ced968eda925caa686"></script>
+  <link rel="preload" as="script" href="../../../_static/scripts/bootstrap.js?digest=365ca57ee442770a23c6" />
+<link rel="preload" as="script" href="../../../_static/scripts/pydata-sphinx-theme.js?digest=365ca57ee442770a23c6" />
+  <script src="../../../_static/vendor/fontawesome/6.1.2/js/all.min.js?digest=365ca57ee442770a23c6"></script>
 
     <script data-url_root="../../../" id="documentation_options" src="../../../_static/documentation_options.js"></script>
     <script src="../../../_static/jquery.js"></script>
@@ -66,7 +66,7 @@ const thebe_selector_output = ".output, .cell_output"
     <link rel="search" title="Search" href="../../../search.html" />
   <meta name="viewport" content="width=device-width, initial-scale=1"/>
   <meta name="docsearch:language" content="en"/>
-    <meta name="docbuild:last-update" content="Oct 25, 2023"/>
+    <meta name="docbuild:last-update" content="Oct 31, 2023"/>
   </head>
   
   
@@ -341,16 +341,14 @@ document.write(`
                   
   <h1>Source code for vampy.automatedPreprocessing.automated_preprocessing</h1><div class="highlight"><pre>
 <span></span><span class="kn">import</span> <span class="nn">argparse</span>
-<span class="kn">import</span> <span class="nn">sys</span>
-<span class="kn">from</span> <span class="nn">os</span> <span class="kn">import</span> <span class="n">remove</span><span class="p">,</span> <span class="n">path</span>
-
 <span class="kn">import</span> <span class="nn">numpy</span> <span class="k">as</span> <span class="nn">np</span>
+<span class="kn">import</span> <span class="nn">sys</span>
 <span class="kn">from</span> <span class="nn">morphman</span> <span class="kn">import</span> <span class="n">get_uncapped_surface</span><span class="p">,</span> <span class="n">write_polydata</span><span class="p">,</span> <span class="n">get_parameters</span><span class="p">,</span> <span class="n">vtk_clean_polydata</span><span class="p">,</span> \
     <span class="n">vtk_triangulate_surface</span><span class="p">,</span> <span class="n">write_parameters</span><span class="p">,</span> <span class="n">vmtk_cap_polydata</span><span class="p">,</span> <span class="n">compute_centerlines</span><span class="p">,</span> <span class="n">get_centerline_tolerance</span><span class="p">,</span> \
     <span class="n">get_vtk_point_locator</span><span class="p">,</span> <span class="n">extract_single_line</span><span class="p">,</span> <span class="n">vtk_merge_polydata</span><span class="p">,</span> <span class="n">get_point_data_array</span><span class="p">,</span> <span class="n">smooth_voronoi_diagram</span><span class="p">,</span> \
     <span class="n">create_new_surface</span><span class="p">,</span> <span class="n">compute_centers</span><span class="p">,</span> <span class="n">vmtk_smooth_surface</span><span class="p">,</span> <span class="n">str2bool</span><span class="p">,</span> <span class="n">vmtk_compute_voronoi_diagram</span><span class="p">,</span> \
     <span class="n">prepare_output_surface</span><span class="p">,</span> <span class="n">vmtk_compute_geometric_features</span>
-
+<span class="kn">from</span> <span class="nn">os</span> <span class="kn">import</span> <span class="n">remove</span><span class="p">,</span> <span class="n">path</span>
 <span class="c1"># Local imports</span>
 <span class="kn">from</span> <span class="nn">vampy.automatedPreprocessing.moving_common</span> <span class="kn">import</span> <span class="n">get_point_map</span><span class="p">,</span> <span class="n">project_displacement</span><span class="p">,</span> <span class="n">save_displacement</span>
 <span class="kn">from</span> <span class="nn">vampy.automatedPreprocessing.preprocessing_common</span> <span class="kn">import</span> <span class="n">read_polydata</span><span class="p">,</span> <span class="n">get_centers_for_meshing</span><span class="p">,</span> \
@@ -739,7 +737,7 @@ document.write(`
         <span class="n">mesh</span> <span class="o">=</span> <span class="n">read_polydata</span><span class="p">(</span><span class="n">file_name_vtu_mesh</span><span class="p">)</span>
 
     <span class="n">network</span><span class="p">,</span> <span class="n">probe_points</span> <span class="o">=</span> <span class="n">setup_model_network</span><span class="p">(</span><span class="n">centerlines</span><span class="p">,</span> <span class="n">file_name_probe_points</span><span class="p">,</span> <span class="n">region_center</span><span class="p">,</span> <span class="n">verbose_print</span><span class="p">,</span>
-                                                <span class="n">has_outlet</span><span class="p">,</span> <span class="n">is_atrium</span><span class="p">)</span>
+                                                <span class="n">is_atrium</span><span class="p">)</span>
 
     <span class="c1"># Load updated parameters following meshing</span>
     <span class="n">parameters</span> <span class="o">=</span> <span class="n">get_parameters</span><span class="p">(</span><span class="n">base_path</span><span class="p">)</span>
@@ -1020,7 +1018,7 @@ By Henrik A. Kjeldsberg
   
   <div class="footer-item">
     <p class="last-updated">
-  Last updated on Oct 25, 2023.
+  Last updated on Oct 31, 2023.
   <br/>
 </p>
   </div>
@@ -1038,8 +1036,8 @@ By Henrik A. Kjeldsberg
   </div>
   
   <!-- Scripts loaded after <body> so the DOM is not blocked -->
-  <script src="../../../_static/scripts/bootstrap.js?digest=c5ced968eda925caa686"></script>
-<script src="../../../_static/scripts/pydata-sphinx-theme.js?digest=c5ced968eda925caa686"></script>
+  <script src="../../../_static/scripts/bootstrap.js?digest=365ca57ee442770a23c6"></script>
+<script src="../../../_static/scripts/pydata-sphinx-theme.js?digest=365ca57ee442770a23c6"></script>
 
   <footer class="bd-footer">
   </footer>
