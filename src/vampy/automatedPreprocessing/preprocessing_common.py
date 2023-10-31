@@ -1,7 +1,5 @@
 import gzip
 import json
-from os import path
-
 import numpy as np
 import vtkmodules.numpy_interface.dataset_adapter as dsa
 from morphman import vtk_clean_polydata, vtk_triangulate_surface, get_parameters, write_parameters, read_polydata, \
@@ -9,7 +7,7 @@ from morphman import vtk_clean_polydata, vtk_triangulate_surface, get_parameters
     get_distance, get_number_of_arrays, vmtk_smooth_surface, get_point_data_array, create_vtk_array, \
     get_vtk_point_locator, vtk_extract_feature_edges, get_uncapped_surface, vtk_compute_connectivity, \
     vtk_compute_mass_properties, extract_single_line, get_centerline_tolerance
-
+from os import path
 from vampy.automatedPreprocessing import ImportData
 from vampy.automatedPreprocessing.NetworkBoundaryConditions import FlowSplitting
 from vampy.automatedPreprocessing.vmtk_pointselector import vmtkPickPointSeedSelector
@@ -654,7 +652,7 @@ def find_boundaries(model_path, mean_inflow_rate, network, mesh, verbose_print, 
     write_parameters(info, model_path)
 
 
-def setup_model_network(centerlines, file_name_probe_points, region_center, verbose_print, has_outlet, is_atrium):
+def setup_model_network(centerlines, file_name_probe_points, region_center, verbose_print, is_atrium):
     """
     Sets up network used for network boundary condition model.
 
@@ -663,7 +661,6 @@ def setup_model_network(centerlines, file_name_probe_points, region_center, verb
         file_name_probe_points (str): Save path of probe points
         region_center (list): List of points representing region of refinement
         verbose_print (bool): Prints additional info if True
-        has_outlet (bool): Determines if model has outlet or not
         is_atrium (bool): Determines if model is atrium or artery
 
     Returns:
@@ -691,7 +688,7 @@ def setup_model_network(centerlines, file_name_probe_points, region_center, verb
     # Set the flow split and inlet boundary condition
     # Compute the outlet boundary condition percentages.
     flowSplitting = FlowSplitting()
-    if not is_atrium and has_outlet:
+    if not is_atrium and network.GetNumberOfOutlet() > 1:
         flowSplitting.ComputeAlphas(network, verbose_print)
         flowSplitting.ComputeBetas(network, verbose_print)
     flowSplitting.ComputeGammas(network, verbose_print)

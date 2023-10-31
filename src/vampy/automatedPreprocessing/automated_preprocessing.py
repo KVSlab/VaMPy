@@ -1,14 +1,12 @@
 import argparse
-import sys
-from os import remove, path
-
 import numpy as np
+import sys
 from morphman import get_uncapped_surface, write_polydata, get_parameters, vtk_clean_polydata, \
     vtk_triangulate_surface, write_parameters, vmtk_cap_polydata, compute_centerlines, get_centerline_tolerance, \
     get_vtk_point_locator, extract_single_line, vtk_merge_polydata, get_point_data_array, smooth_voronoi_diagram, \
     create_new_surface, compute_centers, vmtk_smooth_surface, str2bool, vmtk_compute_voronoi_diagram, \
     prepare_output_surface, vmtk_compute_geometric_features
-
+from os import remove, path
 # Local imports
 from vampy.automatedPreprocessing.moving_common import get_point_map, project_displacement, save_displacement
 from vampy.automatedPreprocessing.preprocessing_common import read_polydata, get_centers_for_meshing, \
@@ -397,7 +395,7 @@ def run_pre_processing(input_model, verbose_print, smoothing_method, smoothing_f
         mesh = read_polydata(file_name_vtu_mesh)
 
     network, probe_points = setup_model_network(centerlines, file_name_probe_points, region_center, verbose_print,
-                                                has_outlet, is_atrium)
+                                                is_atrium)
 
     # Load updated parameters following meshing
     parameters = get_parameters(base_path)
