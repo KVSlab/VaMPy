@@ -2,6 +2,7 @@ import argparse
 import json
 import numpy as np
 import sys
+
 from morphman import get_uncapped_surface, write_polydata, get_parameters, vtk_clean_polydata, \
     vtk_triangulate_surface, write_parameters, vmtk_cap_polydata, compute_centerlines, get_centerline_tolerance, \
     get_vtk_point_locator, extract_single_line, vtk_merge_polydata, get_point_data_array, smooth_voronoi_diagram, \
@@ -405,7 +406,7 @@ def run_pre_processing(input_model, verbose_print, smoothing_method, smoothing_f
         mesh = read_polydata(file_name_vtu_mesh)
 
     network, probe_points = setup_model_network(centerlines, file_name_probe_points, region_center, verbose_print,
-                                                has_outlet, is_atrium)
+                                                is_atrium)
 
     # Load updated parameters following meshing
     parameters = get_parameters(base_path)
