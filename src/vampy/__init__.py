@@ -2,6 +2,7 @@
 from importlib.metadata import metadata
 
 # Imports from post-processing
+from .automatedPostprocessing import compute_energy
 from .automatedPostprocessing import compute_flow_and_simulation_metrics
 from .automatedPostprocessing import compute_hemodynamic_indices
 from .automatedPostprocessing import compute_velocity_and_pressure
@@ -47,6 +48,7 @@ __email__ = meta["Author-email"]
 __program_name__ = meta["Name"]
 
 __all__ = [
+    "compute_energy",
     "compute_flow_and_simulation_metrics",
     "compute_hemodynamic_indices",
     "compute_velocity_and_pressure",
