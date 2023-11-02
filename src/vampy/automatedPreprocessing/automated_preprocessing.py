@@ -1,5 +1,4 @@
 import argparse
-import json
 import numpy as np
 import sys
 
@@ -364,9 +363,14 @@ def run_pre_processing(input_model, verbose_print, smoothing_method, smoothing_f
     # Choose input for the mesh
     print("--- Computing distance to sphere\n")
     if meshing_method == "constant":
-        if not path.isfile(file_name_distance_to_sphere_const):
+        if distance_method == "euclidean":
             distance_to_sphere = dist_sphere_constant(surface_extended, centerlines, region_center, misr_max,
                                                       file_name_distance_to_sphere_const, edge_length)
+        elif distance_method == "geodesic":
+            max_distance = 50  # FIXME: Determine max distance objectively
+            distance_to_sphere = geodesic_distance_from_point(surface_extended, region_center,
+                                                              file_name_distance_to_sphere_geodesic,
+                                                              edge_length, max_distance)
         else:
             distance_to_sphere = read_polydata(file_name_distance_to_sphere_const)
 
