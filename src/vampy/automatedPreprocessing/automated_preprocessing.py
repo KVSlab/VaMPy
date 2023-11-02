@@ -1,15 +1,13 @@
 import argparse
 import json
-import sys
-from os import remove, path
-
 import numpy as np
+import sys
 from morphman import get_uncapped_surface, write_polydata, get_parameters, vtk_clean_polydata, \
     vtk_triangulate_surface, write_parameters, vmtk_cap_polydata, compute_centerlines, get_centerline_tolerance, \
     get_vtk_point_locator, extract_single_line, vtk_merge_polydata, get_point_data_array, smooth_voronoi_diagram, \
     create_new_surface, compute_centers, vmtk_smooth_surface, str2bool, vmtk_compute_voronoi_diagram, \
     prepare_output_surface, vmtk_compute_geometric_features
-
+from os import remove, path
 # Local imports
 from vampy.automatedPreprocessing.moving_common import get_point_map, project_displacement, save_displacement
 from vampy.automatedPreprocessing.preprocessing_common import read_polydata, get_centers_for_meshing, \
@@ -64,12 +62,6 @@ def run_pre_processing(input_model, verbose_print, smoothing_method, smoothing_f
     dir_path = input_model.rsplit(path.sep, 1)[0]
     print("\n--- Working on case:", case_name, "\n")
     # TODO: Removeme (UKE spesific)
-    if "af" in input_model:
-        condition = "af"  # or "sr"
-        print("--- Condition: AF\n")
-    else:
-        condition = "sr"  # or "sr"
-        print("--- Condition: SR\n")
 
     # Naming conventions
     base_path = path.join(dir_path, case_name)
@@ -165,14 +157,6 @@ def run_pre_processing(input_model, verbose_print, smoothing_method, smoothing_f
     # Get 'center' and 'radius' of the regions(s)
     region_center = []
     misr_max = []
-
-    # TODO: Removeme (UKE spesific) – Load LAA point
-    casename = dir_path.rsplit("/", 1)[1]
-    print(f"-- Loading LAA points for {casename}")
-    laa_apex_point_path = f"/Users/henriakj/PhD/Code/VaMPy/models/models_inria/laa_apex_points_{condition}.json"
-    with open(laa_apex_point_path) as f:
-        info = json.load(f)
-    region_points = info[casename][0]
 
     if refine_region:
         regions = get_regions_to_refine(capped_surface, region_points, base_path)
@@ -293,11 +277,10 @@ def run_pre_processing(input_model, verbose_print, smoothing_method, smoothing_f
                 surface = dist_sphere_constant(surface, centerlines, region_center, misr_max,
                                                file_name_distance_to_sphere_initial, edge_length)
             elif distance_method == "geodesic":
-                max_distance = 50
+                max_distance = 50  # FIXME: Determine max distance objectively
                 surface = geodesic_distance_from_point(surface, region_center, file_name_distance_to_sphere_initial,
                                                        edge_length, max_distance)
 
-            exit()
             remeshed = remesh_surface(surface, edge_length, "edgelengtharray")
             remeshed = vtk_clean_polydata(remeshed)
             write_polydata(remeshed, file_name_remeshed)
