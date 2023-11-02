@@ -72,9 +72,9 @@ The centerline inside the surface model, colored by it\'s
 maximum inscribed sphere diameter.
 ```
 
-Meshing based on the centerline diameter is performed by supplying the
-`-m diameter` flag, and optionally the `--coarsening-factor` flag, as above. To generate a variable density mesh based on
-the centerline diameter, run the following command:
+Meshing based on the centerline diameter is performed by supplying the `-m diameter` flag, and optionally
+the `--coarsening-factor` flag, as above. To generate a variable density mesh based on the centerline diameter, run the
+following command:
 
 ``` console
 $ vampy-mesh -m diameter -c 1.2 -i C0001/model.vtp

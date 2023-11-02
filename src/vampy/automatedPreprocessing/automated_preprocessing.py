@@ -1,19 +1,19 @@
 import argparse
-import sys
-from os import remove, path
-
 import numpy as np
+import sys
 from morphman import get_uncapped_surface, write_polydata, get_parameters, vtk_clean_polydata, \
     vtk_triangulate_surface, write_parameters, vmtk_cap_polydata, compute_centerlines, get_centerline_tolerance, \
     get_vtk_point_locator, extract_single_line, vtk_merge_polydata, get_point_data_array, smooth_voronoi_diagram, \
     create_new_surface, compute_centers, vmtk_smooth_surface, str2bool, vmtk_compute_voronoi_diagram, \
     prepare_output_surface, vmtk_compute_geometric_features
+from os import remove, path
 # Local imports
-from vampy.automatedPreprocessing import ToolRepairSTL
+from vampy.automatedPreprocessing.moving_common import get_point_map, project_displacement, save_displacement
 from vampy.automatedPreprocessing.preprocessing_common import read_polydata, get_centers_for_meshing, \
     dist_sphere_diam, dist_sphere_curvature, dist_sphere_constant, get_regions_to_refine, add_flow_extension, \
     write_mesh, mesh_alternative, generate_mesh, find_boundaries, compute_flow_rate, setup_model_network, \
-    radiusArrayName, scale_surface, get_furtest_surface_point, check_if_closed_surface
+    radiusArrayName, scale_surface, get_furtest_surface_point, check_if_closed_surface, remesh_surface
+from vampy.automatedPreprocessing.repair_tools import find_and_delete_nan_triangles, clean_surface, print_surface_info
 from vampy.automatedPreprocessing.simulate import run_simulation
 from vampy.automatedPreprocessing.visualize import visualize_model
 
@@ -22,7 +22,7 @@ def run_pre_processing(input_model, verbose_print, smoothing_method, smoothing_f
                        meshing_method, refine_region, is_atrium, add_flow_extensions, visualize, config_path,
                        coarsening_factor, inlet_flow_extension_length, outlet_flow_extension_length, edge_length,
                        region_points, compress_mesh, add_boundary_layer, scale_factor, resampling_step,
-                       flow_rate_factor):
+                       flow_rate_factor, moving_mesh, clamp_boundaries):
     """
     Automatically generate mesh of surface model in .vtu and .xml format, including prescribed
     flow rates at inlet and outlet based on flow network model.
@@ -51,6 +51,8 @@ def run_pre_processing(input_model, verbose_print, smoothing_method, smoothing_f
         scale_factor (float): Scale input model by this factor
         resampling_step (float): Float value determining the resampling step for centerline computations, in [m]
         flow_rate_factor (float): Flow rate factor
+        moving_mesh (bool): Computes projected movement for displaced surfaces located in [filename_model]_moved folder
+        clamp_boundaries (bool): Clamps inlet(s) and outlet(s) if true
     """
     # Get paths
     case_name = input_model.rsplit(path.sep, 1)[-1].rsplit('.')[0]
@@ -65,7 +67,8 @@ def run_pre_processing(input_model, verbose_print, smoothing_method, smoothing_f
     file_name_distance_to_sphere_diam = base_path + "_distance_to_sphere_diam.vtp"
     file_name_distance_to_sphere_const = base_path + "_distance_to_sphere_const.vtp"
     file_name_distance_to_sphere_curv = base_path + "_distance_to_sphere_curv.vtp"
-    file_name_probe_points = base_path + "_probe_point"
+    file_name_distance_to_sphere_initial = base_path + "_distance_to_sphere_initial.vtp"
+    file_name_probe_points = base_path + "_probe_point.json"
     file_name_voronoi = base_path + "_voronoi.vtp"
     file_name_voronoi_smooth = base_path + "_voronoi_smooth.vtp"
     file_name_voronoi_surface = base_path + "_voronoi_surface.vtp"
@@ -76,7 +79,13 @@ def run_pre_processing(input_model, verbose_print, smoothing_method, smoothing_f
     file_name_surface_name = base_path + "_remeshed_surface.vtp"
     file_name_xml_mesh = base_path + ".xml"
     file_name_vtu_mesh = base_path + ".vtu"
+    file_name_remeshed = base_path + "_remeshed.vtp"
     region_centerlines = None
+
+    # Dynamic mesh files
+    file_name_displacement_points = base_path + "_points.np"
+    folder_moved_surfaces = base_path + "_moved"
+    folder_extended_surfaces = base_path + "_extended"
 
     # Open the surface file.
     print("--- Load model file\n")
@@ -84,7 +93,9 @@ def run_pre_processing(input_model, verbose_print, smoothing_method, smoothing_f
 
     # Scale surface
     if scale_factor is not None:
+        print(f"--- Scaling model by a factor {scale_factor}\n")
         surface = scale_surface(surface, scale_factor)
+        resampling_step *= scale_factor
 
     # Check if surface is closed and uncapps model if True
     is_capped = check_if_closed_surface(surface)
@@ -108,10 +119,10 @@ def run_pre_processing(input_model, verbose_print, smoothing_method, smoothing_f
         surface = vtk_triangulate_surface(surface)
 
         # Check the mesh if there is redundant nodes or NaN triangles.
-        ToolRepairSTL.surfaceOverview(surface)
-        ToolRepairSTL.foundAndDeleteNaNTriangles(surface)
-        surface = ToolRepairSTL.cleanTheSurface(surface)
-        foundNaN = ToolRepairSTL.foundAndDeleteNaNTriangles(surface)
+        print_surface_info(surface)
+        find_and_delete_nan_triangles(surface)
+        surface = clean_surface(surface)
+        foundNaN = find_and_delete_nan_triangles(surface)
         if foundNaN:
             raise RuntimeError(("There is an issue with the surface. "
                                 "Nan coordinates or some other shenanigans."))
@@ -145,8 +156,10 @@ def run_pre_processing(input_model, verbose_print, smoothing_method, smoothing_f
     if refine_region:
         regions = get_regions_to_refine(capped_surface, region_points, base_path)
         for i in range(len(regions) // 3):
-            print("--- Region to refine ({}): {:.3f} {:.3f} {:.3f}"
-                  .format(i + 1, regions[3 * i], regions[3 * i + 1], regions[3 * i + 2]))
+            print(
+                f"--- Region to refine ({i + 1}): " +
+                f"{regions[3 * i]:.3f} {regions[3 * i + 1]:.3f} {regions[3 * i + 2]:.3f}\n"
+            )
 
         centerline_region, _, _ = compute_centerlines(source, regions, file_name_refine_region_centerlines,
                                                       capped_surface, resampling=resampling_step)
@@ -220,10 +233,9 @@ def run_pre_processing(input_model, verbose_print, smoothing_method, smoothing_f
 
             if num_outlets != num_outlets_after:
                 write_polydata(surface, file_name_surface_smooth)
-                print(("ERROR: Automatic clipping failed. You have to open {} and " +
-                       "manually clipp the branch which still is capped. " +
-                       "Overwrite the current {} and restart the script.").format(
-                    file_name_surface_smooth, file_name_surface_smooth))
+                print(f"ERROR: Automatic clipping failed. You have to open {file_name_surface_smooth} and " +
+                      "manually clipp the branch which still is capped. " +
+                      f"Overwrite the current {file_name_surface_smooth} and restart the script.")
                 sys.exit(0)
 
             surface = surface_uncapped
@@ -238,7 +250,7 @@ def run_pre_processing(input_model, verbose_print, smoothing_method, smoothing_f
             surface = read_polydata(file_name_surface_smooth)
 
     elif smoothing_method in ["laplace", "taubin"]:
-        print("--- Smooth surface: {} smoothing\n".format(smoothing_method.capitalize()))
+        print(f"--- Smooth surface: {smoothing_method.capitalize()} smoothing\n")
         if not path.isfile(file_name_surface_smooth):
             surface = vmtk_smooth_surface(surface, smoothing_method, iterations=smoothing_iterations, passband=0.1,
                                           relaxation=0.01)
@@ -251,6 +263,20 @@ def run_pre_processing(input_model, verbose_print, smoothing_method, smoothing_f
     elif smoothing_method == "no_smooth" or None:
         print("--- No smoothing of surface\n")
 
+    if edge_length is not None and moving_mesh:
+        if path.exists(file_name_remeshed):
+            remeshed = read_polydata(file_name_remeshed)
+        else:
+            print("\n--- Remeshing surface for moving mesh\n")
+            surface = dist_sphere_constant(surface, centerlines, region_center, misr_max,
+                                           file_name_distance_to_sphere_initial, edge_length)
+
+            remeshed = remesh_surface(surface, edge_length, "edgelengtharray")
+            remeshed = vtk_clean_polydata(remeshed)
+            write_polydata(remeshed, file_name_remeshed)
+    else:
+        remeshed = surface
+
     # Add flow extensions
     if add_flow_extensions:
         if not path.isfile(file_name_model_flow_ext):
@@ -262,14 +288,14 @@ def run_pre_processing(input_model, verbose_print, smoothing_method, smoothing_f
                 inlet_flow_extension_length, outlet_flow_extension_length = \
                     outlet_flow_extension_length, inlet_flow_extension_length
 
-            # Add extensions to inlet (artery)
-            surface_extended = add_flow_extension(surface, centerlines, is_inlet=True,
-                                                  extension_length=inlet_flow_extension_length,
-                                                  extension_mode=extension)
+            # Add extensions to inlet (artery) / outlet (atrium)
+            surface_extended = add_flow_extension(remeshed, centerlines, is_inlet=True,
+                                                  extension_length=inlet_flow_extension_length)
 
-            # Add extensions to outlets (artery)
+            # Add extensions to outlets (artery) / inlets (Atrium)
             surface_extended = add_flow_extension(surface_extended, centerlines, is_inlet=False,
-                                                  extension_length=outlet_flow_extension_length)
+                                                  extension_length=outlet_flow_extension_length,
+                                                  extension_mode=extension)
 
             surface_extended = vmtk_smooth_surface(surface_extended, "laplace", iterations=200)
             write_polydata(surface_extended, file_name_model_flow_ext)
@@ -278,13 +304,26 @@ def run_pre_processing(input_model, verbose_print, smoothing_method, smoothing_f
     else:
         surface_extended = surface
 
-    # Capp surface with flow extensions
-    capped_surface = vmtk_cap_polydata(surface_extended)
+    # Create displacement input file for moving mesh simulations
+    if moving_mesh:
+        print("--- Computing mesh displacement and saving points to file")
+        # Get a point mapper
+        distance, point_map = get_point_map(remeshed, surface_extended)
+
+        # Project displacement between surfaces
+        points = project_displacement(clamp_boundaries, distance, folder_extended_surfaces, folder_moved_surfaces,
+                                      point_map, surface, surface_extended, remeshed, scale_factor)
+
+        # Save displacement to numpy array
+        save_displacement(file_name_displacement_points, points)
 
     # Get new centerlines with the flow extensions
     if add_flow_extensions:
         if not path.isfile(file_name_flow_centerlines):
             print("--- Compute the model centerlines with flow extension.\n")
+            # Capp surface with flow extensions
+            capped_surface = vmtk_cap_polydata(surface_extended)
+
             # Compute the centerlines.
             if has_outlet:
                 inlet, outlets = get_centers_for_meshing(surface_extended, is_atrium, base_path,
@@ -355,7 +394,8 @@ def run_pre_processing(input_model, verbose_print, smoothing_method, smoothing_f
     else:
         mesh = read_polydata(file_name_vtu_mesh)
 
-    network, probe_points = setup_model_network(centerlines, file_name_probe_points, region_center, verbose_print)
+    network, probe_points = setup_model_network(centerlines, file_name_probe_points, region_center, verbose_print,
+                                                is_atrium)
 
     # Load updated parameters following meshing
     parameters = get_parameters(base_path)
@@ -381,7 +421,8 @@ def run_pre_processing(input_model, verbose_print, smoothing_method, smoothing_f
         file_name_centerlines, file_name_refine_region_centerlines, file_name_region_centerlines,
         file_name_distance_to_sphere_diam, file_name_distance_to_sphere_const, file_name_distance_to_sphere_curv,
         file_name_voronoi, file_name_voronoi_smooth, file_name_voronoi_surface, file_name_surface_smooth,
-        file_name_model_flow_ext, file_name_clipped_model, file_name_flow_centerlines, file_name_surface_name
+        file_name_model_flow_ext, file_name_clipped_model, file_name_flow_centerlines, file_name_surface_name,
+        file_name_remeshed, file_name_distance_to_sphere_initial
     ]
     for file in files_to_remove:
         if path.exists(file):
@@ -533,6 +574,17 @@ def read_command_line(input_path=None):
                         type=float,
                         help="Flow rate factor.")
 
+    parser.add_argument('-mm', '--moving-mesh',
+                        action="store_true",
+                        default=False,
+                        help="If true, assumes a dynamic/moving mesh and will perform computation of projection " +
+                             "between moved surfaces located in the '[filename_model]_moved' folder.")
+
+    parser.add_argument('-cl', '--clamp-boundaries',
+                        action="store_true",
+                        default=False,
+                        help="Clamps boundaries at inlet(s) and outlet(s) if true. Only used for moving mesh.")
+
     # Parse path to get default values
     if required:
         args = parser.parse_args()
@@ -568,7 +620,8 @@ def read_command_line(input_path=None):
                 visualize=args.visualize, region_points=args.region_points, compress_mesh=args.compress_mesh,
                 outlet_flow_extension_length=args.outlet_flowextension, add_boundary_layer=args.add_boundary_layer,
                 scale_factor=args.scale_factor, resampling_step=args.resampling_step,
-                flow_rate_factor=args.flow_rate_factor)
+                flow_rate_factor=args.flow_rate_factor, moving_mesh=args.moving_mesh,
+                clamp_boundaries=args.clamp_boundaries)
 
 
 def main_meshing():

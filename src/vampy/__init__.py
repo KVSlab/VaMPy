@@ -12,7 +12,7 @@ try:
     from .automatedPreprocessing import DisplayData
     from .automatedPreprocessing import ImportData
     from .automatedPreprocessing import NetworkBoundaryConditions
-    from .automatedPreprocessing import ToolRepairSTL
+    from .automatedPreprocessing import repair_tools
     from .automatedPreprocessing import automated_preprocessing
     from .automatedPreprocessing import preprocessing_common
     from .automatedPreprocessing import simulate
@@ -29,6 +29,14 @@ try:
     from .simulation import simulation_common
 except ModuleNotFoundError:
     print("WARNING: Oasis is not installed, running CFD is not available")
+
+try:
+    from .simulation import Probe
+    from .simulation import Womersley
+    from .simulation import simulation_common
+    from .simulation import MovingAtrium
+except ModuleNotFoundError:
+    print("WARNING: OasisMove is not installed, running moving domain simulations (MovingAtrium) is not available")
 
 
 meta = metadata("vampy")
@@ -50,7 +58,7 @@ __all__ = [
     "ImportData",
     "NetworkBoundaryConditions",
     "simulate",
-    "ToolRepairSTL",
+    "repair_tools",
     "visualize",
     "vmtk_pointselector",
     "Artery",
@@ -58,4 +66,5 @@ __all__ = [
     "simulation_common",
     "Probe",
     "Womersley",
+    'MovingAtrium'
 ]
