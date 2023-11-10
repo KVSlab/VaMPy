@@ -1,8 +1,8 @@
-from pathlib import Path
+from os import path
 
 from dolfin import parameters, FunctionSpace, XDMFFile, MPI, VectorFunctionSpace, HDF5File, Mesh, Function
 
-from vampy.automatedPostprocessing.postprocessing_common import read_command_line
+from vampy.automatedPostprocessing.postprocessing_common import read_command_line, get_dataset_names
 
 try:
     parameters["reorder_dofs_serial"] = False
@@ -10,27 +10,40 @@ except NameError:
     pass
 
 
-def compute_velocity_and_pressure(case_path, dt, velocity_degree, pressure_degree, step):
+def compute_velocity_and_pressure(folder, dt, velocity_degree, pressure_degree, step):
     """
     Loads velocity and pressure from compressed .h5 CFD solution and
     converts and saves to .xdmf format for visualization (in e.g. ParaView).
 
     Args:
-        case_path (str): Path to results from simulation
+        folder (str): Path to results from simulation
         dt (float): Time step of simulation
         velocity_degree (int): Finite element degree of velocity
         pressure_degree (int): Finite element degree of pressure
         step (int): Step size determining number of times data is sampled
     """
     # File paths
-    case_path = Path(case_path)
-    file_path_u = case_path / "u.h5"
-    file_path_p = case_path / "p.h5"
-    mesh_path = case_path / "mesh.h5"
+    file_path_u = path.join(folder, "u.h5")
+    file_path_p = path.join(folder, "p.h5")
+    file_path_d = path.join(folder, "d.h5")
+    file_path_mesh = path.join(folder, "mesh.h5")
+
+    # Define HDF5Files
+    file_u = HDF5File(MPI.comm_world, file_path_u, "r")
+    file_p = HDF5File(MPI.comm_world, file_path_p, "r")
+    file_d = None
+    if path.exists(file_path_d):
+        file_d = HDF5File(MPI.comm_world, file_path_d, "r")
+
+    # Read in datasets
+    dataset_u = get_dataset_names(file_u, step=step, vector_filename="/velocity/vector_%d")
+    dataset_p = get_dataset_names(file_p, step=step, vector_filename="/pressure/vector_%d")
+    if file_d is not None:
+        dataset_d = get_dataset_names(file_d, step=step, vector_filename="/deformation/vector_%d")
 
     # Read mesh saved as HDF5 format
     mesh = Mesh()
-    with HDF5File(MPI.comm_world, mesh_path.__str__(), "r") as mesh_file:
+    with HDF5File(MPI.comm_world, file_path_mesh, "r") as mesh_file:
         mesh_file.read(mesh, "mesh", False)
 
     # Define functionspaces and functions
@@ -43,11 +56,12 @@ def compute_velocity_and_pressure(case_path, dt, velocity_degree, pressure_degre
         print("Define functions")
 
     u = Function(V)
+    d = Function(V)
     p = Function(Q)
 
     # Create writer for velocity and pressure
-    u_path = (case_path / "velocity.xdmf").__str__()
-    p_path = (case_path / "pressure.xdmf").__str__()
+    u_path = path.join(folder, "velocity.xdmf")
+    p_path = path.join(folder, "pressure.xdmf")
 
     u_writer = XDMFFile(MPI.comm_world, u_path)
     p_writer = XDMFFile(MPI.comm_world, p_path)
@@ -60,21 +74,15 @@ def compute_velocity_and_pressure(case_path, dt, velocity_degree, pressure_degre
     if MPI.rank(MPI.comm_world) == 0:
         print("=" * 10, "Start post processing", "=" * 10)
 
-    file_counter = 0
-    while True:
-        # Read in velocity solution to vector function u and pressure to function p
-        try:
-            u_h5 = HDF5File(MPI.comm_world, file_path_u.__str__(), "r")
-            p_h5 = HDF5File(MPI.comm_world, file_path_p.__str__(), "r")
-            u_name = "/velocity/vector_%d" % file_counter
-            p_name = "/pressure/vector_%d" % file_counter
-            timestamp = u_h5.attributes(u_name)["timestamp"]
+    file_counter = 1
+    for i in range(len(dataset_u)):
+
+        file_u.read(u, dataset_u[i])
+        file_p.read(p, dataset_p[i])
+
+        if MPI.rank(MPI.comm_world) == 0:
+            timestamp = file_u.attributes(dataset_u[i])["timestamp"]
             print("=" * 10, "Timestep: {}".format(timestamp), "=" * 10)
-            u_h5.read(u, u_name)
-            p_h5.read(p, p_name)
-        except Exception:
-            print("=" * 10, "Finished reading solutions", "=" * 10)
-            break
 
         # Store velocity
         u.rename("velocity", "velocity")
@@ -84,11 +92,18 @@ def compute_velocity_and_pressure(case_path, dt, velocity_degree, pressure_degre
         p.rename("pressure", "pressure")
         p_writer.write(p, dt * file_counter)
 
+        # Store deformation
+        # NB: Storing together with velocity.
+        if file_d is not None:
+            file_d.read(d, dataset_d[i])
+            d.rename("deformation", "deformation")
+            u_writer.write(d, dt * file_counter)
+
         # Update file_counter
         file_counter += step
 
     print("========== Post processing finished ==========")
-    print("Results saved to: {}".format(case_path))
+    print("Results saved to: {}".format(folder))
 
 
 def main_convert():

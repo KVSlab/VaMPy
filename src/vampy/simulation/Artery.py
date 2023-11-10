@@ -4,7 +4,6 @@ import pickle
 from pprint import pprint
 from dolfin import set_log_level
 
-import numpy as np
 if os.environ.get('OASIS_MODE') == 'TESTING':
     from oasismove.problems.NSfracStep import *
 else:
