@@ -210,7 +210,6 @@ def create_bcs(NS_expressions, dynamic_mesh, x_, cardiac_cycle, backflow_facets,
         flow_rate_path = path.join(path.dirname(path.abspath(__file__)), "PV_values")
 
     # Load normalized time and flow rate values
-    Q_mean = info['mean_flow_rate']
     t_values, Q_ = np.loadtxt(flow_rate_path).T
     t_values *= 1000  # Scale time in normalised flow wave form to [ms]
 
