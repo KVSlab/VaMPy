@@ -79,7 +79,6 @@ def compute_velocity_and_pressure(folder, dt, save_frequency, velocity_degree, p
     for i in range(len(dataset_u)):
         # Set physical time (in [ms])
         t = dt * counter * save_frequency
-        print(t)
 
         file_u.read(u, dataset_u[i])
         file_p.read(p, dataset_p[i])
