@@ -66,7 +66,7 @@ const thebe_selector_output = ".output, .cell_output"
     <link rel="search" title="Search" href="../../../search.html" />
   <meta name="viewport" content="width=device-width, initial-scale=1"/>
   <meta name="docsearch:language" content="en"/>
-    <meta name="docbuild:last-update" content="Oct 31, 2023"/>
+    <meta name="docbuild:last-update" content="Nov 10, 2023"/>
   </head>
   
   
@@ -396,7 +396,7 @@ document.write(`
 
     <span class="c1"># Read mesh saved as HDF5 format</span>
     <span class="n">mesh</span> <span class="o">=</span> <span class="n">Mesh</span><span class="p">()</span>
-    <span class="k">with</span> <span class="n">HDF5File</span><span class="p">(</span><span class="n">MPI</span><span class="o">.</span><span class="n">comm_world</span><span class="p">,</span> <span class="n">mesh_path</span><span class="o">.</span><span class="fm">__str__</span><span class="p">(),</span> <span class="s2">&quot;r&quot;</span><span class="p">)</span> <span class="k">as</span> <span class="n">mesh_file</span><span class="p">:</span>
+    <span class="k">with</span> <span class="n">HDF5File</span><span class="p">(</span><span class="n">MPI</span><span class="o">.</span><span class="n">comm_world</span><span class="p">,</span> <span class="n">mesh_path</span><span class="p">,</span> <span class="s2">&quot;r&quot;</span><span class="p">)</span> <span class="k">as</span> <span class="n">mesh_file</span><span class="p">:</span>
         <span class="n">mesh_file</span><span class="o">.</span><span class="n">read</span><span class="p">(</span><span class="n">mesh</span><span class="p">,</span> <span class="s2">&quot;mesh&quot;</span><span class="p">,</span> <span class="kc">False</span><span class="p">)</span>
 
     <span class="n">bm</span> <span class="o">=</span> <span class="n">BoundaryMesh</span><span class="p">(</span><span class="n">mesh</span><span class="p">,</span> <span class="s1">&#39;exterior&#39;</span><span class="p">)</span>
@@ -655,7 +655,7 @@ By Henrik A. Kjeldsberg
   
   <div class="footer-item">
     <p class="last-updated">
-  Last updated on Oct 31, 2023.
+  Last updated on Nov 10, 2023.
   <br/>
 </p>
   </div>

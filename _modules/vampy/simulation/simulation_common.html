@@ -66,7 +66,7 @@ const thebe_selector_output = ".output, .cell_output"
     <link rel="search" title="Search" href="../../../search.html" />
   <meta name="viewport" content="width=device-width, initial-scale=1"/>
   <meta name="docsearch:language" content="en"/>
-    <meta name="docbuild:last-update" content="Oct 31, 2023"/>
+    <meta name="docbuild:last-update" content="Nov 10, 2023"/>
   </head>
   
   
@@ -346,12 +346,13 @@ document.write(`
 <span class="kn">from</span> <span class="nn">dolfin</span> <span class="kn">import</span> <span class="n">MPI</span><span class="p">,</span> <span class="n">assemble</span><span class="p">,</span> <span class="n">Constant</span><span class="p">,</span> <span class="n">assign</span><span class="p">,</span> <span class="n">HDF5File</span><span class="p">,</span> <span class="n">Measure</span>
 
 
-<div class="viewcode-block" id="get_file_paths"><a class="viewcode-back" href="../../../api.html#vampy.simulation.simulation_common.get_file_paths">[docs]</a><span class="k">def</span> <span class="nf">get_file_paths</span><span class="p">(</span><span class="n">folder</span><span class="p">):</span>
+<div class="viewcode-block" id="get_file_paths"><a class="viewcode-back" href="../../../api.html#vampy.simulation.simulation_common.get_file_paths">[docs]</a><span class="k">def</span> <span class="nf">get_file_paths</span><span class="p">(</span><span class="n">folder</span><span class="p">,</span> <span class="n">additional_variables</span><span class="o">=</span><span class="p">[]):</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">    Create folder where data and solutions (velocity, mesh, pressure) is stored</span>
 
 <span class="sd">    Args:</span>
 <span class="sd">        folder (str): Path to data storage location</span>
+<span class="sd">        additional_variables (list): List of additional variables to store</span>
 
 <span class="sd">    Returns:</span>
 <span class="sd">        files (dict): Contains filepaths for respective solution files</span>
@@ -360,12 +361,11 @@ document.write(`
     <span class="k">if</span> <span class="n">MPI</span><span class="o">.</span><span class="n">rank</span><span class="p">(</span><span class="n">MPI</span><span class="o">.</span><span class="n">comm_world</span><span class="p">)</span> <span class="o">==</span> <span class="mi">0</span><span class="p">:</span>
         <span class="k">if</span> <span class="ow">not</span> <span class="n">path</span><span class="o">.</span><span class="n">exists</span><span class="p">(</span><span class="n">common_path</span><span class="p">):</span>
             <span class="n">makedirs</span><span class="p">(</span><span class="n">common_path</span><span class="p">)</span>
+    <span class="n">variables</span> <span class="o">=</span> <span class="p">[</span><span class="s2">&quot;p&quot;</span><span class="p">,</span> <span class="s2">&quot;u&quot;</span><span class="p">,</span> <span class="s2">&quot;u_mean&quot;</span><span class="p">,</span> <span class="s2">&quot;mesh&quot;</span><span class="p">]</span> <span class="o">+</span> <span class="n">additional_variables</span>
+    <span class="n">files</span> <span class="o">=</span> <span class="p">{}</span>
 
-    <span class="n">file_p</span> <span class="o">=</span> <span class="n">path</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">common_path</span><span class="p">,</span> <span class="s2">&quot;p.h5&quot;</span><span class="p">)</span>
-    <span class="n">file_u</span> <span class="o">=</span> <span class="n">path</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">common_path</span><span class="p">,</span> <span class="s2">&quot;u.h5&quot;</span><span class="p">)</span>
-    <span class="n">file_u_mean</span> <span class="o">=</span> <span class="n">path</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">common_path</span><span class="p">,</span> <span class="s2">&quot;u_mean.h5&quot;</span><span class="p">)</span>
-    <span class="n">file_mesh</span> <span class="o">=</span> <span class="n">path</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">common_path</span><span class="p">,</span> <span class="s2">&quot;mesh.h5&quot;</span><span class="p">)</span>
-    <span class="n">files</span> <span class="o">=</span> <span class="p">{</span><span class="s2">&quot;u&quot;</span><span class="p">:</span> <span class="n">file_u</span><span class="p">,</span> <span class="s2">&quot;u_mean&quot;</span><span class="p">:</span> <span class="n">file_u_mean</span><span class="p">,</span> <span class="s2">&quot;p&quot;</span><span class="p">:</span> <span class="n">file_p</span><span class="p">,</span> <span class="s2">&quot;mesh&quot;</span><span class="p">:</span> <span class="n">file_mesh</span><span class="p">}</span>
+    <span class="k">for</span> <span class="n">variable</span> <span class="ow">in</span> <span class="n">variables</span><span class="p">:</span>
+        <span class="n">files</span><span class="p">[</span><span class="n">variable</span><span class="p">]</span> <span class="o">=</span> <span class="n">path</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">common_path</span><span class="p">,</span> <span class="sa">f</span><span class="s2">&quot;</span><span class="si">{</span><span class="n">variable</span><span class="si">}</span><span class="s2">.h5&quot;</span><span class="p">)</span>
 
     <span class="k">return</span> <span class="n">files</span></div>
 
@@ -452,7 +452,7 @@ document.write(`
         <span class="n">u_mean_file</span><span class="o">.</span><span class="n">write</span><span class="p">(</span><span class="n">u_mean</span><span class="p">,</span> <span class="s2">&quot;u_mean&quot;</span><span class="p">)</span></div>
 
 
-<div class="viewcode-block" id="store_velocity_and_pressure_h5"><a class="viewcode-back" href="../../../api.html#vampy.simulation.simulation_common.store_velocity_and_pressure_h5">[docs]</a><span class="k">def</span> <span class="nf">store_velocity_and_pressure_h5</span><span class="p">(</span><span class="n">NS_parameters</span><span class="p">,</span> <span class="n">U</span><span class="p">,</span> <span class="n">p_</span><span class="p">,</span> <span class="n">tstep</span><span class="p">,</span> <span class="n">u_</span><span class="p">,</span> <span class="n">u_mean0</span><span class="p">,</span> <span class="n">u_mean1</span><span class="p">,</span> <span class="n">u_mean2</span><span class="p">):</span>
+<div class="viewcode-block" id="store_velocity_and_pressure_h5"><a class="viewcode-back" href="../../../api.html#vampy.simulation.simulation_common.store_velocity_and_pressure_h5">[docs]</a><span class="k">def</span> <span class="nf">store_velocity_and_pressure_h5</span><span class="p">(</span><span class="n">NS_parameters</span><span class="p">,</span> <span class="n">U</span><span class="p">,</span> <span class="n">p_</span><span class="p">,</span> <span class="n">tstep</span><span class="p">,</span> <span class="n">u_</span><span class="p">,</span> <span class="n">u_mean0</span><span class="p">,</span> <span class="n">u_mean1</span><span class="p">,</span> <span class="n">u_mean2</span><span class="p">,</span> <span class="n">D</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">du_</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">    Store the velocity and pressure values to an HDF5 file.</span>
 
@@ -465,6 +465,8 @@ document.write(`
 <span class="sd">        u_mean0 (Function): The accumulated x-component of the velocity.</span>
 <span class="sd">        u_mean1 (Function): The accumulated y-component of the velocity.</span>
 <span class="sd">        u_mean2 (Function): The accumulated z-component of the velocity.</span>
+<span class="sd">        du_ (List[Function]): List of deformation components</span>
+<span class="sd">        D (Function): A vector function space to assign the deformation components.</span>
 
 <span class="sd">    Returns:</span>
 <span class="sd">        None</span>
@@ -489,7 +491,19 @@ document.write(`
     <span class="c1"># Accumulate velocity</span>
     <span class="n">u_mean0</span><span class="o">.</span><span class="n">vector</span><span class="p">()</span><span class="o">.</span><span class="n">axpy</span><span class="p">(</span><span class="mi">1</span><span class="p">,</span> <span class="n">u_</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span><span class="o">.</span><span class="n">vector</span><span class="p">())</span>
     <span class="n">u_mean1</span><span class="o">.</span><span class="n">vector</span><span class="p">()</span><span class="o">.</span><span class="n">axpy</span><span class="p">(</span><span class="mi">1</span><span class="p">,</span> <span class="n">u_</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span><span class="o">.</span><span class="n">vector</span><span class="p">())</span>
-    <span class="n">u_mean2</span><span class="o">.</span><span class="n">vector</span><span class="p">()</span><span class="o">.</span><span class="n">axpy</span><span class="p">(</span><span class="mi">1</span><span class="p">,</span> <span class="n">u_</span><span class="p">[</span><span class="mi">2</span><span class="p">]</span><span class="o">.</span><span class="n">vector</span><span class="p">())</span></div>
+    <span class="n">u_mean2</span><span class="o">.</span><span class="n">vector</span><span class="p">()</span><span class="o">.</span><span class="n">axpy</span><span class="p">(</span><span class="mi">1</span><span class="p">,</span> <span class="n">u_</span><span class="p">[</span><span class="mi">2</span><span class="p">]</span><span class="o">.</span><span class="n">vector</span><span class="p">())</span>
+
+    <span class="c1"># Save deformation if present</span>
+    <span class="k">if</span> <span class="n">D</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span> <span class="ow">and</span> <span class="n">du_</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
+        <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="mi">3</span><span class="p">):</span>
+            <span class="n">assign</span><span class="p">(</span><span class="n">D</span><span class="o">.</span><span class="n">sub</span><span class="p">(</span><span class="n">i</span><span class="p">),</span> <span class="n">du_</span><span class="p">[</span><span class="n">i</span><span class="p">])</span>
+
+        <span class="c1"># Save path to deformation</span>
+        <span class="n">d_path</span> <span class="o">=</span> <span class="n">NS_parameters</span><span class="p">[</span><span class="s1">&#39;files&#39;</span><span class="p">][</span><span class="s1">&#39;d&#39;</span><span class="p">]</span>
+
+        <span class="c1"># Save deformation</span>
+        <span class="k">with</span> <span class="n">HDF5File</span><span class="p">(</span><span class="n">MPI</span><span class="o">.</span><span class="n">comm_world</span><span class="p">,</span> <span class="n">d_path</span><span class="p">,</span> <span class="n">file_mode</span><span class="o">=</span><span class="n">file_mode</span><span class="p">)</span> <span class="k">as</span> <span class="n">viz_d</span><span class="p">:</span>
+            <span class="n">viz_d</span><span class="o">.</span><span class="n">write</span><span class="p">(</span><span class="n">D</span><span class="p">,</span> <span class="s2">&quot;/deformation&quot;</span><span class="p">,</span> <span class="n">tstep</span><span class="p">)</span></div>
 
 
 <div class="viewcode-block" id="dump_probes"><a class="viewcode-back" href="../../../api.html#vampy.simulation.simulation_common.dump_probes">[docs]</a><span class="k">def</span> <span class="nf">dump_probes</span><span class="p">(</span><span class="n">eval_dict</span><span class="p">,</span> <span class="n">newfolder</span><span class="p">,</span> <span class="n">tstep</span><span class="p">):</span>
@@ -578,7 +592,7 @@ By Henrik A. Kjeldsberg
   
   <div class="footer-item">
     <p class="last-updated">
-  Last updated on Oct 31, 2023.
+  Last updated on Nov 10, 2023.
   <br/>
 </p>
   </div>

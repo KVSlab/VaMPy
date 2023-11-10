@@ -68,7 +68,7 @@ const thebe_selector_output = ".output, .cell_output"
     <link rel="prev" title="Moving domain simulation of the left atrium" href="movingatrium.html" />
   <meta name="viewport" content="width=device-width, initial-scale=1"/>
   <meta name="docsearch:language" content="en"/>
-    <meta name="docbuild:last-update" content="Oct 31, 2023"/>
+    <meta name="docbuild:last-update" content="Nov 10, 2023"/>
   </head>
   
   
@@ -1751,13 +1751,13 @@ density (rho) is in [kg/m^3], the time step (dt) is in [ms], and viscosity (nu) 
 
 <span class="target" id="module-vampy.automatedPostprocessing.compute_velocity_and_pressure"></span><dl class="py function">
 <dt class="sig sig-object py" id="vampy.automatedPostprocessing.compute_velocity_and_pressure.compute_velocity_and_pressure">
-<span class="sig-prename descclassname"><span class="pre">vampy.automatedPostprocessing.compute_velocity_and_pressure.</span></span><span class="sig-name descname"><span class="pre">compute_velocity_and_pressure</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">case_path</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">dt</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">velocity_degree</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">pressure_degree</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">step</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/vampy/automatedPostprocessing/compute_velocity_and_pressure.html#compute_velocity_and_pressure"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#vampy.automatedPostprocessing.compute_velocity_and_pressure.compute_velocity_and_pressure" title="Permalink to this definition">#</a></dt>
+<span class="sig-prename descclassname"><span class="pre">vampy.automatedPostprocessing.compute_velocity_and_pressure.</span></span><span class="sig-name descname"><span class="pre">compute_velocity_and_pressure</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">folder</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">dt</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">velocity_degree</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">pressure_degree</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">step</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/vampy/automatedPostprocessing/compute_velocity_and_pressure.html#compute_velocity_and_pressure"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#vampy.automatedPostprocessing.compute_velocity_and_pressure.compute_velocity_and_pressure" title="Permalink to this definition">#</a></dt>
 <dd><p>Loads velocity and pressure from compressed .h5 CFD solution and
 converts and saves to .xdmf format for visualization (in e.g. ParaView).</p>
 <dl class="field-list simple">
 <dt class="field-odd">Parameters</dt>
 <dd class="field-odd"><ul class="simple">
-<li><p><strong>case_path</strong> (<em>str</em>) – Path to results from simulation</p></li>
+<li><p><strong>folder</strong> (<em>str</em>) – Path to results from simulation</p></li>
 <li><p><strong>dt</strong> (<em>float</em>) – Time step of simulation</p></li>
 <li><p><strong>velocity_degree</strong> (<em>int</em>) – Finite element degree of velocity</p></li>
 <li><p><strong>pressure_degree</strong> (<em>int</em>) – Finite element degree of pressure</p></li>
@@ -2077,11 +2077,14 @@ the projection of x onto the plane defined by c and n.</p>
 
 <dl class="py function">
 <dt class="sig sig-object py" id="vampy.simulation.simulation_common.get_file_paths">
-<span class="sig-prename descclassname"><span class="pre">vampy.simulation.simulation_common.</span></span><span class="sig-name descname"><span class="pre">get_file_paths</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">folder</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/vampy/simulation/simulation_common.html#get_file_paths"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#vampy.simulation.simulation_common.get_file_paths" title="Permalink to this definition">#</a></dt>
+<span class="sig-prename descclassname"><span class="pre">vampy.simulation.simulation_common.</span></span><span class="sig-name descname"><span class="pre">get_file_paths</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">folder</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">additional_variables</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">[]</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/vampy/simulation/simulation_common.html#get_file_paths"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#vampy.simulation.simulation_common.get_file_paths" title="Permalink to this definition">#</a></dt>
 <dd><p>Create folder where data and solutions (velocity, mesh, pressure) is stored</p>
 <dl class="field-list simple">
 <dt class="field-odd">Parameters</dt>
-<dd class="field-odd"><p><strong>folder</strong> (<em>str</em>) – Path to data storage location</p>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>folder</strong> (<em>str</em>) – Path to data storage location</p></li>
+<li><p><strong>additional_variables</strong> (<em>list</em>) – List of additional variables to store</p></li>
+</ul>
 </dd>
 <dt class="field-even">Returns</dt>
 <dd class="field-even"><p>Contains filepaths for respective solution files</p>
@@ -2125,7 +2128,7 @@ the projection of x onto the plane defined by c and n.</p>
 
 <dl class="py function">
 <dt class="sig sig-object py" id="vampy.simulation.simulation_common.store_velocity_and_pressure_h5">
-<span class="sig-prename descclassname"><span class="pre">vampy.simulation.simulation_common.</span></span><span class="sig-name descname"><span class="pre">store_velocity_and_pressure_h5</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">NS_parameters</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">U</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">p_</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">tstep</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">u_</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">u_mean0</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">u_mean1</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">u_mean2</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/vampy/simulation/simulation_common.html#store_velocity_and_pressure_h5"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#vampy.simulation.simulation_common.store_velocity_and_pressure_h5" title="Permalink to this definition">#</a></dt>
+<span class="sig-prename descclassname"><span class="pre">vampy.simulation.simulation_common.</span></span><span class="sig-name descname"><span class="pre">store_velocity_and_pressure_h5</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">NS_parameters</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">U</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">p_</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">tstep</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">u_</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">u_mean0</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">u_mean1</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">u_mean2</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">D</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">du_</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/vampy/simulation/simulation_common.html#store_velocity_and_pressure_h5"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#vampy.simulation.simulation_common.store_velocity_and_pressure_h5" title="Permalink to this definition">#</a></dt>
 <dd><p>Store the velocity and pressure values to an HDF5 file.</p>
 <dl class="field-list simple">
 <dt class="field-odd">Parameters</dt>
@@ -2138,6 +2141,8 @@ the projection of x onto the plane defined by c and n.</p>
 <li><p><strong>u_mean0</strong> (<em>Function</em>) – The accumulated x-component of the velocity.</p></li>
 <li><p><strong>u_mean1</strong> (<em>Function</em>) – The accumulated y-component of the velocity.</p></li>
 <li><p><strong>u_mean2</strong> (<em>Function</em>) – The accumulated z-component of the velocity.</p></li>
+<li><p><strong>du</strong> (<em>List</em><em>[</em><em>Function</em><em>]</em>) – List of deformation components</p></li>
+<li><p><strong>D</strong> (<em>Function</em>) – A vector function space to assign the deformation components.</p></li>
 </ul>
 </dd>
 <dt class="field-even">Returns</dt>
@@ -2238,7 +2243,7 @@ By Henrik A. Kjeldsberg
   
   <div class="footer-item">
     <p class="last-updated">
-  Last updated on Oct 31, 2023.
+  Last updated on Nov 10, 2023.
   <br/>
 </p>
   </div>
