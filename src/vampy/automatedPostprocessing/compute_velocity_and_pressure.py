@@ -10,7 +10,7 @@ except NameError:
     pass
 
 
-def compute_velocity_and_pressure(folder, dt, velocity_degree, pressure_degree, step):
+def compute_velocity_and_pressure(folder, dt, save_frequency, velocity_degree, pressure_degree, step):
     """
     Loads velocity and pressure from compressed .h5 CFD solution and
     converts and saves to .xdmf format for visualization (in e.g. ParaView).
@@ -18,6 +18,7 @@ def compute_velocity_and_pressure(folder, dt, velocity_degree, pressure_degree, 
     Args:
         folder (str): Path to results from simulation
         dt (float): Time step of simulation
+        save_frequency (int): Frequency that velocity and pressure has been stored
         velocity_degree (int): Finite element degree of velocity
         pressure_degree (int): Finite element degree of pressure
         step (int): Step size determining number of times data is sampled
@@ -74,8 +75,11 @@ def compute_velocity_and_pressure(folder, dt, velocity_degree, pressure_degree, 
     if MPI.rank(MPI.comm_world) == 0:
         print("=" * 10, "Start post processing", "=" * 10)
 
-    file_counter = 1
+    counter = 1
     for i in range(len(dataset_u)):
+        # Set physical time (in [ms])
+        t = dt * counter * save_frequency
+        print(t)
 
         file_u.read(u, dataset_u[i])
         file_p.read(p, dataset_p[i])
@@ -86,31 +90,31 @@ def compute_velocity_and_pressure(folder, dt, velocity_degree, pressure_degree, 
 
         # Store velocity
         u.rename("velocity", "velocity")
-        u_writer.write(u, dt * file_counter)
+        u_writer.write(u, t)
 
         # Store pressure
         p.rename("pressure", "pressure")
-        p_writer.write(p, dt * file_counter)
+        p_writer.write(p, t)
 
         # Store deformation
         # NB: Storing together with velocity.
         if file_d is not None:
             file_d.read(d, dataset_d[i])
             d.rename("deformation", "deformation")
-            u_writer.write(d, dt * file_counter)
+            u_writer.write(d, t)
 
         # Update file_counter
-        file_counter += step
+        counter += step
 
     print("========== Post processing finished ==========")
     print("Results saved to: {}".format(folder))
 
 
 def main_convert():
-    folder, _, _, dt, velocity_degree, pressure_degree, _, _, _, _, _, step, _ = read_command_line()
-    compute_velocity_and_pressure(folder, dt, velocity_degree, pressure_degree, step)
+    folder, _, _, dt, velocity_degree, pressure_degree, _, _, save_frequency, _, _, step, _ = read_command_line()
+    compute_velocity_and_pressure(folder, dt, save_frequency, velocity_degree, pressure_degree, step)
 
 
 if __name__ == '__main__':
-    folder, _, _, dt, velocity_degree, pressure_degree, _, _, _, _, _, step, _ = read_command_line()
-    compute_velocity_and_pressure(folder, dt, velocity_degree, pressure_degree, step)
+    folder, _, _, dt, velocity_degree, pressure_degree, _, _, save_frequency, _, _, step, _ = read_command_line()
+    compute_velocity_and_pressure(folder, dt, save_frequency, velocity_degree, pressure_degree, step)
