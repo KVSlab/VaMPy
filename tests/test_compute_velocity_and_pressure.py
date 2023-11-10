@@ -7,12 +7,13 @@ def test_compute_velocity_and_pressure():
     # Path to test results and params
     results_path = "tests/test_data/results/Solutions"
     dt = 0.951
+    save_frequency = 5
     velocity_degree = 1
     pressure_degree = 1
     step = 1
 
     # Run post-processing
-    compute_velocity_and_pressure(results_path, dt, velocity_degree, pressure_degree, step)
+    compute_velocity_and_pressure(results_path, dt, save_frequency, velocity_degree, pressure_degree, step)
 
     # Check that output files exist
     metric_names = ["velocity", "pressure"]

@@ -1,7 +1,6 @@
 import json
 import pickle
 from os import makedirs
-from pprint import pprint
 from dolfin import set_log_level, UserExpression
 
 from oasismove.problems.NSfracStep import *
@@ -95,11 +94,6 @@ def problem_parameters(commandline_kwargs, scalar_components, NS_parameters, **N
         if MPI.rank(MPI.comm_world) == 0:
             print("-- Computing blood residence time --")
         scalar_components += ["blood"]
-
-    if MPI.rank(MPI.comm_world) == 0:
-        print("=== Starting simulation for MovingAtrium.py ===")
-        print("Running with the following parameters:")
-        pprint(NS_parameters)
 
 
 def scalar_source(scalar_components, **NS_namespace):
