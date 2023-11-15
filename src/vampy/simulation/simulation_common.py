@@ -117,7 +117,7 @@ def store_u_mean(T, dt, save_solution_at_tstep, save_solution_frequency, u_mean,
         u_mean_file.write(u_mean, "u_mean")
 
 
-def store_velocity_and_pressure_h5(files, U, p_, tstep, u_, u_mean0, u_mean1, u_mean2, D=None, du_=None):
+def store_velocity_and_pressure_h5(files, U, p_, tstep, u_, u_mean0, u_mean1, u_mean2, D=None, du_=None, blood=None):
     """
     Store the velocity and pressure values to an HDF5 file.
 
@@ -143,6 +143,7 @@ def store_velocity_and_pressure_h5(files, U, p_, tstep, u_, u_mean0, u_mean1, u_
     # Get save paths
     p_path = files['p']
     u_path = files['u']
+    brt_path = files['brt']
     file_mode = "w" if not path.exists(p_path) else "a"
 
     # Save pressure
@@ -152,6 +153,10 @@ def store_velocity_and_pressure_h5(files, U, p_, tstep, u_, u_mean0, u_mean1, u_
     # Save velocity
     with HDF5File(MPI.comm_world, u_path, file_mode=file_mode) as viz_u:
         viz_u.write(U, "/velocity", tstep)
+
+    # Save residence time
+    with HDF5File(MPI.comm_world, brt_path, file_mode=file_mode) as viz_brt:
+        viz_brt.write(blood, "/blood", tstep)
 
     # Accumulate velocity
     u_mean0.vector().axpy(1, u_[0].vector())
@@ -164,7 +169,7 @@ def store_velocity_and_pressure_h5(files, U, p_, tstep, u_, u_mean0, u_mean1, u_
             assign(D.sub(i), du_[i])
 
         # Save path to deformation
-        d_path = files['files']['d']
+        d_path = files['d']
 
         # Save deformation
         with HDF5File(MPI.comm_world, d_path, file_mode=file_mode) as viz_d:
