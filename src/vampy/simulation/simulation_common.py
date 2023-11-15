@@ -15,15 +15,22 @@ def get_file_paths(folder, additional_variables=[]):
     Returns:
         files (dict): Contains filepaths for respective solution files
     """
-    common_path = path.join(folder, "Solutions")
+    common_path_half = path.join(folder, "Solutions")
+    common_path_full = path.join(folder, "SolutionsFull")
     if MPI.rank(MPI.comm_world) == 0:
-        if not path.exists(common_path):
-            makedirs(common_path)
+        if not path.exists(common_path_half):
+            makedirs(common_path_half)
+        if not path.exists(common_path_full):
+            makedirs(common_path_full)
     variables = ["p", "u", "u_mean", "mesh"] + additional_variables
-    files = {}
+    files = {
+        'half': {},
+        'full': {}
+    }
 
     for variable in variables:
-        files[variable] = path.join(common_path, f"{variable}.h5")
+        files['half'][variable] = path.join(common_path_half, f"{variable}.h5")
+        files['full'][variable] = path.join(common_path_full, f"{variable}.h5")
 
     return files
 
@@ -110,7 +117,7 @@ def store_u_mean(T, dt, save_solution_at_tstep, save_solution_frequency, u_mean,
         u_mean_file.write(u_mean, "u_mean")
 
 
-def store_velocity_and_pressure_h5(NS_parameters, U, p_, tstep, u_, u_mean0, u_mean1, u_mean2, D=None, du_=None):
+def store_velocity_and_pressure_h5(files, U, p_, tstep, u_, u_mean0, u_mean1, u_mean2, D=None, du_=None):
     """
     Store the velocity and pressure values to an HDF5 file.
 
@@ -134,8 +141,8 @@ def store_velocity_and_pressure_h5(NS_parameters, U, p_, tstep, u_, u_mean0, u_m
         assign(U.sub(i), u_[i])
 
     # Get save paths
-    p_path = NS_parameters['files']['p']
-    u_path = NS_parameters['files']['u']
+    p_path = files['p']
+    u_path = files['u']
     file_mode = "w" if not path.exists(p_path) else "a"
 
     # Save pressure
@@ -157,7 +164,7 @@ def store_velocity_and_pressure_h5(NS_parameters, U, p_, tstep, u_, u_mean0, u_m
             assign(D.sub(i), du_[i])
 
         # Save path to deformation
-        d_path = NS_parameters['files']['d']
+        d_path = files['files']['d']
 
         # Save deformation
         with HDF5File(MPI.comm_world, d_path, file_mode=file_mode) as viz_d:

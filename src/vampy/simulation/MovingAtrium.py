@@ -321,7 +321,7 @@ def pre_solve_hook(u_components, id_in, id_out, dynamic_mesh, V, Q, cardiac_cycl
         files = NS_namespace["files"]
 
     # Save mesh as HDF5 file for post-processing
-    with HDF5File(MPI.comm_world, files["mesh"], "w") as mesh_file:
+    with HDF5File(MPI.comm_world, files['half']["mesh"], "w") as mesh_file:
         mesh_file.write(mesh, "mesh")
 
     # Create Probes path
@@ -395,7 +395,7 @@ def update_boundary_conditions(t, dynamic_mesh, NS_expressions, id_in, **NS_name
 def temporal_hook(mesh, id_wall, id_out, cardiac_cycle, dt, t, save_solution_frequency, u_, id_in, tstep, newfolder,
                   eval_dict, dump_probe_frequency, p_, save_solution_at_tstep, nu, D_mitral, U, u_mean0, u_mean1,
                   u_mean2, save_flow_metrics_frequency, save_volume_frequency, save_solution_frequency_xdmf, viz_U,
-                  boundary, outlet_area, q_, w_, viz_blood, track_blood, D, du_, **NS_namespace):
+                  boundary, outlet_area, q_, w_, viz_blood, track_blood, D, du_, T, **NS_namespace):
     if tstep % save_volume_frequency == 0:
         compute_volume(mesh, t, newfolder)
 
@@ -424,7 +424,13 @@ def temporal_hook(mesh, id_wall, id_out, cardiac_cycle, dt, t, save_solution_fre
 
     # Save velocity and pressure for post-processing
     if tstep % save_solution_frequency == 0 and tstep >= save_solution_at_tstep:
-        store_velocity_and_pressure_h5(NS_parameters, U, p_, tstep, u_, u_mean0, u_mean1, u_mean2, D, du_)
+        files = NS_parameters['files']
+        if t <= (T/2):
+            files = files['half']
+        else:
+            files = files['full']
+
+        store_velocity_and_pressure_h5(files, U, p_, tstep, u_, u_mean0, u_mean1, u_mean2, D, du_)
 
 
 # Oasis hook called after the simulation has finished
