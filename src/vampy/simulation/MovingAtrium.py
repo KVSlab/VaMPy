@@ -10,8 +10,9 @@ from scipy.spatial import KDTree
 
 from vampy.simulation.Probe import Probes  # type: ignore
 from vampy.simulation.Womersley import make_womersley_bcs, compute_boundary_geometry_acrn
-from vampy.simulation.simulation_common import store_u_mean, get_file_paths, print_mesh_information, \
+from vampy.simulation.simulation_common import get_file_paths, print_mesh_information, \
     store_velocity_and_pressure_h5, dump_probes
+
 
 # FEniCS specific command to control the desired level of logging, here set to critical errors
 set_log_level(50)
@@ -44,9 +45,9 @@ def problem_parameters(commandline_kwargs, scalar_components, NS_parameters, **N
     else:
         # Override some problem specific parameters
         # Parameters are in mm and ms
-        cardiac_cycle = float(commandline_kwargs.get("cardiac_cycle", 1000))
+        cardiac_cycle = float(commandline_kwargs.get("cardiac_cycle", 100))
         number_of_cycles = int(commandline_kwargs.get("number_of_cycles", 2))
-        track_blood = bool(commandline_kwargs.get("track_blood", False))
+        track_blood = bool(commandline_kwargs.get("track_blood", True))
 
         NS_parameters.update(
             # Moving atrium parameters
@@ -56,7 +57,7 @@ def problem_parameters(commandline_kwargs, scalar_components, NS_parameters, **N
             # Blood residence time
             track_blood=track_blood,
             # Backflow parameters
-            backflow_beta=0.2,
+            backflow_beta=0.4,
             backflow_facets=[],
             # Fluid parameters
             nu=3.3018868e-3,  # Viscosity [nu: 0.0035 Pa-s / 1060 kg/m^3 = 3.3018868E-6 m^2/s == 3.3018868E-3 mm^2/ms]
@@ -69,11 +70,11 @@ def problem_parameters(commandline_kwargs, scalar_components, NS_parameters, **N
             dt=0.1,  # # Time step size [ms]
             # Frequencies to save data
             dump_probe_frequency=500,  # Dump frequency for sampling velocity & pressure at probes along the centerline
-            save_solution_frequency=10,  # Save frequency for velocity and pressure field
-            save_solution_frequency_xdmf=10,  # Save frequency for velocity and pressure field
+            save_solution_frequency=20,  # Save frequency for velocity and pressure field
+            save_solution_frequency_xdmf=1e10,  # Save frequency for velocity and pressure field
             save_solution_after_cycle=0,  # Store solution after 1 cardiac cycle
             save_volume_frequency=1e10,  # Save frequency for storing volume
-            save_flow_metrics_frequency=100,  # Frequency for storing flow metrics
+            save_flow_metrics_frequency=50,  # Frequency for storing flow metrics
             # Oasis specific parameters
             checkpoint=1000,  # Overwrite solution in Checkpoint folder each checkpoint
             print_intermediate_info=500,
@@ -425,16 +426,9 @@ def temporal_hook(mesh, id_wall, id_out, cardiac_cycle, dt, t, save_solution_fre
     # Save velocity and pressure for post-processing
     if tstep % save_solution_frequency == 0 and tstep >= save_solution_at_tstep:
         files = NS_parameters['files']
-        if t <= (T/2):
+        if t <= (T / 2):
             files = files['half']
         else:
             files = files['full']
 
-        store_velocity_and_pressure_h5(files, U, p_, tstep, u_, u_mean0, u_mean1, u_mean2, D, du_)
-
-
-# Oasis hook called after the simulation has finished
-def theend_hook(u_mean, u_mean0, u_mean1, u_mean2, T, dt, save_solution_at_tstep, save_solution_frequency,
-                **NS_namespace):
-    store_u_mean(T, dt, save_solution_at_tstep, save_solution_frequency, u_mean, u_mean0, u_mean1, u_mean2,
-                 NS_parameters)
+        store_velocity_and_pressure_h5(files, U, p_, tstep, u_, u_mean0, u_mean1, u_mean2, D, du_, q_['blood'])
