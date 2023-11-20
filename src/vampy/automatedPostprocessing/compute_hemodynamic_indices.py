@@ -54,7 +54,7 @@ def compute_hemodynamic_indices(folder, nu, rho, dt, T, velocity_degree, save_fr
 
     # Read mesh saved as HDF5 format
     mesh = Mesh()
-    with HDF5File(MPI.comm_world, mesh_path.__str__(), "r") as mesh_file:
+    with HDF5File(MPI.comm_world, mesh_path, "r") as mesh_file:
         mesh_file.read(mesh, "mesh", False)
 
     bm = BoundaryMesh(mesh, 'exterior')

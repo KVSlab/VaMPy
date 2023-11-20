@@ -4,12 +4,13 @@ import numpy as np
 from dolfin import MPI, assemble, Constant, assign, HDF5File, Measure
 
 
-def get_file_paths(folder):
+def get_file_paths(folder, additional_variables=[]):
     """
     Create folder where data and solutions (velocity, mesh, pressure) is stored
 
     Args:
         folder (str): Path to data storage location
+        additional_variables (list): List of additional variables to store
 
     Returns:
         files (dict): Contains filepaths for respective solution files
@@ -18,12 +19,11 @@ def get_file_paths(folder):
     if MPI.rank(MPI.comm_world) == 0:
         if not path.exists(common_path):
             makedirs(common_path)
+    variables = ["p", "u", "u_mean", "mesh"] + additional_variables
+    files = {}
 
-    file_p = path.join(common_path, "p.h5")
-    file_u = path.join(common_path, "u.h5")
-    file_u_mean = path.join(common_path, "u_mean.h5")
-    file_mesh = path.join(common_path, "mesh.h5")
-    files = {"u": file_u, "u_mean": file_u_mean, "p": file_p, "mesh": file_mesh}
+    for variable in variables:
+        files[variable] = path.join(common_path, f"{variable}.h5")
 
     return files
 
@@ -110,7 +110,7 @@ def store_u_mean(T, dt, save_solution_at_tstep, save_solution_frequency, u_mean,
         u_mean_file.write(u_mean, "u_mean")
 
 
-def store_velocity_and_pressure_h5(NS_parameters, U, p_, tstep, u_, u_mean0, u_mean1, u_mean2):
+def store_velocity_and_pressure_h5(NS_parameters, U, p_, tstep, u_, u_mean0, u_mean1, u_mean2, D=None, du_=None):
     """
     Store the velocity and pressure values to an HDF5 file.
 
@@ -123,6 +123,8 @@ def store_velocity_and_pressure_h5(NS_parameters, U, p_, tstep, u_, u_mean0, u_m
         u_mean0 (Function): The accumulated x-component of the velocity.
         u_mean1 (Function): The accumulated y-component of the velocity.
         u_mean2 (Function): The accumulated z-component of the velocity.
+        du_ (List[Function]): List of deformation components
+        D (Function): A vector function space to assign the deformation components.
 
     Returns:
         None
@@ -148,6 +150,18 @@ def store_velocity_and_pressure_h5(NS_parameters, U, p_, tstep, u_, u_mean0, u_m
     u_mean0.vector().axpy(1, u_[0].vector())
     u_mean1.vector().axpy(1, u_[1].vector())
     u_mean2.vector().axpy(1, u_[2].vector())
+
+    # Save deformation if present
+    if D is not None and du_ is not None:
+        for i in range(3):
+            assign(D.sub(i), du_[i])
+
+        # Save path to deformation
+        d_path = NS_parameters['files']['d']
+
+        # Save deformation
+        with HDF5File(MPI.comm_world, d_path, file_mode=file_mode) as viz_d:
+            viz_d.write(D, "/deformation", tstep)
 
 
 def dump_probes(eval_dict, newfolder, tstep):

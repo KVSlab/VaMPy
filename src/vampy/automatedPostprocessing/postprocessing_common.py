@@ -211,7 +211,7 @@ class STRESS:
         return pow(inner(u, u), 0.5)
 
 
-def get_dataset_names(data_file, num_files=100000, step=1, start=1, print_info=True,
+def get_dataset_names(data_file, num_files=100000, step=1, start=0, print_info=True,
                       vector_filename="/velocity/vector_%d"):
     """
     Read velocity fields datasets and extract names of files
