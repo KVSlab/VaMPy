@@ -1,10 +1,9 @@
 import json
 import pickle
-from os import makedirs
 from dolfin import set_log_level, UserExpression
-
 from oasismove.problems.NSfracStep import *
 from oasismove.problems.NSfracStep.MovingCommon import get_visualization_writers
+from os import makedirs
 from scipy.interpolate import splrep, splev
 from scipy.spatial import KDTree
 from vampy.simulation.Probe import Probes  # type: ignore
@@ -117,9 +116,11 @@ def mesh(mesh_path, **NS_namespace):
 
 class MeshMotionMapping(UserExpression):
     def __init__(self, points, cycle, **kwargs):
+        self.N = 100
+        self.initial_points = points
+        self.points = self.interpolate_points()
         self.motion_mapping = {}
         self.counter = -1
-        self.points = points
         self.num_points = self.points.shape[0]
         self.num_samples = self.points.shape[-1]
         self.time = np.linspace(0, cycle, self.num_samples)
@@ -133,11 +134,28 @@ class MeshMotionMapping(UserExpression):
         tree = KDTree(self.points[:, :, 0])
         return tree
 
+    def interpolate_points(self):
+        points = self.initial_points
+        time = np.linspace(0, 1, points.shape[2])
+        time_r = np.linspace(0, 1, self.N)
+        move = np.zeros((points.shape[0], points.shape[1], number_of_points + 1))
+
+        # Use interp1d if smooth displacement
+        x = interp1d(time, points[:, 0, :], axis=1)
+        y = interp1d(time, points[:, 1, :], axis=1)
+        z = interp1d(time, points[:, 2, :], axis=1)
+
+        move[:, 0, :] = x(time_r)
+        move[:, 1, :] = y(time_r)
+        move[:, 2, :] = z(time_r)
+
+        return move
+
     def eval(self, _, x):
         self.counter += 1
         _, index = self.tree.query(x)
         # FIXME: Set spline parameter objectively
-        s = 1E-2
+        s = 0.5
         x_ = splrep(self.time, self.points[index, 0, :], s=s, per=True)
         y_ = splrep(self.time, self.points[index, 1, :], s=s, per=True)
         z_ = splrep(self.time, self.points[index, 2, :], s=s, per=True)
