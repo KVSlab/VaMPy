@@ -186,7 +186,7 @@ def pre_boundary_condition(boundary, **NS_namespace):
 
 
 def create_bcs(NS_expressions, dynamic_mesh, x_, cardiac_cycle, backflow_facets, mesh, mesh_path, nu, t,
-               V, Q, id_in, id_out, track_blood, **NS_namespace):
+               V, Q, id_in, id_out, track_blood, boundary, **NS_namespace):
     if mesh_path.endswith(".xml") or mesh_path.endswith(".xml.gz"):
         mesh_filename = ".xml"
     elif mesh_path.endswith(".h5"):
