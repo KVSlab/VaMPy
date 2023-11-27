@@ -7,12 +7,10 @@ from oasismove.problems.NSfracStep import *
 from oasismove.problems.NSfracStep.MovingCommon import get_visualization_writers
 from scipy.interpolate import splrep, splev
 from scipy.spatial import KDTree
-
 from vampy.simulation.Probe import Probes  # type: ignore
 from vampy.simulation.Womersley import make_womersley_bcs, compute_boundary_geometry_acrn
 from vampy.simulation.simulation_common import get_file_paths, print_mesh_information, \
     store_velocity_and_pressure_h5, dump_probes
-
 
 # FEniCS specific command to control the desired level of logging, here set to critical errors
 set_log_level(50)
@@ -41,11 +39,12 @@ def problem_parameters(commandline_kwargs, scalar_components, NS_parameters, **N
         NS_parameters.update(pickle.load(f))
         NS_parameters['restart_folder'] = restart_folder
         NS_parameters['mesh_path'] = mesh_path
+        track_blood = NS_parameters['track_blood']
         globals().update(NS_parameters)
     else:
         # Override some problem specific parameters
         # Parameters are in mm and ms
-        cardiac_cycle = float(commandline_kwargs.get("cardiac_cycle", 100))
+        cardiac_cycle = float(commandline_kwargs.get("cardiac_cycle", 1000))
         number_of_cycles = int(commandline_kwargs.get("number_of_cycles", 2))
         track_blood = bool(commandline_kwargs.get("track_blood", True))
 
@@ -164,6 +163,10 @@ class WallMotion(UserExpression):
             self.counter = -1
 
 
+def pre_boundary_condition(boundary, **NS_namespace):
+    return dict(boundary=boundary)
+
+
 def create_bcs(NS_expressions, dynamic_mesh, x_, cardiac_cycle, backflow_facets, mesh, mesh_path, nu, t,
                V, Q, id_in, id_out, track_blood, **NS_namespace):
     if mesh_path.endswith(".xml") or mesh_path.endswith(".xml.gz"):
@@ -174,10 +177,11 @@ def create_bcs(NS_expressions, dynamic_mesh, x_, cardiac_cycle, backflow_facets,
     rank = MPI.rank(MPI.comm_world)
     coords = ['x', 'y', 'z']
     # Variables needed during the simulation
-    boundary = MeshFunction("size_t", mesh, mesh.geometry().dim() - 1, mesh.domains())
-    if mesh_path.endswith(".h5"):
-        with HDF5File(MPI.comm_world, mesh_path, "r") as f:
-            f.read(boundary, "boundary")
+    if boundary is None:
+        boundary = MeshFunction("size_t", mesh, mesh.geometry().dim() - 1, mesh.domains())
+        if mesh_path.endswith(".h5"):
+            with HDF5File(MPI.comm_world, mesh_path, "r") as f:
+                f.read(boundary, "boundary")
 
     # Get IDs for inlet(s) and outlet(s)
     info_path = mesh_path.split(mesh_filename)[0] + "_info.json"
@@ -322,8 +326,9 @@ def pre_solve_hook(u_components, id_in, id_out, dynamic_mesh, V, Q, cardiac_cycl
         files = NS_namespace["files"]
 
     # Save mesh as HDF5 file for post-processing
-    with HDF5File(MPI.comm_world, files['half']["mesh"], "w") as mesh_file:
-        mesh_file.write(mesh, "mesh")
+    if not path.exists(files['half']['mesh']):
+        with HDF5File(MPI.comm_world, files['half']["mesh"], "w") as mesh_file:
+            mesh_file.write(mesh, "mesh")
 
     # Create Probes path
     probes_folder = path.join(newfolder, "Probes")
