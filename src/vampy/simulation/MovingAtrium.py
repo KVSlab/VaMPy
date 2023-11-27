@@ -138,7 +138,7 @@ class MeshMotionMapping(UserExpression):
         points = self.initial_points
         time = np.linspace(0, 1, points.shape[2])
         time_r = np.linspace(0, 1, self.N)
-        move = np.zeros((points.shape[0], points.shape[1], number_of_points + 1))
+        move = np.zeros((points.shape[0], points.shape[1], self.N))
 
         # Use interp1d if smooth displacement
         x = interp1d(time, points[:, 0, :], axis=1)
