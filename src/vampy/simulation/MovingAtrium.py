@@ -4,7 +4,7 @@ from dolfin import set_log_level, UserExpression
 from oasismove.problems.NSfracStep import *
 from oasismove.problems.NSfracStep.MovingCommon import get_visualization_writers
 from os import makedirs
-from scipy.interpolate import splrep, splev
+from scipy.interpolate import splrep, splev, interp1d
 from scipy.spatial import KDTree
 from vampy.simulation.Probe import Probes  # type: ignore
 from vampy.simulation.Womersley import make_womersley_bcs, compute_boundary_geometry_acrn
