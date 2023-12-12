@@ -32,7 +32,7 @@ def compute_hemodynamic_indices(folder, nu, rho, dt, T, velocity_degree, save_fr
         nu (float): Kinematic viscosity
         rho (float): Fluid density
         dt (float): Time step of simulation
-        T (float): One cardiac cycle, in [ms]
+        T (float): Length of one cardiac cycle, in [ms]
         save_frequency (int): Frequency that velocity has been stored
         start_cycle (int): Determines which cardiac cycle to start from for post-processing
         step (int): Step size determining number of times data is sampled
