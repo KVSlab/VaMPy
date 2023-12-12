@@ -487,7 +487,12 @@ document.write(`
 
 
 <div class="viewcode-block" id="STRESS"><a class="viewcode-back" href="../../../api.html#vampy.automatedPostprocessing.postprocessing_common.STRESS">[docs]</a><span class="k">class</span> <span class="nc">STRESS</span><span class="p">:</span>
-<span class="w">    </span><span class="sd">&quot;&quot;&quot;Computes the stress on a given mesh based on provided velocity and pressure fields.&quot;&quot;&quot;</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Computes the stress on a given mesh based on provided velocity and pressure fields.</span>
+<span class="sd">    Note that the pressure term is unused since it disappears in the process of extracting the tangential component.</span>
+
+<span class="sd">    FIXME: Currently works for P1P1, but not for higher order finite elements (e.g. P2P1)</span>
+<span class="sd">    &quot;&quot;&quot;</span>
 
     <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">u</span><span class="p">,</span> <span class="n">p</span><span class="p">,</span> <span class="n">nu</span><span class="p">,</span> <span class="n">mesh</span><span class="p">):</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;Initializes the StressComputer.</span>
