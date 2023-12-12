@@ -19,7 +19,7 @@ def compute_flow_and_simulation_metrics(folder, nu, dt, velocity_degree, T, time
         nu (float): The kinematic viscosity value.
         dt (float): The time step size.
         velocity_degree (int): The degree of the velocity function space.
-        T (float): The total simulation time.
+        T (float): Length of one cardiac cycle, in [ms]
         times_to_average (list): A list of time points to perform phase averaging. Needs to be in the inverval [0,T).
         save_frequency (int): The frequency of saving data during the simulation.
         start_cycle (int): The starting cycle number for averaging.
