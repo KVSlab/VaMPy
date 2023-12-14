@@ -69,13 +69,13 @@ def problem_parameters(commandline_kwargs, scalar_components, NS_parameters, **N
             dt=0.1,  # # Time step size [ms]
             # Frequencies to save data
             dump_probe_frequency=500,  # Dump frequency for sampling velocity & pressure at probes along the centerline
-            save_solution_frequency=20,  # Save frequency for velocity and pressure field
+            save_solution_frequency=10,  # Save frequency for velocity and pressure field
             save_solution_frequency_xdmf=1e10,  # Save frequency for velocity and pressure field
             save_solution_after_cycle=0,  # Store solution after 1 cardiac cycle
             save_volume_frequency=1e10,  # Save frequency for storing volume
             save_flow_metrics_frequency=50,  # Frequency for storing flow metrics
             # Oasis specific parameters
-            checkpoint=1000,  # Overwrite solution in Checkpoint folder each checkpoint
+            checkpoint=5000,  # Overwrite solution in Checkpoint folder each checkpoint
             print_intermediate_info=500,
             folder="results_moving_atrium",
             mesh_path=commandline_kwargs["mesh_path"],
@@ -156,7 +156,7 @@ class MeshMotionMapping(UserExpression):
         self.counter += 1
         _, index = self.tree.query(x)
         # FIXME: Set spline parameter objectively
-        s = 0.5
+        s = 1E-2
         x_ = splrep(self.time, self.points[index, 0, :], s=s, per=True)
         y_ = splrep(self.time, self.points[index, 1, :], s=s, per=True)
         z_ = splrep(self.time, self.points[index, 2, :], s=s, per=True)
