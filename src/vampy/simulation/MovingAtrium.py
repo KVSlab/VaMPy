@@ -1,6 +1,7 @@
 import json
 import pickle
 from dolfin import set_log_level, UserExpression
+import numpy as np
 from oasismove.problems.NSfracStep import *
 from oasismove.problems.NSfracStep.MovingCommon import get_visualization_writers
 from os import makedirs
@@ -449,7 +450,7 @@ def temporal_hook(mesh, id_wall, id_out, cardiac_cycle, dt, t, save_solution_fre
     # Save velocity and pressure for post-processing
     if tstep % save_solution_frequency == 0 and tstep >= save_solution_at_tstep:
         files = NS_parameters['files']
-        if t <= (T / 2):
+        if t <= (cardiac_cycle * 5):
             files = files['half']
         else:
             files = files['full']
