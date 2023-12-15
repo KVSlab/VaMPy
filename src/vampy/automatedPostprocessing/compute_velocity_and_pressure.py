@@ -1,7 +1,6 @@
-from os import path
+from os import path, listdir
 
 from dolfin import parameters, FunctionSpace, XDMFFile, MPI, VectorFunctionSpace, HDF5File, Mesh, Function
-
 from vampy.automatedPostprocessing.postprocessing_common import read_command_line, get_dataset_names
 
 try:
@@ -24,28 +23,38 @@ def compute_velocity_and_pressure(folder, dt, save_frequency, velocity_degree, p
         step (int): Step size determining number of times data is sampled
     """
     # File paths
-    file_path_u = path.join(folder, "u.h5")
-    file_path_p = path.join(folder, "p.h5")
-    file_path_d = path.join(folder, "d.h5")
-    file_path_mesh = path.join(folder, "mesh.h5")
+    folders = [path.join(folder, f) for f in listdir(folder) if "Solutions_" in f]
+    mesh_path = path.join(folders[0], "mesh.h5")
+    file_us = [HDF5File(MPI.comm_world, path.join(f, "u.h5"), "r") for f in folders]
+    file_ps = [HDF5File(MPI.comm_world, path.join(f, "p.h5"), "r") for f in folders]
+    file_ds = [HDF5File(MPI.comm_world, path.join(f, "d.h5"), "r") for f in folders]
 
     # Define HDF5Files
-    file_u = HDF5File(MPI.comm_world, file_path_u, "r")
-    file_p = HDF5File(MPI.comm_world, file_path_p, "r")
-    file_d = None
-    if path.exists(file_path_d):
-        file_d = HDF5File(MPI.comm_world, file_path_d, "r")
+    dataset_us = []
+    dataset_ps = []
+    dataset_ds = []
+    counters = []
+    for i in range(len(file_us)):
+        file_u = file_us[i]
+        file_p = file_ps[i]
+        file_d = file_ds[i]
 
-    # Read in datasets
-    dataset_u = get_dataset_names(file_u, step=step, vector_filename="/velocity/vector_%d")
-    dataset_p = get_dataset_names(file_p, step=step, vector_filename="/pressure/vector_%d")
-    if file_d is not None:
+        # Read in datasets
+        dataset_u = get_dataset_names(file_u, step=step, vector_filename="/velocity/vector_%d")
+        dataset_p = get_dataset_names(file_p, step=step, vector_filename="/pressure/vector_%d")
         dataset_d = get_dataset_names(file_d, step=step, vector_filename="/deformation/vector_%d")
+        counters.append(len(dataset_u))
+
+        dataset_us += dataset_u
+        dataset_ps += dataset_p
+        dataset_ds += dataset_d
+
+    # file_path_mesh = "/Users/henriakj/PhD/Code/VaMPy/src/vampy/simulation/MyMesh/mesh.h5"
 
     # Read mesh saved as HDF5 format
     mesh = Mesh()
-    with HDF5File(MPI.comm_world, file_path_mesh, "r") as mesh_file:
-        mesh_file.read(mesh, "mesh", False)
+    with HDF5File(MPI.comm_world, mesh_path, "r") as mesh_file:
+        mesh_file.read(mesh, "mesh", True)
 
     # Define functionspaces and functions
     if MPI.rank(MPI.comm_world) == 0:
@@ -76,15 +85,19 @@ def compute_velocity_and_pressure(folder, dt, save_frequency, velocity_degree, p
         print("=" * 10, "Start post processing", "=" * 10)
 
     counter = 1
-    for i in range(len(dataset_u)):
+    k = 0
+    for i in range(len(dataset_us)):
         # Set physical time (in [ms])
         t = dt * counter * save_frequency
+        file_u, file_p, file_d = file_us[k], file_ps[k], file_ds[k]
+        if counter in counters:
+            k += 1
 
-        file_u.read(u, dataset_u[i])
-        file_p.read(p, dataset_p[i])
+        file_u.read(u, dataset_us[i])
+        file_p.read(p, dataset_ps[i])
 
         if MPI.rank(MPI.comm_world) == 0:
-            timestamp = file_u.attributes(dataset_u[i])["timestamp"]
+            timestamp = file_u.attributes(dataset_us[i])["timestamp"]
             print("=" * 10, "Timestep: {}".format(timestamp), "=" * 10)
 
         # Store velocity
@@ -98,13 +111,12 @@ def compute_velocity_and_pressure(folder, dt, save_frequency, velocity_degree, p
         # Store deformation
         # NB: Storing together with velocity.
         if file_d is not None:
-            file_d.read(d, dataset_d[i])
+            file_d.read(d, dataset_ds[i])
             d.rename("deformation", "deformation")
             u_writer.write(d, t)
 
         # Update file_counter
         counter += step
-
     print("========== Post processing finished ==========")
     print("Results saved to: {}".format(folder))
 
