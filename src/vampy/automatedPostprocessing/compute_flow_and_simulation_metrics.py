@@ -127,15 +127,14 @@ def compute_u_avg(dataset_us,file_counters,file_us, file_path_u_avg, n_cycles, s
         start_cycle (int): Determines which cardiac cycle to start from for post-processing
     """
     k = 0
-    for save_step in range(saved_time_steps_per_cycle):
+    files_u = reshape_array(dataset_us, n_cycles, saved_time_steps_per_cycle)
+    files_counter = reshape_array(dataset_us, n_cycles, saved_time_steps_per_cycle)
+
+    for files, counters in zip(files_u, files_counter)[:3]:
         time = -1
-        arr = reshape_array(dataset_us, n_cycles, saved_time_steps_per_cycle)
-        embed()
-        exit()
-        k+=1
-        for cycle in range(start_cycle - 1, n_cycles):
-            data = dataset_us[save_step + cycle * saved_time_steps_per_cycle]
-            # Set time step
+        for k, data in zip(counters,files):
+            file_u = file_us[k]
+
             if time == -1:
                 time = int(file_u.attributes(data)["timestamp"])
 
@@ -150,14 +149,15 @@ def compute_u_avg(dataset_us,file_counters,file_us, file_path_u_avg, n_cycles, s
             print("=" * 10, f"Computing average velocity at time: {time} ms", "=" * 10)
 
         # Save average velocity to HDF5 format
-        file_mode = "w" if save_step == 0 else "a"
+        file_mode = "w" if not path.exists(file_path_u_avg) else "a"
         viz_u_avg = HDF5File(MPI.comm_world, file_path_u_avg, file_mode=file_mode)
         viz_u_avg.write(u_avg, "/velocity", time)
         viz_u_avg.close()
 
         # Reset u_avg vector
         u_avg.vector().zero()
-
+        print(files, counters)
+    exit()
 
 def get_files_for_cycle_averaging(dataset_names, file_path_u_avg, number_of_cycles, saved_time_steps_per_cycle,
                                   start_cycle):
