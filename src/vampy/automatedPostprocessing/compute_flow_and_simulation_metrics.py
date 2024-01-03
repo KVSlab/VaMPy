@@ -1,6 +1,7 @@
-from os import path
+from os import path, listdir
 
 import numpy as np
+from IPython import embed
 from dolfin import FunctionSpace, Function, MPI, VectorFunctionSpace, Timer, project, sqrt, inner, HDF5File, XDMFFile, \
     assign, CellDiameter, Mesh, TestFunction, list_timings, TimingClear, TimingType
 from vampy.automatedPostprocessing.postprocessing_common import read_command_line, get_dataset_names, \
@@ -27,22 +28,35 @@ def compute_flow_and_simulation_metrics(folder, nu, dt, velocity_degree, T, time
         average_over_cycles (bool): A flag indicating whether to perform cycle averaging.
     """
     # File paths
-    file_path_u = path.join(folder, "u.h5")
-    file_path_u_avg = path.join(folder, "u_avg.h5")
+    folders = [path.join(folder, f) for f in listdir(folder) if "SolutionsFull_" in f]
+    file_us = [HDF5File(MPI.comm_world, path.join(f, "u.h5"), "r") for f in folders]
     mesh_path = path.join(folder, "mesh.h5")
+    file_path_u_avg = path.join(folder, "u_avg.h5")
 
-    file_u = HDF5File(MPI.comm_world, file_path_u, "r")
+    dataset_us = []
+    file_counters = []
+    saved_time_steps_per_cycle = int(T / dt / save_frequency / step)
+    for i in range(len(file_us)):
+        file_u = file_us[i]
+        dataset_u = get_dataset_names(file_u, step=step, vector_filename="/velocity/vector_%d")
+        slice_id = len(dataset_u) % saved_time_steps_per_cycle
+        if slice_id != 0:
+            dataset_u_sliced = dataset_u[:-slice_id]
+        else:
+            dataset_u_sliced = dataset_u
+
+        # Add to collective dataset
+        dataset_us += dataset_u_sliced
+        file_counters += [i] * len(dataset_u_sliced)
+
 
     # Get names of data to extract
     start = 0
     if MPI.rank(MPI.comm_world) == 0:
         print("Reading dataset names")
 
-    dataset_names = get_dataset_names(file_u, start=start, step=step)
-
     # Extract specific time steps if phase averaging
-    saved_time_steps_per_cycle = int(T / dt / save_frequency / step)
-    number_of_cycles = int(len(dataset_names) / saved_time_steps_per_cycle)
+    number_of_cycles = int(len(dataset_us) / saved_time_steps_per_cycle)
     cycles_to_average = None
 
     # Get mesh information
@@ -56,7 +70,7 @@ def compute_flow_and_simulation_metrics(folder, nu, dt, velocity_degree, T, time
     Vv = FunctionSpace(mesh, "CG", velocity_degree)
 
     if MPI.rank(MPI.comm_world) == 0:
-        print("Computing average velocity – u_avg(x,t)")
+        print("Computing average velocity: u_avg(x,t)")
 
     # Define u_avg(x,t)
     u = Function(V)
@@ -64,7 +78,7 @@ def compute_flow_and_simulation_metrics(folder, nu, dt, velocity_degree, T, time
 
     # Read velocity and compute cycle averaged velocity
     if not path.exists(file_path_u_avg):
-        compute_u_avg(dataset_names, file_path_u_avg, file_u, number_of_cycles, saved_time_steps_per_cycle, start_cycle,
+        compute_u_avg(dataset_us,file_counters, file_us, file_path_u_avg,  number_of_cycles, saved_time_steps_per_cycle, start_cycle,
                       u, u_avg)
 
     # Perform phase averaging (Average over cycles at specified time point(s))
@@ -89,8 +103,14 @@ def compute_flow_and_simulation_metrics(folder, nu, dt, velocity_degree, T, time
                                              file_path_u_avg, file_path_u, mesh, nu, number_of_files, DG, V, Vv,
                                              cycles_to_average, saved_time_steps_per_cycle)
 
+# Function to reshape the array
+def reshape_array(arr, rows, cols):
+    if len(arr) != rows * cols:
+        raise ValueError("The size of the original array does not match the specified dimensions.")
+    return [arr[i::cols] for i in range(cols)]
 
-def compute_u_avg(dataset_names, file_path_u_avg, file_u, n_cycles, saved_time_steps_per_cycle,
+
+def compute_u_avg(dataset_us,file_counters,file_us, file_path_u_avg, n_cycles, saved_time_steps_per_cycle,
                   start_cycle, u, u_avg):
     """
     Iterate over saved time steps and compute average velocity based on save sampling parameters
@@ -106,10 +126,15 @@ def compute_u_avg(dataset_names, file_path_u_avg, file_u, n_cycles, saved_time_s
         u_avg (Function): Function for storing average velocity
         start_cycle (int): Determines which cardiac cycle to start from for post-processing
     """
+    k = 0
     for save_step in range(saved_time_steps_per_cycle):
         time = -1
+        arr = reshape_array(dataset_us, n_cycles, saved_time_steps_per_cycle)
+        embed()
+        exit()
+        k+=1
         for cycle in range(start_cycle - 1, n_cycles):
-            data = dataset_names[save_step + cycle * saved_time_steps_per_cycle]
+            data = dataset_us[save_step + cycle * saved_time_steps_per_cycle]
             # Set time step
             if time == -1:
                 time = int(file_u.attributes(data)["timestamp"])
