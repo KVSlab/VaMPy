@@ -144,7 +144,7 @@ def compute_u_avg(dataset_us, file_counters, file_us, file_path_u_avg, n_cycles,
         u_avg.vector().zero()
 
 
-def get_files_for_cycle_averaging(dataset_us, file_counters, file_us, file_path_u_avg, number_of_cycles,
+def get_files_for_cycle_averaging(dataset_us, file_counters, file_us,  number_of_cycles,
                                   saved_time_steps_per_cycle, start_cycle):
     """
     Retrieves the dataset dictionaries for cycle averaging.
