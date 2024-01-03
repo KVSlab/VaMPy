@@ -1,7 +1,6 @@
 from os import path, listdir
 
 import numpy as np
-from IPython import embed
 from dolfin import FunctionSpace, Function, MPI, VectorFunctionSpace, Timer, project, sqrt, inner, HDF5File, XDMFFile, \
     assign, CellDiameter, Mesh, TestFunction, list_timings, TimingClear, TimingType
 
@@ -76,7 +75,7 @@ def compute_flow_and_simulation_metrics(folder, nu, dt, velocity_degree, T, time
     u_avg = Function(V)
 
     # Read velocity and compute cycle averaged velocity
-    if False and not path.exists(file_path_u_avg):
+    if not path.exists(file_path_u_avg):
         compute_u_avg(dataset_us, file_counters, file_us, file_path_u_avg, number_of_cycles, saved_time_steps_per_cycle,
                       start_cycle, u, u_avg)
 
@@ -181,9 +180,8 @@ def get_files_for_cycle_averaging(dataset_us, file_counters, file_us, file_path_
     dataset_dict = {"": dataset_us[id_start:]}
 
     # Create similar dataset for the mean velocity
-    dataset_dict_avg = {"": dataset_us[id_start:]}
-    #file_u_avg = HDF5File(MPI.comm_world, file_path_u_avg, "r")
-    #dataset_dict_avg = {"": get_dataset_names(file_u_avg, start=0, step=1) * (number_of_cycles - start_cycle + 1)}
+    file_u_avg = HDF5File(MPI.comm_world, file_path_u_avg, "r")
+    dataset_dict_avg = {"": get_dataset_names(file_u_avg, start=0, step=1) * (number_of_cycles - start_cycle + 1)}
 
     # Get number of files based on the sliced dataset names
     number_of_files = len(dataset_dict[""])
@@ -346,7 +344,7 @@ def define_functions_and_iterate_dataset(folder, file_counters, file_us, time_to
             metrics[vn + cycle_name].parameters["flush_output"] = True
 
     # Get u average
-    #file_u_avg = HDF5File(MPI.comm_world, file_path_u_avg, "r")
+    file_u_avg = HDF5File(MPI.comm_world, file_path_u_avg, "r")
 
     if MPI.rank(MPI.comm_world) == 0:
         print("=" * 10, "Starting post processing", "=" * 10)
@@ -358,13 +356,12 @@ def define_functions_and_iterate_dataset(folder, file_counters, file_us, time_to
         file_u = file_us[k]
 
         # Read velocity and cycle averaged velocity
-        file_u.read(u_avg, data_avg)
+        file_u_avg.read(u_avg, data_avg)
         file_u.read(u, data)
 
         if MPI.rank(MPI.comm_world) == 0:
             time = file_u.attributes(data)["timestamp"]
             print("=" * 10, f"Time: {time} ms", "=" * 10)
-
 
         # Compute u_prime
         t0 = Timer("u prime")
@@ -400,8 +397,6 @@ def define_functions_and_iterate_dataset(folder, file_counters, file_us, time_to
         turbulent_kinetic_energy_cycle_avg.vector().axpy(1, turbulent_kinetic_energy.vector())
         t0.stop()
 
-        embed()
-        exit()
         if counter % 10 == 0:
             list_timings(TimingClear.clear, [TimingType.wall])
 
