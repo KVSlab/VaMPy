@@ -126,9 +126,8 @@ def compute_u_avg(dataset_us,file_counters,file_us, file_path_u_avg, n_cycles, s
         u_avg (Function): Function for storing average velocity
         start_cycle (int): Determines which cardiac cycle to start from for post-processing
     """
-    k = 0
     files_u = reshape_array(dataset_us, n_cycles, saved_time_steps_per_cycle)[:3]
-    files_counter = reshape_array(dataset_us, n_cycles, saved_time_steps_per_cycle)[:3]
+    files_counter = reshape_array(file_counters, n_cycles, saved_time_steps_per_cycle)[:3]
 
     for files, counters in zip(files_u, files_counter):
         time = -1
