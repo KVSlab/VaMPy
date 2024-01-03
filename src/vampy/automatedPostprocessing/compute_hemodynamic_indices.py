@@ -42,7 +42,7 @@ def compute_hemodynamic_indices(folder, nu, rho, dt, T, velocity_degree, save_fr
     folders = [path.join(folder, f) for f in listdir(folder) if "SolutionsFull_" in f]
 
     file_us = [HDF5File(MPI.comm_world, path.join(f, "u.h5"), "r") for f in folders]
-    mesh_path = path.join(folder, "Solutions_V0", "mesh.h5")
+    mesh_path = path.join(folder, "mesh.h5")
 
     dataset_us = []
     file_counters = []
