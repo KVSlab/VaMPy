@@ -52,7 +52,10 @@ def compute_hemodynamic_indices(folder, nu, rho, dt, T, velocity_degree, save_fr
         file_u = file_us[i]
         dataset_u = get_dataset_names(file_u, step=step, vector_filename="/velocity/vector_%d")
         slice_id = len(dataset_u) % saved_time_steps_per_cycle
-        dataset_u_sliced = dataset_u[:-slice_id]
+        if slice_id != 0:
+            dataset_u_sliced = dataset_u[:-slice_id]
+        else:
+            dataset_u_sliced = dataset_u
 
         # Add to collective dataset
         dataset_us += dataset_u_sliced
