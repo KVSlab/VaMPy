@@ -346,26 +346,25 @@ def define_functions_and_iterate_dataset(folder, file_counters, file_us, time_to
             metrics[vn + cycle_name].parameters["flush_output"] = True
 
     # Get u average
-    file_u_avg = HDF5File(MPI.comm_world, file_path_u_avg, "r")
+    #file_u_avg = HDF5File(MPI.comm_world, file_path_u_avg, "r")
 
     if MPI.rank(MPI.comm_world) == 0:
         print("=" * 10, "Starting post processing", "=" * 10)
 
     counter = 0
     for k, data, data_avg in zip(file_counters, dataset, dataset_avg):
-        embed()
-        exit()
         counter += 1
 
         file_u = file_us[k]
 
         # Read velocity and cycle averaged velocity
-        file_u_avg.read(u_avg, data_avg)
+        file_u.read(u_avg, data_avg)
         file_u.read(u, data)
 
         if MPI.rank(MPI.comm_world) == 0:
             time = file_u.attributes(data)["timestamp"]
             print("=" * 10, f"Time: {time} ms", "=" * 10)
+
 
         # Compute u_prime
         t0 = Timer("u prime")
@@ -401,6 +400,8 @@ def define_functions_and_iterate_dataset(folder, file_counters, file_us, time_to
         turbulent_kinetic_energy_cycle_avg.vector().axpy(1, turbulent_kinetic_energy.vector())
         t0.stop()
 
+        embed()
+        exit()
         if counter % 10 == 0:
             list_timings(TimingClear.clear, [TimingType.wall])
 
