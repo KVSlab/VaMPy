@@ -1,9 +1,8 @@
 from os import path, listdir
 
 import numpy as np
-from IPython import embed
-from dolfin import FunctionSpace, Function, MPI, VectorFunctionSpace, Timer, project, HDF5File, XDMFFile, \
-    assign, CellDiameter, Mesh, TestFunction, list_timings, TimingClear, TimingType
+from dolfin import FunctionSpace, Function, MPI, VectorFunctionSpace, Timer, HDF5File, XDMFFile, \
+    Mesh, TestFunction, list_timings, TimingClear, TimingType
 
 from vampy.automatedPostprocessing.postprocessing_common import read_command_line, get_dataset_names
 
@@ -144,7 +143,7 @@ def compute_u_avg(dataset_us, file_counters, file_us, file_path_u_avg, n_cycles,
         u_avg.vector().zero()
 
 
-def get_files_for_cycle_averaging(dataset_us, file_counters, file_us,  number_of_cycles,
+def get_files_for_cycle_averaging(dataset_us, file_counters, file_us, number_of_cycles,
                                   saved_time_steps_per_cycle, start_cycle):
     """
     Retrieves the dataset dictionaries for cycle averaging.
@@ -241,8 +240,8 @@ def define_functions_and_iterate_dataset(folder, file_counters, file_brts, time_
 
     # Energy
     brt = Function(Vv)
-    brt_avg= Function(Vv)
-    brt_cycle_avg= Function(Vv)
+    brt_avg = Function(Vv)
+    brt_cycle_avg = Function(Vv)
 
     # Velocity
     u0 = Function(Vv)
@@ -251,7 +250,6 @@ def define_functions_and_iterate_dataset(folder, file_counters, file_brts, time_
     u0_prime = Function(Vv)
     u1_prime = Function(Vv)
     u2_prime = Function(Vv)
-
 
     # Create XDMF files for saving metrics
     if cycles_to_average is None:
@@ -277,12 +275,11 @@ def define_functions_and_iterate_dataset(folder, file_counters, file_brts, time_
             metrics[vn + cycle_name].parameters["rewrite_function_mesh"] = False
             metrics[vn + cycle_name].parameters["flush_output"] = True
 
-
     if MPI.rank(MPI.comm_world) == 0:
         print("=" * 10, "Starting post processing", "=" * 10)
 
     counter = 0
-    for k, data in zip(file_counters, dataset ):
+    for k, data in zip(file_counters, dataset):
         counter += 1
 
         file_brt = file_brts[k]
@@ -290,14 +287,9 @@ def define_functions_and_iterate_dataset(folder, file_counters, file_brts, time_
         # Read velocity and cycle averaged velocity
         file_brt.read(u, data)
 
-
         if MPI.rank(MPI.comm_world) == 0:
             time = file_brt.attributes(data)["timestamp"]
             print("=" * 10, f"Time: {time} ms", "=" * 10)
-
-
-        embed()
-        exit()
 
         # Compute u_prime
         t0 = Timer("BRT")
