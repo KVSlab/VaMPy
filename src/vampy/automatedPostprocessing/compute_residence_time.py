@@ -8,7 +8,7 @@ from vampy.automatedPostprocessing.postprocessing_common import read_command_lin
     rate_of_dissipation, rate_of_strain
 
 
-def compute_flow_and_simulation_metrics(folder, nu, dt, velocity_degree, T, times_to_average, save_frequency,
+def compute_residence_time(folder, nu, dt, velocity_degree, T, times_to_average, save_frequency,
                                         start_cycle, step, average_over_cycles):
     """
     Computes several flow field characteristics and metrics for the velocity field.
@@ -462,11 +462,11 @@ def define_functions_and_iterate_dataset(folder, file_counters, file_us, time_to
         print(f"Results saved to: {save_folder}")
 
 
-def main_metrics():
+def main_residence():
     folder, nu, _, dt, velocity_degree, _, _, T, save_frequency, times_to_average, start_cycle, step, \
     average_over_cycles = read_command_line()
 
-    compute_flow_and_simulation_metrics(folder, nu, dt, velocity_degree, T, times_to_average, save_frequency,
+    compute_residence_time(folder, nu, dt, velocity_degree, T, times_to_average, save_frequency,
                                         start_cycle, step, average_over_cycles)
 
 
@@ -474,5 +474,5 @@ if __name__ == '__main__':
     folder, nu, _, dt, velocity_degree, _, _, T, save_frequency, times_to_average, start_cycle, step, \
     average_over_cycles = read_command_line()
 
-    compute_flow_and_simulation_metrics(folder, nu, dt, velocity_degree, T, times_to_average, save_frequency,
+    compute_residence_time(folder, nu, dt, velocity_degree, T, times_to_average, save_frequency,
                                         start_cycle, step, average_over_cycles)

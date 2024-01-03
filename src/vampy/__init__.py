@@ -4,6 +4,7 @@ from importlib.metadata import metadata
 # Imports from post-processing
 from .automatedPostprocessing import compute_flow_and_simulation_metrics
 from .automatedPostprocessing import compute_hemodynamic_indices
+from .automatedPostprocessing import compute_residence_time
 from .automatedPostprocessing import compute_velocity_and_pressure
 from .automatedPostprocessing import postprocessing_common
 from .automatedPostprocessing import visualize_probes
@@ -50,6 +51,7 @@ __all__ = [
     "compute_flow_and_simulation_metrics",
     "compute_hemodynamic_indices",
     "compute_velocity_and_pressure",
+    "compute_residence_time",
     "postprocessing_common",
     "visualize_probes",
     "automated_preprocessing",
