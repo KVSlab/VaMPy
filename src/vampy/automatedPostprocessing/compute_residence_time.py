@@ -237,9 +237,7 @@ def define_functions_and_iterate_dataset(folder, file_counters, file_brts, time_
     """
     # Functions for storing values
     v = TestFunction(DG)
-    u = Function(V)
-    u_avg = Function(V)
-    u_prime = Function(V)
+    u = Function(Vv)
 
     # Energy
     brt = Function(Vv)
@@ -292,9 +290,14 @@ def define_functions_and_iterate_dataset(folder, file_counters, file_brts, time_
         # Read velocity and cycle averaged velocity
         file_brt.read(u, data)
 
+
         if MPI.rank(MPI.comm_world) == 0:
             time = file_brt.attributes(data)["timestamp"]
             print("=" * 10, f"Time: {time} ms", "=" * 10)
+
+
+        embed()
+        exit()
 
         # Compute u_prime
         t0 = Timer("BRT")
@@ -305,8 +308,6 @@ def define_functions_and_iterate_dataset(folder, file_counters, file_brts, time_
 
         if counter % 10 == 0:
             list_timings(TimingClear.clear, [TimingType.wall])
-        embed()
-        exit()
         if len(cycles_to_average) != 0 and counter == counters_to_save[0]:
             # Get cycle number
             cycle = int(counters_to_save[0] / saved_time_steps_per_cycle)
