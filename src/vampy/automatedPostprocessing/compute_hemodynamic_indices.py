@@ -1,6 +1,5 @@
 from os import path, listdir
 
-from IPython import embed
 from dolfin import Function, VectorFunctionSpace, FunctionSpace, parameters, MPI, HDF5File, Mesh, XDMFFile, \
     BoundaryMesh, project, inner
 
@@ -154,8 +153,7 @@ def compute_hemodynamic_indices(folder, nu, rho, dt, T, velocity_degree, save_fr
         if MPI.rank(MPI.comm_world) == 0:
             timestamp = file_u.attributes(data)["timestamp"]
             print("=" * 10, "Timestep: {}".format(timestamp), "=" * 10)
-        embed()
-        exit()
+
         # Compute WSS
         if MPI.rank(MPI.comm_world) == 0:
             print("Compute WSS (mean)")
@@ -184,7 +182,7 @@ def compute_hemodynamic_indices(folder, nu, rho, dt, T, velocity_degree, save_fr
 
         # Save instantaneous WSS
         tau.rename("WSS", "WSS")
-        indices["WSS"].write(tau, dt * counter)
+        #indices["WSS"].write(tau, dt * counter)
 
         if len(cycles_to_average) != 0 and counter == counters_to_save[0]:
             # Get cycle number
