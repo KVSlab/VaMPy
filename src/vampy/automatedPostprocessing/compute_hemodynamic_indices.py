@@ -46,13 +46,17 @@ def compute_hemodynamic_indices(folder, nu, rho, dt, T, velocity_degree, save_fr
     mesh_path = path.join(folder, "Solutions_V0", "mesh.h5")
 
     dataset_us = []
-    counters = []
+    file_counters = []
+    saved_time_steps_per_cycle = int(T / dt / save_frequency / step)
     for i in range(len(file_us)):
         file_u = file_us[i]
         dataset_u = get_dataset_names(file_u, step=step, vector_filename="/velocity/vector_%d")
-        embed()
-        exit()
+        slice_id = len(dataset_u) % saved_time_steps_per_cycle
+        dataset_u_sliced = dataset_u[:-slice_id]
 
+        # Add to collective dataset
+        dataset_us += dataset_u_sliced
+        file_counters += [i] * len(dataset_u_sliced)
 
     # Determine what time step to start post-processing from
     start = int(T / dt / save_frequency * (start_cycle - 1))
@@ -60,8 +64,6 @@ def compute_hemodynamic_indices(folder, nu, rho, dt, T, velocity_degree, save_fr
     # Get names of data to extract
     if MPI.rank(MPI.comm_world) == 0:
         print("Reading dataset names")
-
-    dataset = get_dataset_names(file_u, start=start, step=step)
 
     # Read mesh saved as HDF5 format
     mesh = Mesh()
@@ -111,8 +113,7 @@ def compute_hemodynamic_indices(folder, nu, rho, dt, T, velocity_degree, save_fr
     stress = STRESS(u, 0.0, nu, mesh)
 
     # Get number of saved steps and cycles
-    saved_time_steps_per_cycle = int(T / dt / save_frequency / step)
-    n_cycles = int(len(dataset) / saved_time_steps_per_cycle)
+    n_cycles = int(len(dataset_us) / saved_time_steps_per_cycle)
 
     # Set number of cycles to average over
     cycles_to_average = list(range(1, n_cycles + 1)) if average_over_cycles else []
@@ -120,8 +121,7 @@ def compute_hemodynamic_indices(folder, nu, rho, dt, T, velocity_degree, save_fr
     cycle_names = [""] + ["_cycle_{:02d}".format(cycle) for cycle in cycles_to_average]
 
     # Create XDMF files for saving indices
-    fullname = file_path_u.replace("u.h5", "%s%s.xdmf")
-    fullname = fullname.replace("Solutions", "Hemodynamics")
+    solution_path = path.join(folder, "Hemodynamics", "%s%s.xdmf")
     index_names = ["RRT", "OSI", "ECAP", "TAWSS", "TWSSG"]
     index_variables = [RRT, OSI, ECAP, TAWSS, TWSSG]
     index_variables_avg = [RRT_avg, OSI_avg, ECAP_avg, TAWSS_avg, TWSSG_avg]
@@ -132,7 +132,7 @@ def compute_hemodynamic_indices(folder, nu, rho, dt, T, velocity_degree, save_fr
     indices = {}
     for cycle_name in cycle_names:
         for index in index_names + ["WSS"]:
-            indices[index + cycle_name] = XDMFFile(MPI.comm_world, fullname % (index, cycle_name))
+            indices[index + cycle_name] = XDMFFile(MPI.comm_world, solution_path % (index, cycle_name))
             indices[index + cycle_name].parameters["rewrite_function_mesh"] = False
             indices[index + cycle_name].parameters["flush_output"] = True
             indices[index + cycle_name].parameters["functions_share_mesh"] = True
@@ -141,16 +141,18 @@ def compute_hemodynamic_indices(folder, nu, rho, dt, T, velocity_degree, save_fr
         print("=" * 10, "Start post processing", "=" * 10)
 
     counter = start
-    for data in dataset:
+    for k, data in zip(file_counters, dataset_us):
         # Update file_counter
         counter += 1
+        file_u = file_us[k]
 
         file_u.read(u, data)
 
         if MPI.rank(MPI.comm_world) == 0:
             timestamp = file_u.attributes(data)["timestamp"]
             print("=" * 10, "Timestep: {}".format(timestamp), "=" * 10)
-
+        embed()
+        exit()
         # Compute WSS
         if MPI.rank(MPI.comm_world) == 0:
             print("Compute WSS (mean)")
