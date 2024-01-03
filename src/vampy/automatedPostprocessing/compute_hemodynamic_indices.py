@@ -1,5 +1,6 @@
-from os import path
+from os import path, listdir
 
+from IPython import embed
 from dolfin import Function, VectorFunctionSpace, FunctionSpace, parameters, MPI, HDF5File, Mesh, XDMFFile, \
     BoundaryMesh, project, inner
 
@@ -39,9 +40,19 @@ def compute_hemodynamic_indices(folder, nu, rho, dt, T, velocity_degree, save_fr
         average_over_cycles (bool): Averages over cardiac cycles if True
     """
     # File paths
-    file_path_u = path.join(folder, "u.h5")
-    mesh_path = path.join(folder, "mesh.h5")
-    file_u = HDF5File(MPI.comm_world, file_path_u, "r")
+    folders = [path.join(folder, f) for f in listdir(folder) if "SolutionsFull_" in f]
+
+    file_us = [HDF5File(MPI.comm_world, path.join(f, "u.h5"), "r") for f in folders]
+    mesh_path = path.join(folder, "Solutions_V0", "mesh.h5")
+
+    dataset_us = []
+    counters = []
+    for i in range(len(file_us)):
+        file_u = file_us[i]
+        dataset_u = get_dataset_names(file_u, step=step, vector_filename="/velocity/vector_%d")
+        embed()
+        exit()
+
 
     # Determine what time step to start post-processing from
     start = int(T / dt / save_frequency * (start_cycle - 1))
