@@ -307,7 +307,7 @@ def define_functions_and_iterate_dataset(folder, file_counters, file_brts, time_
                 print("========== Storing cardiac cycle {} ==========".format(cycle))
 
             # Get average over sampled time steps
-            for metric in list(metric_dict_cycle.values())[1:]:
+            for metric in list(metric_dict_cycle.values()):
                 metric.vector()[:] = metric.vector()[:] / saved_time_steps_per_cycle
 
             # Store solution
@@ -315,13 +315,12 @@ def define_functions_and_iterate_dataset(folder, file_counters, file_brts, time_
                 metrics[name + "_cycle_{:02d}".format(cycle)].write_checkpoint(metric, name)
 
             # Append solution to total solution
-            for metric_avg, metric_cycle_avg in zip(list(metric_dict.values())[1:],
-                                                    list(metric_dict_cycle.values())[1:]):
+            for metric_avg, metric_cycle_avg in zip(list(metric_dict.values()), list(metric_dict_cycle.values())):
                 metric_cycle_avg.vector().apply("insert")
                 metric_avg.vector().axpy(1, metric_cycle_avg.vector())
 
             # Reset tmp solutions
-            for metric_cycle_avg in list(metric_dict_cycle.values())[1:]:
+            for metric_cycle_avg in list(metric_dict_cycle.values()):
                 metric_cycle_avg.vector().zero()
 
             counters_to_save.pop(0)
