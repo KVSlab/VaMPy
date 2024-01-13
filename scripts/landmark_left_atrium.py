@@ -11,7 +11,6 @@
 ## Modified by Henrik A. Kjeldsberg, 2022
 
 import time
-from os import mkdir
 
 try:
     from morphman.common import *
@@ -40,8 +39,8 @@ def extract_LA_and_LAA(case, condition, cycle, clip_volume=False):
 
     # File paths
     print("--- Load model file\n")
-    # save_path = f"/home/opc/Simulation40/{condition}/{case}/results_moving_atrium/data/1/Hemodynamics"
-    save_path = f"/Users/henriakj/PhD/Code/OasisMove/results_34case/results_{case}_{condition}/Hemodynamics"
+    save_path = f"/home/opc/Simulation40/{condition.upper()}/{case}/results_moving_atrium/data/1/Hemodynamics"
+    # save_path = f"/Users/henriakj/PhD/Code/OasisMove/results_34case/results_{case}_{condition}/Hemodynamics"
     input_path = path.join(save_path, f"hemodynamics_cycle_{cycle:02d}.vtp")
     clipped_model = input_path.replace(".vtp", "_la_and_laa.vtp")
 
@@ -54,8 +53,8 @@ def extract_LA_and_LAA(case, condition, cycle, clip_volume=False):
     new_cl = input_path.replace(".vtp", "_centerline.vtp")
     surface = read_polydata(input_path)
 
-    # model_path = f'/app/OasisMove/src/oasismove/mesh/UKE_{condition.upper()}/{case}/'
-    model_path = f'/Users/henriakj/PhD/Code/VaMPy/models/models_inria/models_{condition.lower()}/{case}'
+    model_path = f'/app/OasisMove/src/oasismove/mesh/UKE_{condition.upper()}/{case}/'
+    # model_path = f'/Users/henriakj/PhD/Code/VaMPy/models/models_inria/models_{condition.lower()}/{case}'
     open_surface_path = path.join(model_path, 'model_remeshed_surface.vtp')
     centerline_path = path.join(model_path, 'model_centerlines.vtp')
     open_surface = read_polydata(open_surface_path)
@@ -200,7 +199,7 @@ def merge_dataset(laa_volume):
     return cleanFilter.GetOutput()
 
 
-def separate_LA_and_LAA(folder, laa_point, clip_volume=False):
+def separate_LA_and_LAA(case, condition, cycle, laa_point, clip_volume=False):
     """Algorithm for detecting the left atrial appendage and isolate it from the atrium lumen
      based on the cross-sectional area along enterlines.
 
@@ -219,22 +218,26 @@ def separate_LA_and_LAA(folder, laa_point, clip_volume=False):
 
     # File paths
     print("--- Load model file\n")
-    save_folder = f"/Users/henriakj/PhD/Code/VaMPy/models/models_inria/models_landmarked/{condition}/{case}"
-    if not path.exists(save_folder):
-        mkdir(save_folder)
+    save_path = f"/home/opc/Simulation40/{condition.upper()}/{case}/results_moving_atrium/data/1/Hemodynamics"
+    # save_path = f"/Users/henriakj/PhD/Code/OasisMove/results_34case/results_{case}_{condition}/Hemodynamics"
+    input_path = path.join(save_path, f"hemodynamics_cycle_{cycle:02d}.vtp")
+    clipped_model = input_path.replace(".vtp", "_la_and_laa.vtp")
+    laa_model_path = input_path.replace('.vtp', '_laa.vtp')
+    la_model_path = input_path.replace('.vtp', '_la.vtp')
 
-    clipped_model = path.join(save_folder, "model_la_laa.vtp")
-    clipped_model_vtu = path.join(save_folder, "model_la_laa.vtu")
-    laa_model_path = path.join(save_folder, "model_laa.vtp")
-    la_model_path = path.join(save_folder, "model_la.vtp")
-    laa_model_path_vtu = path.join(save_folder, "model_laa.vtu")
-    la_model_path_vtu = path.join(save_folder, "model_la.vtu")
     surface = read_polydata(clipped_model)
     if clip_volume:
+        laa_model_path_vtu = path.join(save_folder, "model_laa.vtu")
+        la_model_path_vtu = path.join(save_folder, "model_la.vtu")
+        clipped_model_vtu = path.join(save_folder, "model_la_laa.vtu")
         volume = read_polydata(clipped_model_vtu)
-    capped_surface = vmtk_cap_polydata(surface)
 
-    laa_centerlines_path = path.join(folder, "model_region_centerline_0.vtp")
+    capped_surface = surface
+
+    model_path = f'/app/OasisMove/src/oasismove/mesh/UKE_{condition.upper()}/{case}/'
+    # model_path = f'/Users/henriakj/PhD/Code/VaMPy/models/models_inria/models_{condition.lower()}/{case}'
+
+    laa_centerlines_path = path.join(model_path, "model_region_centerline_0.vtp")
     laa_centerlines = read_polydata(laa_centerlines_path)
     id_start = int(laa_centerlines.GetNumberOfPoints() * 0.1)
     id_stop = int(laa_centerlines.GetNumberOfPoints() * 0.8)
@@ -571,27 +574,28 @@ if __name__ == "__main__":
     cases = ["1029"]
     cycle = 5
     for condition in conditions:
-        root = f"/Users/henriakj/PhD/Code/VaMPy/models/models_inria/models_{condition}"
         for case in cases:
             print("--- Extracting case: {}".format(case))
             # Get LAA point
             print(f"--- Loading LAA points for {case}, condition {condition}")
-            laa_apex_point_path = f"/Users/henriakj/PhD/Code/VaMPy/models/models_inria/laa_apex_points_{condition}.json"
+            # Oracle
+            laa_apex_point_path = f"/home/opc/Simulation40/laa_apex_points_{condition}.json"
+
+            # Local
+            # laa_apex_point_path = f"/Users/henriakj/PhD/Code/VaMPy/models/models_inria/laa_apex_points_{condition}.json"
+
             with open(laa_apex_point_path) as f:
                 info = json.load(f)
             laa_point = info[case][0]
             t0 = time.time()
-            folder = path.join(root, case)
 
             t1 = time.time()
             try:
                 extract_LA_and_LAA(case, condition, cycle, clip_volume)
-                # separate_LA_and_LAA(folder, laa_point, clip_volume)
+                separate_LA_and_LAA(case, condition, cycle, laa_point, clip_volume)
             except Exception as e:
                 print(f"--- FAILED for case {case}, condition {condition}, Error: {e}")
                 failed.append(f"{condition}:{case}")
 
             t2 = time.time()
             print(f"--- Time spent extracting LAA: {t2 - t1:.3f} s")
-    print(failed)
-    #  Failed SR: ['sr:0029', 'sr:0077', 'sr:0081', 'sr:1029', 'sr:1031', 'sr:1033', 'sr:1035', 'sr:1037', 'sr:2022']
