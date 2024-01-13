@@ -11,7 +11,7 @@
 ## Modified by Henrik A. Kjeldsberg, 2022
 
 import time
-from os import mkdir, listdir
+from os import mkdir
 
 try:
     from morphman.common import *
@@ -26,7 +26,7 @@ except ImportError:
     pass
 
 
-def extract_LA_and_LAA(folder, clip_volume=False):
+def extract_LA_and_LAA(case, condition, cycle, clip_volume=False):
     """Algorithm for detecting the left atrial appendage and isolate it from the atrium lumen
      based on the cross-sectional area along enterlines.
 
@@ -37,33 +37,39 @@ def extract_LA_and_LAA(folder, clip_volume=False):
     Output:
         surface (vtkPolyData): A landmarked surface
     """
-    # "/Users/henriakj/PhD/Code/OasisMove/results_34case/results_1029_SR/Hemodynamics/hemodynamics_cycle_05.vtp"
 
     # File paths
     print("--- Load model file\n")
-    save_folder = f"/Users/henriakj/PhD/Code/VaMPy/models/models_inria/models_landmarked/{condition}/{case}"
-    if not path.exists(save_folder):
-        mkdir(save_folder)
+    # save_path = f"/home/opc/Simulation40/{condition}/{case}/results_moving_atrium/data/1/Hemodynamics"
+    save_path = f"/Users/henriakj/PhD/Code/OasisMove/results_34case/results_{case}_{condition}/Hemodynamics"
+    input_path = path.join(save_path, f"hemodynamics_cycle_{cycle:02d}.vtp")
+    clipped_model = input_path.replace(".vtp", "_la_and_laa.vtp")
 
-    input_path = path.join(folder, "model_remeshed_surface.vtp")
-    model_centerline_path = path.join(folder, "model_centerlines.vtp")
-    input_path_vtu = path.join(folder, "model.vtu")
-    clipped_model = path.join(save_folder, "model_la_laa.vtp")
-    clipped_model_vtu = path.join(save_folder, "model_la_laa.vtu")
-    new_cl = path.join(save_folder, "model_cl.vtp")
+    if clip_volume:
+        # BRT and Energy
+        input_path_vtu = path.join(folder, "model.vtu")
+        volume = read_polydata(input_path_vtu)
+        clipped_model_vtu = path.join(save_path, "model_la_laa.vtu")
+
+    new_cl = input_path.replace(".vtp", "_centerline.vtp")
     surface = read_polydata(input_path)
-    volume = read_polydata(input_path_vtu)
-    capped_surface = vmtk_cap_polydata(surface)
+
+    # model_path = f'/app/OasisMove/src/oasismove/mesh/UKE_{condition.upper()}/{case}/'
+    model_path = f'/Users/henriakj/PhD/Code/VaMPy/models/models_inria/models_{condition.lower()}/{case}'
+    open_surface_path = path.join(model_path, 'model_remeshed_surface.vtp')
+    centerline_path = path.join(model_path, 'model_centerlines.vtp')
+    open_surface = read_polydata(open_surface_path)
+    capped_surface = surface
 
     # Centers
-    inlet, outlets = compute_centers(surface)
+    inlet, outlets = compute_centers(open_surface)
     p_outlet = np.array(inlet)
 
     # Centerline
     capped_surface = vtk_clean_polydata(capped_surface)
     la_centerlines, _, _ = compute_centerlines(inlet, outlets, new_cl, capped_surface, resampling=0.1, smooth=True)
     # Read original
-    la_centerline = read_polydata(model_centerline_path)
+    la_centerline = read_polydata(centerline_path)
 
     # Clip PVs
     N_PVs = 4
@@ -563,7 +569,7 @@ if __name__ == "__main__":
     clip_volume = False
     conditions = ['sr']
     cases = ["1029"]
-
+    cycle = 5
     for condition in conditions:
         root = f"/Users/henriakj/PhD/Code/VaMPy/models/models_inria/models_{condition}"
         for case in cases:
@@ -579,8 +585,8 @@ if __name__ == "__main__":
 
             t1 = time.time()
             try:
-                extract_LA_and_LAA(folder, clip_volume)
-                separate_LA_and_LAA(folder, laa_point, clip_volume)
+                extract_LA_and_LAA(case, condition, cycle, clip_volume)
+                # separate_LA_and_LAA(folder, laa_point, clip_volume)
             except Exception as e:
                 print(f"--- FAILED for case {case}, condition {condition}, Error: {e}")
                 failed.append(f"{condition}:{case}")
