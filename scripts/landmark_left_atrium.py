@@ -197,29 +197,20 @@ def extract_LA_and_LAA(case, condition, cycle, is_local, clip_volume=False):
 
     print("--- Saving LA and LAA to: {}".format(clipped_model))
     surface = attach_clipped_regions_to_surface(surface, clipped, center)
-    write_polydata(surface, clipped_model)
+    # write_polydata(surface, clipped_model)
 
     if clip_volume:
         print("--- Saving BRT LA and LAA volume to: {}".format(clipped_model_brt))
         volume_brt = attach_clipped_regions_to_surface(volume_brt, clipped_volume_brt, center, clip_volume=True)
-        write_polydata(volume_brt, clipped_model_brt)
+        #write_polydata(volume_brt, clipped_model_brt)
 
         print("--- Saving Energy LA and LAA volume to: {}".format(clipped_model_energy))
-        volume_brt = attach_clipped_regions_to_surface(volume_energy, clipped_volume_energy, center, clip_volume=True)
-        write_polydata(volume_brt, clipped_model_energy)
+        volume_energy = attach_clipped_regions_to_surface(volume_energy, clipped_volume_energy, center, clip_volume=True)
+        #write_polydata(volume_energy, clipped_model_energy)
 
 
-def merge_dataset(laa_volume):
-    # Merge close points
-    cleanFilter = vtk.vtkCleanPolyData()
-    cleanFilter.SetInputData(laa_volume)
-    cleanFilter.SetTolerance(0.001)  # Adjust this tolerance as needed
-    cleanFilter.Update()
 
-    return cleanFilter.GetOutput()
-
-
-def separate_LA_and_LAA(case, condition, cycle, laa_point, is_local, clip_volume=False):
+#def separate_LA_and_LAA(case, condition, cycle, laa_point, is_local, clip_volume=False):
     """Algorithm for detecting the left atrial appendage and isolate it from the atrium lumen
      based on the cross-sectional area along enterlines.
 
@@ -248,11 +239,11 @@ def separate_LA_and_LAA(case, condition, cycle, laa_point, is_local, clip_volume
         model_path = f'/app/OasisMove/src/oasismove/mesh/UKE_{condition.upper()}/{case}/'
 
     input_path = path.join(save_path, f"hemodynamics_cycle_{cycle:02d}.vtp")
-    clipped_model = input_path.replace(".vtp", "_la_and_laa.vtp")
+    #clipped_model = input_path.replace(".vtp", "_la_and_laa.vtp")
     laa_model_path = input_path.replace('.vtp', '_laa.vtp')
     la_model_path = input_path.replace('.vtp', '_la.vtp')
 
-    surface = read_polydata(clipped_model)
+    #surface = read_polydata(clipped_model)
     if clip_volume:
         input_path_brt = path.join(save_path_vtu, f"blood_residence_time_cycle_{cycle:02d}.vtu")
         input_path_energy = path.join(save_path_vtu, f"energy_cycle_{cycle:02d}.vtu")
@@ -265,8 +256,8 @@ def separate_LA_and_LAA(case, condition, cycle, laa_point, is_local, clip_volume
         laa_model_path_energy = input_path_energy.replace('.vtu', '_laa.vtu')
         la_model_path_energy = input_path_energy.replace('.vtu', '_la.vtu')
 
-        volume_brt = read_polydata(clipped_model_brt)
-        volume_energy = read_polydata(clipped_model_energy)
+        #volume_brt = read_polydata(clipped_model_brt)
+        #volume_energy = read_polydata(clipped_model_energy)
 
     capped_surface = vmtk_cap_polydata(surface)
 
