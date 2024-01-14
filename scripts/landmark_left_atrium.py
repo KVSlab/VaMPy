@@ -454,6 +454,49 @@ def vtk_merge_polydata(inputs, is_volume=False):
     return merged_data
 
 
+def vtk_compute_threshold(surface, name, lower=0, upper=1, threshold_type="between", source=1, volume=False):
+    """Wrapper for vtkThreshold. Extract a section of a surface given a criteria.
+
+    Args:
+        surface (vtkPolyData): The input data to be extracted.
+        name (str): Name of scalar array.
+        lower (float): Lower bound.
+        upper (float): Upper bound.
+        threshold_type (str): Type of threshold (lower, upper, between)
+        source (int): PointData or CellData.
+
+    Returns:
+        surface (vtkPolyData): The extracted surface based on the lower and upper limit.
+    """
+    # source = 1 uses cell data as input
+    # source = 0 uses point data as input
+
+    # Apply threshold
+    vtk_threshold = vtk.vtkThreshold()
+    vtk_threshold.SetInputData(surface)
+    if threshold_type == "between":
+        vtk_threshold.SetLowerThreshold(lower)
+        vtk_threshold.SetUpperThreshold(upper)
+    elif threshold_type == "lower":
+        vtk_threshold.SetLowerThreshold(lower)
+    elif threshold_type == "upper":
+        vtk_threshold.SetUpperThreshold(upper)
+    else:
+        print((("%s is not a threshold type. Pleace chose from: upper, lower" +
+                ", or between") % threshold_type))
+        sys.exit(0)
+
+    vtk_threshold.SetInputArrayToProcess(0, 0, 0, source, name)
+    vtk_threshold.Update()
+    surface = vtk_threshold.GetOutput()
+
+    # Convert to polydata
+    if not volume:
+        surface = vtk_convert_unstructured_grid_to_polydata(surface)
+
+    return surface
+
+
 def vtk_compute_connectivity(surface, mode="All", closest_point=None, show_color_regions=True,
                              mark_visited_points=False, is_volume=False):
     """Wrapper of vtkPolyDataConnectivityFilter. Compute connectivity.
