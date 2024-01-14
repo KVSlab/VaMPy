@@ -26,12 +26,29 @@ def main(case, condition, cycle):
     tWSSG_cycle_05xdmf = Xdmf3ReaderS(registrationName='TWSSG_cycle_05.xdmf', FileName=[
         path.join(solution_path, f'TWSSG_cycle_{cycle:02d}.xdmf')])
     tWSSG_cycle_05xdmf.PointArrays = ['TWSSG']
+
+
+
+
+    # create a new 'Append Attributes'
+    appendAttributes1 = AppendAttributes(registrationName='AppendAttributes1',
+                                         Input=[eCAP_cycle_05xdmf, oSI_cycle_05xdmf, rRT_cycle_05xdmf,
+                                                tAWSS_cycle_05xdmf, tWSSG_cycle_05xdmf])
+    # create a new 'Extract Surface'
+    extractSurface1 = ExtractSurface(registrationName='ExtractSurface1', Input=appendAttributes1)
+
+    # save data
+    save_path = path.join(solution_path, f"hemodynamics_cycle_{cycle:02d}.vtp")
+    SaveData(save_path, proxy=extractSurface1, PointDataArrays=['ECAP', 'OSI', 'RRT', 'TAWSS', 'TWSSG'])
+    exit()
+
     # get active view
     renderView1 = GetActiveViewOrCreate('RenderView')
 
     # show data in view
     oSI_cycle_05xdmfDisplay = Show(oSI_cycle_05xdmf, renderView1, 'UnstructuredGridRepresentation')
 
+    exit()
     # get color transfer function/color map for 'OSI'
     oSILUT = GetColorTransferFunction('OSI')
 
@@ -298,10 +315,6 @@ def main(case, condition, cycle):
     # set active source
     SetActiveSource(tWSSG_cycle_05xdmf)
 
-    # create a new 'Append Attributes'
-    appendAttributes1 = AppendAttributes(registrationName='AppendAttributes1',
-                                         Input=[eCAP_cycle_05xdmf, oSI_cycle_05xdmf, rRT_cycle_05xdmf,
-                                                tAWSS_cycle_05xdmf, tWSSG_cycle_05xdmf])
 
     # show data in view
     appendAttributes1Display = Show(appendAttributes1, renderView1, 'UnstructuredGridRepresentation')
@@ -463,14 +476,12 @@ if __name__ == '__main__':
     # conditions = ["SR", "AF"]
 
     conditions = ['SR']
-    cases = ['0004', '0006','0007']
-    cases = ['0003']
-    cycles = [1,2,3,4,5]
+    cases = ['0004']
+    cycle = 1
     for condition in conditions:
         for case in cases:
-            for cycle in cycles:
-                print(f"Combining and converting HEMODYNAMICS from xdmf to vtu for {case} for condition {condition} (Cycle {cycle})")
-                try:
-                    main(case, condition, cycle)
-                except Exception as e:
-                    print(f"-- FAILED for case {case}, condition {condition}), error: {e}")
+            print(f"Combining and converting HEMODYNAMICS from xdmf to vtu for {case} for condition {condition}")
+            try:
+                main(case, condition, cycle)
+            except Exception as e:
+                print(f"-- FAILED for case {case}, condition {condition}), error: {e}")

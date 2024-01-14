@@ -614,8 +614,8 @@ if __name__ == "__main__":
     failed = []
     clip_volume = False
     conditions = ['sr']
-    cases = ["1029"]
-    cycle = 5
+    cases = ["0003"]
+    cycle = 1
     for condition in conditions:
         for case in cases:
             print("--- Extracting case: {}".format(case))
