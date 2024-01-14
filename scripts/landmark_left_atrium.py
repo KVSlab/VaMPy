@@ -663,7 +663,7 @@ if __name__ == "__main__":
     clip_volume = True
     conditions = ['sr']
     cases = ["1029"]
-    cycle = 5
+    cycle = 3
     local = False
     for condition in conditions:
         for case in cases:
@@ -685,7 +685,7 @@ if __name__ == "__main__":
             t1 = time.time()
             try:
                 extract_LA_and_LAA(case, condition, cycle, local, clip_volume)
-                separate_LA_and_LAA(case, condition, cycle, laa_point, local, clip_volume)
+                # separate_LA_and_LAA(case, condition, cycle, laa_point, local, clip_volume)
             except Exception as e:
                 print(f"--- FAILED for case {case}, condition {condition}, Error: {e}")
                 failed.append(f"{condition}:{case}")
