@@ -115,10 +115,7 @@ if __name__ == '__main__':
     conditions = ["sr"]
     cases = ['1029']
     cycle = 3
-    is_local = True
-    metric = "blood_residence_time"
-    metric = "kinetic_energy"
-    metric = 'hemodynamics'
+    is_local = False
     metrics = ['kinetic_energy', 'turbulent_kinetic_energy', 'blood_residence_time', 'hemodynamics']
     for metric in metrics:
         for case in cases:
