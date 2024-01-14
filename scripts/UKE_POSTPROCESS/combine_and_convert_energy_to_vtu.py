@@ -5,10 +5,16 @@ from paraview.simple import *
 paraview.simple._DisableFirstRenderCameraReset()
 
 
-def main(case, condition, cycle):
+def main(case, condition, cycle, is_local=False):
     # create a new 'Xdmf3ReaderS'
-    filename_ke = f'/Users/henriakj/PhD/Code/OasisMove/results_34case/results_{case}_{condition}/FlowMetrics/kinetic_energy_cycle_{cycle:02d}.xdmf'
-    filename_tke = f'/Users/henriakj/PhD/Code/OasisMove/results_34case/results_{case}_{condition}/FlowMetrics/turbulent_kinetic_energy_cycle_{cycle:02d}.xdmf'
+    if is_local:
+        # LOCAL
+        filename_ke = f'/Users/henriakj/PhD/Code/OasisMove/results_34case/results_{case}_{condition}/FlowMetrics/kinetic_energy_cycle_{cycle:02d}.xdmf'
+        filename_tke = f'/Users/henriakj/PhD/Code/OasisMove/results_34case/results_{case}_{condition}/FlowMetrics/turbulent_kinetic_energy_cycle_{cycle:02d}.xdmf'
+    else:
+        # ORACLE
+        filename_ke = f"/home/opc/Simulation40/{condition}/{case}/results_moving_atrium/data/1/FlowMetrics/kinetic_energy_cycle_{cycle:02d}.xdmf"
+        filename_tke = f"/home/opc/Simulation40/{condition}/{case}/results_moving_atrium/data/1/FlowMetrics/turbulent_kinetic_energy_cycle_{cycle:02d}.xdmf"
 
     kinetic_energy_cycle_05xdmf = Xdmf3ReaderS(registrationName='kinetic_energy_cycle_05.xdmf', FileName=[filename_ke])
     turbulent_kinetic_energy_cycle_05xdmf = Xdmf3ReaderS(registrationName='turbulent_kinetic_energy_cycle_05.xdmf',
@@ -201,7 +207,11 @@ def main(case, condition, cycle):
     renderView1.Update()
 
     # save data
-    save_path = f'/Users/henriakj/PhD/Code/OasisMove/results_34case/results_{case}_{condition}/FlowMetrics/energy_cycle_{cycle:02d}.vtu'
+    if is_local:
+        save_path = f'/Users/henriakj/PhD/Code/OasisMove/results_34case/results_{case}_{condition}/FlowMetrics/energy_cycle_{cycle:02d}.vtu'
+    else:
+        save_path = f"/home/opc/Simulation40/{condition}/{case}/results_moving_atrium/data/1/FlowMetrics/turbulent_kinetic_energy_cycle_{cycle:02d}.vtu"
+
     SaveData(save_path,
              proxy=appendAttributes1, PointDataArrays=['kinetic_energy', 'turbulent_kinetic_energy'])
 

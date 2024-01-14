@@ -3,9 +3,15 @@ from paraview.simple import *
 paraview.simple._DisableFirstRenderCameraReset()
 
 
-def main(case, condition, cycle):
+def main(case, condition, cycle, is_local=False):
     # create a new 'Xdmf3ReaderS'
-    filename = f'/Users/henriakj/PhD/Code/OasisMove/results_34case/results_{case}_{condition}/FlowMetrics/blood_residence_time_cycle_{cycle:02d}.xdmf'
+    if is_local:
+        # LOCAL
+        filename = f'/Users/henriakj/PhD/Code/OasisMove/results_34case/results_{case}_{condition}/FlowMetrics/blood_residence_time_cycle_{cycle:02d}.xdmf'
+    else:
+        # ORACLE
+        filename = f"/home/opc/Simulation40/{condition}/{case}/results_moving_atrium/data/1/FlowMetrics/blood_residence_time_cycle_{cycle:02d}.xdmf"
+
     blood_residence_time_cycle_05xdmf = Xdmf3ReaderS(registrationName='blood_residence_time_cycle_05.xdmf',
                                                      FileName=[filename])
 
@@ -77,9 +83,13 @@ def main(case, condition, cycle):
     blood_residence_timeTF2D = GetTransferFunction2D('blood_residence_time')
 
     # save data
-    save_path= f'/Users/henriakj/PhD/Code/OasisMove/results_34case/results_{case}_{condition}/FlowMetrics/blood_residence_time_cycle_{cycle:02d}.vtu'
+    if is_local:
+        save_path = f'/Users/henriakj/PhD/Code/OasisMove/results_34case/results_{case}_{condition}/FlowMetrics/blood_residence_time_cycle_{cycle:02d}.vtu'
+    else:
+        save_path = f"/home/opc/Simulation40/{condition}/{case}/results_moving_atrium/data/1/FlowMetrics/blood_residence_time_cycle_{cycle:02d}.vtu"
+
     SaveData(save_path,
-        proxy=blood_residence_time_cycle_05xdmf, PointDataArrays=['blood_residence_time'])
+             proxy=blood_residence_time_cycle_05xdmf, PointDataArrays=['blood_residence_time'])
 
     layout1 = GetLayout()
     layout1.SetSize(2856, 1270)
