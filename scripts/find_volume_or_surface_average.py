@@ -114,16 +114,18 @@ def main_volume(case, condition, cycle, metric, is_local):
 if __name__ == '__main__':
     conditions = ["sr"]
     cases = ['1029']
-    cycle = 5
+    cycle = 3
     is_local = True
     metric = "blood_residence_time"
     metric = "kinetic_energy"
     metric = 'hemodynamics'
-    for case in cases:
-        for condition in conditions:
-            if metric in ['kinetic_energy', 'turublent_kinetic_energy', 'blood_residence_time']:
-                main_volume(case, condition, cycle, metric, is_local)
-            elif metric == 'hemodynamics':
-                main_surface(case, condition, cycle, is_local)
-            else:
-                print(f'Not valie metric {metric}')
+    metrics = ['kinetic_energy', 'turbulent_kinetic_energy', 'blood_residence_time', 'hemodynamics']
+    for metric in metrics:
+        for case in cases:
+            for condition in conditions:
+                if metric in ['kinetic_energy', 'turublent_kinetic_energy', 'blood_residence_time']:
+                    main_volume(case, condition, cycle, metric, is_local)
+                elif metric == 'hemodynamics':
+                    main_surface(case, condition, cycle, is_local)
+                else:
+                    print(f'Not valie metric {metric}')
