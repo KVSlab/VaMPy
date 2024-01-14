@@ -87,8 +87,8 @@ def main_volume(case, condition, cycle, metric, is_local):
         mesh_path_laa = f'/Users/henriakj/PhD/Code/OasisMove/results_34case/results_1029_SR/FlowMetrics/{metric_name}_cycle_{cycle:02d}_laa.vtu'
         mesh_path_la = f'/Users/henriakj/PhD/Code/OasisMove/results_34case/results_1029_SR/FlowMetrics/{metric_name}_cycle_{cycle:02d}_la.vtu'
     else:
-        mesh_path_laa = f"/home/opc/Simulation40/{condition.upper()}/{case}/results_moving_atrium/data/1/FlowMetrics/hemodynamics_cycle_{cycle:02d}_laa.vtu"
-        mesh_path_la = f"/home/opc/Simulation40/{condition.upper()}/{case}/results_moving_atrium/data/1/FlowMetrics/hemodynamics_cycle_{cycle:02d}_la.vtu"
+        mesh_path_laa = f"/home/opc/Simulation40/{condition.upper()}/{case}/results_moving_atrium/data/1/FlowMetrics/{metric_name}_cycle_{cycle:02d}_laa.vtu"
+        mesh_path_la = f"/home/opc/Simulation40/{condition.upper()}/{case}/results_moving_atrium/data/1/FlowMetrics/{metric_name}_cycle_{cycle:02d}_la.vtu"
 
     for name, mesh_path in zip(['LA', 'LAA'], [mesh_path_la, mesh_path_laa]):
         data = read_polydata(mesh_path)
@@ -115,15 +115,12 @@ if __name__ == '__main__':
     conditions = ["sr"]
     cases = ['1029']
     cycle = 3
-    is_local = True
-    metric = "blood_residence_time"
-    metric = "kinetic_energy"
-    metric = 'hemodynamics'
+    is_local =False
     metrics = ['kinetic_energy', 'turbulent_kinetic_energy', 'blood_residence_time', 'hemodynamics']
     for metric in metrics:
         for case in cases:
             for condition in conditions:
-                if metric in ['kinetic_energy', 'turublent_kinetic_energy', 'blood_residence_time']:
+                if metric in ['kinetic_energy', 'turbulent_kinetic_energy', 'blood_residence_time']:
                     main_volume(case, condition, cycle, metric, is_local)
                 elif metric == 'hemodynamics':
                     main_surface(case, condition, cycle, is_local)
