@@ -46,8 +46,11 @@ def main_surface(case, condition, cycle, is_local):
     # Compute mean, median, min, max, and volume average
     print(f"-- Loading case {case} condition {condition} cycle {cycle}")
     if is_local:
-        mesh_path_laa = f'/Users/henriakj/PhD/Code/OasisMove/results_34case/results_1029_SR/Hemodynamics/hemodynamics_cycle_{cycle:02d}_laa.vtp'
-        mesh_path_la = f'/Users/henriakj/PhD/Code/OasisMove/results_34case/results_1029_SR/Hemodynamics/hemodynamics_cycle_{cycle:02d}_la.vtp'
+        mesh_path_laa = f'/Users/henriakj/PhD/Code/OasisMove/results_34case/results_{case}_{condition}/Hemodynamics/hemodynamics_cycle_{cycle:02d}_laa.vtp'
+        mesh_path_la = f'/Users/henriakj/PhD/Code/OasisMove/results_34case/results_{case}_{condition}/Hemodynamics/hemodynamics_cycle_{cycle:02d}_la.vtp'
+    else:
+        mesh_path_laa = f"/home/opc/Simulation40/{condition.upper()}/{case}/results_moving_atrium/data/1/Hemodynamics/hemodynamics_cycle_{cycle:02d}_laa.vtp"
+        mesh_path_la = f"/home/opc/Simulation40/{condition.upper()}/{case}/results_moving_atrium/data/1/Hemodynamics/hemodynamics_cycle_{cycle:02d}_la.vtp"
 
     for name, mesh_path in zip(['LA', 'LAA'], [mesh_path_la, mesh_path_laa]):
         data = read_polydata(mesh_path)
@@ -83,6 +86,9 @@ def main_volume(case, condition, cycle, metric, is_local):
     if is_local:
         mesh_path_laa = f'/Users/henriakj/PhD/Code/OasisMove/results_34case/results_1029_SR/FlowMetrics/{metric_name}_cycle_{cycle:02d}_laa.vtu'
         mesh_path_la = f'/Users/henriakj/PhD/Code/OasisMove/results_34case/results_1029_SR/FlowMetrics/{metric_name}_cycle_{cycle:02d}_la.vtu'
+    else:
+        mesh_path_laa = f"/home/opc/Simulation40/{condition.upper()}/{case}/results_moving_atrium/data/1/FlowMetrics/hemodynamics_cycle_{cycle:02d}_laa.vtu"
+        mesh_path_la = f"/home/opc/Simulation40/{condition.upper()}/{case}/results_moving_atrium/data/1/FlowMetrics/hemodynamics_cycle_{cycle:02d}_la.vtu"
 
     for name, mesh_path in zip(['LA', 'LAA'], [mesh_path_la, mesh_path_laa]):
         data = read_polydata(mesh_path)
