@@ -25,7 +25,7 @@ except ImportError:
     pass
 
 
-def extract_LA_and_LAA(case, condition, cycle, clip_volume=False):
+def extract_LA_and_LAA(case, condition, cycle, is_local, clip_volume=False):
     """Algorithm for detecting the left atrial appendage and isolate it from the atrium lumen
      based on the cross-sectional area along enterlines.
 
@@ -39,22 +39,27 @@ def extract_LA_and_LAA(case, condition, cycle, clip_volume=False):
 
     # File paths
     print("--- Load model file\n")
-    save_path = f"/home/opc/Simulation40/{condition.upper()}/{case}/results_moving_atrium/data/1/Hemodynamics"
-    # save_path = f"/Users/henriakj/PhD/Code/OasisMove/results_34case/results_{case}_{condition}/Hemodynamics"
+    if is_local:
+        save_path = f"/Users/henriakj/PhD/Code/OasisMove/results_34case/results_{case}_{condition}/Hemodynamics"
+        save_path_vtu = f"/Users/henriakj/PhD/Code/OasisMove/results_34case/results_{case}_{condition}/FlowMetrics"
+        model_path = f'/Users/henriakj/PhD/Code/VaMPy/models/models_inria/models_{condition.lower()}/{case}'
+    else:
+        save_path = f"/home/opc/Simulation40/{condition.upper()}/{case}/results_moving_atrium/data/1/Hemodynamics"
+        save_path_vtu = f"/home/opc/Simulation40/{condition.upper()}/{case}/results_moving_atrium/data/1/FlowMetrics"
+        model_path = f'/app/OasisMove/src/oasismove/mesh/UKE_{condition.upper()}/{case}/'
+
     input_path = path.join(save_path, f"hemodynamics_cycle_{cycle:02d}.vtp")
     clipped_model = input_path.replace(".vtp", "_la_and_laa.vtp")
 
-    if clip_volume:
-        # BRT and Energy
-        input_path_vtu = path.join(folder, "model.vtu")
-        volume = read_polydata(input_path_vtu)
-        clipped_model_vtu = path.join(save_path, "model_la_laa.vtu")
+    input_path_brt = path.join(save_path_vtu, f"blood_residence_time_cycle_{cycle:02d}.vtu")
+    input_path_energy = path.join(save_path_vtu, f"energy_cycle_{cycle:02d}.vtu")
+    volume_brt = read_polydata(input_path_brt)
+    volume_energy = read_polydata(input_path_energy)
+    clipped_model_brt = input_path_brt.replace(".vtu", "_la_and_laa.vtu")
+    clipped_model_energy = input_path_energy.replace(".vtu", "_la_and_laa.vtu")
 
     new_cl = input_path.replace(".vtp", "_centerline.vtp")
     surface = read_polydata(input_path)
-
-    model_path = f'/app/OasisMove/src/oasismove/mesh/UKE_{condition.upper()}/{case}/'
-    # model_path = f'/Users/henriakj/PhD/Code/VaMPy/models/models_inria/models_{condition.lower()}/{case}'
     open_surface_path = path.join(model_path, 'model_remeshed_surface.vtp')
     centerline_path = path.join(model_path, 'model_centerlines.vtp')
     open_surface = read_polydata(open_surface_path)
@@ -110,8 +115,13 @@ def extract_LA_and_LAA(case, condition, cycle, clip_volume=False):
         plane = vtk_plane(center, normal)
         if clip_volume:
             plane_inv = vtk_plane(center, -normal)
-            clipped_volume, _ = vtk_clip_polydata(volume, plane_inv, clip_volume=True)
-            volume, _ = vtk_clip_polydata(volume, plane, clip_volume=True)
+            # BRT
+            clipped_volume_brt, _ = vtk_clip_polydata(volume_brt, plane_inv, clip_volume=True)
+            volume_brt, _ = vtk_clip_polydata(volume_brt, plane, clip_volume=True)
+
+            # Energy
+            clipped_volume_energy, _ = vtk_clip_polydata(volume_energy, plane_inv, clip_volume=True)
+            volume_energy, _ = vtk_clip_polydata(volume_energy, plane, clip_volume=True)
 
         surface, clipped = vtk_clip_polydata(surface, plane, clip_volume=False)
 
@@ -131,10 +141,13 @@ def extract_LA_and_LAA(case, condition, cycle, clip_volume=False):
         if dist_surface < dist_clipped:
             surface, clipped = clipped, surface
             if clip_volume:
-                volume, clipped_volume = clipped_volume, volume
+                volume_brt, clipped_volume_brt = clipped_volume_brt, volume_brt
+                volume_energy, clipped_volume_energy = clipped_volume_energy, volume_energy
         surface = attach_clipped_regions_to_surface(surface, clipped, center)
         if clip_volume:
-            volume = attach_clipped_regions_to_surface(volume, clipped_volume, center, clip_volume=True)
+            volume_brt = attach_clipped_regions_to_surface(volume_brt, clipped_volume_brt, center, clip_volume=True)
+            volume_energy = attach_clipped_regions_to_surface(volume_energy, clipped_volume_energy, center,
+                                                              clip_volume=True)
 
     # Clip MV
     print("--- Clipping MV")
@@ -157,9 +170,11 @@ def extract_LA_and_LAA(case, condition, cycle, clip_volume=False):
     surface, clipped = vtk_clip_polydata(surface, plane)
     if clip_volume:
         plane_inv = vtk_plane(center, -normal)
-        clipped_volume, _ = vtk_clip_polydata(volume, plane_inv, clip_volume=True)
-        volume, _ = vtk_clip_polydata(volume, plane, clip_volume=True)
+        clipped_volume_brt, _ = vtk_clip_polydata(volume_brt, plane_inv, clip_volume=True)
+        volume_brt, _ = vtk_clip_polydata(volume_brt, plane, clip_volume=True)
 
+        clipped_volume_energy, _ = vtk_clip_polydata(volume_energy, plane_inv, clip_volume=True)
+        volume_energy, _ = vtk_clip_polydata(volume_energy, plane, clip_volume=True)
     # Find part to keep
     surface = vtk_clean_polydata(surface)
     clipped = vtk_clean_polydata(clipped)
@@ -177,16 +192,21 @@ def extract_LA_and_LAA(case, condition, cycle, clip_volume=False):
     if dist_surface < dist_clipped:
         surface, clipped = clipped, surface
         if clip_volume:
-            volume, clipped_volume = clipped_volume, volume
+            volume_brt, clipped_volume_brt = clipped_volume_brt, volume_brt
+            volume_energy, clipped_volume_energy = clipped_volume_energy, volume_energy
 
     print("--- Saving LA and LAA to: {}".format(clipped_model))
     surface = attach_clipped_regions_to_surface(surface, clipped, center)
     write_polydata(surface, clipped_model)
 
     if clip_volume:
-        print("--- Saving LA and LAA volume to: {}".format(clipped_model_vtu))
-        volume = attach_clipped_regions_to_surface(volume, clipped_volume, center, clip_volume=True)
-        write_polydata(volume, clipped_model_vtu)
+        print("--- Saving BRT LA and LAA volume to: {}".format(clipped_model_brt))
+        volume_brt = attach_clipped_regions_to_surface(volume_brt, clipped_volume_brt, center, clip_volume=True)
+        write_polydata(volume_brt, clipped_model_brt)
+
+        print("--- Saving Energy LA and LAA volume to: {}".format(clipped_model_energy))
+        volume_brt = attach_clipped_regions_to_surface(volume_energy, clipped_volume_energy, center, clip_volume=True)
+        write_polydata(volume_brt, clipped_model_energy)
 
 
 def merge_dataset(laa_volume):
@@ -199,7 +219,7 @@ def merge_dataset(laa_volume):
     return cleanFilter.GetOutput()
 
 
-def separate_LA_and_LAA(case, condition, cycle, laa_point, clip_volume=False):
+def separate_LA_and_LAA(case, condition, cycle, laa_point, is_local, clip_volume=False):
     """Algorithm for detecting the left atrial appendage and isolate it from the atrium lumen
      based on the cross-sectional area along enterlines.
 
@@ -218,8 +238,15 @@ def separate_LA_and_LAA(case, condition, cycle, laa_point, clip_volume=False):
 
     # File paths
     print("--- Load model file\n")
-    save_path = f"/home/opc/Simulation40/{condition.upper()}/{case}/results_moving_atrium/data/1/Hemodynamics"
-    # save_path = f"/Users/henriakj/PhD/Code/OasisMove/results_34case/results_{case}_{condition}/Hemodynamics"
+    if is_local:
+        save_path = f"/Users/henriakj/PhD/Code/OasisMove/results_34case/results_{case}_{condition}/Hemodynamics"
+        save_path_vtu = f"/Users/henriakj/PhD/Code/OasisMove/results_34case/results_{case}_{condition}/FlowMetrics"
+        model_path = f'/Users/henriakj/PhD/Code/VaMPy/models/models_inria/models_{condition.lower()}/{case}'
+    else:
+        save_path = f"/home/opc/Simulation40/{condition.upper()}/{case}/results_moving_atrium/data/1/Hemodynamics"
+        save_path_vtu = f"/home/opc/Simulation40/{condition.upper()}/{case}/results_moving_atrium/data/1/FlowMetrics"
+        model_path = f'/app/OasisMove/src/oasismove/mesh/UKE_{condition.upper()}/{case}/'
+
     input_path = path.join(save_path, f"hemodynamics_cycle_{cycle:02d}.vtp")
     clipped_model = input_path.replace(".vtp", "_la_and_laa.vtp")
     laa_model_path = input_path.replace('.vtp', '_laa.vtp')
@@ -227,15 +254,21 @@ def separate_LA_and_LAA(case, condition, cycle, laa_point, clip_volume=False):
 
     surface = read_polydata(clipped_model)
     if clip_volume:
-        laa_model_path_vtu = path.join(save_folder, "model_laa.vtu")
-        la_model_path_vtu = path.join(save_folder, "model_la.vtu")
-        clipped_model_vtu = path.join(save_folder, "model_la_laa.vtu")
-        volume = read_polydata(clipped_model_vtu)
+        input_path_brt = path.join(save_path_vtu, f"blood_residence_time_cycle_{cycle:02d}.vtu")
+        input_path_energy = path.join(save_path_vtu, f"energy_cycle_{cycle:02d}.vtu")
 
-    capped_surface = surface
+        clipped_model_brt = input_path_brt.replace('.vtu', '_la_and_laa.vtu')
+        laa_model_path_brt = input_path_brt.replace('.vtu', '_laa.vtu')
+        la_model_path_brt = input_path_brt.replace('.vtu', '_la.vtu')
 
-    model_path = f'/app/OasisMove/src/oasismove/mesh/UKE_{condition.upper()}/{case}/'
-    # model_path = f'/Users/henriakj/PhD/Code/VaMPy/models/models_inria/models_{condition.lower()}/{case}'
+        clipped_model_energy = input_path_energy.replace('.vtu', '_la_and_laa.vtu')
+        laa_model_path_energy = input_path_energy.replace('.vtu', '_laa.vtu')
+        la_model_path_energy = input_path_energy.replace('.vtu', '_la.vtu')
+
+        volume_brt = read_polydata(clipped_model_brt)
+        volume_energy = read_polydata(clipped_model_energy)
+
+    capped_surface = vmtk_cap_polydata(surface)
 
     laa_centerlines_path = path.join(model_path, "model_region_centerline_0.vtp")
     laa_centerlines = read_polydata(laa_centerlines_path)
@@ -308,8 +341,14 @@ def separate_LA_and_LAA(case, condition, cycle, laa_point, clip_volume=False):
     surface, clipped = vtk_clip_polydata(surface, plane)
     if clip_volume:
         plane_inv = vtk_plane(center, -normal)
-        clipped_volume, _ = vtk_clip_polydata(volume, plane_inv, clip_volume=True)
-        volume, _ = vtk_clip_polydata(volume, plane, clip_volume=True)
+
+        # BRT
+        clipped_volume_brt, _ = vtk_clip_polydata(volume_brt, plane_inv, clip_volume=True)
+        volume_brt, _ = vtk_clip_polydata(volume_brt, plane, clip_volume=True)
+
+        # Energy
+        clipped_volume_energy, _ = vtk_clip_polydata(volume_energy, plane_inv, clip_volume=True)
+        volume_energy, _ = vtk_clip_polydata(volume_energy, plane, clip_volume=True)
 
     # Find part to keep
     surface = vtk_clean_polydata(surface)
@@ -329,26 +368,38 @@ def separate_LA_and_LAA(case, condition, cycle, laa_point, clip_volume=False):
     if dist_surface > dist_clipped:
         surface, clipped = clipped, surface
         if clip_volume:
-            volume, clipped_volume = clipped_volume, volume
+            volume_brt, clipped_volume_brt = clipped_volume_brt, volume_brt
+            volume_energy, clipped_volume_energy = clipped_volume_energy, volume_energy
 
     surface_whole = attach_clipped_regions_to_surface(surface, clipped, center)
     laa_surface = get_surface_closest_to_point(surface_whole, center)
     if clip_volume:
-        laa_volume = attach_clipped_regions_to_surface(volume, clipped_volume, center, clip_volume=True)
-        laa_volume = merge_dataset(laa_volume)
-        laa_volume = get_surface_closest_to_point(laa_volume, center, is_volume=True)
+        # BRT
+        laa_volume_brt = attach_clipped_regions_to_surface(volume_brt, clipped_volume_brt, center, clip_volume=True)
+        #laa_volume_brt = merge_dataset(laa_volume_brt)
+        laa_volume_brt = get_surface_closest_to_point(laa_volume_brt, center, is_volume=True)
+        # Energy
+        laa_volume_energy = attach_clipped_regions_to_surface(volume_energy, clipped_volume_energy, center,
+                                                              clip_volume=True)
+        #laa_volume_energy = merge_dataset(laa_volume_energy)
+        laa_volume_energy = get_surface_closest_to_point(laa_volume_energy, center, is_volume=True)
 
     # Extract LA:
     if dist_surface < dist_clipped:
         surface, clipped = clipped, surface
         if clip_volume:
-            volume, clipped_volume = clipped_volume, volume
+            volume_brt, clipped_volume_brt = clipped_volume_brt, volume_brt
+            volume_energy, clipped_volume_energy = clipped_volume_energy, volume_energy
 
     surface_whole = attach_clipped_regions_to_surface(surface, clipped, center)
     la_surface = get_surface_closest_to_point(surface_whole, center)
     if clip_volume:
-        la_volume = attach_clipped_regions_to_surface(volume, clipped_volume, center, clip_volume=True)
-        la_volume = get_surface_closest_to_point(la_volume, center, is_volume=True)
+        la_volume_brt = attach_clipped_regions_to_surface(volume_brt, clipped_volume_brt, center, clip_volume=True)
+        la_volume_brt = get_surface_closest_to_point(la_volume_brt, center, is_volume=True)
+
+        la_volume_energy = attach_clipped_regions_to_surface(volume_energy, clipped_volume_energy, center,
+                                                             clip_volume=True)
+        la_volume_energy = get_surface_closest_to_point(la_volume_energy, center, is_volume=True)
     print("--- Saving LAA to: {}".format(laa_model_path))
     write_polydata(laa_surface, laa_model_path)
 
@@ -356,11 +407,17 @@ def separate_LA_and_LAA(case, condition, cycle, laa_point, clip_volume=False):
     write_polydata(la_surface, la_model_path)
 
     if clip_volume:
-        print("--- Saving LAA (vtu) to: {}".format(laa_model_path_vtu))
-        write_polydata(laa_volume, laa_model_path_vtu)
+        print("--- Saving BRT LAA (vtu) to: {}".format(laa_model_path_brt))
+        write_polydata(laa_volume_brt, laa_model_path_brt)
 
-        print("--- Saving LA (vtu) to: {}".format(la_model_path_vtu))
-        write_polydata(la_volume, la_model_path_vtu)
+        print("--- Saving BRT LA (vtu) to: {}".format(la_model_path_brt))
+        write_polydata(la_volume_brt, la_model_path_brt)
+
+        print("--- Saving Energy LAA (vtu) to: {}".format(laa_model_path_energy))
+        write_polydata(laa_volume_energy, laa_model_path_energy)
+
+        print("--- Saving Energy LA (vtu) to: {}".format(la_model_path_energy))
+        write_polydata(la_volume_energy, la_model_path_energy)
 
 
 def vtk_clip_polydata(surface, cutter=None, value=0, get_inside_out=False, generate_clip_scalars=False,
@@ -612,20 +669,22 @@ def provide_region_points(surface, provided_points, dir_path=None):
 
 if __name__ == "__main__":
     failed = []
-    clip_volume = False
+    clip_volume = True
     conditions = ['sr']
-    cases = ["0003"]
-    cycle = 1
+    cases = ["1029"]
+    cycle = 5
+    local = True
     for condition in conditions:
         for case in cases:
             print("--- Extracting case: {}".format(case))
             # Get LAA point
             print(f"--- Loading LAA points for {case}, condition {condition}")
-            # Oracle
-            laa_apex_point_path = f"/home/opc/Simulation40/laa_apex_points_{condition}.json"
-
-            # Local
-            # laa_apex_point_path = f"/Users/henriakj/PhD/Code/VaMPy/models/models_inria/laa_apex_points_{condition}.json"
+            if local:
+                # Local
+                laa_apex_point_path = f"/Users/henriakj/PhD/Code/VaMPy/models/models_inria/laa_apex_points_{condition}.json"
+            else:
+                # Oracle
+                laa_apex_point_path = f"/home/opc/Simulation40/laa_apex_points_{condition}.json"
 
             with open(laa_apex_point_path) as f:
                 info = json.load(f)
@@ -634,8 +693,8 @@ if __name__ == "__main__":
 
             t1 = time.time()
             try:
-                extract_LA_and_LAA(case, condition, cycle, clip_volume)
-                separate_LA_and_LAA(case, condition, cycle, laa_point, clip_volume)
+                # extract_LA_and_LAA(case, condition, cycle, local, clip_volume)
+                separate_LA_and_LAA(case, condition, cycle, laa_point, local, clip_volume)
             except Exception as e:
                 print(f"--- FAILED for case {case}, condition {condition}, Error: {e}")
                 failed.append(f"{condition}:{case}")
