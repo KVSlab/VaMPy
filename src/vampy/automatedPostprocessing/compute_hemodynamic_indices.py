@@ -143,7 +143,9 @@ def compute_hemodynamic_indices(folder, nu, rho, dt, T, velocity_degree, save_fr
         print("=" * 10, "Start post processing", "=" * 10)
 
     counter = start
+    import time as tm
     for k, data in zip(file_counters, dataset_us):
+        ta = tm.time()
         # Update file_counter
         counter += 1
         file_u = file_us[k]
@@ -231,6 +233,9 @@ def compute_hemodynamic_indices(folder, nu, rho, dt, T, velocity_degree, save_fr
 
             counters_to_save.pop(0)
 
+        tb = tm.time()
+        if MPI.rank(MPI.comm_world) == 0:
+            print(f"Time counter {counter} = {tb - ta} seconds")
     if MPI.rank(MPI.comm_world) == 0:
         print("=" * 10, "Saving hemodynamic indices", "=" * 10)
 
