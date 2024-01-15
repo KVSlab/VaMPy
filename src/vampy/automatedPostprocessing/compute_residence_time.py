@@ -279,7 +279,9 @@ def define_functions_and_iterate_dataset(folder, file_counters, file_brts, time_
         print("=" * 10, "Starting post processing", "=" * 10)
 
     counter = 0
+    import time as tm
     for k, data in zip(file_counters, dataset):
+        t0 = tm.time()
         counter += 1
 
         file_brt = file_brts[k]
@@ -324,6 +326,10 @@ def define_functions_and_iterate_dataset(folder, file_counters, file_brts, time_
                 metric_cycle_avg.vector().zero()
 
             counters_to_save.pop(0)
+
+        t1 = tm.time()
+        if MPI.rank(MPI.comm_world) == 0:
+            print(f"Time counter {counter} = {t1-t0} seconds")
 
     # Get average over sampled time steps
     metrics_dict_to_save = metric_dict if len(cycles_to_average) != 0 else metric_dict_cycle
