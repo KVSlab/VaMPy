@@ -78,8 +78,8 @@ def compute_flow_and_simulation_metrics(folder, nu, dt, velocity_degree, T, time
     u_avg = Function(V)
 
     # Read velocity and compute cycle averaged velocity
-    #if not path.exists(file_path_u_avg):
-    compute_u_avg(dataset_us, file_counters, file_us, file_path_u_avg, number_of_cycles, saved_time_steps_per_cycle,
+    if not path.exists(file_path_u_avg):
+        compute_u_avg(dataset_us, file_counters, file_us, file_path_u_avg, number_of_cycles, saved_time_steps_per_cycle,
                       start_cycle, u, u_avg)
 
     # Perform phase averaging (Average over cycles at specified time point(s))
@@ -133,11 +133,10 @@ def compute_u_avg(dataset_us, file_counters, file_us, file_path_u_avg, n_cycles,
     files_u = reshape_array(dataset_us, n_cycles, saved_time_steps_per_cycle)
     files_counter = reshape_array(file_counters, n_cycles, saved_time_steps_per_cycle)
     import time as tm
-    t0 = tm.time()
     for files, counters in zip(files_u, files_counter):
+        t0 = tm.time()
         time = -1
         for k, data in zip(counters, files):
-            ta = tm.time()
             file_u = file_us[k]
 
             if time == -1:
@@ -146,9 +145,6 @@ def compute_u_avg(dataset_us, file_counters, file_us, file_path_u_avg, n_cycles,
             # Accumulate velocity
             file_u.read(u, data)
             u_avg.vector().axpy(1, u.vector())
-            if MPI.rank(MPI.comm_world) == 0:
-                dt = tm.time()-ta
-                print("Read one file, dt={dt} seconds")
 
         # Average over pre-defined amount of cycles
         u_avg.vector()[:] /= (n_cycles - start_cycle + 1)
@@ -166,9 +162,7 @@ def compute_u_avg(dataset_us, file_counters, file_us, file_path_u_avg, n_cycles,
         u_avg.vector().zero()
         t1 = tm.time()
         if MPI.rank(MPI.comm_world) == 0:
-            print("---DONE WITH ONE LOAD ---")
             print(f"---Time spent loading and storing to u_avg: {t1-t0}---")
-        exit()
 
 
 def get_files_for_cycle_averaging(dataset_us, file_counters, file_us, file_path_u_avg, number_of_cycles,
