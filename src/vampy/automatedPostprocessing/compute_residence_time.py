@@ -3,7 +3,6 @@ from os import path, listdir
 import numpy as np
 from dolfin import FunctionSpace, Function, MPI, VectorFunctionSpace, Timer, HDF5File, XDMFFile, \
     Mesh, TestFunction, list_timings, TimingClear, TimingType
-
 from vampy.automatedPostprocessing.postprocessing_common import read_command_line, get_dataset_names
 
 
@@ -27,21 +26,26 @@ def compute_residence_time(folder, nu, dt, velocity_degree, T, times_to_average,
         average_over_cycles (bool): A flag indicating whether to perform cycle averaging.
     """
     # File paths
-    folders = [path.join(folder, f) for f in listdir(folder) if "SolutionsFull_" in f]
+    folders = [path.join(folder, f) for f in sorted(listdir(folder)) if "SolutionsFull_" in f]
     file_brts = [HDF5File(MPI.comm_world, path.join(f, "brt.h5"), "r") for f in folders]
     mesh_path = path.join(folder, "mesh.h5")
 
     dataset_brts = []
     file_counters = []
     saved_time_steps_per_cycle = int(T / dt / save_frequency / step)
+    print(f"-- Reading from folders: {folders}")
     for i in range(len(file_brts)):
         file_u = file_brts[i]
         dataset_brt = get_dataset_names(file_u, step=step, vector_filename="/blood/vector_%d")
-        slice_id = len(dataset_brt) % saved_time_steps_per_cycle
-        if slice_id != 0:
-            dataset_brt_sliced = dataset_brt[:-slice_id]
+
+        if "0021" in folder and i == 0:
+            dataset_brt_sliced = dataset_brt[-250:]
         else:
-            dataset_brt_sliced = dataset_brt
+            slice_id = len(dataset_brt) % saved_time_steps_per_cycle
+            if slice_id != 0:
+                dataset_brt_sliced = dataset_brt[:-slice_id]
+            else:
+                dataset_brt_sliced = dataset_brt
 
         # Add to collective dataset
         dataset_brts += dataset_brt_sliced
@@ -279,7 +283,9 @@ def define_functions_and_iterate_dataset(folder, file_counters, file_brts, time_
         print("=" * 10, "Starting post processing", "=" * 10)
 
     counter = 0
+    import time as tm
     for k, data in zip(file_counters, dataset):
+        ta = tm.time()
         counter += 1
 
         file_brt = file_brts[k]
@@ -324,6 +330,10 @@ def define_functions_and_iterate_dataset(folder, file_counters, file_brts, time_
                 metric_cycle_avg.vector().zero()
 
             counters_to_save.pop(0)
+
+        tb = tm.time()
+        if MPI.rank(MPI.comm_world) == 0:
+            print(f"Time counter {counter} = {ta - tb} seconds")
 
     # Get average over sampled time steps
     metrics_dict_to_save = metric_dict if len(cycles_to_average) != 0 else metric_dict_cycle

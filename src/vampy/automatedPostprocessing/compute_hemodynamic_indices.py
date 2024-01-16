@@ -2,7 +2,6 @@ from os import path, listdir
 
 from dolfin import Function, VectorFunctionSpace, FunctionSpace, parameters, MPI, HDF5File, Mesh, XDMFFile, \
     BoundaryMesh, project, inner
-
 from vampy.automatedPostprocessing.postprocessing_common import STRESS, read_command_line, get_dataset_names
 
 try:
@@ -39,7 +38,7 @@ def compute_hemodynamic_indices(folder, nu, rho, dt, T, velocity_degree, save_fr
         average_over_cycles (bool): Averages over cardiac cycles if True
     """
     # File paths
-    folders = [path.join(folder, f) for f in listdir(folder) if "SolutionsFull_" in f]
+    folders = [path.join(folder, f) for f in sorted(listdir(folder)) if "SolutionsFull_" in f]
 
     file_us = [HDF5File(MPI.comm_world, path.join(f, "u.h5"), "r") for f in folders]
     mesh_path = path.join(folder, "mesh.h5")
@@ -47,14 +46,19 @@ def compute_hemodynamic_indices(folder, nu, rho, dt, T, velocity_degree, save_fr
     dataset_us = []
     file_counters = []
     saved_time_steps_per_cycle = int(T / dt / save_frequency / step)
+    print(f"-- Reading from folders: {folders}")
     for i in range(len(file_us)):
         file_u = file_us[i]
         dataset_u = get_dataset_names(file_u, step=step, vector_filename="/velocity/vector_%d")
-        slice_id = len(dataset_u) % saved_time_steps_per_cycle
-        if slice_id != 0:
-            dataset_u_sliced = dataset_u[:-slice_id]
+
+        if "0021" in folder and i == 0:
+            dataset_u_sliced = dataset_u[-250:]
         else:
-            dataset_u_sliced = dataset_u
+            slice_id = len(dataset_u) % saved_time_steps_per_cycle
+            if slice_id != 0:
+                dataset_u_sliced = dataset_u[:-slice_id]
+            else:
+                dataset_u_sliced = dataset_u
 
         # Add to collective dataset
         dataset_us += dataset_u_sliced
@@ -143,7 +147,9 @@ def compute_hemodynamic_indices(folder, nu, rho, dt, T, velocity_degree, save_fr
         print("=" * 10, "Start post processing", "=" * 10)
 
     counter = start
+    import time as tm
     for k, data in zip(file_counters, dataset_us):
+        ta = tm.time()
         # Update file_counter
         counter += 1
         file_u = file_us[k]
@@ -182,7 +188,7 @@ def compute_hemodynamic_indices(folder, nu, rho, dt, T, velocity_degree, save_fr
 
         # Save instantaneous WSS
         tau.rename("WSS", "WSS")
-        #indices["WSS"].write(tau, dt * counter)
+        # indices["WSS"].write(tau, dt * counter)
 
         if len(cycles_to_average) != 0 and counter == counters_to_save[0]:
             # Get cycle number
@@ -231,6 +237,9 @@ def compute_hemodynamic_indices(folder, nu, rho, dt, T, velocity_degree, save_fr
 
             counters_to_save.pop(0)
 
+        tb = tm.time()
+        if MPI.rank(MPI.comm_world) == 0:
+            print(f"Time counter {counter} = {tb - ta} seconds")
     if MPI.rank(MPI.comm_world) == 0:
         print("=" * 10, "Saving hemodynamic indices", "=" * 10)
 
