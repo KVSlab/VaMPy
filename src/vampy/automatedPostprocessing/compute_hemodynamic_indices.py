@@ -2,7 +2,6 @@ from os import path, listdir
 
 from dolfin import Function, VectorFunctionSpace, FunctionSpace, parameters, MPI, HDF5File, Mesh, XDMFFile, \
     BoundaryMesh, project, inner
-
 from vampy.automatedPostprocessing.postprocessing_common import STRESS, read_command_line, get_dataset_names
 
 try:
@@ -189,7 +188,7 @@ def compute_hemodynamic_indices(folder, nu, rho, dt, T, velocity_degree, save_fr
 
         # Save instantaneous WSS
         tau.rename("WSS", "WSS")
-        #indices["WSS"].write(tau, dt * counter)
+        # indices["WSS"].write(tau, dt * counter)
 
         if len(cycles_to_average) != 0 and counter == counters_to_save[0]:
             # Get cycle number
