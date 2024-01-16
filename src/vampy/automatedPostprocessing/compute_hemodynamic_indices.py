@@ -47,6 +47,7 @@ def compute_hemodynamic_indices(folder, nu, rho, dt, T, velocity_degree, save_fr
     dataset_us = []
     file_counters = []
     saved_time_steps_per_cycle = int(T / dt / save_frequency / step)
+    print(f"-- Reading from folders: {folders}")
     for i in range(len(file_us)):
         file_u = file_us[i]
         dataset_u = get_dataset_names(file_u, step=step, vector_filename="/velocity/vector_%d")
@@ -64,9 +65,6 @@ def compute_hemodynamic_indices(folder, nu, rho, dt, T, velocity_degree, save_fr
         dataset_us += dataset_u_sliced
         file_counters += [i] * len(dataset_u_sliced)
 
-    print(dataset_us)
-    print(len(dataset_us))
-    exit()
     # Determine what time step to start post-processing from
     start = int(T / dt / save_frequency * (start_cycle - 1))
 
