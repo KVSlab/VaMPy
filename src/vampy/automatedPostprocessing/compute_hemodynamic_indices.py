@@ -39,7 +39,7 @@ def compute_hemodynamic_indices(folder, nu, rho, dt, T, velocity_degree, save_fr
         average_over_cycles (bool): Averages over cardiac cycles if True
     """
     # File paths
-    folders = [path.join(folder, f) for f in listdir(folder) if "SolutionsFull_" in f]
+    folders = [path.join(folder, f) for f in sorted(listdir(folder)) if "SolutionsFull_" in f]
 
     file_us = [HDF5File(MPI.comm_world, path.join(f, "u.h5"), "r") for f in folders]
     mesh_path = path.join(folder, "mesh.h5")
