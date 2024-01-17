@@ -29,7 +29,7 @@ def compute_flow_and_simulation_metrics(folder, nu, dt, velocity_degree, T, time
     folders = [path.join(folder, f) for f in sorted(listdir(folder)) if "SolutionsFull_" in f]
     file_us = [HDF5File(MPI.comm_world, path.join(f, "u.h5"), "r") for f in folders]
     mesh_path = path.join(folder, "mesh.h5")
-    file_path_u_avg = path.join(folder, f"u_avg_{nu}.h5")
+    file_path_u_avg = path.join(folder, "u_avg.h5")
 
     dataset_us = []
     file_counters = []
