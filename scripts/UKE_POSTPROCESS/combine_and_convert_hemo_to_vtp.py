@@ -14,13 +14,6 @@ def main(case, condition):
     solution_path = f"/home/opc/Simulation40/{condition}/{case}/results_moving_atrium/data/1/Hemodynamics"
     print(f"-- Reading solutions from {solution_path} --")
 
-    # Local
-    # solution_path = f'/Users/henriakj/PhD/Code/OasisMove/results_34case/results_{case}_{condition}/Hemodynamics/'
-
-    # On Oracle
-    solution_path = f"/home/opc/Simulation40/{condition}/{case}/results_moving_atrium/data/1/Hemodynamics"
-    print(f"-- Reading solutions from {solution_path} --")
-
     # create a new 'Xdmf3 Reader S'
     eCAP_cycle_01xdmf = Xdmf3ReaderS(registrationName='ECAP_cycle_01.xdmf', FileName=[
         path.join(solution_path, 'ECAP_cycle_01.xdmf')])

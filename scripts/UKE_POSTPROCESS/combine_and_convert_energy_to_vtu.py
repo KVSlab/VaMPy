@@ -1,3 +1,5 @@
+import argparse
+
 from paraview.simple import *
 
 paraview.simple._DisableFirstRenderCameraReset()
