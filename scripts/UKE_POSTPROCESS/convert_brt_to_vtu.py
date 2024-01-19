@@ -1,4 +1,5 @@
 import argparse
+from os import path
 
 from paraview.simple import *
 
@@ -9,20 +10,93 @@ def main(case, condition, cycle, is_local=False):
     # create a new 'Xdmf3ReaderS'
     if is_local:
         # LOCAL
-        filename = f'/Users/henriakj/PhD/Code/OasisMove/results_34case/results_{case}_{condition}/FlowMetrics/blood_residence_time_cycle_{cycle:02d}.xdmf'
+        solution_path = f'/Users/henriakj/PhD/Code/OasisMove/results_34case/results_{case}_{condition}/FlowMetrics/blood_residence_time_cycle_{cycle:02d}.xdmf'
     else:
         # ORACLE
-        filename = f"/home/opc/Simulation40/{condition}/{case}/results_moving_atrium/data/1/FlowMetrics/blood_residence_time_cycle_{cycle:02d}.xdmf"
+        solution_path = f"/home/opc/Simulation40/{condition}/{case}/results_moving_atrium/data/1/FlowMetrics"
+    print(f"-- Reading solutions from {solution_path} --")
 
-    blood_residence_time_cycle_05xdmf = Xdmf3ReaderS(registrationName='blood_residence_time_cycle_05.xdmf',
-                                                     FileName=[filename])
+    # create a new 'Xdmf3 Reader S'
+    blood_residence_time_cycle_01xdmf = Xdmf3ReaderS(registrationName='blood_residence_time_cycle_01.xdmf', FileName=[
+        path.join(solution_path, 'blood_residence_time_cycle_01.xdmf')])
+
+    # create a new 'Xdmf3 Reader S'
+    blood_residence_time_cycle_02xdmf = Xdmf3ReaderS(registrationName='blood_residence_time_cycle_02.xdmf', FileName=[
+        path.join(solution_path, 'blood_residence_time_cycle_02.xdmf')])
+
+    # create a new 'Xdmf3 Reader S'
+    blood_residence_time_cycle_03xdmf = Xdmf3ReaderS(registrationName='blood_residence_time_cycle_03.xdmf', FileName=[
+        path.join(solution_path, 'blood_residence_time_cycle_03.xdmf')])
+
+    # create a new 'Xdmf3 Reader S'
+    blood_residence_time_cycle_04xdmf = Xdmf3ReaderS(registrationName='blood_residence_time_cycle_04.xdmf', FileName=[
+        path.join(solution_path, 'blood_residence_time_cycle_04.xdmf')])
+
+    # create a new 'Xdmf3 Reader S'
+    blood_residence_time_cycle_05xdmf = Xdmf3ReaderS(registrationName='blood_residence_time_cycle_05.xdmf', FileName=[
+        path.join(solution_path, 'blood_residence_time_cycle_05.xdmf')])
 
     # get active view
     renderView1 = GetActiveViewOrCreate('RenderView')
 
     # show data in view
+    blood_residence_time_cycle_01xdmfDisplay = Show(blood_residence_time_cycle_01xdmf, renderView1,
+                                                    'UnstructuredGridRepresentation')
+
+    # trace defaults for the display properties.
+    blood_residence_time_cycle_01xdmfDisplay.Representation = 'Surface'
+
+    # reset view to fit data
+    renderView1.ResetCamera(False, 0.9)
+
+    # get the material library
+    materialLibrary1 = GetMaterialLibrary()
+
+    # show color bar/color legend
+    blood_residence_time_cycle_01xdmfDisplay.SetScalarBarVisibility(renderView1, True)
+
+    # show data in view
+    blood_residence_time_cycle_04xdmfDisplay = Show(blood_residence_time_cycle_04xdmf, renderView1,
+                                                    'UnstructuredGridRepresentation')
+
+    # trace defaults for the display properties.
+    blood_residence_time_cycle_04xdmfDisplay.Representation = 'Surface'
+
+    # show color bar/color legend
+    blood_residence_time_cycle_04xdmfDisplay.SetScalarBarVisibility(renderView1, True)
+
+    # show data in view
     blood_residence_time_cycle_05xdmfDisplay = Show(blood_residence_time_cycle_05xdmf, renderView1,
                                                     'UnstructuredGridRepresentation')
+
+    # trace defaults for the display properties.
+    blood_residence_time_cycle_05xdmfDisplay.Representation = 'Surface'
+
+    # show color bar/color legend
+    blood_residence_time_cycle_05xdmfDisplay.SetScalarBarVisibility(renderView1, True)
+
+    # show data in view
+    blood_residence_time_cycle_02xdmfDisplay = Show(blood_residence_time_cycle_02xdmf, renderView1,
+                                                    'UnstructuredGridRepresentation')
+
+    # trace defaults for the display properties.
+    blood_residence_time_cycle_02xdmfDisplay.Representation = 'Surface'
+
+    # show color bar/color legend
+    blood_residence_time_cycle_02xdmfDisplay.SetScalarBarVisibility(renderView1, True)
+
+    # show data in view
+    blood_residence_time_cycle_03xdmfDisplay = Show(blood_residence_time_cycle_03xdmf, renderView1,
+                                                    'UnstructuredGridRepresentation')
+
+    # trace defaults for the display properties.
+    blood_residence_time_cycle_03xdmfDisplay.Representation = 'Surface'
+
+    # show color bar/color legend
+    blood_residence_time_cycle_03xdmfDisplay.SetScalarBarVisibility(renderView1, True)
+
+    # update the view to ensure updated data information
+    renderView1.Update()
 
     # get color transfer function/color map for 'blood_residence_time'
     blood_residence_timeLUT = GetColorTransferFunction('blood_residence_time')
@@ -30,71 +104,61 @@ def main(case, condition, cycle, is_local=False):
     # get opacity transfer function/opacity map for 'blood_residence_time'
     blood_residence_timePWF = GetOpacityTransferFunction('blood_residence_time')
 
-    # trace defaults for the display properties.
-    blood_residence_time_cycle_05xdmfDisplay.Representation = 'Surface'
-    blood_residence_time_cycle_05xdmfDisplay.ColorArrayName = ['POINTS', 'blood_residence_time']
-    blood_residence_time_cycle_05xdmfDisplay.LookupTable = blood_residence_timeLUT
-    blood_residence_time_cycle_05xdmfDisplay.SelectTCoordArray = 'None'
-    blood_residence_time_cycle_05xdmfDisplay.SelectNormalArray = 'None'
-    blood_residence_time_cycle_05xdmfDisplay.SelectTangentArray = 'None'
-    blood_residence_time_cycle_05xdmfDisplay.OSPRayScaleArray = 'blood_residence_time'
-    blood_residence_time_cycle_05xdmfDisplay.OSPRayScaleFunction = 'PiecewiseFunction'
-    blood_residence_time_cycle_05xdmfDisplay.SelectOrientationVectors = 'None'
-    blood_residence_time_cycle_05xdmfDisplay.ScaleFactor = 8.22499008178711
-    blood_residence_time_cycle_05xdmfDisplay.SelectScaleArray = 'blood_residence_time'
-    blood_residence_time_cycle_05xdmfDisplay.GlyphType = 'Arrow'
-    blood_residence_time_cycle_05xdmfDisplay.GlyphTableIndexArray = 'blood_residence_time'
-    blood_residence_time_cycle_05xdmfDisplay.GaussianRadius = 0.41124950408935546
-    blood_residence_time_cycle_05xdmfDisplay.SetScaleArray = ['POINTS', 'blood_residence_time']
-    blood_residence_time_cycle_05xdmfDisplay.ScaleTransferFunction = 'PiecewiseFunction'
-    blood_residence_time_cycle_05xdmfDisplay.OpacityArray = ['POINTS', 'blood_residence_time']
-    blood_residence_time_cycle_05xdmfDisplay.OpacityTransferFunction = 'PiecewiseFunction'
-    blood_residence_time_cycle_05xdmfDisplay.DataAxesGrid = 'GridAxesRepresentation'
-    blood_residence_time_cycle_05xdmfDisplay.PolarAxes = 'PolarAxesRepresentation'
-    blood_residence_time_cycle_05xdmfDisplay.ScalarOpacityFunction = blood_residence_timePWF
-    blood_residence_time_cycle_05xdmfDisplay.ScalarOpacityUnitDistance = 0.632171218531951
-    blood_residence_time_cycle_05xdmfDisplay.OpacityArrayName = ['POINTS', 'blood_residence_time']
-    blood_residence_time_cycle_05xdmfDisplay.SelectInputVectors = [None, '']
-    blood_residence_time_cycle_05xdmfDisplay.WriteLog = ''
+    # get 2D transfer function for 'blood_residence_time'
+    blood_residence_timeTF2D = GetTransferFunction2D('blood_residence_time')
 
-    # init the 'PiecewiseFunction' selected for 'OSPRayScaleFunction'
-    blood_residence_time_cycle_05xdmfDisplay.OSPRayScaleFunction.Points = [0.0, 0.0, 0.5, 0.0, 1123.3660888671875, 1.0,
-                                                                           0.5, 0.0]
-
-    # init the 'PiecewiseFunction' selected for 'ScaleTransferFunction'
-    blood_residence_time_cycle_05xdmfDisplay.ScaleTransferFunction.Points = [0.0, 0.0, 0.5, 0.0, 16736728.0, 1.0, 0.5,
-                                                                             0.0]
-
-    # init the 'PiecewiseFunction' selected for 'OpacityTransferFunction'
-    blood_residence_time_cycle_05xdmfDisplay.OpacityTransferFunction.Points = [0.0, 0.0, 0.5, 0.0, 16736728.0, 1.0, 0.5,
-                                                                               0.0]
+    # set active source
+    SetActiveSource(blood_residence_time_cycle_01xdmf)
 
     # reset view to fit data
-    renderView1.ResetCamera(False)
+    renderView1.ResetCamera(False, 0.9)
 
-    # get the material library
-    materialLibrary1 = GetMaterialLibrary()
+    # set active source
+    SetActiveSource(blood_residence_time_cycle_05xdmf)
+
+    # create a new 'Append Attributes'
+    appendAttributes1 = AppendAttributes(registrationName='AppendAttributes1',
+                                         Input=[blood_residence_time_cycle_01xdmf, blood_residence_time_cycle_02xdmf,
+                                                blood_residence_time_cycle_03xdmf, blood_residence_time_cycle_04xdmf,
+                                                blood_residence_time_cycle_05xdmf])
+
+    # show data in view
+    appendAttributes1Display = Show(appendAttributes1, renderView1, 'UnstructuredGridRepresentation')
+
+    # trace defaults for the display properties.
+    appendAttributes1Display.Representation = 'Surface'
+
+    # hide data in view
+    Hide(blood_residence_time_cycle_05xdmf, renderView1)
+
+    # hide data in view
+    Hide(blood_residence_time_cycle_01xdmf, renderView1)
+
+    # hide data in view
+    Hide(blood_residence_time_cycle_02xdmf, renderView1)
+
+    # hide data in view
+    Hide(blood_residence_time_cycle_03xdmf, renderView1)
+
+    # hide data in view
+    Hide(blood_residence_time_cycle_04xdmf, renderView1)
 
     # show color bar/color legend
-    blood_residence_time_cycle_05xdmfDisplay.SetScalarBarVisibility(renderView1, True)
+    appendAttributes1Display.SetScalarBarVisibility(renderView1, True)
 
     # update the view to ensure updated data information
     renderView1.Update()
 
-    # get 2D transfer function for 'blood_residence_time'
-    blood_residence_timeTF2D = GetTransferFunction2D('blood_residence_time')
-
-    # save data
     if is_local:
-        save_path = f'/Users/henriakj/PhD/Code/OasisMove/results_34case/results_{case}_{condition}/FlowMetrics/blood_residence_time_cycle_{cycle:02d}.vtu'
+        save_path = f'/Users/henriakj/PhD/Code/OasisMove/results_34case/results_{case}_{condition}/FlowMetrics/blood_residence_time.vtu'
     else:
-        save_path = f"/home/opc/Simulation40/{condition}/{case}/results_moving_atrium/data/1/FlowMetrics/blood_residence_time_cycle_{cycle:02d}.vtu"
-
+        save_path = f"/home/opc/Simulation40/{condition}/{case}/results_moving_atrium/data/1/FlowMetrics/blood_residence_time.vtu"
+    # save data
     SaveData(save_path,
-             proxy=blood_residence_time_cycle_05xdmf, PointDataArrays=['blood_residence_time'])
+             proxy=appendAttributes1,
+             PointDataArrays=['blood_residence_time', 'blood_residence_time_input_1', 'blood_residence_time_input_2',
+                              'blood_residence_time_input_3', 'blood_residence_time_input_4'])
 
-    layout1 = GetLayout()
-    layout1.SetSize(2856, 1270)
     ResetSession()
 
 
