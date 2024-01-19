@@ -1,3 +1,4 @@
+import argparse
 from os import path
 
 from paraview.simple import *
@@ -461,10 +462,15 @@ if __name__ == '__main__':
     # TODO: UPDATE SAVE PATH
     # cases = sorted(listdir("/Users/henriakj/PhD/Code/VaMPy/models/models_inria"))
     # conditions = ["SR", "AF"]
+    parser = argparse.ArgumentParser()
+    parser.add_argument('--case', help='Description for foo argument', required=True)
+    parser.add_argument('--condition', help='Description for bar argument', required=True)
+    args = parser.parse_args()
 
-    conditions = ['SR']
-    cases = ['1029']
-    cycles = [3]
+    conditions = [args.condition]
+    cases = [args.case]
+    cycle = [1,2,3,4,5]
+
     for condition in conditions:
         for case in cases:
             for cycle in cycles:
