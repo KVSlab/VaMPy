@@ -12,6 +12,8 @@
 import argparse
 import time
 
+from IPython import embed
+
 try:
     from morphman.common import *
     from vmtk import vmtkscripts
@@ -208,7 +210,6 @@ def extract_LA_and_LAA(case, condition, is_local, clip_volume=False):
         volume_energy = attach_clipped_regions_to_surface(volume_energy, clipped_volume_energy, center,
                                                           clip_volume=True)
         # write_polydata(volume_energy, clipped_model_energy)
-
     # def separate_LA_and_LAA(case, condition, cycle, laa_point, is_local, clip_volume=False):
     """Algorithm for detecting the left atrial appendage and isolate it from the atrium lumen
      based on the cross-sectional area along enterlines.
@@ -385,11 +386,11 @@ def extract_LA_and_LAA(case, condition, is_local, clip_volume=False):
     la_surface = get_surface_closest_to_point(surface_whole, center)
     if clip_volume:
         la_volume_brt = attach_clipped_regions_to_surface(volume_brt, clipped_volume_brt, center, clip_volume=True)
-        la_volume_brt = get_surface_closest_to_point(la_volume_brt, center, is_volume=True)
+        #la_volume_brt = get_surface_closest_to_point(la_volume_brt_tmp, center, is_volume=True)
 
         la_volume_energy = attach_clipped_regions_to_surface(volume_energy, clipped_volume_energy, center,
                                                              clip_volume=True)
-        la_volume_energy = get_surface_closest_to_point(la_volume_energy, center, is_volume=True)
+        #la_volume_energy = get_surface_closest_to_point(la_volume_energy, center, is_volume=True)
     print("--- Saving LAA to: {}".format(laa_model_path))
     write_polydata(laa_surface, laa_model_path)
 
@@ -668,7 +669,7 @@ if __name__ == "__main__":
 
     conditions = [args.condition]
     cases = [args.case]
-    local = False
+    local = True
     for condition in conditions:
         for case in cases:
             print("--- Extracting case: {}".format(case))
