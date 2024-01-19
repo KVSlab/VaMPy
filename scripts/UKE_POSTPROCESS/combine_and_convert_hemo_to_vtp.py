@@ -2,12 +2,13 @@ import argparse
 from os import path
 
 from paraview.simple import *
+
 paraview.simple._DisableFirstRenderCameraReset()
 
 
 def main(case, condition, cycle):
     # Local
-    #solution_path = f'/Users/henriakj/PhD/Code/OasisMove/results_34case/results_{case}_{condition}/Hemodynamics/'
+    # solution_path = f'/Users/henriakj/PhD/Code/OasisMove/results_34case/results_{case}_{condition}/Hemodynamics/'
 
     # On Oracle
     solution_path = f"/home/opc/Simulation40/{condition}/{case}/results_moving_atrium/data/1/Hemodynamics"
@@ -469,12 +470,13 @@ if __name__ == '__main__':
 
     conditions = [args.condition]
     cases = [args.case]
-    cycle = [1,2,3,4,5]
+    cycles = [1, 2, 3, 4, 5]
 
     for condition in conditions:
         for case in cases:
             for cycle in cycles:
-                print(f"Combining and converting HEMODYNAMICS from xdmf to vtu for {case} for condition {condition} (Cycle {cycle})")
+                print(
+                    f"Combining and converting HEMODYNAMICS from xdmf to vtu for {case} for condition {condition} (Cycle {cycle})")
                 try:
                     main(case, condition, cycle)
                 except Exception as e:

@@ -1,5 +1,6 @@
 #### import the simple module from the paraview
 import argparse
+
 from paraview.simple import *
 
 #### disable automatic camera reset on 'Show'
@@ -255,11 +256,12 @@ if __name__ == '__main__':
 
     conditions = [args.condition]
     cases = [args.case]
-    cycle = [1,2,3,4,5]
+    cycles = [1, 2, 3, 4, 5]
     for condition in conditions:
         for case in cases:
-            print(f"Combining and converting KE & TKE from xdmf to vtu for {case} for condition {condition}")
-            try:
-                main(case, condition, cycle)
-            except Exception as e:
-                print(f"-- FAILED for case {case}, condition {condition}), error: {e}")
+            for cycle in cycles:
+                print(f"Combining and converting KE & TKE from xdmf to vtu for {case} for condition {condition}")
+                try:
+                    main(case, condition, cycle)
+                except Exception as e:
+                    print(f"-- FAILED for case {case}, condition {condition}), error: {e}")
