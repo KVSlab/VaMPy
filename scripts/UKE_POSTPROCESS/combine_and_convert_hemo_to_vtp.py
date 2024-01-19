@@ -771,10 +771,9 @@ if __name__ == '__main__':
 
     for condition in conditions:
         for case in cases:
-            for cycle in cycles:
-                print(
-                    f"Combining and converting HEMODYNAMICS from xdmf to vtu for {case} for condition {condition} (Cycle {cycle})")
-                try:
-                    main(case, condition, cycle)
-                except Exception as e:
-                    print(f"-- FAILED for case {case}, condition {condition}), error: {e}")
+            print(
+                f"Combining and converting HEMODYNAMICS from xdmf to vtu for {case} for condition {condition} (Cycle {cycle})")
+            try:
+                main(case, condition)
+            except Exception as e:
+                print(f"-- FAILED for case {case}, condition {condition}), error: {e}")

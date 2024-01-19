@@ -6,7 +6,7 @@ from paraview.simple import *
 paraview.simple._DisableFirstRenderCameraReset()
 
 
-def main(case, condition, cycle, is_local=False):
+def main(case, condition, is_local=False):
     # create a new 'Xdmf3ReaderS'
     if is_local:
         # LOCAL
@@ -183,13 +183,11 @@ if __name__ == '__main__':
 
     conditions = [args.condition]
     cases = [args.case]
-    cycles = [1, 2, 3, 4, 5]
 
     for condition in conditions:
         for case in cases:
-            for cycle in cycles:
-                print(f"Converting BRT xdmf to vtu for {case} for condition {condition}")
-                try:
-                    main(case, condition, cycle)
-                except Exception as e:
-                    print(f"-- FAILED for case {case}, condition {condition}), error: {e}")
+            print(f"Converting BRT xdmf to vtu for {case} for condition {condition}")
+            try:
+                main(case, condition)
+            except Exception as e:
+                print(f"-- FAILED for case {case}, condition {condition}), error: {e}")
