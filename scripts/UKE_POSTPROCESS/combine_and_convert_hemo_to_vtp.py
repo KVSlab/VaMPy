@@ -23,23 +23,23 @@ def main(case, condition):
 
     # create a new 'Xdmf3 Reader S'
     eCAP_cycle_01xdmf = Xdmf3ReaderS(registrationName='ECAP_cycle_01.xdmf', FileName=[
-        path.join(solution_path, '/ECAP_cycle_01.xdmf')])
+        path.join(solution_path, 'ECAP_cycle_01.xdmf')])
 
     # create a new 'Xdmf3 Reader S'
     eCAP_cycle_02xdmf = Xdmf3ReaderS(registrationName='ECAP_cycle_02.xdmf', FileName=[
-        path.join(solution_path, '/ECAP_cycle_02.xdmf')])
+        path.join(solution_path, 'ECAP_cycle_02.xdmf')])
 
     # create a new 'Xdmf3 Reader S'
     eCAP_cycle_03xdmf = Xdmf3ReaderS(registrationName='ECAP_cycle_03.xdmf', FileName=[
-        path.join(solution_path, '/ECAP_cycle_03.xdmf')])
+        path.join(solution_path, 'ECAP_cycle_03.xdmf')])
 
     # create a new 'Xdmf3 Reader S'
     eCAP_cycle_04xdmf = Xdmf3ReaderS(registrationName='ECAP_cycle_04.xdmf', FileName=[
-        path.join(solution_path, '/ECAP_cycle_04.xdmf')])
+        path.join(solution_path, 'ECAP_cycle_04.xdmf')])
 
     # create a new 'Xdmf3 Reader S'
     eCAP_cycle_05xdmf = Xdmf3ReaderS(registrationName='ECAP_cycle_05.xdmf', FileName=[
-        path.join(solution_path, '/ECAP_cycle_05.xdmf')])
+        path.join(solution_path, 'ECAP_cycle_05.xdmf')])
 
     # get active view
     renderView1 = GetActiveViewOrCreate('RenderView')
@@ -112,23 +112,23 @@ def main(case, condition):
 
     # create a new 'Xdmf3 Reader S'
     oSI_cycle_01xdmf = Xdmf3ReaderS(registrationName='OSI_cycle_01.xdmf', FileName=[
-        path.join(solution_path, '/OSI_cycle_01.xdmf')])
+        path.join(solution_path, 'OSI_cycle_01.xdmf')])
 
     # create a new 'Xdmf3 Reader S'
     oSI_cycle_02xdmf = Xdmf3ReaderS(registrationName='OSI_cycle_02.xdmf', FileName=[
-        path.join(solution_path, '/OSI_cycle_02.xdmf')])
+        path.join(solution_path, 'OSI_cycle_02.xdmf')])
 
     # create a new 'Xdmf3 Reader S'
     oSI_cycle_03xdmf = Xdmf3ReaderS(registrationName='OSI_cycle_03.xdmf', FileName=[
-        path.join(solution_path, '/OSI_cycle_03.xdmf')])
+        path.join(solution_path, 'OSI_cycle_03.xdmf')])
 
     # create a new 'Xdmf3 Reader S'
     oSI_cycle_04xdmf = Xdmf3ReaderS(registrationName='OSI_cycle_04.xdmf', FileName=[
-        path.join(solution_path, '/OSI_cycle_04.xdmf')])
+        path.join(solution_path, 'OSI_cycle_04.xdmf')])
 
     # create a new 'Xdmf3 Reader S'
     oSI_cycle_05xdmf = Xdmf3ReaderS(registrationName='OSI_cycle_05.xdmf', FileName=[
-        path.join(solution_path, '/OSI_cycle_05.xdmf')])
+        path.join(solution_path, 'OSI_cycle_05.xdmf')])
 
     # show data in view
     oSI_cycle_01xdmfDisplay = Show(oSI_cycle_01xdmf, renderView1, 'UnstructuredGridRepresentation')
@@ -192,23 +192,23 @@ def main(case, condition):
 
     # create a new 'Xdmf3 Reader S'
     rRT_cycle_01xdmf = Xdmf3ReaderS(registrationName='RRT_cycle_01.xdmf', FileName=[
-        path.join(solution_path, '/RRT_cycle_01.xdmf')])
+        path.join(solution_path, 'RRT_cycle_01.xdmf')])
 
     # create a new 'Xdmf3 Reader S'
     rRT_cycle_02xdmf = Xdmf3ReaderS(registrationName='RRT_cycle_02.xdmf', FileName=[
-        path.join(solution_path, '/RRT_cycle_02.xdmf')])
+        path.join(solution_path, 'RRT_cycle_02.xdmf')])
 
     # create a new 'Xdmf3 Reader S'
     rRT_cycle_03xdmf = Xdmf3ReaderS(registrationName='RRT_cycle_03.xdmf', FileName=[
-        path.join(solution_path, '/RRT_cycle_03.xdmf')])
+        path.join(solution_path, 'RRT_cycle_03.xdmf')])
 
     # create a new 'Xdmf3 Reader S'
     rRT_cycle_04xdmf = Xdmf3ReaderS(registrationName='RRT_cycle_04.xdmf', FileName=[
-        path.join(solution_path, '/RRT_cycle_04.xdmf')])
+        path.join(solution_path, 'RRT_cycle_04.xdmf')])
 
     # create a new 'Xdmf3 Reader S'
     rRT_cycle_05xdmf = Xdmf3ReaderS(registrationName='RRT_cycle_05.xdmf', FileName=[
-        path.join(solution_path, '/RRT_cycle_05.xdmf')])
+        path.join(solution_path, 'RRT_cycle_05.xdmf')])
 
     # show data in view
     rRT_cycle_01xdmfDisplay = Show(rRT_cycle_01xdmf, renderView1, 'UnstructuredGridRepresentation')
@@ -272,23 +272,23 @@ def main(case, condition):
 
     # create a new 'Xdmf3 Reader S'
     tAWSS_cycle_01xdmf = Xdmf3ReaderS(registrationName='TAWSS_cycle_01.xdmf', FileName=[
-        path.join(solution_path, '/TAWSS_cycle_01.xdmf')])
+        path.join(solution_path, 'TAWSS_cycle_01.xdmf')])
 
     # create a new 'Xdmf3 Reader S'
     tAWSS_cycle_02xdmf = Xdmf3ReaderS(registrationName='TAWSS_cycle_02.xdmf', FileName=[
-        path.join(solution_path, '/TAWSS_cycle_02.xdmf')])
+        path.join(solution_path, 'TAWSS_cycle_02.xdmf')])
 
     # create a new 'Xdmf3 Reader S'
     tAWSS_cycle_03xdmf = Xdmf3ReaderS(registrationName='TAWSS_cycle_03.xdmf', FileName=[
-        path.join(solution_path, '/TAWSS_cycle_03.xdmf')])
+        path.join(solution_path, 'TAWSS_cycle_03.xdmf')])
 
     # create a new 'Xdmf3 Reader S'
     tAWSS_cycle_04xdmf = Xdmf3ReaderS(registrationName='TAWSS_cycle_04.xdmf', FileName=[
-        path.join(solution_path, '/TAWSS_cycle_04.xdmf')])
+        path.join(solution_path, 'TAWSS_cycle_04.xdmf')])
 
     # create a new 'Xdmf3 Reader S'
     tAWSS_cycle_05xdmf = Xdmf3ReaderS(registrationName='TAWSS_cycle_05.xdmf', FileName=[
-        path.join(solution_path, '/TAWSS_cycle_05.xdmf')])
+        path.join(solution_path, 'TAWSS_cycle_05.xdmf')])
 
     # show data in view
     tAWSS_cycle_01xdmfDisplay = Show(tAWSS_cycle_01xdmf, renderView1, 'UnstructuredGridRepresentation')
@@ -352,23 +352,23 @@ def main(case, condition):
 
     # create a new 'Xdmf3 Reader S'
     tWSSG_cycle_01xdmf = Xdmf3ReaderS(registrationName='TWSSG_cycle_01.xdmf', FileName=[
-        path.join(solution_path, '/TWSSG_cycle_01.xdmf')])
+        path.join(solution_path, 'TWSSG_cycle_01.xdmf')])
 
     # create a new 'Xdmf3 Reader S'
     tWSSG_cycle_02xdmf = Xdmf3ReaderS(registrationName='TWSSG_cycle_02.xdmf', FileName=[
-        path.join(solution_path, '/TWSSG_cycle_02.xdmf')])
+        path.join(solution_path, 'TWSSG_cycle_02.xdmf')])
 
     # create a new 'Xdmf3 Reader S'
     tWSSG_cycle_03xdmf = Xdmf3ReaderS(registrationName='TWSSG_cycle_03.xdmf', FileName=[
-        path.join(solution_path, '/TWSSG_cycle_03.xdmf')])
+        path.join(solution_path, 'TWSSG_cycle_03.xdmf')])
 
     # create a new 'Xdmf3 Reader S'
     tWSSG_cycle_04xdmf = Xdmf3ReaderS(registrationName='TWSSG_cycle_04.xdmf', FileName=[
-        path.join(solution_path, '/TWSSG_cycle_04.xdmf')])
+        path.join(solution_path, 'TWSSG_cycle_04.xdmf')])
 
     # create a new 'Xdmf3 Reader S'
     tWSSG_cycle_05xdmf = Xdmf3ReaderS(registrationName='TWSSG_cycle_05.xdmf', FileName=[
-        path.join(solution_path, '/TWSSG_cycle_05.xdmf')])
+        path.join(solution_path, 'TWSSG_cycle_05.xdmf')])
 
     # show data in view
     tWSSG_cycle_01xdmfDisplay = Show(tWSSG_cycle_01xdmf, renderView1, 'UnstructuredGridRepresentation')
