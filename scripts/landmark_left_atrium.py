@@ -12,8 +12,6 @@
 import argparse
 import time
 
-from IPython import embed
-
 try:
     from morphman.common import *
     from vmtk import vmtkscripts
@@ -386,11 +384,11 @@ def extract_LA_and_LAA(case, condition, is_local, clip_volume=False):
     la_surface = get_surface_closest_to_point(surface_whole, center)
     if clip_volume:
         la_volume_brt = attach_clipped_regions_to_surface(volume_brt, clipped_volume_brt, center, clip_volume=True)
-        #la_volume_brt = get_surface_closest_to_point(la_volume_brt_tmp, center, is_volume=True)
+        # la_volume_brt = get_surface_closest_to_point(la_volume_brt_tmp, center, is_volume=True)
 
         la_volume_energy = attach_clipped_regions_to_surface(volume_energy, clipped_volume_energy, center,
                                                              clip_volume=True)
-        #la_volume_energy = get_surface_closest_to_point(la_volume_energy, center, is_volume=True)
+        # la_volume_energy = get_surface_closest_to_point(la_volume_energy, center, is_volume=True)
     print("--- Saving LAA to: {}".format(laa_model_path))
     write_polydata(laa_surface, laa_model_path)
 
