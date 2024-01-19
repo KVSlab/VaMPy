@@ -25,7 +25,7 @@ except ImportError:
     pass
 
 
-def extract_LA_and_LAA(case, condition, cycle, is_local, clip_volume=False):
+def extract_LA_and_LAA(case, condition, is_local, clip_volume=False):
     """Algorithm for detecting the left atrial appendage and isolate it from the atrium lumen
      based on the cross-sectional area along enterlines.
 
@@ -48,11 +48,11 @@ def extract_LA_and_LAA(case, condition, cycle, is_local, clip_volume=False):
         save_path_vtu = f"/home/opc/Simulation40/{condition.upper()}/{case}/results_moving_atrium/data/1/FlowMetrics"
         model_path = f'/app/OasisMove/src/oasismove/mesh/UKE_{condition.upper()}/{case}/'
 
-    input_path = path.join(save_path, f"hemodynamics_cycle_{cycle:02d}.vtp")
+    input_path = path.join(save_path, f"hemodynamics.vtp")
     clipped_model = input_path.replace(".vtp", "_la_and_laa.vtp")
 
-    input_path_brt = path.join(save_path_vtu, f"blood_residence_time_cycle_{cycle:02d}.vtu")
-    input_path_energy = path.join(save_path_vtu, f"energy_cycle_{cycle:02d}.vtu")
+    input_path_brt = path.join(save_path_vtu, f"blood_residence_time.vtu")
+    input_path_energy = path.join(save_path_vtu, f"energy.vtu")
     volume_brt = read_polydata(input_path_brt)
     volume_energy = read_polydata(input_path_energy)
     clipped_model_brt = input_path_brt.replace(".vtu", "_la_and_laa.vtu")
@@ -237,15 +237,15 @@ def extract_LA_and_LAA(case, condition, cycle, is_local, clip_volume=False):
         save_path_vtu = f"/home/opc/Simulation40/{condition.upper()}/{case}/results_moving_atrium/data/1/FlowMetrics"
         model_path = f'/app/OasisMove/src/oasismove/mesh/UKE_{condition.upper()}/{case}/'
 
-    input_path = path.join(save_path, f"hemodynamics_cycle_{cycle:02d}.vtp")
+    input_path = path.join(save_path, f"hemodynamics.vtp")
     # clipped_model = input_path.replace(".vtp", "_la_and_laa.vtp")
     laa_model_path = input_path.replace('.vtp', '_laa.vtp')
     la_model_path = input_path.replace('.vtp', '_la.vtp')
 
     # surface = read_polydata(clipped_model)
     if clip_volume:
-        input_path_brt = path.join(save_path_vtu, f"blood_residence_time_cycle_{cycle:02d}.vtu")
-        input_path_energy = path.join(save_path_vtu, f"energy_cycle_{cycle:02d}.vtu")
+        input_path_brt = path.join(save_path_vtu, f"blood_residence_time.vtu")
+        input_path_energy = path.join(save_path_vtu, f"energy.vtu")
 
         clipped_model_brt = input_path_brt.replace('.vtu', '_la_and_laa.vtu')
         laa_model_path_brt = input_path_brt.replace('.vtu', '_laa.vtu')
@@ -668,33 +668,31 @@ if __name__ == "__main__":
 
     conditions = [args.condition]
     cases = [args.case]
-    cycles = [1, 2, 3, 4, 5]
     local = False
     for condition in conditions:
         for case in cases:
-            for cycle in cycles:
-                print("--- Extracting case: {}".format(case))
-                # Get LAA point
-                print(f"--- Loading LAA points for {case}, condition {condition}")
-                if local:
-                    # Local
-                    laa_apex_point_path = f"/Users/henriakj/PhD/Code/VaMPy/models/models_inria/laa_apex_points_{condition}.json"
-                else:
-                    # Oracle
-                    laa_apex_point_path = f"/home/opc/Simulation40/laa_apex_points_{condition}.json"
+            print("--- Extracting case: {}".format(case))
+            # Get LAA point
+            print(f"--- Loading LAA points for {case}, condition {condition}")
+            if local:
+                # Local
+                laa_apex_point_path = f"/Users/henriakj/PhD/Code/VaMPy/models/models_inria/laa_apex_points_{condition}.json"
+            else:
+                # Oracle
+                laa_apex_point_path = f"/home/opc/Simulation40/laa_apex_points_{condition}.json"
 
-                with open(laa_apex_point_path) as f:
-                    info = json.load(f)
-                laa_point = info[case][0]
-                t0 = time.time()
+            with open(laa_apex_point_path) as f:
+                info = json.load(f)
+            laa_point = info[case][0]
+            t0 = time.time()
 
-                t1 = time.time()
-                try:
-                    extract_LA_and_LAA(case, condition, cycle, local, clip_volume)
-                    # separate_LA_and_LAA(case, condition, cycle, laa_point, local, clip_volume)
-                except Exception as e:
-                    print(f"--- FAILED for case {case}, condition {condition}, Error: {e}")
-                    failed.append(f"{condition}:{case}")
+            t1 = time.time()
+            try:
+                extract_LA_and_LAA(case, condition, local, clip_volume)
+                # separate_LA_and_LAA(case, condition, cycle, laa_point, local, clip_volume)
+            except Exception as e:
+                print(f"--- FAILED for case {case}, condition {condition}, Error: {e}")
+                failed.append(f"{condition}:{case}")
 
-                t2 = time.time()
-                print(f"--- Time spent extracting LAA: {t2 - t1:.3f} s")
+            t2 = time.time()
+            print(f"--- Time spent extracting LAA: {t2 - t1:.3f} s")
