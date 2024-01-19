@@ -9,7 +9,7 @@
 
 ## Writen by Aslak W. Bergersen, 2019
 ## Modified by Henrik A. Kjeldsberg, 2022
-
+import argparse
 import time
 
 try:
@@ -202,15 +202,14 @@ def extract_LA_and_LAA(case, condition, cycle, is_local, clip_volume=False):
     if clip_volume:
         print("--- Saving BRT LA and LAA volume to: {}".format(clipped_model_brt))
         volume_brt = attach_clipped_regions_to_surface(volume_brt, clipped_volume_brt, center, clip_volume=True)
-        #write_polydata(volume_brt, clipped_model_brt)
+        # write_polydata(volume_brt, clipped_model_brt)
 
         print("--- Saving Energy LA and LAA volume to: {}".format(clipped_model_energy))
-        volume_energy = attach_clipped_regions_to_surface(volume_energy, clipped_volume_energy, center, clip_volume=True)
-        #write_polydata(volume_energy, clipped_model_energy)
+        volume_energy = attach_clipped_regions_to_surface(volume_energy, clipped_volume_energy, center,
+                                                          clip_volume=True)
+        # write_polydata(volume_energy, clipped_model_energy)
 
-
-
-#def separate_LA_and_LAA(case, condition, cycle, laa_point, is_local, clip_volume=False):
+    # def separate_LA_and_LAA(case, condition, cycle, laa_point, is_local, clip_volume=False):
     """Algorithm for detecting the left atrial appendage and isolate it from the atrium lumen
      based on the cross-sectional area along enterlines.
 
@@ -239,11 +238,11 @@ def extract_LA_and_LAA(case, condition, cycle, is_local, clip_volume=False):
         model_path = f'/app/OasisMove/src/oasismove/mesh/UKE_{condition.upper()}/{case}/'
 
     input_path = path.join(save_path, f"hemodynamics_cycle_{cycle:02d}.vtp")
-    #clipped_model = input_path.replace(".vtp", "_la_and_laa.vtp")
+    # clipped_model = input_path.replace(".vtp", "_la_and_laa.vtp")
     laa_model_path = input_path.replace('.vtp', '_laa.vtp')
     la_model_path = input_path.replace('.vtp', '_la.vtp')
 
-    #surface = read_polydata(clipped_model)
+    # surface = read_polydata(clipped_model)
     if clip_volume:
         input_path_brt = path.join(save_path_vtu, f"blood_residence_time_cycle_{cycle:02d}.vtu")
         input_path_energy = path.join(save_path_vtu, f"energy_cycle_{cycle:02d}.vtu")
@@ -256,8 +255,8 @@ def extract_LA_and_LAA(case, condition, cycle, is_local, clip_volume=False):
         laa_model_path_energy = input_path_energy.replace('.vtu', '_laa.vtu')
         la_model_path_energy = input_path_energy.replace('.vtu', '_la.vtu')
 
-        #volume_brt = read_polydata(clipped_model_brt)
-        #volume_energy = read_polydata(clipped_model_energy)
+        # volume_brt = read_polydata(clipped_model_brt)
+        # volume_energy = read_polydata(clipped_model_energy)
 
     capped_surface = vmtk_cap_polydata(surface)
 
@@ -367,12 +366,12 @@ def extract_LA_and_LAA(case, condition, cycle, is_local, clip_volume=False):
     if clip_volume:
         # BRT
         laa_volume_brt = attach_clipped_regions_to_surface(volume_brt, clipped_volume_brt, center, clip_volume=True)
-        #laa_volume_brt = merge_dataset(laa_volume_brt)
+        # laa_volume_brt = merge_dataset(laa_volume_brt)
         laa_volume_brt = get_surface_closest_to_point(laa_volume_brt, center, is_volume=True)
         # Energy
         laa_volume_energy = attach_clipped_regions_to_surface(volume_energy, clipped_volume_energy, center,
                                                               clip_volume=True)
-        #laa_volume_energy = merge_dataset(laa_volume_energy)
+        # laa_volume_energy = merge_dataset(laa_volume_energy)
         laa_volume_energy = get_surface_closest_to_point(laa_volume_energy, center, is_volume=True)
 
     # Extract LA:
@@ -661,34 +660,41 @@ def provide_region_points(surface, provided_points, dir_path=None):
 if __name__ == "__main__":
     failed = []
     clip_volume = True
-    conditions = ['sr']
-    cases = ["1029"]
-    cycle = 3
+
+    parser = argparse.ArgumentParser()
+    parser.add_argument('--case', help='Description for foo argument', required=True)
+    parser.add_argument('--condition', help='Description for bar argument', required=True)
+    args = parser.parse_args()
+
+    conditions = [args.condition]
+    cases = [args.case]
+    cycles = [1, 2, 3, 4, 5]
     local = False
     for condition in conditions:
         for case in cases:
-            print("--- Extracting case: {}".format(case))
-            # Get LAA point
-            print(f"--- Loading LAA points for {case}, condition {condition}")
-            if local:
-                # Local
-                laa_apex_point_path = f"/Users/henriakj/PhD/Code/VaMPy/models/models_inria/laa_apex_points_{condition}.json"
-            else:
-                # Oracle
-                laa_apex_point_path = f"/home/opc/Simulation40/laa_apex_points_{condition}.json"
+            for cycle in cycles:
+                print("--- Extracting case: {}".format(case))
+                # Get LAA point
+                print(f"--- Loading LAA points for {case}, condition {condition}")
+                if local:
+                    # Local
+                    laa_apex_point_path = f"/Users/henriakj/PhD/Code/VaMPy/models/models_inria/laa_apex_points_{condition}.json"
+                else:
+                    # Oracle
+                    laa_apex_point_path = f"/home/opc/Simulation40/laa_apex_points_{condition}.json"
 
-            with open(laa_apex_point_path) as f:
-                info = json.load(f)
-            laa_point = info[case][0]
-            t0 = time.time()
+                with open(laa_apex_point_path) as f:
+                    info = json.load(f)
+                laa_point = info[case][0]
+                t0 = time.time()
 
-            t1 = time.time()
-            try:
-                extract_LA_and_LAA(case, condition, cycle, local, clip_volume)
-                # separate_LA_and_LAA(case, condition, cycle, laa_point, local, clip_volume)
-            except Exception as e:
-                print(f"--- FAILED for case {case}, condition {condition}, Error: {e}")
-                failed.append(f"{condition}:{case}")
+                t1 = time.time()
+                try:
+                    extract_LA_and_LAA(case, condition, cycle, local, clip_volume)
+                    # separate_LA_and_LAA(case, condition, cycle, laa_point, local, clip_volume)
+                except Exception as e:
+                    print(f"--- FAILED for case {case}, condition {condition}, Error: {e}")
+                    failed.append(f"{condition}:{case}")
 
-            t2 = time.time()
-            print(f"--- Time spent extracting LAA: {t2 - t1:.3f} s")
+                t2 = time.time()
+                print(f"--- Time spent extracting LAA: {t2 - t1:.3f} s")
