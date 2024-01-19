@@ -113,7 +113,7 @@ if __name__ == '__main__':
 
     conditions = ['SR']
     cases = ['1029']
-    cycle = 5
+    cycle = 3
     for condition in conditions:
         for case in cases:
             print(f"Converting BRT xdmf to vtu for {case} for condition {condition}")

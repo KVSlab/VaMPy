@@ -463,9 +463,8 @@ if __name__ == '__main__':
     # conditions = ["SR", "AF"]
 
     conditions = ['SR']
-    cases = ['0004', '0006','0007']
-    cases = ['0003']
-    cycles = [1,2,3,4,5]
+    cases = ['1029']
+    cycles = [3]
     for condition in conditions:
         for case in cases:
             for cycle in cycles:

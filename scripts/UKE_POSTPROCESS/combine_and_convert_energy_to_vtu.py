@@ -210,7 +210,7 @@ def main(case, condition, cycle, is_local=False):
     if is_local:
         save_path = f'/Users/henriakj/PhD/Code/OasisMove/results_34case/results_{case}_{condition}/FlowMetrics/energy_cycle_{cycle:02d}.vtu'
     else:
-        save_path = f"/home/opc/Simulation40/{condition}/{case}/results_moving_atrium/data/1/FlowMetrics/turbulent_kinetic_energy_cycle_{cycle:02d}.vtu"
+        save_path = f"/home/opc/Simulation40/{condition}/{case}/results_moving_atrium/data/1/FlowMetrics/energy_cycle_{cycle:02d}.vtu"
 
     SaveData(save_path,
              proxy=appendAttributes1, PointDataArrays=['kinetic_energy', 'turbulent_kinetic_energy'])
@@ -249,7 +249,7 @@ if __name__ == '__main__':
 
     conditions = ['SR']
     cases = ['1029']
-    cycle = 5
+    cycle = 3
     for condition in conditions:
         for case in cases:
             print(f"Combining and converting KE & TKE from xdmf to vtu for {case} for condition {condition}")
