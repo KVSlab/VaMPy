@@ -772,7 +772,7 @@ if __name__ == '__main__':
     for condition in conditions:
         for case in cases:
             print(
-                f"Combining and converting HEMODYNAMICS from xdmf to vtu for {case} for condition {condition} (Cycle {cycle})")
+                f"Combining and converting HEMODYNAMICS from xdmf to vtu for {case} for condition {condition}")
             try:
                 main(case, condition)
             except Exception as e:
