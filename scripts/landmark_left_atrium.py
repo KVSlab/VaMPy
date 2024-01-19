@@ -665,9 +665,9 @@ if __name__ == "__main__":
     parser.add_argument('--condition', help='Description for bar argument', required=True)
     args = parser.parse_args()
 
-    conditions = [args.condition]
+    conditions = [args.condition.lower()]
     cases = [args.case]
-    local = True
+    local = False
     for condition in conditions:
         for case in cases:
             print("--- Extracting case: {}".format(case))
