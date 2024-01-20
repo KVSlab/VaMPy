@@ -201,19 +201,19 @@ def extract_LA_and_LAA(case, condition, is_local, clip_volume=False):
 
     print("--- Saving LA and LAA to: {}".format(clipped_model))
     surface = attach_clipped_regions_to_surface(surface, clipped, center)
-    write_polydata(surface, clipped_model)
+    #  write_polydata(surface, clipped_model)
 
     if clip_volume:
         print("--- Saving BRT LA and LAA volume to: {}".format(clipped_model_brt))
         volume_brt = attach_clipped_regions_to_surface(volume_brt, clipped_volume_brt, center, clip_volume=True)
-        write_polydata(volume_brt, clipped_model_brt)
+        # write_polydata(volume_brt, clipped_model_brt)
 
         print("--- Saving Energy LA and LAA volume to: {}".format(clipped_model_energy))
         volume_energy = attach_clipped_regions_to_surface(volume_energy, clipped_volume_energy, center,
                                                           clip_volume=True)
-        write_polydata(volume_energy, clipped_model_energy)
+        # write_polydata(volume_energy, clipped_model_energy)
 
-def separate_LA_and_LAA(case, condition, laa_point, is_local, clip_volume=False):
+#def separate_LA_and_LAA(case, condition, laa_point, is_local, clip_volume=False):
     """Algorithm for detecting the left atrial appendage and isolate it from the atrium lumen
      based on the cross-sectional area along enterlines.
 
@@ -246,7 +246,7 @@ def separate_LA_and_LAA(case, condition, laa_point, is_local, clip_volume=False)
     laa_model_path = input_path.replace('.vtp', '_laa.vtp')
     la_model_path = input_path.replace('.vtp', '_la.vtp')
 
-    surface = read_polydata(clipped_model)
+    #   surface = read_polydata(clipped_model)
     if clip_volume:
         input_path_brt = path.join(save_path_vtu, f"blood_residence_time.vtu")
         input_path_energy = path.join(save_path_vtu, f"energy.vtu")
@@ -259,8 +259,8 @@ def separate_LA_and_LAA(case, condition, laa_point, is_local, clip_volume=False)
         laa_model_path_energy = input_path_energy.replace('.vtu', '_laa.vtu')
         la_model_path_energy = input_path_energy.replace('.vtu', '_la.vtu')
 
-        volume_brt = read_polydata(clipped_model_brt)
-        volume_energy = read_polydata(clipped_model_energy)
+        #volume_brt = read_polydata(clipped_model_brt)
+        #volume_energy = read_polydata(clipped_model_energy)
     print("-- Reading centerlines")
     capped_surface = vmtk_cap_polydata(surface)
 
@@ -698,7 +698,7 @@ if __name__ == "__main__":
             t1 = time.time()
             try:
                 extract_LA_and_LAA(case, condition, local, clip_volume)
-                separate_LA_and_LAA(case, condition, laa_point, local, clip_volume)
+                #separate_LA_and_LAA(case, condition, laa_point, local, clip_volume)
             except Exception as e:
                 print(f"--- FAILED for case {case}, condition {condition}, Error: {e}")
                 failed.append(f"{condition}:{case}")
