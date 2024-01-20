@@ -256,7 +256,7 @@ def extract_LA_and_LAA(case, condition, is_local, clip_volume=False):
 
         # volume_brt = read_polydata(clipped_model_brt)
         # volume_energy = read_polydata(clipped_model_energy)
-
+    print("-- Reading centerlines")
     capped_surface = vmtk_cap_polydata(surface)
 
     laa_centerlines_path = path.join(model_path, "model_region_centerline_0.vtp")
@@ -264,14 +264,17 @@ def extract_LA_and_LAA(case, condition, is_local, clip_volume=False):
     id_start = int(laa_centerlines.GetNumberOfPoints() * 0.1)
     id_stop = int(laa_centerlines.GetNumberOfPoints() * 0.8)
 
+
+    print("-- Resample, Spline and Section computation" )
     line = extract_single_line(laa_centerlines, 0, start_id=id_start, end_id=id_stop)
     laa_l = get_curvilinear_coordinate(line)
-    step = 5 * np.mean(laa_l[1:] - laa_l[:-1])
+    step = 2 * np.mean(laa_l[1:] - laa_l[:-1])
     line = vmtk_resample_centerline(line, step)
-    line = compute_splined_centerline(line, nknots=10, isline=True)
+    line = compute_splined_centerline(line, nknots=20, isline=True)
     area, sections = vmtk_compute_centerline_sections(capped_surface, line)
 
     # Get arrays
+    print("-- Extract point arrays" )
     a = get_point_data_array("CenterlineSectionArea", area)
     n = get_point_data_array("FrenetTangent", area, k=3)
 
