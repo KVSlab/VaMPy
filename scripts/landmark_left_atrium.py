@@ -268,9 +268,9 @@ def extract_LA_and_LAA(case, condition, is_local, clip_volume=False):
     print("-- Resample, Spline and Section computation" )
     line = extract_single_line(laa_centerlines, 0, start_id=id_start, end_id=id_stop)
     laa_l = get_curvilinear_coordinate(line)
-    step = 2 * np.mean(laa_l[1:] - laa_l[:-1])
+    step = 10 * np.mean(laa_l[1:] - laa_l[:-1])
     line = vmtk_resample_centerline(line, step)
-    line = compute_splined_centerline(line, nknots=20, isline=True)
+    line = compute_splined_centerline(line, nknots=10, isline=True)
     area, sections = vmtk_compute_centerline_sections(capped_surface, line)
 
     # Get arrays
