@@ -51,9 +51,6 @@ def extract_LA_and_LAA(case, condition, is_local, clip_volume=False):
 
     input_path = path.join(save_path, f"hemodynamics.vtp")
     clipped_model = input_path.replace(".vtp", "_la_and_laa.vtp")
-    if os.path.exists(clipped_model):
-        print("-- Found clip (la and laa)")
-        return
 
     input_path_brt = path.join(save_path_vtu, f"blood_residence_time.vtu")
     input_path_energy = path.join(save_path_vtu, f"energy.vtu")
