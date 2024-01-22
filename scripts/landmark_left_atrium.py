@@ -89,7 +89,7 @@ def extract_LA_and_LAA(case, condition, is_local, clip_volume=False):
 
         line = extract_single_line(la_centerline_i, 0, start_id=start, end_id=stop)
         la_l = get_curvilinear_coordinate(line)
-        step = 1 * np.mean(la_l[1:] - la_l[:-1])
+        step = 5 * np.mean(la_l[1:] - la_l[:-1])
         line = vmtk_resample_centerline(line, step)
         line = compute_splined_centerline(line, nknots=10, isline=True)
         area, sections = vmtk_compute_centerline_sections(capped_surface, line)
