@@ -531,18 +531,18 @@ def main_probe():
         'velocity_emptying': []
     }
     case_to_id = pd.read_csv(f"/home/opc/probe_ids_{condition}.csv")
-    root = "/home/opc/Simulation40/{}/{}/results_moving_atrium/data/1/Probes"
-    cases = case_to_id.case_id
-    folders = [root.format(condition,case) for case in cases]
+    root = "/home/opc/Simulation40/{}/{:04d}/results_moving_atrium/data/1/Probes"
+    cases = case_to_id.case_id.to_numpy()[:3]
+    folders = [root.format(condition.upper(),case) for case in cases]
     m = 0
     for folder, case in zip(folders, cases):
         probes_to_plot = [case_to_id.laa_probe_id[m]]
         try:
             filling, emptying = visualize_probes(folder, probe_freq, T, dt, probes_to_plot, show_figure=True,
                                                  save_figure=True)
-            data['case_id'] = f'{case:04d}'
-            data['velocity_filling'] = filling
-            data['velocity_emptying'] = emptying
+            data['case_id'].append(f'{case:04d}')
+            data['velocity_filling'].append(filling)
+            data['velocity_emptying'].append(emptying)
         except:
             print(f"-- Failed for case {case}")
 
