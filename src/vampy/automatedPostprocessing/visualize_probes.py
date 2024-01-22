@@ -531,18 +531,16 @@ def main_probe():
         'velocity_emptying': []
     }
     case_to_id = pd.read_csv(f"/home/opc/probe_ids_{condition}.csv")
-    cases = ["0001", "0003", "0004", "0005", "0006", "0007", "0008", "0009", "0019", "0020", "0021", "0022", "0023",
-             "0024", "0025", "0026", "0027", "0028", "0029", "0030", "0031", "0032", "0033", "0034", "0035", "0074",
-             "0075", "0076", "0077", "0078", "0079", "0080", "0081", "1029", "1030", "1031", "1032", "1033", "1034",
-             "1035", "1036", "1037", "1038", "1039", "2022"]
     root = "/home/opc/Simulation40/{}/{}/results_moving_atrium/data/1/Probes"
+    cases = case_to_id.case_id
     folders = [root.format(condition,case) for case in cases]
+    m = 0
     for folder, case in zip(folders, cases):
-        probes_to_plot = case_to_id[case]
+        probes_to_plot = [case_to_id.laa_probe_id[m]]
         try:
             filling, emptying = visualize_probes(folder, probe_freq, T, dt, probes_to_plot, show_figure=True,
                                                  save_figure=True)
-            data['case_id'] = case
+            data['case_id'] = f'{case:04d}'
             data['velocity_filling'] = filling
             data['velocity_emptying'] = emptying
         except:
