@@ -535,7 +535,8 @@ def main_probe():
              "0024", "0025", "0026", "0027", "0028", "0029", "0030", "0031", "0032", "0033", "0034", "0035", "0074",
              "0075", "0076", "0077", "0078", "0079", "0080", "0081", "1029", "1030", "1031", "1032", "1033", "1034",
              "1035", "1036", "1037", "1038", "1039", "2022"]
-    folders = []
+    root = "/home/opc/Simulation40/{}/{}/results_moving_atrium/data/1/Probes"
+    folders = [root.format(condition,case) for case in cases]
     for folder, case in zip(folders, cases):
         probes_to_plot = case_to_id[case]
         try:
