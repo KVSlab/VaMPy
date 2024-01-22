@@ -676,7 +676,7 @@ if __name__ == "__main__":
 
     conditions = [args.condition.lower()]
     cases = [args.case]
-    local = True
+    local = False
     for condition in conditions:
         for case in cases:
             print("--- Extracting case: {}".format(case))
