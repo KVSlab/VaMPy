@@ -2,6 +2,7 @@ from os import path
 
 import matplotlib.pyplot as plt
 import numpy as np
+import pandas as pd
 from vampy.automatedPostprocessing.postprocessing_common import read_command_line
 
 # Plotting variables
@@ -39,15 +40,23 @@ def visualize_probes(case_path, probe_saving_frequency, T, dt, probes_to_plot, s
     else:
         # Plot probes in separate plots
         for k in probes_to_plot:
-            fig, ((ax1, ax2), (ax3, ax4)) = plt.subplots(2, 2)
-            plot_velocity_and_pressure(k, ax1, max_P, max_U, mean_velocity, n_timesteps, pressures, velocity)
-            plot_kinetic_energy(k, ax2, kinetic_energy, max_ke, max_tke, n_timesteps, turbulent_kinetic_energy,
-                                turbulence_intensity)
-            plot_energy_spectrum(k, ax3, freq, kinetic_energy_spectrum, max_kes)
-            plot_spectrogram(k, ax4, velocity_u)
+            PLOT = False
+            if PLOT:
+                fig, ((ax1, ax2), (ax3, ax4)) = plt.subplots(2, 2)
+                plot_velocity_and_pressure(k, ax1, max_P, max_U, mean_velocity, n_timesteps, pressures, velocity)
+                plot_kinetic_energy(k, ax2, kinetic_energy, max_ke, max_tke, n_timesteps, turbulent_kinetic_energy,
+                                    turbulence_intensity)
+                plot_energy_spectrum(k, ax3, freq, kinetic_energy_spectrum, max_kes)
+                plot_spectrogram(k, ax4, velocity_u)
 
-            print(f"-- Plotting quantities for probe {k}")
-            save_and_show_plot(case_path, f"probes_{k}.png", save_figure, show_figure)
+                print(f"-- Plotting quantities for probe {k}")
+                save_and_show_plot(case_path, f"probes_{k}.png", save_figure, show_figure)
+            else:
+                id_half = int(5000 / 2)
+                peak_filling = max(mean_velocity[k][:id_half])
+                peak_emptying = max(mean_velocity[k][id_half:id_half * 2])
+
+                return peak_filling, peak_emptying
 
 
 def save_and_show_plot(case_path, filename, save, show):
@@ -227,6 +236,8 @@ def plot_velocity_and_pressure(k, ax, max_P, max_U, mean_velocity, n_timesteps, 
     id_half = int(5000 / 2)
     peak_filling = max(mean_velocity[k][:id_half])
     peak_emptying = max(mean_velocity[k][id_half:id_half * 2])
+    print(f"Peak emptying is {peak_emptying * 100:.02f} cm/s")
+    print(f"Peak filling is {peak_filling * 100:.02f} cm/s")
 
     ax_twinx = ax.twinx()
     time_interval = np.linspace(0, n_timesteps, n_timesteps)
@@ -250,9 +261,6 @@ def plot_velocity_and_pressure(k, ax, max_P, max_U, mean_velocity, n_timesteps, 
 
     # Set title to probe number
     ax.set_title('Probe {}'.format(k + 1), y=1.0, pad=-14)
-
-    print(f"Peak emptying is {peak_emptying * 100:.02f} cm/s")
-    print(f"Peak filling is {peak_filling * 100:.02f} cm/s")
 
 
 def compute_mean_velocity_and_kinetic_energy(T, dt, n_timesteps, n_probes, velocity, velocity_u, velocity_v,
@@ -514,8 +522,33 @@ def compute_energy_spectrum(n_probes, velocity_u, velocity_v, velocity_w, dt):
 def main_probe():
     # Read command line arguments
     folder, _, _, dt, _, _, probe_freq, T, _, _, _, _, _ = read_command_line()
-    probes_to_plot = [23]
-    visualize_probes(folder, probe_freq, T, dt, probes_to_plot, show_figure=True, save_figure=True)
+    # Load probes
+
+    condition = "af"
+    data = {
+        'case_id': [],
+        'velocity_filling': [],
+        'velocity_emptying': []
+    }
+    case_to_id = pd.read_csv(f"probe_ids_{condition}.csv")
+    cases = ["0001", "0003", "0004", "0005", "0006", "0007", "0008", "0009", "0019", "0020", "0021", "0022", "0023",
+             "0024", "0025", "0026", "0027", "0028", "0029", "0030", "0031", "0032", "0033", "0034", "0035", "0074",
+             "0075", "0076", "0077", "0078", "0079", "0080", "0081", "1029", "1030", "1031", "1032", "1033", "1034",
+             "1035", "1036", "1037", "1038", "1039", "2022"]
+    folders = []
+    for folder, case in zip(folders, cases):
+        probes_to_plot = case_to_id[case]
+        try:
+            filling, emptying = visualize_probes(folder, probe_freq, T, dt, probes_to_plot, show_figure=True,
+                                                 save_figure=True)
+            data['case_id'] = case
+            data['velocity_filling'] = filling
+            data['velocity_emptying'] = emptying
+        except:
+            print(f"-- Failed for case {case}")
+
+    df = pd.DataFrame(data)
+    df.to_csv(f"laa_velocities_{condition}.csv")
 
 
 if __name__ == '__main__':
