@@ -89,7 +89,7 @@ def extract_LA_and_LAA(case, condition, is_local, clip_volume=False):
 
         line = extract_single_line(la_centerline_i, 0, start_id=start, end_id=stop)
         la_l = get_curvilinear_coordinate(line)
-        step = 5 * np.mean(la_l[1:] - la_l[:-1])
+        step = 1 * np.mean(la_l[1:] - la_l[:-1])
         line = vmtk_resample_centerline(line, step)
         line = compute_splined_centerline(line, nknots=10, isline=True)
         area, sections = vmtk_compute_centerline_sections(capped_surface, line)
@@ -269,7 +269,7 @@ def extract_LA_and_LAA(case, condition, is_local, clip_volume=False):
 
     line = extract_single_line(laa_centerlines, 0, start_id=id_start, end_id=id_stop)
     laa_l = get_curvilinear_coordinate(line)
-    step = 1 * np.mean(laa_l[1:] - laa_l[:-1])
+    step = 5 * np.mean(laa_l[1:] - laa_l[:-1])
     print("-- Resample computation" )
     line = vmtk_resample_centerline(line, step)
     print("-- Spline computation" )
@@ -674,7 +674,7 @@ if __name__ == "__main__":
 
     conditions = [args.condition.lower()]
     cases = [args.case]
-    local = False
+    local = True
     for condition in conditions:
         for case in cases:
             print("--- Extracting case: {}".format(case))

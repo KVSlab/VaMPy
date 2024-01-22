@@ -199,7 +199,7 @@ if __name__ == '__main__':
     cases = [args.case]
     for condition in conditions:
         for case in cases:
-            print(f"Combining and converting KE & TKE from xdmf to vtu for {case} for condition {condition}")
+            print(f"MERGING KE & TKE from xdmf to vtu for {case} for condition {condition}")
             try:
                 main(case, condition)
             except Exception as e:

@@ -244,7 +244,7 @@ if __name__ == '__main__':
     for condition in conditions:
         for case in cases:
             for cycle in cycles:
-                print(f"Combining and converting KE & TKE from xdmf to vtu for {case} for condition {condition}")
+                print(f"Combining and converting KE & TKE from xdmf to vtu for {case} for condition {condition} cycle {cycle}")
                 try:
                     main(case, condition, cycle)
                 except Exception as e:

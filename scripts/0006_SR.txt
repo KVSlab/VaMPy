@@ -1,0 +1,19 @@
+Fri Jan 19 23:16:05 GMT 2024
+Converting energy case 0006 , condiiton SR
+Combining and converting KE & TKE from xdmf to vtu for 0006 for condition SR
+Combining and converting KE & TKE from xdmf to vtu for 0006 for condition SR
+Combining and converting KE & TKE from xdmf to vtu for 0006 for condition SR
+Combining and converting KE & TKE from xdmf to vtu for 0006 for condition SR
+Combining and converting KE & TKE from xdmf to vtu for 0006 for condition SR
+Merging energy for case 0006 , condiiton SR
+Combining and converting KE & TKE from xdmf to vtu for 0006 for condition SR
+Converting HEMO for case 0006 , condiiton SR
+Combining and converting HEMODYNAMICS from xdmf to vtu for 0006 for condition SR
+-- Reading solutions from /home/opc/Simulation40/SR/0006/results_moving_atrium/data/1/Hemodynamics --
+Converting BRT for case 0006 , condiiton SR
+Converting BRT xdmf to vtu for 0006 for condition SR
+-- Reading solutions from /home/opc/Simulation40/SR/0006/results_moving_atrium/data/1/FlowMetrics --
+Clipping case 0006 , condiiton SR
+--- Extracting case: 0006
+--- Loading LAA points for 0006, condition SR
+Fri Jan 19 23:23:51 GMT 2024

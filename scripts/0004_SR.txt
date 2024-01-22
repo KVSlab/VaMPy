@@ -1,0 +1,12 @@
+Fri Jan 19 23:14:03 GMT 2024
+Conevrting case 0004 , condiiton SR
+Combining and converting KE & TKE from xdmf to vtu for 0004 for condition SR
+Combining and converting KE & TKE from xdmf to vtu for 0004 for condition SR
+Combining and converting KE & TKE from xdmf to vtu for 0004 for condition SR
+Combining and converting KE & TKE from xdmf to vtu for 0004 for condition SR
+Combining and converting KE & TKE from xdmf to vtu for 0004 for condition SR
+Combining and converting KE & TKE from xdmf to vtu for 0004 for condition SR
+Combining and converting HEMODYNAMICS from xdmf to vtu for 0004 for condition SR
+-- Reading solutions from /home/opc/Simulation40/SR/0004/results_moving_atrium/data/1/Hemodynamics --
+Converting BRT xdmf to vtu for 0004 for condition SR
+-- Reading solutions from /home/opc/Simulation40/SR/0004/results_moving_atrium/data/1/FlowMetrics --
