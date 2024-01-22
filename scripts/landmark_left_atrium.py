@@ -287,17 +287,19 @@ def extract_LA_and_LAA(case, condition, is_local, clip_volume=False):
     lim = -200
     tol = 5
     ID = -1
-    if case == "0008":
-        tol = 20
     if case == "0081":
         tol = 1
     if condition == "sr":
+        if case == "0008":
+            tol = 20
         if case == "0007":
             lim = -100
         if case == "0026":
             ID = 0
             tol = 20
     if condition == "af":
+        if case == "0008":
+            tol = 0
         if case == "0024":
             tol = 0
         if case == "0028":
