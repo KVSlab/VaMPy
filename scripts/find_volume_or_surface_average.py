@@ -47,9 +47,12 @@ def main_surface(case, condition, cycle, region, metric_name, is_local):
     # Compute mean, median, min, max, and volume average
     print(f"-- Loading case {case} condition {condition} cycle {cycle}")
     if is_local:
-        mesh_path = f'/Users/henriakj/PhD/Code/OasisMove/results_34case/results_{case}_{condition}/Hemodynamics/hemodynamics_cycle_{cycle:02d}_{region}.vtp'
+        mesh_path = f'/Users/henriakj/PhD/Code/OasisMove/results_34case/results_{case}_{condition}/Hemodynamics/hemodynamics_{region}.vtp'
     else:
-        mesh_path = f"/home/opc/Simulation40/{condition.upper()}/{case}/results_moving_atrium/data/1/Hemodynamics/hemodynamics_cycle_{cycle:02d}_{region}.vtp"
+        mesh_path = f"/home/opc/Simulation40/{condition.upper()}/{case}/results_moving_atrium/data/1/Hemodynamics/hemodynamics__{region}.vtp"
+
+    if cycle != 1:
+        metric_array_name = f"{metric_name}_input_{cycle-1}"
 
     data = read_polydata(mesh_path)
     point_to_cell_data = convert_to_cell_data(data)
@@ -57,7 +60,7 @@ def main_surface(case, condition, cycle, region, metric_name, is_local):
     model = dsa.WrapDataObject(vtk_model)
 
     area = model.CellData.GetArray('Area')
-    metric = model.CellData.GetArray(metric_name)
+    metric = model.CellData.GetArray(metric_array_name)
 
     # Filter negatives
     metric, area = filter_metric(metric, area, metric_name)
@@ -79,16 +82,19 @@ def main_volume(case, condition, cycle, metric, region, is_local):
     print(f"-- Loading case {case} condition {condition} cycle {cycle} metric {metric}")
     metric_name = 'blood_residence_time' if metric == 'blood_residence_time' else 'energy'
     if is_local:
-        mesh_path = f'/Users/henriakj/PhD/Code/OasisMove/results_34case/results_1029_SR/FlowMetrics/{metric_name}_cycle_{cycle:02d}_{region}.vtu'
+        mesh_path = f'/Users/henriakj/PhD/Code/OasisMove/results_34case/results_1029_SR/FlowMetrics/{metric_name}_{region}.vtu'
     else:
-        mesh_path = f"/home/opc/Simulation40/{condition.upper()}/{case}/results_moving_atrium/data/1/FlowMetrics/{metric_name}_cycle_{cycle:02d}_{region}.vtu"
-
+        mesh_path = f"/home/opc/Simulation40/{condition.upper()}/{case}/results_moving_atrium/data/1/FlowMetrics/{metric_name}_{region}.vtu"
+    if cycle != 1:
+        metric_name = f"{metric}_input_{cycle-1}"
+    else:
+        metric_name = metric
     data = read_polydata(mesh_path)
     point_to_cell_data = convert_to_cell_data(data)
     vtk_model = get_volume(point_to_cell_data)
     model = dsa.WrapDataObject(vtk_model)
     volume = model.CellData.GetArray('Volume')
-    quantity = model.CellData.GetArray(metric)
+    quantity = model.CellData.GetArray(metric_name)
     positive_volume = np.abs(volume)
     total_volume = np.sum(positive_volume)
 
