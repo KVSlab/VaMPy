@@ -49,7 +49,7 @@ def main_surface(case, condition, cycle, region, metric_name, is_local):
     if is_local:
         mesh_path = f'/Users/henriakj/PhD/Code/OasisMove/results_34case/results_{case}_{condition}/Hemodynamics/hemodynamics_{region}.vtp'
     else:
-        mesh_path = f"/home/opc/Simulation40/{condition.upper()}/{case}/results_moving_atrium/data/1/Hemodynamics/hemodynamics__{region}.vtp"
+        mesh_path = f"/home/opc/Simulation40/{condition.upper()}/{case}/results_moving_atrium/data/1/Hemodynamics/hemodynamics_{region}.vtp"
 
     if cycle != 1:
         metric_array_name = f"{metric_name}_input_{cycle-1}"
@@ -114,7 +114,7 @@ if __name__ == '__main__':
              "0020", "0021", "0023", "0024", "0025", "0026", "0027", "0028",
              "0029", "0030", "0031", "0032", "0033", "0034", "0035", "0074",
              "0076", "0077", "0078", "0080", "0081", "1029", "1030", "1031",
-             "1032", "1033", "1035", "1037", "1038", "1039", "2022"]
+             "1032", "1033", "1035", "1037", "1038", "1039", "2022"][:4]
     cycles = [1, 2, 3, 4, 5]
     is_local = False
     metrics = ['kinetic_energy', 'turbulent_kinetic_energy', 'blood_residence_time', 'hemodynamics']
