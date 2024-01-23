@@ -26,7 +26,10 @@ def compute_residence_time(folder, nu, dt, velocity_degree, T, times_to_average,
         average_over_cycles (bool): A flag indicating whether to perform cycle averaging.
     """
     # File paths
-    folders = [path.join(folder, f) for f in sorted(listdir(folder)) if "SolutionsFull_" in f]
+    if "0024" in folder:
+        folders = [path.join(folder, f) for f in sorted(listdir(folder)) if "Solutions_" in f]
+    else:
+        folders = [path.join(folder, f) for f in sorted(listdir(folder)) if "SolutionsFull_" in f]
     file_brts = [HDF5File(MPI.comm_world, path.join(f, "brt.h5"), "r") for f in folders]
     mesh_path = path.join(folder, "mesh.h5")
 
