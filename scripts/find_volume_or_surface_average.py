@@ -52,7 +52,7 @@ def main_surface(case, condition, cycle, region, metric_name, is_local):
         mesh_path = f"/home/opc/Simulation40/{condition.upper()}/{case}/results_moving_atrium/data/1/Hemodynamics/hemodynamics_{region}.vtp"
 
     if cycle != 1:
-        metric_array_name = f"{metric_name}_input_{cycle-1}"
+        metric_array_name = f"{metric_name}_input_{cycle - 1}"
     else:
         metric_array_name = metric_name
 
@@ -75,7 +75,7 @@ def main_surface(case, condition, cycle, region, metric_name, is_local):
     minimum = np.min(metric)
     maximum = np.max(metric)
 
-    return area_avg, avg, median
+    return area_avg, avg, median, minimum, maximum
 
 
 def main_volume(case, condition, cycle, metric, region, is_local):
@@ -88,7 +88,7 @@ def main_volume(case, condition, cycle, metric, region, is_local):
     else:
         mesh_path = f"/home/opc/Simulation40/{condition.upper()}/{case}/results_moving_atrium/data/1/FlowMetrics/{metric_name}_{region}.vtu"
     if cycle != 1:
-        metric_name = f"{metric}_input_{cycle-1}"
+        metric_name = f"{metric}_input_{cycle - 1}"
     else:
         metric_name = metric
     data = read_polydata(mesh_path)
@@ -107,7 +107,7 @@ def main_volume(case, condition, cycle, metric, region, is_local):
     minimum = np.min(quantity)
     maximum = np.max(quantity)
 
-    return volume_avg, avg, median
+    return volume_avg, avg, median, minimum, maximum
 
 
 if __name__ == '__main__':
@@ -130,13 +130,15 @@ if __name__ == '__main__':
                 'cycle': [],
                 'volume_avg': [],
                 'avg': [],
-                'median': []
+                'median': [],
+                'minimum': [],
+                'maximum':[]
             }
             for case in cases:
                 for metric in metrics:
                     for cycle in cycles:
                         if metric in ['kinetic_energy', 'turbulent_kinetic_energy', 'blood_residence_time']:
-                            volume_avg, avg, median = main_volume(case, condition, cycle, metric, region, is_local)
+                            volume_avg, avg, median,minimum,maximum = main_volume(case, condition, cycle, metric, region, is_local)
                             # Append the current case, metric, and cycle information to the data dictionary
                             data['case_id'].append(case)
                             data['metric'].append(metric)
@@ -144,15 +146,19 @@ if __name__ == '__main__':
                             data['volume_avg'].append(volume_avg)
                             data['avg'].append(avg)
                             data['median'].append(median)
+                            data['minimum'].append(minimum)
+                            data['maximum'].append(maximum)
                         elif metric == 'hemodynamics':
                             for m in ['TAWSS', 'TWSSG', 'OSI', 'RRT', 'ECAP']:
-                                volume_avg, avg, median = main_surface(case, condition, cycle, region, m, is_local)
+                                volume_avg, avg, median,minimum,maximum = main_surface(case, condition, cycle, region, m, is_local)
                                 data['case_id'].append(case)
                                 data['metric'].append(metric)
                                 data['cycle'].append(cycle)
                                 data['volume_avg'].append(volume_avg)
                                 data['avg'].append(avg)
                                 data['median'].append(median)
+                                data['minimum'].append(minimum)
+                                data['maximum'].append(maximum)
                         else:
                             print(f'Not valid metric {metric}')
             df = pd.DataFrame(data)
