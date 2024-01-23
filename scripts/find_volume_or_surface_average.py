@@ -131,7 +131,6 @@ if __name__ == '__main__':
                 'median': []
             }
             for case in cases:
-                data['case_id'].append(case)
                 for metric in metrics:
                     for cycle in cycles:
                         if metric in ['kinetic_energy', 'turbulent_kinetic_energy', 'blood_residence_time']:
