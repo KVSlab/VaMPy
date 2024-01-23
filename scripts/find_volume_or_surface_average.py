@@ -1,4 +1,5 @@
 import numpy as np
+import pandas as pd
 import vtk
 from morphman import read_polydata
 from vtk.numpy_interface import dataset_adapter as dsa
@@ -42,87 +43,110 @@ def filter_metric(metric, area, m):
     return metric[ids], area[ids]
 
 
-def main_surface(case, condition, cycle, is_local):
+def main_surface(case, condition, cycle, region, metric_name, is_local):
     # Compute mean, median, min, max, and volume average
     print(f"-- Loading case {case} condition {condition} cycle {cycle}")
     if is_local:
-        mesh_path_laa = f'/Users/henriakj/PhD/Code/OasisMove/results_34case/results_{case}_{condition}/Hemodynamics/hemodynamics_cycle_{cycle:02d}_laa.vtp'
-        mesh_path_la = f'/Users/henriakj/PhD/Code/OasisMove/results_34case/results_{case}_{condition}/Hemodynamics/hemodynamics_cycle_{cycle:02d}_la.vtp'
+        mesh_path = f'/Users/henriakj/PhD/Code/OasisMove/results_34case/results_{case}_{condition}/Hemodynamics/hemodynamics_cycle_{cycle:02d}_{region}.vtp'
     else:
-        mesh_path_laa = f"/home/opc/Simulation40/{condition.upper()}/{case}/results_moving_atrium/data/1/Hemodynamics/hemodynamics_cycle_{cycle:02d}_laa.vtp"
-        mesh_path_la = f"/home/opc/Simulation40/{condition.upper()}/{case}/results_moving_atrium/data/1/Hemodynamics/hemodynamics_cycle_{cycle:02d}_la.vtp"
+        mesh_path = f"/home/opc/Simulation40/{condition.upper()}/{case}/results_moving_atrium/data/1/Hemodynamics/hemodynamics_cycle_{cycle:02d}_{region}.vtp"
 
-    for name, mesh_path in zip(['LA', 'LAA'], [mesh_path_la, mesh_path_laa]):
-        data = read_polydata(mesh_path)
-        point_to_cell_data = convert_to_cell_data(data)
-        vtk_model = get_volume(point_to_cell_data, volume=False, area=True)
-        model = dsa.WrapDataObject(vtk_model)
-        print('PART, METRIC, Volume avg, avg, median, min, max')
-        for m in ['TAWSS', 'TWSSG', 'OSI', 'RRT', 'ECAP']:
-            area = model.CellData.GetArray('Area')
-            metric = model.CellData.GetArray(m)
+    data = read_polydata(mesh_path)
+    point_to_cell_data = convert_to_cell_data(data)
+    vtk_model = get_volume(point_to_cell_data, volume=False, area=True)
+    model = dsa.WrapDataObject(vtk_model)
 
-            # Filter negatives
-            metric, area = filter_metric(metric, area, m)
-            positive_area = np.abs(area)
-            total_area = np.sum(positive_area)
+    area = model.CellData.GetArray('Area')
+    metric = model.CellData.GetArray(metric_name)
 
-            area_avg = (np.dot(positive_area, metric)) / total_area
-            avg = np.mean(metric)
-            median = np.median(metric)
-            minimum = np.min(metric)
-            maximum = np.max(metric)
+    # Filter negatives
+    metric, area = filter_metric(metric, area, metric_name)
+    positive_area = np.abs(area)
+    total_area = np.sum(positive_area)
 
-            # TODO: dimension?
-            values = [name, m, area_avg, avg, median, minimum, maximum]
-            print(values)
+    area_avg = (np.dot(positive_area, metric)) / total_area
+    avg = np.mean(metric)
+    median = np.median(metric)
+    minimum = np.min(metric)
+    maximum = np.max(metric)
+
+    return area_avg, avg, median
 
 
-def main_volume(case, condition, cycle, metric, is_local):
+def main_volume(case, condition, cycle, metric, region, is_local):
     # Compute mean, median, min, max, and volume average
 
     print(f"-- Loading case {case} condition {condition} cycle {cycle} metric {metric}")
     metric_name = 'blood_residence_time' if metric == 'blood_residence_time' else 'energy'
     if is_local:
-        mesh_path_laa = f'/Users/henriakj/PhD/Code/OasisMove/results_34case/results_1029_SR/FlowMetrics/{metric_name}_cycle_{cycle:02d}_laa.vtu'
-        mesh_path_la = f'/Users/henriakj/PhD/Code/OasisMove/results_34case/results_1029_SR/FlowMetrics/{metric_name}_cycle_{cycle:02d}_la.vtu'
+        mesh_path = f'/Users/henriakj/PhD/Code/OasisMove/results_34case/results_1029_SR/FlowMetrics/{metric_name}_cycle_{cycle:02d}_{region}.vtu'
     else:
-        mesh_path_laa = f"/home/opc/Simulation40/{condition.upper()}/{case}/results_moving_atrium/data/1/FlowMetrics/{metric_name}_cycle_{cycle:02d}_laa.vtu"
-        mesh_path_la = f"/home/opc/Simulation40/{condition.upper()}/{case}/results_moving_atrium/data/1/FlowMetrics/{metric_name}_cycle_{cycle:02d}_la.vtu"
+        mesh_path = f"/home/opc/Simulation40/{condition.upper()}/{case}/results_moving_atrium/data/1/FlowMetrics/{metric_name}_cycle_{cycle:02d}_{region}.vtu"
 
-    for name, mesh_path in zip(['LA', 'LAA'], [mesh_path_la, mesh_path_laa]):
-        data = read_polydata(mesh_path)
-        point_to_cell_data = convert_to_cell_data(data)
-        vtk_model = get_volume(point_to_cell_data)
-        model = dsa.WrapDataObject(vtk_model)
-        volume = model.CellData.GetArray('Volume')
-        quantity = model.CellData.GetArray(metric)
-        positive_volume = np.abs(volume)
-        total_volume = np.sum(positive_volume)
+    data = read_polydata(mesh_path)
+    point_to_cell_data = convert_to_cell_data(data)
+    vtk_model = get_volume(point_to_cell_data)
+    model = dsa.WrapDataObject(vtk_model)
+    volume = model.CellData.GetArray('Volume')
+    quantity = model.CellData.GetArray(metric)
+    positive_volume = np.abs(volume)
+    total_volume = np.sum(positive_volume)
 
-        # TODO: dimension?
-        volume_avg = (np.dot(positive_volume, quantity)) / total_volume
-        avg = np.mean(quantity)
-        median = np.median(quantity)
-        minimum = np.min(quantity)
-        maximum = np.max(quantity)
-        values = [name, volume_avg, avg, median, minimum, maximum]
-        print('PART, Volume avg, avg, median, min, max')
-        print(values)
+    # TODO: dimension?
+    volume_avg = (np.dot(positive_volume, quantity)) / total_volume
+    avg = np.mean(quantity)
+    median = np.median(quantity)
+    minimum = np.min(quantity)
+    maximum = np.max(quantity)
+
+    return volume_avg, avg, median
 
 
 if __name__ == '__main__':
-    conditions = ["sr"]
-    cases = ['1029']
-    cycle = 3
+    conditions = ["sr",'af']
+    cases = ["0003", "0004", "0005", "0006", "0007", "0008", "0009", "0019",
+             "0020", "0021", "0023", "0024", "0025", "0026", "0027", "0028",
+             "0029", "0030", "0031", "0032", "0033", "0034", "0035", "0074",
+             "0076", "0077", "0078", "0080", "0081", "1029", "1030", "1031",
+             "1032", "1033", "1035", "1037", "1038", "1039", "2022"]
+    cycles = [1, 2, 3, 4, 5]
     is_local = False
     metrics = ['kinetic_energy', 'turbulent_kinetic_energy', 'blood_residence_time', 'hemodynamics']
-    for metric in metrics:
-        for case in cases:
-            for condition in conditions:
-                if metric in ['kinetic_energy', 'turbulent_kinetic_energy', 'blood_residence_time']:
-                    main_volume(case, condition, cycle, metric, is_local)
-                elif metric == 'hemodynamics':
-                    main_surface(case, condition, cycle, is_local)
-                else:
-                    print(f'Not valie metric {metric}')
+    regions = ['laa', 'la']
+    for condition in conditions:
+        for region in regions:
+            save_path = f'metrics_{condition}_{region}.csv'
+            data = {
+                'case_id': [],
+                'metric': [],
+                'cycle': [],
+                'volume_avg': [],
+                'avg': [],
+                'median': []
+            }
+            for case in cases:
+                data['case_id'].append(case)
+                for metric in metrics:
+                    for cycle in cycles:
+                        if metric in ['kinetic_energy', 'turbulent_kinetic_energy', 'blood_residence_time']:
+                            volume_avg, avg, median = main_volume(case, condition, cycle, metric, region, is_local)
+                            # Append the current case, metric, and cycle information to the data dictionary
+                            data['case_id'].append(case)
+                            data['metric'].append(metric)
+                            data['cycle'].append(cycle)
+                            data['volume_avg'].append(volume_avg)
+                            data['avg'].append(avg)
+                            data['median'].append(median)
+                        elif metric == 'hemodynamics':
+                            for m in ['TAWSS', 'TWSSG', 'OSI', 'RRT', 'ECAP']:
+                                volume_avg, avg, median = main_surface(case, condition, cycle, region, m, is_local)
+                                data['case_id'].append(case)
+                                data['metric'].append(metric)
+                                data['cycle'].append(cycle)
+                                data['volume_avg'].append(volume_avg)
+                                data['avg'].append(avg)
+                                data['median'].append(median)
+                        else:
+                            print(f'Not valid metric {metric}')
+            df = pd.DataFrame(data)
+            df.to_csv(save_path)
