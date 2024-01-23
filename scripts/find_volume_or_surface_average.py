@@ -45,7 +45,7 @@ def filter_metric(metric, area, m):
 
 def main_surface(case, condition, cycle, region, metric_name, is_local):
     # Compute mean, median, min, max, and volume average
-    print(f"-- Loading case {case} condition {condition} cycle {cycle}")
+    print(f"-- Loading case {case} condition {condition} cycle {cycle} metric {metric_name}")
     if is_local:
         mesh_path = f'/Users/henriakj/PhD/Code/OasisMove/results_34case/results_{case}_{condition}/Hemodynamics/hemodynamics_{region}.vtp'
     else:
@@ -53,6 +53,8 @@ def main_surface(case, condition, cycle, region, metric_name, is_local):
 
     if cycle != 1:
         metric_array_name = f"{metric_name}_input_{cycle-1}"
+    else:
+        metric_array_name = metric_name
 
     data = read_polydata(mesh_path)
     point_to_cell_data = convert_to_cell_data(data)
