@@ -2,6 +2,7 @@ import json
 import os
 import pickle
 from pprint import pprint
+import numpy as np
 from dolfin import set_log_level
 
 if os.environ.get('OASIS_MODE') == 'TESTING':
