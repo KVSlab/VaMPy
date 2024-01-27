@@ -53,6 +53,7 @@ def compute_hemodynamic_indices(folder, nu, rho, dt, T, velocity_degree, save_fr
     for i in range(len(file_us)):
         file_u = file_us[i]
         dataset_u = get_dataset_names(file_u, step=step, vector_filename="/velocity/vector_%d")
+        print(dataset_u)
 
         if "0021" in folder and i == 0:
             dataset_u_sliced = dataset_u[-250:]
