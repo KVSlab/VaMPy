@@ -105,8 +105,8 @@ def compute_velocity_and_pressure(folder, dt, save_frequency, velocity_degree, p
         u_writer.write(u, t)
 
         # Store pressure
-        p.rename("pressure", "pressure")
-        p_writer.write(p, t)
+        # p.rename("pressure", "pressure")
+        # p_writer.write(p, t)
 
         # Store deformation
         # NB: Storing together with velocity.
