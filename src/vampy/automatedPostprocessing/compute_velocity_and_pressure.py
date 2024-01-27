@@ -23,7 +23,7 @@ def compute_velocity_and_pressure(folder, dt, save_frequency, velocity_degree, p
         step (int): Step size determining number of times data is sampled
     """
     # File paths
-    folders = [path.join(folder, f) for f in listdir(folder) if "Solutions_" in f]
+    folders = [path.join(folder, f) for f in listdir(folder) if "SolutionsFull_" in f]
     mesh_path = path.join(folders[0], "mesh.h5")
     file_us = [HDF5File(MPI.comm_world, path.join(f, "u.h5"), "r") for f in folders]
     file_ps = [HDF5File(MPI.comm_world, path.join(f, "p.h5"), "r") for f in folders]
