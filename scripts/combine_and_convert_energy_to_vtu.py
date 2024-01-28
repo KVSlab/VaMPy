@@ -15,6 +15,9 @@ def main(case, condition, cycle, is_local=False):
         # ORACLE
         filename_ke = f"/home/opc/Simulation40/{condition}/{case}/results_moving_atrium/data/1/FlowMetrics/kinetic_energy_cycle_{cycle:02d}.xdmf"
         filename_tke = f"/home/opc/Simulation40/{condition}/{case}/results_moving_atrium/data/1/FlowMetrics/turbulent_kinetic_energy_cycle_{cycle:02d}.xdmf"
+        if "LA" in case:
+            filename_ke = f"/home/opc/Simulation1/{case}/results_moving_atrium/data/1/FlowMetrics/kinetic_energy_cycle_{cycle:02d}.xdmf"
+            filename_tke = f"/home/opc/Simulation1/{case}/results_moving_atrium/data/1/FlowMetrics/turbulent_kinetic_energy_cycle_{cycle:02d}.xdmf"
 
     kinetic_energy_cycle_05xdmf = Xdmf3ReaderS(registrationName='kinetic_energy_cycle_05.xdmf', FileName=[filename_ke])
     turbulent_kinetic_energy_cycle_05xdmf = Xdmf3ReaderS(registrationName='turbulent_kinetic_energy_cycle_05.xdmf',
@@ -211,6 +214,8 @@ def main(case, condition, cycle, is_local=False):
         save_path = f'/Users/henriakj/PhD/Code/OasisMove/results_34case/results_{case}_{condition}/FlowMetrics/energy_cycle_{cycle:02d}.vtu'
     else:
         save_path = f"/home/opc/Simulation40/{condition}/{case}/results_moving_atrium/data/1/FlowMetrics/energy_cycle_{cycle:02d}.vtu"
+        if "LA" in case:
+            save_path = f"/home/opc/Simulation1/{case}/results_moving_atrium/data/1/FlowMetrics/energy_cycle_{cycle:02d}.vtu"
 
     SaveData(save_path,
              proxy=appendAttributes1, PointDataArrays=['kinetic_energy', 'turbulent_kinetic_energy'])

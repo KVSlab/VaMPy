@@ -14,6 +14,8 @@ def main(case, condition, is_local=False):
     else:
         # ORACLE
         solution_path = f"/home/opc/Simulation40/{condition}/{case}/results_moving_atrium/data/1/FlowMetrics/"
+        if "LA" in case:
+            solution_path = f"/home/opc/Simulation1/{case}/results_moving_atrium/data/1/FlowMetrics/"
 
     energy_cycle_01vtu = XMLUnstructuredGridReader(registrationName='energy_cycle_01.vtu', FileName=[
         path.join(solution_path, 'energy_cycle_01.vtu')])
@@ -162,6 +164,8 @@ def main(case, condition, is_local=False):
         save_path = f'/Users/henriakj/PhD/Code/OasisMove/results_34case/results_{case}_{condition}/FlowMetrics/energy.vtu'
     else:
         save_path = f"/home/opc/Simulation40/{condition}/{case}/results_moving_atrium/data/1/FlowMetrics/energy.vtu"
+        if "LA" in case:
+            save_path = f"/home/opc/Simulation1/{case}/results_moving_atrium/data/1/FlowMetrics/energy.vtu"
 
     SaveData(save_path,
              proxy=appendAttributes1,
