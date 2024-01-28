@@ -9,7 +9,7 @@ except NameError:
     pass
 
 
-def compute_velocity_and_pressure(folder, dt, save_frequency, velocity_degree, pressure_degree, step):
+def compute_velocity_and_pressure(folder, dt, T, save_frequency, velocity_degree, pressure_degree, step):
     """
     Loads velocity and pressure from compressed .h5 CFD solution and
     converts and saves to .xdmf format for visualization (in e.g. ParaView).
@@ -24,7 +24,7 @@ def compute_velocity_and_pressure(folder, dt, save_frequency, velocity_degree, p
     """
     # File paths
     folders = [path.join(folder, f) for f in listdir(folder) if "SolutionsFull_" in f]
-    mesh_path = path.join(folders[0], "mesh.h5")
+    mesh_path = path.join(folders, "mesh.h5")
     file_us = [HDF5File(MPI.comm_world, path.join(f, "u.h5"), "r") for f in folders]
     file_ps = [HDF5File(MPI.comm_world, path.join(f, "p.h5"), "r") for f in folders]
     file_ds = [HDF5File(MPI.comm_world, path.join(f, "d.h5"), "r") for f in folders]
@@ -34,6 +34,7 @@ def compute_velocity_and_pressure(folder, dt, save_frequency, velocity_degree, p
     dataset_ps = []
     dataset_ds = []
     counters = []
+    saved_time_steps_per_cycle = int(T / dt / save_frequency / step)
     for i in range(len(file_us)):
         file_u = file_us[i]
         file_p = file_ps[i]
@@ -43,11 +44,22 @@ def compute_velocity_and_pressure(folder, dt, save_frequency, velocity_degree, p
         dataset_u = get_dataset_names(file_u, step=step, vector_filename="/velocity/vector_%d")
         dataset_p = get_dataset_names(file_p, step=step, vector_filename="/pressure/vector_%d")
         dataset_d = get_dataset_names(file_d, step=step, vector_filename="/deformation/vector_%d")
-        counters.append(len(dataset_u))
+        #counters.append(len(dataset_u))
 
-        dataset_us += dataset_u
-        dataset_ps += dataset_p
-        dataset_ds += dataset_d
+        slice_id = len(dataset_u) % saved_time_steps_per_cycle
+        if slice_id != 0:
+            dataset_u_sliced = dataset_u[:-slice_id]
+            dataset_p_sliced = dataset_p[:-slice_id]
+            dataset_d_sliced = dataset_d[:-slice_id]
+        else:
+            dataset_u_sliced = dataset_u
+            dataset_p_sliced = dataset_p
+            dataset_d_sliced = dataset_d
+
+        dataset_us += dataset_u_sliced
+        dataset_ps += dataset_p_sliced
+        dataset_ds += dataset_d_sliced
+        counters += [i] * len(dataset_u_sliced)
 
     # file_path_mesh = "/Users/henriakj/PhD/Code/VaMPy/src/vampy/simulation/MyMesh/mesh.h5"
 
@@ -122,10 +134,10 @@ def compute_velocity_and_pressure(folder, dt, save_frequency, velocity_degree, p
 
 
 def main_convert():
-    folder, _, _, dt, velocity_degree, pressure_degree, _, _, save_frequency, _, _, step, _ = read_command_line()
-    compute_velocity_and_pressure(folder, dt, save_frequency, velocity_degree, pressure_degree, step)
+    folder, _, _, dt, velocity_degree, pressure_degree, _, T, save_frequency, _, _, step, _ = read_command_line()
+    compute_velocity_and_pressure(folder, dt, T, save_frequency, velocity_degree, pressure_degree, step)
 
 
 if __name__ == '__main__':
-    folder, _, _, dt, velocity_degree, pressure_degree, _, _, save_frequency, _, _, step, _ = read_command_line()
-    compute_velocity_and_pressure(folder, dt, save_frequency, velocity_degree, pressure_degree, step)
+    folder, _, _, dt, velocity_degree, pressure_degree, _, T, save_frequency, _, _, step, _ = read_command_line()
+    compute_velocity_and_pressure(folder, dt, T, save_frequency, velocity_degree, pressure_degree, step)
