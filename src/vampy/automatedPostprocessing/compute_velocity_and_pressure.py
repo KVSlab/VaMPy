@@ -24,7 +24,7 @@ def compute_velocity_and_pressure(folder, dt, T, save_frequency, velocity_degree
     """
     # File paths
     folders = [path.join(folder, f) for f in listdir(folder) if "SolutionsFull_" in f]
-    mesh_path = path.join(folders, "mesh.h5")
+    mesh_path = path.join(folder, "mesh.h5")
     file_us = [HDF5File(MPI.comm_world, path.join(f, "u.h5"), "r") for f in folders]
     file_ps = [HDF5File(MPI.comm_world, path.join(f, "p.h5"), "r") for f in folders]
     file_ds = [HDF5File(MPI.comm_world, path.join(f, "d.h5"), "r") for f in folders]
