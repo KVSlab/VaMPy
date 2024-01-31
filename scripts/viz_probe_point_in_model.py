@@ -209,7 +209,7 @@ def main(case, condition, probe,probes):
         sphere1Display.Representation = 'Surface'
         SetActiveSource(sphere_tmp)
         sphere_tmp.Center = probe
-        sphere_tmpt cm .Radius = 1.0
+        sphere_tmp.Radius = 1.0
         sphere1Display.AmbientColor = [0.0, 0., 0.0]
         sphere1Display.DiffuseColor = [0.0, 0., 0.0]
 
