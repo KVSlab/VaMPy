@@ -271,6 +271,8 @@ def main(case, condition, probe):
 
     CASE {case} """
 
+    text1Display.FontSize = 200
+
     # update the view to ensure updated data information
     renderView1.Update()
 
