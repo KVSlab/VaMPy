@@ -205,13 +205,14 @@ def main(case, condition, probe,probes):
     # create a new 'Sphere'
     for i,probe_tmp in emumerate(probes):
         sphere_tmp = Sphere(registrationName=f'Sphere{i+2}')
-        sphere1Display = Show(sphere_tmp, renderView1, 'GeometryRepresentation')
-        sphere1Display.Representation = 'Surface'
+        sphere1Display_tmp = Show(sphere_tmp, renderView1, 'GeometryRepresentation')
+        sphere1Display_tmp.Representation = 'Surface'
         SetActiveSource(sphere_tmp)
-        sphere_tmp.Center = probe
+        sphere_tmp.Center = probe_tmp
         sphere_tmp.Radius = 1.0
-        sphere1Display.AmbientColor = [0.0, 0., 0.0]
-        sphere1Display.DiffuseColor = [0.0, 0., 0.0]
+        sphere1Display_tmp.AmbientColor = [0.0, 0., 0.0]
+        sphere1Display_tmp.DiffuseColor = [0.0, 0., 0.0]
+        renderView1.Update()
 
     sphere1 = Sphere(registrationName='Sphere1')
     sphere1Display = Show(sphere1, renderView1, 'GeometryRepresentation')
