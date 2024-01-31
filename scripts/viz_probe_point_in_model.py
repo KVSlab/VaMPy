@@ -10,7 +10,7 @@ from paraview.simple import *
 paraview.simple._DisableFirstRenderCameraReset()
 
 
-def main(case, condition, probe):
+def main(case, condition, probe,probes):
     # create a new 'XML PolyData Reader'
     hemodynamics_laavtp = XMLPolyDataReader(registrationName='hemodynamics_laa.vtp', FileName=[
         f'/home/opc/Simulation40/{condition.upper()}/{case}/results_moving_atrium/data/1/Hemodynamics/hemodynamics_laa.vtp'])
@@ -203,36 +203,22 @@ def main(case, condition, probe):
     model_region_centerline_0vtpDisplay.DiffuseColor = [0.6666666666666666, 0.0, 0.0]
 
     # create a new 'Sphere'
+    for i,probe_tmp in emumerate(probes):
+        sphere_tmp = Sphere(registrationName=f'Sphere{i+2}')
+        sphere1Display = Show(sphere_tmp, renderView1, 'GeometryRepresentation')
+        sphere1Display.Representation = 'Surface'
+        SetActiveSource(sphere_tmp)
+        sphere_tmp.Center = probe
+        sphere_tmpt cm .Radius = 1.0
+        sphere1Display.AmbientColor = [0.0, 0., 0.0]
+        sphere1Display.DiffuseColor = [0.0, 0., 0.0]
+
     sphere1 = Sphere(registrationName='Sphere1')
-
-    # show data in view
     sphere1Display = Show(sphere1, renderView1, 'GeometryRepresentation')
-
-    # trace defaults for the display properties.
     sphere1Display.Representation = 'Surface'
-
-    # set active source
     SetActiveSource(sphere1)
-
-    # Properties modified on sphere1
     sphere1.Center = probe
-
-    # update the view to ensure updated data information
-    renderView1.Update()
-
-    # Properties modified on sphere1
-    sphere1.Radius = 5.0
-
-    # update the view to ensure updated data information
-    renderView1.Update()
-
-    # Properties modified on sphere1
     sphere1.Radius = 2.0
-
-    # update the view to ensure updated data information
-    renderView1.Update()
-
-    # change solid color
     sphere1Display.AmbientColor = [0.0, 0.6666666666666666, 0.0]
     sphere1Display.DiffuseColor = [0.0, 0.6666666666666666, 0.0]
 
@@ -344,7 +330,8 @@ if __name__ == '__main__':
                 probe_points = np.array(json.load(infile))
             try:
                 probe = probe_points[int(id)]
-                main(case, condition, probe)
+
+                main(case, condition, probe, probe_points)
             except:
                 print(f"Failed for case {case} condtion {condition}")
             # Match probe id with point
