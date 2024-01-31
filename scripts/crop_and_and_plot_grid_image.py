@@ -62,6 +62,9 @@ for condition in ['AF', 'SR']:
     image_folder = f"landmark_figures/{condition}"
     output_image_path = f"landmark_figures/landmark_{condition}.jpg"
 
+    image_folder = f"ProbeViz/{condition}"
+    output_image_path = f"ProbeViz/probes_{condition}.jpg"
+
 
     # Load all images from the folder
     image_files = [f for f in sorted(os.listdir(image_folder)) if os.path.isfile(os.path.join(image_folder, f))]
@@ -77,5 +80,8 @@ for condition in ['AF', 'SR']:
     N = 8
     M = 5
     # Create a grid of images (for example, 3x3)
-    grid_image = create_image_grid(cropped_and_texted_images, (N, M))
+    # NO CROPPING
+    grid_image = create_image_grid(images, (N, M))
+    # CROPING
+    #grid_image = create_image_grid(cropped_and_texted_images, (N, M))
     grid_image.save(output_image_path)

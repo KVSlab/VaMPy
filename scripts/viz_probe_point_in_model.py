@@ -332,6 +332,7 @@ if __name__ == '__main__':
 
         for id, case in zip(ids, cases):
             # Read in probes (points)
+            print(f"-- Viz probe for case {case} condition {condition.upper()}")
             if local:
                 probe_point_path = f"/Users/henriakj/PhD/Code/VaMPy/models/models_inria/models_{condition}/{case}/model_probe_point.json"
             else:
