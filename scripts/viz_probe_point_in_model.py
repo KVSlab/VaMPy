@@ -329,10 +329,9 @@ if __name__ == '__main__':
 
             with open(probe_point_path, 'r') as infile:
                 probe_points = np.array(json.load(infile))
-            try:
-                probe = probe_points[int(id)]
+            probe = probe_points[int(id)]
 
-                main(case, condition, probe, probe_points)
-            except:
-                print(f"Failed for case {case} condtion {condition}")
+            main(case, condition, probe, probe_points)
+            #except:
+            #    print(f"Failed for case {case} condtion {condition}")
             # Match probe id with point
