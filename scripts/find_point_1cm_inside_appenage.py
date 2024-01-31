@@ -2,10 +2,6 @@ import pandas as pd
 from morphman import *
 from vtk.numpy_interface import dataset_adapter as dsa
 
-data = {
-    'case_id': [],
-    'laa_probe_id': []
-}
 
 
 def main():
@@ -31,6 +27,10 @@ def main():
 
     conditions = ["af", 'sr']  # , "sr"]
     for condition in conditions:
+        data = {
+            'case_id': [],
+            'laa_probe_id': []
+        }
         for j, case in enumerate(cases):
             # print(f"-- Loading case {case} condition {condition}")
             try:
