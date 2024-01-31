@@ -203,7 +203,7 @@ def main(case, condition, probe,probes):
     model_region_centerline_0vtpDisplay.DiffuseColor = [0.6666666666666666, 0.0, 0.0]
 
     # create a new 'Sphere'
-    for i,probe_tmp in emumerate(probes):
+    for i,probe_tmp in enumerate(probes):
         sphere_tmp = Sphere(registrationName=f'Sphere{i+2}')
         sphere1Display_tmp = Show(sphere_tmp, renderView1, 'GeometryRepresentation')
         sphere1Display_tmp.Representation = 'Surface'
@@ -329,9 +329,10 @@ if __name__ == '__main__':
 
             with open(probe_point_path, 'r') as infile:
                 probe_points = np.array(json.load(infile))
-            probe = probe_points[int(id)]
+            try:
+                probe = probe_points[int(id)]
 
-            main(case, condition, probe, probe_points)
-            #except:
-            #    print(f"Failed for case {case} condtion {condition}")
+                main(case, condition, probe, probe_points)
+            except:
+                print(f"Failed for case {case} condtion {condition}")
             # Match probe id with point
