@@ -530,7 +530,7 @@ def main_probe():
             'velocity_filling': [],
             'velocity_emptying': []
         }
-        case_to_id = pd.read_csv(f"/app/Vampy/scripts/probe_ids_{condition}.csv")
+        case_to_id = pd.read_csv(f"/app/VaMPy/scripts/probe_ids_{condition}.csv")
         root = "/home/opc/Simulation40/{}/{:04d}/results_moving_atrium/data/1/Probes"
         cases = case_to_id.case_id.to_numpy()
         folders = [root.format(condition.upper(), case) for case in cases]
