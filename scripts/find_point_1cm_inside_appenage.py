@@ -76,7 +76,7 @@ def compute_laa_centerline_stats(boundary, case, laa_cl_path, point_path):
     id_tmp = p_orifice_id
     p_orifice_on_cl = np.array(p_orifice_on_cl)
     while id_tmp < laa_centerline.GetNumberOfPoints() - 1:
-        id_tmp -= 1
+        id_tmp += 1
         p_cl = laa_centerline.GetPoint(id_tmp)
         p_cl = np.array(p_cl)
 
