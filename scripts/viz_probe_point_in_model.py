@@ -304,7 +304,8 @@ if __name__ == '__main__':
         if local:
             probe_id_path = f"/Users/henriakj/PhD/Code/OasisMove/results_34case/Morphology/probe_ids_{condition}.csv"
         else:
-            probe_id_path = f"/home/opc/probe_ids_{condition}.csv"
+            probe_id_path = f"/app/VaMPy/scripts/probe_ids_{condition}.csv"
+
 
         probe_df = defaultdict(list)  # each value in each column is appended to a list
 
