@@ -26,10 +26,7 @@ def compute_flow_and_simulation_metrics(folder, nu, dt, velocity_degree, T, time
         average_over_cycles (bool): A flag indicating whether to perform cycle averaging.
     """
     # File paths
-    if "0024" in folder:
-        folders = [path.join(folder, f) for f in sorted(listdir(folder)) if "Solutions_" in f]
-    else:
-        folders = [path.join(folder, f) for f in sorted(listdir(folder)) if "SolutionsFull_" in f]
+    folders = [path.join(folder, f) for f in sorted(listdir(folder)) if "SolutionsFull_" in f]
     file_us = [HDF5File(MPI.comm_world, path.join(f, "u.h5"), "r") for f in folders]
     mesh_path = path.join(folder, "mesh.h5")
     file_path_u_avg = path.join(folder, "u_avg.h5")
