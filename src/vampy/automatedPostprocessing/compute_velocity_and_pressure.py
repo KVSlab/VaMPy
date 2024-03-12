@@ -110,7 +110,7 @@ def compute_velocity_and_pressure(folder, dt, T, save_frequency, velocity_degree
         file_u, file_p, file_d = file_us[k], file_ps[k], file_ds[k]
 
         file_u.read(u, dataset_us[i])
-        file_p.read(p, dataset_ps[i])
+        #file_p.read(p, dataset_ps[i])
 
         if MPI.rank(MPI.comm_world) == 0:
             timestamp = file_u.attributes(dataset_us[i])["timestamp"]
