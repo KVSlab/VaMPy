@@ -33,7 +33,7 @@ def compute_velocity_and_pressure(folder, dt, T, save_frequency, velocity_degree
     dataset_us = []
     dataset_ps = []
     dataset_ds = []
-    counters = []
+    file_counters = []
     saved_time_steps_per_cycle = int(T / dt / save_frequency / step)
     for i in range(len(file_us)):
         file_u = file_us[i]
@@ -44,7 +44,6 @@ def compute_velocity_and_pressure(folder, dt, T, save_frequency, velocity_degree
         dataset_u = get_dataset_names(file_u, step=step, vector_filename="/velocity/vector_%d")
         dataset_p = get_dataset_names(file_p, step=step, vector_filename="/pressure/vector_%d")
         dataset_d = get_dataset_names(file_d, step=step, vector_filename="/deformation/vector_%d")
-        #counters.append(len(dataset_u))
 
         slice_id = len(dataset_u) % saved_time_steps_per_cycle
         if slice_id != 0:
@@ -56,12 +55,11 @@ def compute_velocity_and_pressure(folder, dt, T, save_frequency, velocity_degree
             dataset_p_sliced = dataset_p
             dataset_d_sliced = dataset_d
 
+        # Add to collective dataset
         dataset_us += dataset_u_sliced
         dataset_ps += dataset_p_sliced
         dataset_ds += dataset_d_sliced
-        counters += [i] * len(dataset_u_sliced)
-
-    # file_path_mesh = "/Users/henriakj/PhD/Code/VaMPy/src/vampy/simulation/MyMesh/mesh.h5"
+        file_counters += [i] * len(dataset_u_sliced)
 
     # Read mesh saved as HDF5 format
     mesh = Mesh()
@@ -96,14 +94,20 @@ def compute_velocity_and_pressure(folder, dt, T, save_frequency, velocity_degree
     if MPI.rank(MPI.comm_world) == 0:
         print("=" * 10, "Start post processing", "=" * 10)
 
-    counter = 1
-    k = 0
+    # Determine what time step to start post-processing from
+    start_cycle = 0  # Include all cycles
+    start = int(T / dt / save_frequency * (start_cycle - 1))
+    counter = start
+
     for i in range(len(dataset_us)):
+        k = file_counters[i]
+
+        # Update file_counter
+        counter += step
+
         # Set physical time (in [ms])
         t = dt * counter * save_frequency
         file_u, file_p, file_d = file_us[k], file_ps[k], file_ds[k]
-        if counter in counters:
-            k += 1
 
         file_u.read(u, dataset_us[i])
         file_p.read(p, dataset_ps[i])
@@ -127,8 +131,6 @@ def compute_velocity_and_pressure(folder, dt, T, save_frequency, velocity_degree
             d.rename("deformation", "deformation")
             u_writer.write(d, t)
 
-        # Update file_counter
-        counter += step
     print("========== Post processing finished ==========")
     print("Results saved to: {}".format(folder))
 
