@@ -95,7 +95,7 @@ def compute_velocity_and_pressure(folder, dt, T, save_frequency, velocity_degree
         print("=" * 10, "Start post processing", "=" * 10)
 
     # Determine what time step to start post-processing from
-    start_cycle = 0  # Include all cycles
+    start_cycle = 1  # Include all cycles
     start = int(T / dt / save_frequency * (start_cycle - 1))
     counter = start
 
