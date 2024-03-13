@@ -10,6 +10,8 @@ dependencies:
   - pip
   - python <=3.10
   - git
+  - vtk <= 9.1
+  - numpy <= 1.24.4
   - pip:
       - scipy
       - cppimport
