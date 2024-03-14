@@ -6,6 +6,11 @@ from pprint import pprint
 import numpy as np
 from dolfin import set_log_level, MPI
 
+from vampy.simulation.Probe import Probes  # type: ignore
+from vampy.simulation.Womersley import make_womersley_bcs, compute_boundary_geometry_acrn
+from vampy.simulation.simulation_common import get_file_paths, store_u_mean, print_mesh_information, \
+    store_velocity_and_pressure_h5, dump_probes
+
 # Check for oasis and oasismove
 package_name_oasis = 'oasis'
 package_name_oasismove = 'oasismove'
@@ -17,11 +22,6 @@ elif oasis_exists:
     from oasis.problems.NSfracStep import *
 else:
     print("Neither oasis nor oasismove is installed. Exiting simulation..")
-
-from vampy.simulation.Probe import Probes  # type: ignore
-from vampy.simulation.Womersley import make_womersley_bcs, compute_boundary_geometry_acrn
-from vampy.simulation.simulation_common import get_file_paths, store_u_mean, print_mesh_information, \
-    store_velocity_and_pressure_h5, dump_probes
 
 # FEniCS specific command to control the desired level of logging, here set to critical errors
 set_log_level(50)
