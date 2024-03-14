@@ -106,7 +106,7 @@ $ oasismove NSfracStepMove problem=MovingAtrium mesh_path=../../../models/moving
 
 Upon completion of the simulation, the results, along with the associated mesh, are stored in a concise HDF5 format.
 Additionally, the residence time $T_R$ and the velocity field are saved in the XDMF files `blood.xdmf`
-and `velocity.xdmf`, respectively, which includes the mesh deformation. {numref}`moving_results` presents the volumetric
+and `velocity.xdmf`, respectively, which includes the mesh deformation. The animation below presents the volumetric
 representation of the blood residence time and velocity field throughout the four cardiac cycles. It's noteworthy to
 observe the accumulating $T_R$ within the left atrial appendage over time.
 

@@ -35,7 +35,7 @@ Pre-processing scripts
    :undoc-members:
    :show-inheritance:
 
-.. automodule:: vampy.automatedPreprocessing.ToolRepairSTL
+.. automodule:: vampy.automatedPreprocessing.repair_tools
    :members:
    :undoc-members:
    :show-inheritance:
