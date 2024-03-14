@@ -4,3 +4,4 @@ numpy
 ghp-import
 cppimport
 scipy
+docutils==0.17.1
