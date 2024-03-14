@@ -355,25 +355,34 @@ document.write(`
                 <article class="bd-article">
                   
   <h1>Source code for vampy.simulation.Artery</h1><div class="highlight"><pre>
-<span></span><span class="kn">import</span> <span class="nn">json</span>
-<span class="kn">import</span> <span class="nn">os</span>
+<span></span><span class="kn">import</span> <span class="nn">importlib.util</span>
+<span class="kn">import</span> <span class="nn">json</span>
 <span class="kn">import</span> <span class="nn">pickle</span>
 <span class="kn">from</span> <span class="nn">pprint</span> <span class="kn">import</span> <span class="n">pprint</span>
-<span class="kn">import</span> <span class="nn">numpy</span> <span class="k">as</span> <span class="nn">np</span>
-<span class="kn">from</span> <span class="nn">dolfin</span> <span class="kn">import</span> <span class="n">set_log_level</span>
 
-<span class="k">if</span> <span class="n">os</span><span class="o">.</span><span class="n">environ</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s1">&#39;OASIS_MODE&#39;</span><span class="p">)</span> <span class="o">==</span> <span class="s1">&#39;TESTING&#39;</span><span class="p">:</span>
-    <span class="kn">from</span> <span class="nn">oasismove.problems.NSfracStep</span> <span class="kn">import</span> <span class="o">*</span>
-<span class="k">else</span><span class="p">:</span>
-    <span class="kn">from</span> <span class="nn">oasis.problems.NSfracStep</span> <span class="kn">import</span> <span class="o">*</span>
+<span class="kn">import</span> <span class="nn">numpy</span> <span class="k">as</span> <span class="nn">np</span>
+<span class="kn">from</span> <span class="nn">dolfin</span> <span class="kn">import</span> <span class="n">set_log_level</span><span class="p">,</span> <span class="n">MPI</span>
 
 <span class="kn">from</span> <span class="nn">vampy.simulation.Probe</span> <span class="kn">import</span> <span class="n">Probes</span>  <span class="c1"># type: ignore</span>
 <span class="kn">from</span> <span class="nn">vampy.simulation.Womersley</span> <span class="kn">import</span> <span class="n">make_womersley_bcs</span><span class="p">,</span> <span class="n">compute_boundary_geometry_acrn</span>
 <span class="kn">from</span> <span class="nn">vampy.simulation.simulation_common</span> <span class="kn">import</span> <span class="n">get_file_paths</span><span class="p">,</span> <span class="n">store_u_mean</span><span class="p">,</span> <span class="n">print_mesh_information</span><span class="p">,</span> \
     <span class="n">store_velocity_and_pressure_h5</span><span class="p">,</span> <span class="n">dump_probes</span>
 
+<span class="c1"># Check for oasis and oasismove</span>
+<span class="n">package_name_oasis</span> <span class="o">=</span> <span class="s1">&#39;oasis&#39;</span>
+<span class="n">package_name_oasismove</span> <span class="o">=</span> <span class="s1">&#39;oasismove&#39;</span>
+<span class="n">oasis_exists</span> <span class="o">=</span> <span class="n">importlib</span><span class="o">.</span><span class="n">util</span><span class="o">.</span><span class="n">find_spec</span><span class="p">(</span><span class="n">package_name_oasis</span><span class="p">)</span>
+<span class="n">oasismove_exists</span> <span class="o">=</span> <span class="n">importlib</span><span class="o">.</span><span class="n">util</span><span class="o">.</span><span class="n">find_spec</span><span class="p">(</span><span class="n">package_name_oasismove</span><span class="p">)</span>
+<span class="k">if</span> <span class="n">oasismove_exists</span><span class="p">:</span>
+    <span class="kn">from</span> <span class="nn">oasismove.problems.NSfracStep</span> <span class="kn">import</span> <span class="o">*</span>
+<span class="k">elif</span> <span class="n">oasis_exists</span><span class="p">:</span>
+    <span class="kn">from</span> <span class="nn">oasis.problems.NSfracStep</span> <span class="kn">import</span> <span class="o">*</span>
+<span class="k">else</span><span class="p">:</span>
+    <span class="nb">print</span><span class="p">(</span><span class="s2">&quot;Neither oasis nor oasismove is installed. Exiting simulation..&quot;</span><span class="p">)</span>
+
 <span class="c1"># FEniCS specific command to control the desired level of logging, here set to critical errors</span>
 <span class="n">set_log_level</span><span class="p">(</span><span class="mi">50</span><span class="p">)</span>
+<span class="n">comm</span> <span class="o">=</span> <span class="n">MPI</span><span class="o">.</span><span class="n">comm_world</span>
 
 
 <div class="viewcode-block" id="problem_parameters"><a class="viewcode-back" href="../../../api.html#vampy.simulation.Artery.problem_parameters">[docs]</a><span class="k">def</span> <span class="nf">problem_parameters</span><span class="p">(</span><span class="n">commandline_kwargs</span><span class="p">,</span> <span class="n">NS_parameters</span><span class="p">,</span> <span class="n">NS_expressions</span><span class="p">,</span> <span class="o">**</span><span class="n">NS_namespace</span><span class="p">):</span>
@@ -432,7 +441,7 @@ document.write(`
     <span class="n">case_name</span> <span class="o">=</span> <span class="n">mesh_file</span><span class="o">.</span><span class="n">split</span><span class="p">(</span><span class="s2">&quot;.&quot;</span><span class="p">)[</span><span class="mi">0</span><span class="p">]</span>
     <span class="n">NS_parameters</span><span class="p">[</span><span class="s2">&quot;folder&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="n">path</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">NS_parameters</span><span class="p">[</span><span class="s2">&quot;folder&quot;</span><span class="p">],</span> <span class="n">case_name</span><span class="p">)</span>
 
-    <span class="k">if</span> <span class="n">MPI</span><span class="o">.</span><span class="n">rank</span><span class="p">(</span><span class="n">MPI</span><span class="o">.</span><span class="n">comm_world</span><span class="p">)</span> <span class="o">==</span> <span class="mi">0</span><span class="p">:</span>
+    <span class="k">if</span> <span class="n">MPI</span><span class="o">.</span><span class="n">rank</span><span class="p">(</span><span class="n">comm</span><span class="p">)</span> <span class="o">==</span> <span class="mi">0</span><span class="p">:</span>
         <span class="nb">print</span><span class="p">(</span><span class="s2">&quot;=== Starting simulation for case: </span><span class="si">{}</span><span class="s2"> ===&quot;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">case_name</span><span class="p">))</span>
         <span class="nb">print</span><span class="p">(</span><span class="s2">&quot;Running with the following parameters:&quot;</span><span class="p">)</span>
         <span class="n">pprint</span><span class="p">(</span><span class="n">NS_parameters</span><span class="p">)</span></div>
@@ -488,7 +497,7 @@ document.write(`
         <span class="n">area_out</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">assemble</span><span class="p">(</span><span class="n">Constant</span><span class="p">(</span><span class="mf">1.0</span><span class="p">)</span> <span class="o">*</span> <span class="n">dsi</span><span class="p">))</span>
 
     <span class="n">bc_p</span> <span class="o">=</span> <span class="p">[]</span>
-    <span class="k">if</span> <span class="n">MPI</span><span class="o">.</span><span class="n">rank</span><span class="p">(</span><span class="n">MPI</span><span class="o">.</span><span class="n">comm_world</span><span class="p">)</span> <span class="o">==</span> <span class="mi">0</span><span class="p">:</span>
+    <span class="k">if</span> <span class="n">MPI</span><span class="o">.</span><span class="n">rank</span><span class="p">(</span><span class="n">comm</span><span class="p">)</span> <span class="o">==</span> <span class="mi">0</span><span class="p">:</span>
         <span class="nb">print</span><span class="p">(</span><span class="s2">&quot;=== Initial pressure and area fraction ===&quot;</span><span class="p">)</span>
 
     <span class="k">for</span> <span class="n">i</span><span class="p">,</span> <span class="n">ID</span> <span class="ow">in</span> <span class="nb">enumerate</span><span class="p">(</span><span class="n">id_out</span><span class="p">):</span>
@@ -497,7 +506,7 @@ document.write(`
         <span class="n">bc</span> <span class="o">=</span> <span class="n">DirichletBC</span><span class="p">(</span><span class="n">Q</span><span class="p">,</span> <span class="n">outflow</span><span class="p">,</span> <span class="n">boundary</span><span class="p">,</span> <span class="n">ID</span><span class="p">)</span>
         <span class="n">bc_p</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">bc</span><span class="p">)</span>
         <span class="n">NS_expressions</span><span class="p">[</span><span class="n">ID</span><span class="p">]</span> <span class="o">=</span> <span class="n">outflow</span>
-        <span class="k">if</span> <span class="n">MPI</span><span class="o">.</span><span class="n">rank</span><span class="p">(</span><span class="n">MPI</span><span class="o">.</span><span class="n">comm_world</span><span class="p">)</span> <span class="o">==</span> <span class="mi">0</span><span class="p">:</span>
+        <span class="k">if</span> <span class="n">MPI</span><span class="o">.</span><span class="n">rank</span><span class="p">(</span><span class="n">comm</span><span class="p">)</span> <span class="o">==</span> <span class="mi">0</span><span class="p">:</span>
             <span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;Boundary ID=</span><span class="si">{</span><span class="n">ID</span><span class="si">}</span><span class="s2">, pressure: </span><span class="si">{</span><span class="n">p_initial</span><span class="si">:</span><span class="s2">.5f</span><span class="si">}</span><span class="s2">, area fraction: </span><span class="si">{</span><span class="n">area_ratio</span><span class="p">[</span><span class="n">i</span><span class="p">]</span><span class="si">:</span><span class="s2">0.5f</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span>
 
     <span class="c1"># No slip condition at wall</span>
@@ -528,7 +537,7 @@ document.write(`
         <span class="n">probe_points</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">(</span><span class="n">json</span><span class="o">.</span><span class="n">load</span><span class="p">(</span><span class="n">infile</span><span class="p">))</span>
 
     <span class="c1"># Store points file in checkpoint</span>
-    <span class="k">if</span> <span class="n">MPI</span><span class="o">.</span><span class="n">rank</span><span class="p">(</span><span class="n">MPI</span><span class="o">.</span><span class="n">comm_world</span><span class="p">)</span> <span class="o">==</span> <span class="mi">0</span><span class="p">:</span>
+    <span class="k">if</span> <span class="n">MPI</span><span class="o">.</span><span class="n">rank</span><span class="p">(</span><span class="n">comm</span><span class="p">)</span> <span class="o">==</span> <span class="mi">0</span><span class="p">:</span>
         <span class="n">probe_points</span><span class="o">.</span><span class="n">dump</span><span class="p">(</span><span class="n">path</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">newfolder</span><span class="p">,</span> <span class="s2">&quot;Checkpoint&quot;</span><span class="p">,</span> <span class="s2">&quot;points&quot;</span><span class="p">))</span>
 
     <span class="n">eval_dict</span><span class="p">[</span><span class="s2">&quot;centerline_u_x_probes&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="n">Probes</span><span class="p">(</span><span class="n">probe_points</span><span class="o">.</span><span class="n">flatten</span><span class="p">(),</span> <span class="n">V</span><span class="p">)</span>
@@ -544,7 +553,7 @@ document.write(`
         <span class="n">files</span> <span class="o">=</span> <span class="n">NS_namespace</span><span class="p">[</span><span class="s2">&quot;files&quot;</span><span class="p">]</span>
 
     <span class="c1"># Save mesh as HDF5 file for post-processing</span>
-    <span class="k">with</span> <span class="n">HDF5File</span><span class="p">(</span><span class="n">MPI</span><span class="o">.</span><span class="n">comm_world</span><span class="p">,</span> <span class="n">files</span><span class="p">[</span><span class="s2">&quot;mesh&quot;</span><span class="p">],</span> <span class="s2">&quot;w&quot;</span><span class="p">)</span> <span class="k">as</span> <span class="n">mesh_file</span><span class="p">:</span>
+    <span class="k">with</span> <span class="n">HDF5File</span><span class="p">(</span><span class="n">comm</span><span class="p">,</span> <span class="n">files</span><span class="p">[</span><span class="s2">&quot;mesh&quot;</span><span class="p">],</span> <span class="s2">&quot;w&quot;</span><span class="p">)</span> <span class="k">as</span> <span class="n">mesh_file</span><span class="p">:</span>
         <span class="n">mesh_file</span><span class="o">.</span><span class="n">write</span><span class="p">(</span><span class="n">mesh</span><span class="p">,</span> <span class="s2">&quot;mesh&quot;</span><span class="p">)</span>
 
     <span class="c1"># Create vector function for storing velocity</span>
@@ -576,7 +585,7 @@ document.write(`
                                                            <span class="n">tstep</span><span class="p">,</span> <span class="n">u_</span><span class="p">)</span>
 
     <span class="c1"># Compute flow rates and updated pressure at outlets, and mean velocity and Reynolds number at inlet</span>
-    <span class="k">if</span> <span class="n">MPI</span><span class="o">.</span><span class="n">rank</span><span class="p">(</span><span class="n">MPI</span><span class="o">.</span><span class="n">comm_world</span><span class="p">)</span> <span class="o">==</span> <span class="mi">0</span> <span class="ow">and</span> <span class="n">tstep</span> <span class="o">%</span> <span class="mi">10</span> <span class="o">==</span> <span class="mi">0</span><span class="p">:</span>
+    <span class="k">if</span> <span class="n">MPI</span><span class="o">.</span><span class="n">rank</span><span class="p">(</span><span class="n">comm</span><span class="p">)</span> <span class="o">==</span> <span class="mi">0</span> <span class="ow">and</span> <span class="n">tstep</span> <span class="o">%</span> <span class="mi">10</span> <span class="o">==</span> <span class="mi">0</span><span class="p">:</span>
         <span class="n">U_mean</span> <span class="o">=</span> <span class="n">Q_in</span> <span class="o">/</span> <span class="n">area_inlet</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span>
         <span class="n">diam_inlet</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">sqrt</span><span class="p">(</span><span class="mi">4</span> <span class="o">*</span> <span class="n">area_inlet</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span> <span class="o">/</span> <span class="n">np</span><span class="o">.</span><span class="n">pi</span><span class="p">)</span>
         <span class="n">Re</span> <span class="o">=</span> <span class="n">U_mean</span> <span class="o">*</span> <span class="n">diam_inlet</span> <span class="o">/</span> <span class="n">nu</span>
