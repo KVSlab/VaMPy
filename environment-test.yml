@@ -8,12 +8,11 @@ dependencies:
   - morphman
   - paramiko
   - pip
-  - python ==3.8.15
   - git
-  - vtk <= 9.1.0
-  - numpy <= 1.24.4
+  - python >=3.8
+  - expat==2.5 # Hotfix for https://gitlab.archlinux.org/archlinux/packaging/packages/paraview/-/issues/4
   - pip:
       - matplotlib
       - scipy
-      - cppimport==22.8.2
+      - cppimport
       - git+https://github.com/KVSlab/OasisMove
