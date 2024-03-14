@@ -1,13 +1,22 @@
+import importlib.util
 import json
-import os
 import pickle
 from pprint import pprint
+
+import numpy as np
 from dolfin import set_log_level, MPI
 
-if os.environ.get('OASIS_MODE') == 'TESTING':
+# Check for oasis and oasismove
+package_name_oasis = 'oasis'
+package_name_oasismove = 'oasismove'
+oasis_exists = importlib.util.find_spec(package_name_oasis)
+oasismove_exists = importlib.util.find_spec(package_name_oasismove)
+if oasismove_exists:
     from oasismove.problems.NSfracStep import *
-else:
+elif oasis_exists:
     from oasis.problems.NSfracStep import *
+else:
+    print("Neither oasis nor oasismove is installed. Exiting simulation..")
 
 from vampy.simulation.Probe import Probes  # type: ignore
 from vampy.simulation.Womersley import make_womersley_bcs, compute_boundary_geometry_acrn
@@ -74,7 +83,7 @@ def problem_parameters(commandline_kwargs, NS_parameters, scalar_components, Sch
     case_name = mesh_file.split(".")[0]
     NS_parameters["folder"] = path.join(NS_parameters["folder"], case_name)
 
-    if MPI.rank(MPI.comm_world) == 0:
+    if MPI.rank(comm) == 0:
         print("=== Starting simulation for Atrium.py ===")
         print("Running with the following parameters:")
         pprint(NS_parameters)
@@ -165,7 +174,7 @@ def pre_solve_hook(V, Q, cardiac_cycle, dt, save_solution_after_cycle, mesh_path
         probe_points = np.array(json.load(infile))
 
     # Store points file in checkpoint
-    if MPI.rank(MPI.comm_world) == 0:
+    if MPI.rank(comm) == 0:
         probe_points.dump(path.join(newfolder, "Checkpoint", "points"))
 
     eval_dict["centerline_u_x_probes"] = Probes(probe_points.flatten(), V)
@@ -181,7 +190,7 @@ def pre_solve_hook(V, Q, cardiac_cycle, dt, save_solution_after_cycle, mesh_path
         files = NS_namespace["files"]
 
     # Save mesh as HDF5 file for post-processing
-    with HDF5File(MPI.comm_world, files["mesh"], "w") as mesh_file:
+    with HDF5File(comm, files["mesh"], "w") as mesh_file:
         mesh_file.write(mesh, "mesh")
 
     # Create vector function for storing velocity
@@ -221,7 +230,7 @@ def temporal_hook(mesh, dt, t, save_solution_frequency, u_, NS_expressions, id_i
         U_mean = comm.gather(local_U_mean, 0)
         U_max = comm.gather(local_U_max, 0)
 
-        if MPI.rank(MPI.comm_world) == 0:
+        if MPI.rank(comm) == 0:
             u_mean = np.mean(U_mean)
             u_max = max(U_max)
 
