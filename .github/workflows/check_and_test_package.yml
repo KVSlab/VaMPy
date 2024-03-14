@@ -97,8 +97,6 @@ jobs:
 
       - name: Run tests
         run: python3 -m pytest tests
-        env:
-          OASIS_MODE: TESTING
 
       - name: Upload coverage report to codecov
         if: matrix.os == 'ubuntu-latest'
