@@ -412,6 +412,7 @@ document.write(`
 <li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#vampy.automatedPreprocessing.preprocessing_common.dist_sphere_constant"><code class="docutils literal notranslate"><span class="pre">dist_sphere_constant()</span></code></a></li>
 <li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#vampy.automatedPreprocessing.preprocessing_common.dist_sphere_curvature"><code class="docutils literal notranslate"><span class="pre">dist_sphere_curvature()</span></code></a></li>
 <li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#vampy.automatedPreprocessing.preprocessing_common.dist_sphere_diam"><code class="docutils literal notranslate"><span class="pre">dist_sphere_diam()</span></code></a></li>
+<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#vampy.automatedPreprocessing.preprocessing_common.dist_sphere_geodesic"><code class="docutils literal notranslate"><span class="pre">dist_sphere_geodesic()</span></code></a></li>
 <li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#vampy.automatedPreprocessing.preprocessing_common.find_boundaries"><code class="docutils literal notranslate"><span class="pre">find_boundaries()</span></code></a></li>
 <li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#vampy.automatedPreprocessing.preprocessing_common.generate_mesh"><code class="docutils literal notranslate"><span class="pre">generate_mesh()</span></code></a></li>
 <li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#vampy.automatedPreprocessing.preprocessing_common.get_centers_for_meshing"><code class="docutils literal notranslate"><span class="pre">get_centers_for_meshing()</span></code></a></li>
@@ -629,13 +630,14 @@ only return default values.</p>
 
 <dl class="py function">
 <dt class="sig sig-object py" id="vampy.automatedPreprocessing.automated_preprocessing.run_pre_processing">
-<span class="sig-prename descclassname"><span class="pre">vampy.automatedPreprocessing.automated_preprocessing.</span></span><span class="sig-name descname"><span class="pre">run_pre_processing</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">input_model</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">verbose_print</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">smoothing_method</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">smoothing_factor</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">smoothing_iterations</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">meshing_method</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">refine_region</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">is_atrium</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">add_flow_extensions</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">visualize</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">config_path</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">coarsening_factor</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">inlet_flow_extension_length</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">outlet_flow_extension_length</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">edge_length</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">region_points</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">compress_mesh</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">add_boundary_layer</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">scale_factor</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">resampling_step</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">flow_rate_factor</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">moving_mesh</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">clamp_boundaries</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/vampy/automatedPreprocessing/automated_preprocessing.html#run_pre_processing"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#vampy.automatedPreprocessing.automated_preprocessing.run_pre_processing" title="Permalink to this definition">#</a></dt>
+<span class="sig-prename descclassname"><span class="pre">vampy.automatedPreprocessing.automated_preprocessing.</span></span><span class="sig-name descname"><span class="pre">run_pre_processing</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">input_model</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">verbose_print</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">smoothing_method</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">smoothing_factor</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">smoothing_iterations</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">meshing_method</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">refine_region</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">is_atrium</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">add_flow_extensions</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">visualize</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">config_path</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">coarsening_factor</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">inlet_flow_extension_length</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">outlet_flow_extension_length</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">edge_length</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">region_points</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">compress_mesh</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">add_boundary_layer</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">scale_factor</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">resampling_step</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">flow_rate_factor</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">moving_mesh</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">clamp_boundaries</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">max_geodesic_distance</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/vampy/automatedPreprocessing/automated_preprocessing.html#run_pre_processing"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#vampy.automatedPreprocessing.automated_preprocessing.run_pre_processing" title="Permalink to this definition">#</a></dt>
 <dd><p>Automatically generate mesh of surface model in .vtu and .xml format, including prescribed
 flow rates at inlet and outlet based on flow network model.</p>
 <p>Runs simulation of meshed case on a remote ssh server if server configuration is provided.</p>
 <dl class="field-list simple">
 <dt class="field-odd">Parameters</dt>
 <dd class="field-odd"><ul class="simple">
+<li><p><strong>max_geodesic_distance</strong> (<em>float</em>) – Max distance when performing geodesic refinement (in mm)</p></li>
 <li><p><strong>input_model</strong> (<em>str</em>) – Name of case</p></li>
 <li><p><strong>verbose_print</strong> (<em>bool</em>) – Toggles verbose mode</p></li>
 <li><p><strong>smoothing_method</strong> (<em>str</em>) – Method for surface smoothing</p></li>
@@ -853,6 +855,32 @@ Level of refinement/coarseness is determined based on the distance to the center
 </dd>
 <dt class="field-odd">Return type</dt>
 <dd class="field-odd"><p>surface (vtkPolyData)</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="vampy.automatedPreprocessing.preprocessing_common.dist_sphere_geodesic">
+<span class="sig-prename descclassname"><span class="pre">vampy.automatedPreprocessing.preprocessing_common.</span></span><span class="sig-name descname"><span class="pre">dist_sphere_geodesic</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">surface</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">region_center</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">max_distance</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">save_path</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">edge_length</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/vampy/automatedPreprocessing/preprocessing_common.html#dist_sphere_geodesic"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#vampy.automatedPreprocessing.preprocessing_common.dist_sphere_geodesic" title="Permalink to this definition">#</a></dt>
+<dd><p>Determines the target edge length for each cell on the surface, including
+potential refinement or coarsening of certain user specified areas.
+Level of refinement/coarseness is determined based on user selected region and the geodesic distance from it.
+:param surface: Input surface model
+:type surface: vtkPolyData
+:param region_center: Point representing region to refine
+:type region_center: list
+:param save_path: Location to store processed surface
+:type save_path: str
+:param edge_length: Target edge length
+:type edge_length: float
+:param max_distance: Max distance of geodesic measure
+:type max_distance: float</p>
+<dl class="field-list simple">
+<dt class="field-odd">Returns</dt>
+<dd class="field-odd"><p>Processed surface model with info on cell specific target edge length</p>
+</dd>
+<dt class="field-even">Return type</dt>
+<dd class="field-even"><p>surface (vtkPolyData)</p>
 </dd>
 </dl>
 </dd></dl>
@@ -2447,6 +2475,7 @@ the projection of x onto the plane defined by c and n.</p>
 <li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#vampy.automatedPreprocessing.preprocessing_common.dist_sphere_constant"><code class="docutils literal notranslate"><span class="pre">dist_sphere_constant()</span></code></a></li>
 <li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#vampy.automatedPreprocessing.preprocessing_common.dist_sphere_curvature"><code class="docutils literal notranslate"><span class="pre">dist_sphere_curvature()</span></code></a></li>
 <li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#vampy.automatedPreprocessing.preprocessing_common.dist_sphere_diam"><code class="docutils literal notranslate"><span class="pre">dist_sphere_diam()</span></code></a></li>
+<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#vampy.automatedPreprocessing.preprocessing_common.dist_sphere_geodesic"><code class="docutils literal notranslate"><span class="pre">dist_sphere_geodesic()</span></code></a></li>
 <li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#vampy.automatedPreprocessing.preprocessing_common.find_boundaries"><code class="docutils literal notranslate"><span class="pre">find_boundaries()</span></code></a></li>
 <li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#vampy.automatedPreprocessing.preprocessing_common.generate_mesh"><code class="docutils literal notranslate"><span class="pre">generate_mesh()</span></code></a></li>
 <li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#vampy.automatedPreprocessing.preprocessing_common.get_centers_for_meshing"><code class="docutils literal notranslate"><span class="pre">get_centers_for_meshing()</span></code></a></li>

@@ -357,6 +357,8 @@ document.write(`
   <h1>Source code for vampy.automatedPreprocessing.preprocessing_common</h1><div class="highlight"><pre>
 <span></span><span class="kn">import</span> <span class="nn">gzip</span>
 <span class="kn">import</span> <span class="nn">json</span>
+<span class="kn">from</span> <span class="nn">os</span> <span class="kn">import</span> <span class="n">path</span>
+
 <span class="kn">import</span> <span class="nn">numpy</span> <span class="k">as</span> <span class="nn">np</span>
 <span class="kn">import</span> <span class="nn">vtkmodules.numpy_interface.dataset_adapter</span> <span class="k">as</span> <span class="nn">dsa</span>
 <span class="kn">from</span> <span class="nn">morphman</span> <span class="kn">import</span> <span class="n">vtk_clean_polydata</span><span class="p">,</span> <span class="n">vtk_triangulate_surface</span><span class="p">,</span> <span class="n">get_parameters</span><span class="p">,</span> <span class="n">write_parameters</span><span class="p">,</span> <span class="n">read_polydata</span><span class="p">,</span> \
@@ -364,7 +366,7 @@ document.write(`
     <span class="n">get_distance</span><span class="p">,</span> <span class="n">get_number_of_arrays</span><span class="p">,</span> <span class="n">vmtk_smooth_surface</span><span class="p">,</span> <span class="n">get_point_data_array</span><span class="p">,</span> <span class="n">create_vtk_array</span><span class="p">,</span> \
     <span class="n">get_vtk_point_locator</span><span class="p">,</span> <span class="n">vtk_extract_feature_edges</span><span class="p">,</span> <span class="n">get_uncapped_surface</span><span class="p">,</span> <span class="n">vtk_compute_connectivity</span><span class="p">,</span> \
     <span class="n">vtk_compute_mass_properties</span><span class="p">,</span> <span class="n">extract_single_line</span><span class="p">,</span> <span class="n">get_centerline_tolerance</span>
-<span class="kn">from</span> <span class="nn">os</span> <span class="kn">import</span> <span class="n">path</span>
+
 <span class="kn">from</span> <span class="nn">vampy.automatedPreprocessing</span> <span class="kn">import</span> <span class="n">ImportData</span>
 <span class="kn">from</span> <span class="nn">vampy.automatedPreprocessing.NetworkBoundaryConditions</span> <span class="kn">import</span> <span class="n">FlowSplitting</span>
 <span class="kn">from</span> <span class="nn">vampy.automatedPreprocessing.vmtk_pointselector</span> <span class="kn">import</span> <span class="n">vmtkPickPointSeedSelector</span>
@@ -373,6 +375,7 @@ document.write(`
 <span class="n">distanceToSpheresArrayName</span> <span class="o">=</span> <span class="s2">&quot;DistanceToSpheres&quot;</span>
 <span class="n">radiusArrayName</span> <span class="o">=</span> <span class="s1">&#39;MaximumInscribedSphereRadius&#39;</span>
 <span class="n">cellEntityArrayName</span> <span class="o">=</span> <span class="s2">&quot;CellEntityIds&quot;</span>
+<span class="n">dijkstraArrayName</span> <span class="o">=</span> <span class="s2">&quot;DijkstraDistanceToPoints&quot;</span>
 
 
 <div class="viewcode-block" id="get_regions_to_refine"><a class="viewcode-back" href="../../../api.html#vampy.automatedPreprocessing.preprocessing_common.get_regions_to_refine">[docs]</a><span class="k">def</span> <span class="nf">get_regions_to_refine</span><span class="p">(</span><span class="n">surface</span><span class="p">,</span> <span class="n">provided_points</span><span class="p">,</span> <span class="n">dir_path</span><span class="p">):</span>
@@ -783,7 +786,7 @@ document.write(`
     <span class="n">distance_to_sphere</span><span class="o">.</span><span class="n">GetPointData</span><span class="p">()</span><span class="o">.</span><span class="n">AddArray</span><span class="p">(</span><span class="n">elements_vtk</span><span class="p">)</span>
     <span class="n">element_size</span> <span class="o">=</span> <span class="n">diameter_array</span> <span class="o">/</span> <span class="n">element_size</span>
 
-    <span class="c1"># Reduce element size in aneurysm</span>
+    <span class="c1"># Reduce element size in refinement region</span>
     <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="n">region_center</span><span class="p">)):</span>
         <span class="n">distance_to_sphere</span> <span class="o">=</span> <span class="n">compute_distance_to_sphere</span><span class="p">(</span><span class="n">distance_to_sphere</span><span class="p">,</span>
                                                         <span class="n">region_center</span><span class="p">[</span><span class="n">i</span><span class="p">],</span>
@@ -1279,6 +1282,58 @@ document.write(`
     <span class="n">remeshed_surface</span> <span class="o">=</span> <span class="n">remeshing</span><span class="o">.</span><span class="n">Surface</span>
 
     <span class="k">return</span> <span class="n">remeshed_surface</span></div>
+
+
+<div class="viewcode-block" id="dist_sphere_geodesic"><a class="viewcode-back" href="../../../api.html#vampy.automatedPreprocessing.preprocessing_common.dist_sphere_geodesic">[docs]</a><span class="k">def</span> <span class="nf">dist_sphere_geodesic</span><span class="p">(</span><span class="n">surface</span><span class="p">,</span> <span class="n">region_center</span><span class="p">,</span> <span class="n">max_distance</span><span class="p">,</span> <span class="n">save_path</span><span class="p">,</span> <span class="n">edge_length</span><span class="p">):</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Determines the target edge length for each cell on the surface, including</span>
+<span class="sd">        potential refinement or coarsening of certain user specified areas.</span>
+<span class="sd">        Level of refinement/coarseness is determined based on user selected region and the geodesic distance from it.</span>
+<span class="sd">        Args:</span>
+<span class="sd">            surface (vtkPolyData): Input surface model</span>
+<span class="sd">            region_center (list): Point representing region to refine</span>
+<span class="sd">            save_path (str): Location to store processed surface</span>
+<span class="sd">            edge_length (float): Target edge length</span>
+<span class="sd">            max_distance (float): Max distance of geodesic measure</span>
+<span class="sd">        Returns:</span>
+<span class="sd">            surface (vtkPolyData): Processed surface model with info on cell specific target edge length</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+
+    <span class="c1"># Define refine region point ID</span>
+    <span class="n">locator</span> <span class="o">=</span> <span class="n">get_vtk_point_locator</span><span class="p">(</span><span class="n">surface</span><span class="p">)</span>
+    <span class="n">point</span> <span class="o">=</span> <span class="n">region_center</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span>
+    <span class="n">region_id</span> <span class="o">=</span> <span class="n">locator</span><span class="o">.</span><span class="n">FindClosestPoint</span><span class="p">(</span><span class="n">point</span><span class="p">)</span>
+    <span class="n">region_ids</span> <span class="o">=</span> <span class="n">vtk</span><span class="o">.</span><span class="n">vtkIdList</span><span class="p">()</span>
+    <span class="n">region_ids</span><span class="o">.</span><span class="n">InsertNextId</span><span class="p">(</span><span class="n">region_id</span><span class="p">)</span>
+
+    <span class="c1"># Compute geodesic distance to point</span>
+    <span class="n">dijkstra</span> <span class="o">=</span> <span class="n">vtkvmtk</span><span class="o">.</span><span class="n">vtkvmtkPolyDataDijkstraDistanceToPoints</span><span class="p">()</span>
+    <span class="n">dijkstra</span><span class="o">.</span><span class="n">SetInputData</span><span class="p">(</span><span class="n">surface</span><span class="p">)</span>
+    <span class="n">dijkstra</span><span class="o">.</span><span class="n">SetSeedIds</span><span class="p">(</span><span class="n">region_ids</span><span class="p">)</span>
+    <span class="n">dijkstra</span><span class="o">.</span><span class="n">SetDistanceOffset</span><span class="p">(</span><span class="mi">0</span><span class="p">)</span>
+    <span class="n">dijkstra</span><span class="o">.</span><span class="n">SetDistanceScale</span><span class="p">(</span><span class="mi">1</span><span class="p">)</span>
+    <span class="n">dijkstra</span><span class="o">.</span><span class="n">SetMinDistance</span><span class="p">(</span><span class="mi">0</span><span class="p">)</span>
+    <span class="n">dijkstra</span><span class="o">.</span><span class="n">SetMaxDistance</span><span class="p">(</span><span class="n">max_distance</span><span class="p">)</span>
+    <span class="n">dijkstra</span><span class="o">.</span><span class="n">SetDijkstraDistanceToPointsArrayName</span><span class="p">(</span><span class="n">dijkstraArrayName</span><span class="p">)</span>
+    <span class="n">dijkstra</span><span class="o">.</span><span class="n">Update</span><span class="p">()</span>
+    <span class="n">geodesic_distance</span> <span class="o">=</span> <span class="n">dijkstra</span><span class="o">.</span><span class="n">GetOutput</span><span class="p">()</span>
+
+    <span class="c1"># Create smooth transition between LAA and LA lumen</span>
+    <span class="n">N</span> <span class="o">=</span> <span class="n">surface</span><span class="o">.</span><span class="n">GetNumberOfPoints</span><span class="p">()</span>
+    <span class="n">dist_array</span> <span class="o">=</span> <span class="n">geodesic_distance</span><span class="o">.</span><span class="n">GetPointData</span><span class="p">()</span><span class="o">.</span><span class="n">GetArray</span><span class="p">(</span><span class="n">dijkstraArrayName</span><span class="p">)</span>
+    <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="n">N</span><span class="p">):</span>
+        <span class="n">dist</span> <span class="o">=</span> <span class="n">dist_array</span><span class="o">.</span><span class="n">GetComponent</span><span class="p">(</span><span class="n">i</span><span class="p">,</span> <span class="mi">0</span><span class="p">)</span> <span class="o">/</span> <span class="n">max_distance</span>
+        <span class="n">newDist</span> <span class="o">=</span> <span class="mi">1</span> <span class="o">/</span> <span class="mi">3</span> <span class="o">*</span> <span class="n">edge_length</span> <span class="o">*</span> <span class="p">(</span><span class="mi">1</span> <span class="o">+</span> <span class="mi">2</span> <span class="o">*</span> <span class="n">dist</span> <span class="o">**</span> <span class="mi">3</span><span class="p">)</span>
+        <span class="n">dist_array</span><span class="o">.</span><span class="n">SetComponent</span><span class="p">(</span><span class="n">i</span><span class="p">,</span> <span class="mi">0</span><span class="p">,</span> <span class="n">newDist</span><span class="p">)</span>
+
+    <span class="c1"># Set element size based on geodesic distance</span>
+    <span class="n">element_size</span> <span class="o">=</span> <span class="n">get_point_data_array</span><span class="p">(</span><span class="n">dijkstraArrayName</span><span class="p">,</span> <span class="n">geodesic_distance</span><span class="p">)</span>
+    <span class="n">vtk_array</span> <span class="o">=</span> <span class="n">create_vtk_array</span><span class="p">(</span><span class="n">element_size</span><span class="p">,</span> <span class="s2">&quot;Size&quot;</span><span class="p">)</span>
+    <span class="n">geodesic_distance</span><span class="o">.</span><span class="n">GetPointData</span><span class="p">()</span><span class="o">.</span><span class="n">AddArray</span><span class="p">(</span><span class="n">vtk_array</span><span class="p">)</span>
+
+    <span class="n">write_polydata</span><span class="p">(</span><span class="n">geodesic_distance</span><span class="p">,</span> <span class="n">save_path</span><span class="p">)</span>
+
+    <span class="k">return</span> <span class="n">geodesic_distance</span></div>
 </pre></div>
 
                 </article>
