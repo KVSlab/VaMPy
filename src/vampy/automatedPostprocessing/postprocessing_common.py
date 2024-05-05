@@ -1,8 +1,10 @@
 import argparse
 from time import time
 
-from dolfin import parameters, MPI, assemble, interpolate, Measure, FacetNormal, Identity, VectorFunctionSpace, \
-    BoundaryMesh, Function, FacetArea, TestFunction, FunctionSpace, grad, inner, sqrt
+import numpy as np
+from dolfin import sym, parameters, MPI, assemble, interpolate, Measure, FacetNormal, VectorFunctionSpace, \
+    BoundaryMesh, Function, TestFunction, FunctionSpace, grad, inner, sqrt, TrialFunction, LUSolver, \
+    FunctionAssigner, Mesh, ds
 
 try:
     parameters["allow_extrapolation"] = True
@@ -85,21 +87,8 @@ def read_command_line():
     args = parser.parse_args()
 
     return args.case, args.nu, args.rho, args.dt, args.velocity_degree, args.pressure_degree, args.probe_frequency, \
-        args.T, args.save_frequency, args.times_to_average, args.start_cycle, args.sample_step, \
-        args.average_over_cycles
-
-
-def epsilon(u):
-    """
-    Computes the strain-rate tensor
-    Args:
-        u (Function): Velocity field
-
-    Returns:
-        epsilon (Function): Strain rate tensor of u
-    """
-
-    return 0.5 * (grad(u) + grad(u).T)
+           args.T, args.save_frequency, args.times_to_average, args.start_cycle, args.sample_step, \
+           args.average_over_cycles
 
 
 def rate_of_strain(strain, u, v, mesh, h):
@@ -114,7 +103,7 @@ def rate_of_strain(strain, u, v, mesh, h):
         h (float): Cell diameter of mesh
     """
     dx = Measure("dx", domain=mesh)
-    eps = epsilon(u)
+    eps = sym(grad(u))
     f = sqrt(inner(eps, eps))
     x = assemble(inner(f, v) / h * dx)
     strain.vector().set_local(x.get_local())
@@ -134,11 +123,101 @@ def rate_of_dissipation(dissipation, u, v, mesh, h, nu):
         nu (float): Viscosity
     """
     dx = Measure("dx", domain=mesh)
-    eps = epsilon(u)
+    eps = sym(grad(u))
     f = 2 * nu * inner(eps, eps)
     x = assemble(inner(f, v) / h * dx)
     dissipation.vector().set_local(x.get_local())
     dissipation.vector().apply("insert")
+
+
+class InterpolateDG:
+    """
+    interpolate DG function from the domain to the boundary. FEniCS built-in function interpolate does not work
+    with DG function spaces. This class is a workaround for this issue. Basically, for each facet, we find the
+    mapping between the dofs on the boundary and the dofs on the domain. Then, we copy the values of the dofs on the
+    domain to the dofs on the boundary. This is done for each subspaces of the DG vector function space.
+    """
+
+    def __init__(self, V: VectorFunctionSpace, V_sub: VectorFunctionSpace, mesh: Mesh, boundary_mesh: Mesh) -> None:
+        """
+        Initialize the interpolator
+
+        Args:
+            V (VectorFunctionSpace): function space on the domain
+            V_sub (VectorFunctionSpace): function space on the boundary
+            mesh (Mesh): whole mesh
+            boundary_mesh (Mesh): boundary mesh of the whole mesh
+        """
+        assert V.ufl_element().family() == "Discontinuous Lagrange", "V must be a DG space"
+        assert V_sub.ufl_element().family() == "Discontinuous Lagrange", "V_sub must be a DG space"
+        self.V = V
+        self.v_sub = Function(V_sub)
+        self.Ws = [V_sub.sub(i).collapse() for i in range(V_sub.num_sub_spaces())]
+        self.ws = [Function(Wi) for Wi in self.Ws]
+        self.w_sub_copy = [w_sub.vector().get_local() for w_sub in self.ws]
+        self.sub_dofmaps = [W_sub.dofmap() for W_sub in self.Ws]
+        self.sub_coords = [Wi.tabulate_dof_coordinates() for Wi in self.Ws]
+        self.mesh = mesh
+        self.sub_map = boundary_mesh.entity_map(self.mesh.topology().dim() - 1).array()
+        self.mesh.init(self.mesh.topology().dim() - 1, self.mesh.topology().dim())
+        self.f_to_c = self.mesh.topology()(self.mesh.topology().dim() - 1, self.mesh.topology().dim())
+        self.dof_coords = V.tabulate_dof_coordinates()
+        self.fa = FunctionAssigner(V_sub, self.Ws)
+
+    def __call__(self, u_vec: np.ndarray) -> Function:
+        """interpolate DG function from the domain to the boundary"""
+
+        for k, (coords_k, vec, sub_dofmap) in enumerate(zip(self.sub_coords, self.w_sub_copy, self.sub_dofmaps)):
+            for i, facet in enumerate(self.sub_map):
+                cells = self.f_to_c(facet)
+                # Get closure dofs on parent facet
+                sub_dofs = sub_dofmap.cell_dofs(i)
+                closure_dofs = self.V.sub(k).dofmap().entity_closure_dofs(
+                    self.mesh, self.mesh.topology().dim(), [cells[0]])
+                copy_dofs = np.empty(len(sub_dofs), dtype=np.int32)
+
+                for dof in closure_dofs:
+                    for j, sub_coord in enumerate(coords_k[sub_dofs]):
+                        if np.allclose(self.dof_coords[dof], sub_coord):
+                            copy_dofs[j] = dof
+                            break
+                sub_dofs = sub_dofmap.cell_dofs(i)
+                vec[sub_dofs] = u_vec[copy_dofs]
+
+            self.ws[k].vector().set_local(vec)
+
+        self.fa.assign(self.v_sub, self.ws)
+
+        return self.v_sub
+
+
+class SurfaceProjector:
+    """
+    Project a function contains surface integral onto a function space V
+    """
+
+    def __init__(self, V: FunctionSpace) -> None:
+        """
+        Initialize the surface projector
+
+        Args:
+            V (FunctionSpace): function space to project onto
+        """
+        u = TrialFunction(V)
+        v = TestFunction(V)
+        a_proj = inner(u, v) * ds
+        # keep_diagonal=True & ident_zeros() are necessary for the matrix to be invertible
+        self.A = assemble(a_proj, keep_diagonal=True)
+        self.A.ident_zeros()
+        self.u_ = Function(V)
+        self.solver = LUSolver(self.A)
+
+    def __call__(self, f: Function) -> Function:
+        v = TestFunction(self.u_.function_space())
+        self.b_proj = inner(f, v) * ds
+        self.b = assemble(self.b_proj)
+        self.solver.solve(self.u_.vector(), self.b)
+        return self.u_
 
 
 class STRESS:
@@ -149,21 +228,21 @@ class STRESS:
     FIXME: Currently works for P1P1, but not for higher order finite elements (e.g. P2P1)
     """
 
-    def __init__(self, u, p, nu, mesh):
+    def __init__(self, u: Function, V_dg: VectorFunctionSpace, V_sub: VectorFunctionSpace, nu: float, mesh: Mesh,
+                 boundary_mesh: Mesh) -> None:
         """Initializes the StressComputer.
 
         Args:
             u (Function): The velocity field.
-            p (Function): The pressure field.
             nu (float): The kinematic viscosity.
             mesh (Mesh): The mesh on which to compute stress.
         """
-        boundary_ds = Measure("ds", domain=mesh)
-        boundary_mesh = BoundaryMesh(mesh, 'exterior')
-        self.bmV = VectorFunctionSpace(boundary_mesh, 'CG', 1)
+
+        self.projector = SurfaceProjector(V_dg)
+        self.interpolator = InterpolateDG(V_dg, V_sub, mesh, boundary_mesh)
 
         # Compute stress tensor
-        sigma = (2 * nu * epsilon(u)) - (p * Identity(len(u)))
+        sigma = 2 * nu * sym(grad(u))
 
         # Compute stress on surface
         n = FacetNormal(mesh)
@@ -171,24 +250,24 @@ class STRESS:
 
         # Compute normal and tangential components
         Fn = inner(F, n)  # scalar-valued
-        Ft = F - (Fn * n)  # vector-valued
+        self.Ft = F - (Fn * n)  # vector-valued
 
         # Integrate against piecewise constants on the boundary
-        scalar = FunctionSpace(mesh, 'DG', 0)
-        vector = VectorFunctionSpace(mesh, 'CG', 1)
-        scaling = FacetArea(mesh)  # Normalise the computed stress relative to the size of the element
-
-        v = TestFunction(scalar)
-        w = TestFunction(vector)
-
-        # Create functions
-        self.Fn = Function(scalar)
-        self.Ftv = Function(vector)
-        self.Ft = Function(scalar)
-
-        self.Ln = 1 / scaling * v * Fn * boundary_ds
-        self.Ltv = 1 / (2 * scaling) * inner(w, Ft) * boundary_ds
-        self.Lt = 1 / scaling * inner(v, self.norm_l2(self.Ftv)) * boundary_ds
+        # scalar = FunctionSpace(mesh, 'DG', 0)
+        # vector = VectorFunctionSpace(mesh, 'CG', 1)
+        # scaling = FacetArea(mesh)  # Normalise the computed stress relative to the size of the element
+        #
+        # v = TestFunction(scalar)
+        # w = TestFunction(vector)
+        #
+        # # Create functions
+        # self.Fn = Function(scalar)
+        # self.Ftv = Function(vector)
+        # self.Ft = Function(scalar)
+        #
+        # self.Ln = 1 / scaling * v * Fn * boundary_ds
+        # self.Ltv = 1 / (2 * scaling) * inner(w, Ft) * boundary_ds
+        # self.Lt = 1 / scaling * inner(v, self.norm_l2(self.Ftv)) * boundary_ds
 
     def __call__(self):
         """
@@ -197,6 +276,11 @@ class STRESS:
         Returns:
             Ftv_mb (Function): Shear stress
         """
+
+        self.Ftv = self.projector(self.Ft)
+        self.Ftv_bd = self.interpolator(self.Ftv.vector().get_local())
+
+        return self.Ftv_bd
 
         # Assemble vectors
         assemble(self.Ltv, tensor=self.Ftv.vector())

@@ -1,14 +1,13 @@
 from os import path
 
+import numpy as np
+from IPython import embed
 from dolfin import Function, VectorFunctionSpace, FunctionSpace, parameters, MPI, HDF5File, Mesh, XDMFFile, \
-    BoundaryMesh, project, inner
+    BoundaryMesh, project, inner, FunctionAssigner
 
 from vampy.automatedPostprocessing.postprocessing_common import STRESS, read_command_line, get_dataset_names
 
-try:
-    parameters["reorder_dofs_serial"] = False
-except NameError:
-    pass
+parameters["reorder_dofs_serial"] = False
 
 
 def compute_hemodynamic_indices(folder, nu, rho, dt, T, velocity_degree, save_frequency, start_cycle, step,
@@ -57,47 +56,48 @@ def compute_hemodynamic_indices(folder, nu, rho, dt, T, velocity_degree, save_fr
     with HDF5File(MPI.comm_world, mesh_path, "r") as mesh_file:
         mesh_file.read(mesh, "mesh", False)
 
-    bm = BoundaryMesh(mesh, 'exterior')
+    boundary_mesh = BoundaryMesh(mesh, 'exterior')
 
     if MPI.rank(MPI.comm_world) == 0:
         print("Defining function spaces")
 
-    V_b1 = VectorFunctionSpace(bm, "CG", 1)
-    U_b1 = FunctionSpace(bm, "CG", 1)
-    V = VectorFunctionSpace(mesh, "CG", velocity_degree)
+    Vv_P1 = VectorFunctionSpace(mesh, "CG", velocity_degree)
+    Vv = VectorFunctionSpace(mesh, "DG", 1)
+    Vv_boundary = VectorFunctionSpace(boundary_mesh, "DG", 1)
+    V_boundary = FunctionSpace(boundary_mesh, "DG", 1)
 
     if MPI.rank(MPI.comm_world) == 0:
         print("Defining functions")
 
-    u = Function(V)
+    u = Function(Vv_P1)
 
     # RRT
-    RRT = Function(U_b1)
-    RRT_avg = Function(U_b1)
+    RRT = Function(V_boundary)
+    RRT_avg = Function(V_boundary)
 
     # OSI
-    OSI = Function(U_b1)
-    OSI_avg = Function(U_b1)
+    OSI = Function(V_boundary)
+    OSI_avg = Function(V_boundary)
 
     # ECAP
-    ECAP = Function(U_b1)
-    ECAP_avg = Function(U_b1)
+    ECAP = Function(V_boundary)
+    ECAP_avg = Function(V_boundary)
 
     # WSS_mean
-    WSS_mean = Function(V_b1)
-    WSS_mean_avg = Function(V_b1)
+    WSS_mean = Function(Vv_boundary)
+    WSS_mean_avg = Function(Vv_boundary)
 
     # TAWSS
-    TAWSS = Function(U_b1)
-    TAWSS_avg = Function(U_b1)
+    TAWSS = Function(V_boundary)
+    TAWSS_avg = Function(V_boundary)
 
     # TWSSG
-    TWSSG = Function(U_b1)
-    TWSSG_avg = Function(U_b1)
-    twssg = Function(V_b1)
-    tau_prev = Function(V_b1)
+    TWSSG = Function(V_boundary)
+    TWSSG_avg = Function(V_boundary)
+    twssg = Function(Vv_boundary)
+    tau_prev = Function(Vv_boundary)
 
-    stress = STRESS(u, 0.0, nu, mesh)
+    stress = STRESS(u=u, V_dg=Vv, V_sub=Vv_boundary, nu=nu, mesh=mesh, boundary_mesh=boundary_mesh)
 
     # Get number of saved steps and cycles
     saved_time_steps_per_cycle = int(T / dt / save_frequency / step)
@@ -150,14 +150,32 @@ def compute_hemodynamic_indices(folder, nu, rho, dt, T, velocity_degree, save_fr
         if MPI.rank(MPI.comm_world) == 0:
             print("Compute WSS (absolute value)")
         tawss = project(inner(tau, tau) ** (1 / 2), U_b1)
-        TAWSS_avg.vector().axpy(1, tawss.vector())
+        # TAWSS_avg.vector().axpy(1, tawss.vector())
+        # V_b1 = = Vv_bo = VectorFunctionSpace(bm, "CG", 1)
+        # U_b1 = V_bo = FunctionSpace(bm, "CG", 1)
+        local_size = tau.vector()[:].size // Vv_boundary.num_sub_spaces()
+        work_vec = tau.vector().get_local()
+        #tau_vec = work_vec.reshape(local_size, Vv_boundary.dofmap().block_size()).copy()
+        tau_vec = work_vec.copy()
+        tau_tmp = Function(Vv_boundary)
+        work_vec[:] = 0
+        # instead of using sqrt(inner(tau, tau)), we use np.linalg.norm to avoid the issue with inner(tau, tau) being
+        # negative value. Here, we simply compute the magnitude of the dofs
+        work_vec[::Vv_boundary.num_sub_spaces()] = np.linalg.norm(tau_vec)#, axis=1)
+        tau_tmp.vector().set_local(work_vec)
+        tau_tmp.vector().apply('insert')
+        V0 = Vv_boundary.sub(0).collapse()
+        tau_norm = Function(V0)
+        assigner = FunctionAssigner(V0, Vv_boundary.sub(0))
+        assigner.assign(tau_norm, tau_tmp.sub(0))
+        TAWSS.vector()[:] += tau_norm.vector().get_local()
 
         # Compute TWSSG
         if MPI.rank(MPI.comm_world) == 0:
             print("Compute TWSSG")
         twssg.vector().set_local((tau.vector().get_local() - tau_prev.vector().get_local()) / dt)
         twssg.vector().apply("insert")
-        twssg_ = project(inner(twssg, twssg) ** (1 / 2), U_b1)
+        twssg_ = project(inner(twssg, twssg) ** (1 / 2), V_boundary)
         TWSSG_avg.vector().axpy(1, twssg_.vector())
 
         # Update tau
@@ -181,7 +199,7 @@ def compute_hemodynamic_indices(folder, nu, rho, dt, T, velocity_degree, save_fr
                 index.vector()[:] = index.vector()[:] / saved_time_steps_per_cycle
 
             # Compute OSI, RRT and ECAP
-            wss_mean = project(inner(WSS_mean_avg, WSS_mean_avg) ** (1 / 2), U_b1)
+            wss_mean = project(inner(WSS_mean_avg, WSS_mean_avg) ** (1 / 2), V_boundary)
             wss_mean_vec = wss_mean.vector().get_local()
             tawss_vec = TAWSS_avg.vector().get_local()
 
@@ -228,13 +246,27 @@ def compute_hemodynamic_indices(folder, nu, rho, dt, T, velocity_degree, save_fr
     index_dict['TWSSG'].vector()[:] = index_dict['TWSSG'].vector()[:] / n
     index_dict['TAWSS'].vector()[:] = index_dict['TAWSS'].vector()[:] / n
     WSS_mean.vector()[:] = WSS_mean.vector()[:] / n
-    wss_mean = project(inner(WSS_mean, WSS_mean) ** (1 / 2), U_b1)
-    wss_mean_vec = wss_mean.vector().get_local()
+
+    local_size = WSS_mean.vector()[:].size // Vv_boundary.num_sub_spaces()
+    work_vec = WSS_mean.vector().get_local()
+    wss_mean_vec = work_vec.copy()#reshape(local_size, Vv_boundary.dofmap().block_size()).copy()
+    wss_mean_mag_tmp = Function(Vv_boundary)
+    work_vec[:] = 0
+    work_vec[::Vv_boundary.num_sub_spaces()] = np.linalg.norm(wss_mean_vec)
+    wss_mean_mag_tmp.vector().set_local(work_vec)
+    wss_mean_mag_tmp.vector().set_local(work_vec)
+
+    wss_mean_mag = Function(V0)
+    assigner = FunctionAssigner(V0, Vv_boundary.sub(0))
+    assigner.assign(wss_mean_mag, wss_mean_mag_tmp.sub(0))
+    wss_mean_mag = wss_mean_mag.vector().get_local()
+    # wss_mean = project(inner(WSS_mean, WSS_mean) ** (1 / 2), U_b1)
+    # wss_mean_vec = wss_mean.vector().get_local()
     tawss_vec = index_dict['TAWSS'].vector().get_local()
 
     # Compute RRT, OSI, and ECAP based on mean and absolute WSS
-    index_dict['RRT'].vector().set_local(1 / wss_mean_vec)
-    index_dict['OSI'].vector().set_local(0.5 * (1 - wss_mean_vec / tawss_vec))
+    index_dict['RRT'].vector().set_local(1 / wss_mean_mag)
+    index_dict['OSI'].vector().set_local(0.5 * (1 - wss_mean_mag / tawss_vec))
     index_dict['ECAP'].vector().set_local(index_dict['OSI'].vector().get_local() / tawss_vec)
 
     for index in ['RRT', 'OSI', 'ECAP']:
