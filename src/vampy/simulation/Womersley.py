@@ -21,7 +21,7 @@ import math
 
 import numpy as np
 from dolfin import UserExpression, assemble, Constant, FacetNormal, SpatialCoordinate, Measure
-from scipy.integrate import simps
+from scipy.integrate import simpson
 from scipy.interpolate import UnivariateSpline
 from scipy.special import jn
 
@@ -75,9 +75,9 @@ def fourier_coefficients(x, y, T, N):
     '''From x-array and y-spline and period T, calculate N complex Fourier coefficients.'''
     omega = 2 * np.pi / T
     ck = []
-    ck.append(1 / T * simps(y(x), x))
+    ck.append(1 / T * simpson(y(x), x=x))
     for n in range(1, N):
-        c = 1 / T * simps(y(x) * np.exp(-1j * n * omega * x), x)
+        c = 1 / T * simpson(y(x) * np.exp(-1j * n * omega * x), x=x)
 
         # Clamp almost zero real and imag components to zero
         if 1:
