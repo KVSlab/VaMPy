@@ -12,6 +12,7 @@ dependencies:
   - python >=3.8
   - expat==2.5 # Hotfix for https://gitlab.archlinux.org/archlinux/packaging/packages/paraview/-/issues/4
   - pip:
+      - numpy==1.26.0
       - matplotlib
       - scipy
       - cppimport
