@@ -10,7 +10,7 @@ dependencies:
   - pip==24.2
   - pip:
       - matplotlib
-      - scipy
+      - scipy==1.14.1
       - numpy==1.24.4
       - cppimport==22.8.2
       - paramiko==3.4.1
