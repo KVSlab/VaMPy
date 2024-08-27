@@ -6,12 +6,12 @@ channels:
 dependencies:
   - fenics
   - morphman
-  - paramiko
-  - pip
-  - git
   - python >=3.8
-  - expat==2.5 # Hotfix for https://gitlab.archlinux.org/archlinux/packaging/packages/paraview/-/issues/4
+  - pip==24.2
   - pip:
-      - scipy
-      - cppimport
+      - matplotlib
+      - scipy==1.14.1
+      - numpy==1.24.4
+      - cppimport==22.8.2
+      - paramiko==3.4.1
       - git+https://github.com/mikaem/Oasis

@@ -11,7 +11,7 @@ on:
     - cron: '0 8 * * *'
 
 env:
-  CACHE_NUMBER: 11 # Increase to reset cache
+  CACHE_NUMBER: 12 # Increase to reset cache
 
 jobs:
   check-code:
@@ -19,7 +19,7 @@ jobs:
     runs-on: ubuntu-latest
 
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v3
       - uses: actions/setup-python@v5
         with:
           python-version: '3.8'
@@ -48,11 +48,13 @@ jobs:
     defaults:
       run: # https://github.com/marketplace/actions/setup-miniconda#use-a-default-shell
         shell: bash -l {0}
+
     steps:
       - uses: actions/checkout@v3
       - uses: actions/setup-python@v5
         with:
           python-version: '3.8'
+
       - name: Setup and install with Mambaforge
         uses: conda-incubator/setup-miniconda@v2
         with:
@@ -63,19 +65,20 @@ jobs:
           use-mamba: true
           environment-file: environment-test.yml
         id: mamba
-      - uses: actions/cache@v2
+
+      - uses: actions/cache@v3
         with:
           path: ${{ matrix.prefix }}
-          key: ${{ matrix.label }}-${{ github.run_id }}-${{ env.CACHE_NUMBER }}
-          restore-keys: ${{ matrix.label }}-
+          key: ${{ matrix.label }}-${{ env.CACHE_NUMBER }}-${{ hashFiles('environment-test.yml') }}
+          restore-keys: ${{ matrix.label }}-${{ env.CACHE_NUMBER }}-
+
       - run: mamba env update -n vampy -f environment-test.yml
-        if: steps.cache.outputs.cache-hit != 'true'
 
       - name: Install VaMPy
-        run: python -m pip install .[test]
+        run: mamba run -n vampy python -m pip install '.[test]'
 
       - name: Run tests
-        run: python -m pytest tests
+        run: mamba run -n vampy python -m pytest tests
 
       - name: Upload coverage report to Codecov
         if: matrix.os == 'ubuntu-latest'
