@@ -6,13 +6,11 @@ channels:
 dependencies:
   - fenics
   - morphman
-  - paramiko
-  - pip
-  - git
   - python >=3.8
-  - expat==2.5 # Hotfix for https://gitlab.archlinux.org/archlinux/packaging/packages/paraview/-/issues/4
   - pip:
       - matplotlib
       - scipy
-      - cppimport
+      - numpy==1.26.4
+      - cppimport==22.8.2
+      - paramiko==3.4.1
       - git+https://github.com/KVSlab/OasisMove
