@@ -15,6 +15,7 @@ parts:
   - caption: Using VaMPy
     chapters:
     - file: preprocess
+    - file: movingpreprocess
     - file: simulation
     - file: postprocess
     - file: quantities
@@ -26,6 +27,7 @@ parts:
     - file: tutorials
     - file: artery
     - file: atrium
+    - file: movingatrium
 
   - caption: Python API
     chapters:

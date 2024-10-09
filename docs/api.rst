@@ -15,6 +15,11 @@ Pre-processing scripts
    :undoc-members:
    :show-inheritance:
 
+.. automodule:: vampy.automatedPreprocessing.moving_common
+   :members:
+   :undoc-members:
+   :show-inheritance:
+
 .. automodule:: vampy.automatedPreprocessing.DisplayData
    :members:
    :undoc-members:
@@ -30,7 +35,7 @@ Pre-processing scripts
    :undoc-members:
    :show-inheritance:
 
-.. automodule:: vampy.automatedPreprocessing.ToolRepairSTL
+.. automodule:: vampy.automatedPreprocessing.repair_tools
    :members:
    :undoc-members:
    :show-inheritance:
@@ -92,6 +97,11 @@ CFD simulation scripts
    :show-inheritance:
 
 .. automodule:: vampy.simulation.Atrium
+   :members:
+   :undoc-members:
+   :show-inheritance:
+
+.. automodule:: vampy.simulation.MovingAtrium
    :members:
    :undoc-members:
    :show-inheritance:

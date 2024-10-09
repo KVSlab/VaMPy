@@ -16,7 +16,7 @@ class VtkText:
         self.text.SetDisplayPosition(10, 2)
 
 
-class vmtkSeedSelector:
+class vmtkSeedSelector():  # pragma: no cover
     def __init__(self):
         self._Surface = None
         self._SeedIds = None
@@ -35,7 +35,7 @@ class vmtkSeedSelector:
         pass
 
 
-class vmtkPickPointSeedSelector(vmtkSeedSelector):
+class vmtkPickPointSeedSelector(vmtkSeedSelector):  # pragma: no cover
     def __init__(self):
         vmtkSeedSelector.__init__(self)
         self.PickedSeedIds = vtk.vtkIdList()

@@ -12,8 +12,7 @@
 import vtk
 
 
-class VtkPointCloud:
-
+class VtkPointCloud:  # pragma: no cover
     def __init__(self, maxNumPoints=1e6):
         self.maxNumPoints = maxNumPoints
         self.vtkPolyData = vtk.vtkPolyData()
@@ -42,19 +41,7 @@ class VtkPointCloud:
         self.vtkPolyData.SetVerts(self.vtkCells)
 
 
-class VtkText:
-
-    def __init__(self, guiText=""):
-        self.text = vtk.vtkTextActor()
-        self.text.SetInputData(guiText)
-        textProperties = self.text.GetTextProperty()
-        textProperties.SetFontSize(15)
-        textProperties.SetColor(1, 1, 1)
-        self.text.SetDisplayPosition(20, 30)
-
-
-class DisplayModel(object):
-
+class DisplayModel(object):  # pragma: no cover
     def polyDataToActor(self, polyData, opacity=1.0):
         """Wrap the provided vtkPolyData object in a mapper and an actor,
         returning the actor."""

@@ -222,7 +222,12 @@ def rate_of_dissipation(dissipation, u, v, mesh, h, nu):
 
 
 class STRESS:
-    """Computes the stress on a given mesh based on provided velocity and pressure fields."""
+    """
+    Computes the stress on a given mesh based on provided velocity and pressure fields.
+    Note that the pressure term is unused since it disappears in the process of extracting the tangential component.
+
+    FIXME: Currently works for P1P1, but not for higher order finite elements (e.g. P2P1)
+    """
 
     def __init__(self, u, p, nu, mesh):
         """Initializes the StressComputer.
@@ -293,14 +298,8 @@ class STRESS:
         return pow(inner(u, u), 0.5)
 
 
-def get_dataset_names(
-    data_file,
-    num_files=100000,
-    step=1,
-    start=1,
-    print_info=True,
-    vector_filename="/velocity/vector_%d",
-):
+def get_dataset_names(data_file, num_files=100000, step=1, start=0, print_info=True,
+                      vector_filename="/velocity/vector_%d"):
     """
     Read velocity fields datasets and extract names of files
 

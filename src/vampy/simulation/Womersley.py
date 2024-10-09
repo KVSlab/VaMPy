@@ -20,18 +20,8 @@
 import math
 
 import numpy as np
-from dolfin import (
-    MPI,
-    Constant,
-    FacetNormal,
-    Measure,
-    SpatialCoordinate,
-    SubsetIterator,
-    UserExpression,
-    assemble,
-    sqrt,
-)
-from scipy.integrate import simpson as simps
+from dolfin import UserExpression, assemble, Constant, FacetNormal, SpatialCoordinate, Measure
+from scipy.integrate import simpson
 from scipy.interpolate import UnivariateSpline
 from scipy.special import jn
 
@@ -43,33 +33,12 @@ def x_to_r2(x, c, n):
     the projection of x onto the plane defined by c and n.
     """
     # Steps:
-    # rv = x - c
-    # rvn = rv . n
-    # rp = rv - (rv . n) n
-    # r2 = ||rp||**2
-
     rv = x - c
     rvn = rv.dot(n)
     rp = rv - rvn * n
     r2 = rp.dot(rp)
 
     return r2
-
-
-def compute_radius(mesh, facet_domains, ind, center):
-    d = len(center)
-    it = SubsetIterator(facet_domains, ind)
-    geom = mesh.geometry()
-    # maxr2 = -1.0
-    maxr2 = 0
-    for i, facet in enumerate(it):
-        ent = facet.entities(0)
-        for v in ent:
-            p = geom.point(v)
-            r2 = sum((p[j] - center[j]) ** 2 for j in range(d))
-            maxr2 = max(maxr2, r2)
-    r = MPI.max(MPI.comm_world, sqrt(maxr2))
-    return r
 
 
 def compute_boundary_geometry_acrn(mesh, ind, facet_domains):
@@ -96,36 +65,19 @@ def compute_boundary_geometry_acrn(mesh, ind, facet_domains):
     n_len = np.sqrt(sum([ni[i] ** 2 for i in range(d)]))  # Should always be 1!?
     normal = ni / n_len
 
-    # Compute radius by taking max radius of boundary points
-    # (assuming boundary points are on exact geometry)
-    # r = compute_radius(mesh, facet_domains, ind, c)
     # This old estimate is a few % lower because of boundary discretization errors
     r = np.sqrt(A / math.pi)
 
     return A, c, r, normal
 
 
-def compute_area(mesh, ind, facet_domains):
-    # Some convenient variables
-    assert facet_domains is not None
-    ds = Measure("ds", domain=mesh, subdomain_data=facet_domains)
-    dsi = ds(ind)
-
-    # Compute area of boundary tesselation by integrating 1.0 over all facets
-    A = assemble(Constant(1.0, name="one") * dsi)
-    assert (
-        A > 0.0
-    ), "Expecting positive area, probably mismatch between mesh and markers!"
-    return A
-
-
 def fourier_coefficients(x, y, T, N):
     """From x-array and y-spline and period T, calculate N complex Fourier coefficients."""
     omega = 2 * np.pi / T
     ck = []
-    ck.append(1 / T * simps(y(x), x))
+    ck.append(1 / T * simpson(y(x), x=x))
     for n in range(1, N):
-        c = 1 / T * simps(y(x) * np.exp(-1j * n * omega * x), x)
+        c = 1 / T * simpson(y(x) * np.exp(-1j * n * omega * x), x=x)
 
         # Clamp almost zero real and imag components to zero
         if 1:
@@ -210,9 +162,8 @@ class WomersleyComponent(UserExpression):
         pir2 = np.pi * self.radius**2
         # Compute intermediate terms for womersley function
         r_dependent_coeffs = np.zeros(self.N, dtype=np.complex_)
-        if hasattr(self, "Vn"):
-            # r_dependent_coeffs[0] = (self.Vn[0]/2.0) * (1 - y**2)
-            r_dependent_coeffs[0] = self.Vn[0] * (1 - y**2)
+        if hasattr(self, 'Vn'):
+            r_dependent_coeffs[0] = self.Vn[0] * (1 - y ** 2)
             for n in self.ns:
                 jn0b = self.jn0_betas[n]
                 r_dependent_coeffs[n] = (
@@ -259,33 +210,30 @@ class WomersleyComponent(UserExpression):
         value[0] = -self.normal_component * self.scale_value * wom
 
 
-def make_womersley_bcs(
-    t,
-    Q,
-    mesh,
-    nu,
-    area,
-    center,
-    radius,
-    normal,
-    element,
-    scale_to=None,
-    coeffstype="Q",
-    N=1001,
-    num_fourier_coefficients=20,
-    **NS_namespace
-):
-    """Generate a list of expressions for the components of a Womersley profile."""
-    # Compute transient profile as interpolation of given coefficients
-    period = max(t)
-    transient_profile = UnivariateSpline(t, Q, s=0, k=1)
+def make_womersley_bcs(t, Q, nu, center, radius, normal, element, coeffstype="Q",
+                       N=1001, num_fourier_coefficients=20, Cn=None, **NS_namespace):
+    """
+    Generate a list of expressions for the components of a Womersley profile.
+    Users can specify either the flow rate or fourier coefficients of the flow rate
+    depending on if Cn is None or not.
+    """
+    # period is usually the lenght of a cardiac cycle (0.951 s)
+    # If t is a list or numpy array, then period is the maximum value of t
+    # If not, simply assign t as period
+    try:
+        period = max(t)
+    except TypeError:
+        period = t
 
-    # Compute fourier coefficients of transient profile
-    timedisc = np.linspace(0, period, N)
+    # Compute fourier coefficients of transient profile if Cn is None
+    if Cn is None:
+        # Compute transient profile as interpolation of given coefficients
+        transient_profile = UnivariateSpline(t, Q, s=0, k=1)
 
-    Cn = fourier_coefficients(
-        timedisc, transient_profile, period, num_fourier_coefficients
-    )
+        # Compute fourier coefficients of transient profile
+        timedisc = np.linspace(0, period, N)
+
+        Cn = fourier_coefficients(timedisc, transient_profile, period, num_fourier_coefficients)
 
     # Create Expressions for each direction
     expressions = []

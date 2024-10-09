@@ -18,8 +18,8 @@ RUN mamba env update --file environment.yml --name dockerenv
 RUN echo "source activate dockerenv" > ~/.bashrc
 
 # Fix issues with VMTK
-RUN sed -i "s/file[[:space:]]=[[:space:]]open(self.OutputFileName,'r')/file = open(self.OutputFileName,'rb')/g" /opt/conda/envs/dockerenv/lib/python3.10/site-packages/vmtk/vmtkmeshwriter.py
-RUN sed -i "s/gzfile[[:space:]]=[[:space:]]gzip.open(self.OutputFileName,'w')/gzfile = gzip.open(self.OutputFileName,'wb')/g" /opt/conda/envs/dockerenv/lib/python3.10/site-packages/vmtk/vmtkmeshwriter.py
+RUN sed -i "s/file[[:space:]]=[[:space:]]open(self.OutputFileName,'r')/file = open(self.OutputFileName,'rb')/g" /opt/conda/envs/dockerenv/lib/python3.11/site-packages/vmtk/vmtkmeshwriter.py
+RUN sed -i "s/gzfile[[:space:]]=[[:space:]]gzip.open(self.OutputFileName,'w')/gzfile = gzip.open(self.OutputFileName,'wb')/g" /opt/conda/envs/dockerenv/lib/python3.11/site-packages/vmtk/vmtkmeshwriter.py
 
 RUN mamba run -n dockerenv python -m pip install .[test]
 

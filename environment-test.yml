@@ -1,0 +1,17 @@
+name: vampy
+
+channels:
+  - conda-forge
+
+dependencies:
+  - fenics
+  - morphman
+  - python >=3.8
+  - pip==24.2
+  - pip:
+      - matplotlib
+      - scipy==1.14.1
+      - numpy==1.24.4
+      - cppimport==22.8.2
+      - paramiko==3.4.1
+      - git+https://github.com/KVSlab/OasisMove

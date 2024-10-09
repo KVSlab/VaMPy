@@ -31,7 +31,7 @@ jobs:
       - name: Upgrade pip and setuptools
         run: |
           python3 -m pip install pip setuptools --upgrade
-          
+
       # See: https://github.com/marketplace/actions/setup-miniconda
       - name: Setup Mambaforge
         uses: conda-incubator/setup-miniconda@v2
@@ -56,21 +56,17 @@ jobs:
         run: mamba env update -n vampy -f environment.yml
         if: steps.cache.outputs.cache-hit != 'true'
 
+      # Install requirements, with downgraded docutils to fix layout-bug
+      # https://github.com/executablebooks/jupyter-book/issues/1997
       - name: Install dependencies
-        run: |
-          pip install -r requirements.txt
+        run: pip install -r requirements.txt
 
       - name: Install VaMPy
-        run: python3 -m pip install .[test]
-
-      # https://github.com/executablebooks/jupyter-book/issues/1997
-      - name: Downgrade docutils to fix layout-bug
-        run: python3 -m pip install docutils==0.17.1
+        run: python3 -m pip install '.[test]'
 
         # Build the book
       - name: Build the book
-        run: |
-          jupyter-book build docs
+        run: jupyter-book build docs
 
       # Deploy the book's HTML to gh-pages branch
       - name: GitHub Pages action

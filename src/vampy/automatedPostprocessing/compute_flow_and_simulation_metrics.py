@@ -51,7 +51,7 @@ def compute_flow_and_simulation_metrics(
         nu (float): The kinematic viscosity value.
         dt (float): The time step size.
         velocity_degree (int): The degree of the velocity function space.
-        T (float): The total simulation time.
+        T (float): Length of one cardiac cycle, in [ms]
         times_to_average (list): A list of time points to perform phase averaging. Needs to be in the inverval [0,T).
         save_frequency (int): The frequency of saving data during the simulation.
         start_cycle (int): The starting cycle number for averaging.
@@ -482,6 +482,7 @@ def define_functions_and_iterate_dataset(
         print("=" * 10, "Starting post processing", "=" * 10)
 
     counter = 0
+    tolerance = 1E-12
     for data, data_avg in zip(dataset, dataset_avg):
         counter += 1
 
@@ -556,14 +557,14 @@ def define_functions_and_iterate_dataset(
 
         # Compute length scale
         t0 = Timer("Length scale")
-        length_scale.vector().set_local((nu**3 / eps) ** (1.0 / 4))
+        length_scale.vector().set_local((nu ** 3 / (eps + tolerance)) ** (1. / 4))
         length_scale.vector().apply("insert")
         length_scale_cycle_avg.vector().axpy(1, length_scale.vector())
         t0.stop()
 
         # Compute time scale
         t0 = Timer("Time scale")
-        time_scale.vector().set_local((nu / eps) ** 0.5)
+        time_scale.vector().set_local((nu / (eps + tolerance)) ** 0.5)
         time_scale.vector().apply("insert")
         time_scale_cycle_avg.vector().axpy(1, time_scale.vector())
         t0.stop()

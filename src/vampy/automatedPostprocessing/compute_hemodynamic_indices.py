@@ -57,7 +57,7 @@ def compute_hemodynamic_indices(
         nu (float): Kinematic viscosity
         rho (float): Fluid density
         dt (float): Time step of simulation
-        T (float): One cardiac cycle, in [ms]
+        T (float): Length of one cardiac cycle, in [ms]
         save_frequency (int): Frequency that velocity has been stored
         start_cycle (int): Determines which cardiac cycle to start from for post-processing
         step (int): Step size determining number of times data is sampled
@@ -79,7 +79,7 @@ def compute_hemodynamic_indices(
 
     # Read mesh saved as HDF5 format
     mesh = Mesh()
-    with HDF5File(MPI.comm_world, mesh_path.__str__(), "r") as mesh_file:
+    with HDF5File(MPI.comm_world, mesh_path, "r") as mesh_file:
         mesh_file.read(mesh, "mesh", False)
 
     bm = BoundaryMesh(mesh, "exterior")

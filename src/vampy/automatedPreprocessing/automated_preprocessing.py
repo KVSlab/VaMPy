@@ -3,77 +3,29 @@ import sys
 from os import path, remove
 
 import numpy as np
-from morphman import (
-    compute_centerlines,
-    compute_centers,
-    create_new_surface,
-    extract_single_line,
-    get_centerline_tolerance,
-    get_parameters,
-    get_point_data_array,
-    get_uncapped_surface,
-    get_vtk_point_locator,
-    prepare_output_surface,
-    smooth_voronoi_diagram,
-    str2bool,
-    vmtk_cap_polydata,
-    vmtk_compute_geometric_features,
-    vmtk_compute_voronoi_diagram,
-    vmtk_smooth_surface,
-    vtk_clean_polydata,
-    vtk_merge_polydata,
-    vtk_triangulate_surface,
-    write_parameters,
-    write_polydata,
-)
+from morphman import get_uncapped_surface, write_polydata, read_polydata, get_parameters, vtk_clean_polydata, \
+    vtk_triangulate_surface, write_parameters, vmtk_cap_polydata, compute_centerlines, get_centerline_tolerance, \
+    get_vtk_point_locator, extract_single_line, vtk_merge_polydata, get_point_data_array, smooth_voronoi_diagram, \
+    create_new_surface, compute_centers, vmtk_smooth_surface, str2bool, vmtk_compute_voronoi_diagram, \
+    prepare_output_surface, vmtk_compute_geometric_features
 
 # Local imports
-from vampy.automatedPreprocessing import ToolRepairSTL
-from vampy.automatedPreprocessing.preprocessing_common import (
-    add_flow_extension,
-    check_if_closed_surface,
-    compute_flow_rate,
-    dist_sphere_constant,
-    dist_sphere_curvature,
-    dist_sphere_diam,
-    find_boundaries,
-    generate_mesh,
-    get_centers_for_meshing,
-    get_furtest_surface_point,
-    get_regions_to_refine,
-    mesh_alternative,
-    radiusArrayName,
-    read_polydata,
-    scale_surface,
-    setup_model_network,
-    write_mesh,
-)
+from vampy.automatedPreprocessing.moving_common import get_point_map, project_displacement, save_displacement
+from vampy.automatedPreprocessing.preprocessing_common import get_centers_for_meshing, \
+    dist_sphere_diam, dist_sphere_curvature, dist_sphere_constant, get_regions_to_refine, add_flow_extension, \
+    write_mesh, mesh_alternative, generate_mesh, find_boundaries, compute_flow_rate, setup_model_network, \
+    radiusArrayName, scale_surface, get_furtest_surface_point, check_if_closed_surface, remesh_surface, \
+    dist_sphere_geodesic
+from vampy.automatedPreprocessing.repair_tools import find_and_delete_nan_triangles, clean_surface, print_surface_info
 from vampy.automatedPreprocessing.simulate import run_simulation
 from vampy.automatedPreprocessing.visualize import visualize_model
 
 
-def run_pre_processing(
-    input_model,
-    verbose_print,
-    smoothing_method,
-    smoothing_factor,
-    smoothing_iterations,
-    meshing_method,
-    refine_region,
-    is_atrium,
-    add_flow_extensions,
-    visualize,
-    config_path,
-    coarsening_factor,
-    inlet_flow_extension_length,
-    outlet_flow_extension_length,
-    edge_length,
-    region_points,
-    compress_mesh,
-    add_boundary_layer,
-    scale_factor,
-    resampling_step,
-):
+def run_pre_processing(input_model, verbose_print, smoothing_method, smoothing_factor, smoothing_iterations,
+                       meshing_method, refine_region, is_atrium, add_flow_extensions, visualize, config_path,
+                       coarsening_factor, inlet_flow_extension_length, outlet_flow_extension_length, edge_length,
+                       region_points, compress_mesh, add_boundary_layer, scale_factor, resampling_step,
+                       flow_rate_factor, moving_mesh, clamp_boundaries, max_geodesic_distance):
     """
     Automatically generate mesh of surface model in .vtu and .xml format, including prescribed
     flow rates at inlet and outlet based on flow network model.
@@ -81,6 +33,7 @@ def run_pre_processing(
     Runs simulation of meshed case on a remote ssh server if server configuration is provided.
 
     Args:
+        max_geodesic_distance (float): Max distance when performing geodesic refinement (in mm)
         input_model (str): Name of case
         verbose_print (bool): Toggles verbose mode
         smoothing_method (str): Method for surface smoothing
@@ -101,6 +54,9 @@ def run_pre_processing(
         add_boundary_layer (bool): Adds boundary layers to walls if True
         scale_factor (float): Scale input model by this factor
         resampling_step (float): Float value determining the resampling step for centerline computations, in [m]
+        flow_rate_factor (float): Flow rate factor
+        moving_mesh (bool): Computes projected movement for displaced surfaces located in [filename_model]_moved folder
+        clamp_boundaries (bool): Clamps inlet(s) and outlet(s) if true
     """
     # Get paths
     case_name = input_model.rsplit(path.sep, 1)[-1].rsplit(".")[0]
@@ -112,10 +68,9 @@ def run_pre_processing(
     file_name_centerlines = base_path + "_centerlines.vtp"
     file_name_refine_region_centerlines = base_path + "_refine_region_centerline.vtp"
     file_name_region_centerlines = base_path + "_sac_centerline_{}.vtp"
-    file_name_distance_to_sphere_diam = base_path + "_distance_to_sphere_diam.vtp"
-    file_name_distance_to_sphere_const = base_path + "_distance_to_sphere_const.vtp"
-    file_name_distance_to_sphere_curv = base_path + "_distance_to_sphere_curv.vtp"
-    file_name_probe_points = base_path + "_probe_point"
+    file_name_distance_to_sphere = base_path + f"_distance_to_sphere_{meshing_method}.vtp"
+    file_name_distance_to_sphere_initial = base_path + "_distance_to_sphere_initial.vtp"
+    file_name_probe_points = base_path + "_probe_point.json"
     file_name_voronoi = base_path + "_voronoi.vtp"
     file_name_voronoi_smooth = base_path + "_voronoi_smooth.vtp"
     file_name_voronoi_surface = base_path + "_voronoi_surface.vtp"
@@ -126,7 +81,13 @@ def run_pre_processing(
     file_name_surface_name = base_path + "_remeshed_surface.vtp"
     file_name_xml_mesh = base_path + ".xml"
     file_name_vtu_mesh = base_path + ".vtu"
+    file_name_remeshed = base_path + "_remeshed.vtp"
     region_centerlines = None
+
+    # Dynamic mesh files
+    file_name_displacement_points = base_path + "_points.np"
+    folder_moved_surfaces = base_path + "_moved"
+    folder_extended_surfaces = base_path + "_extended"
 
     # Open the surface file.
     print("--- Load model file\n")
@@ -134,7 +95,9 @@ def run_pre_processing(
 
     # Scale surface
     if scale_factor is not None:
+        print(f"--- Scaling model by a factor {scale_factor}\n")
         surface = scale_surface(surface, scale_factor)
+        resampling_step *= scale_factor
 
     # Check if surface is closed and uncapps model if True
     is_capped = check_if_closed_surface(surface)
@@ -160,10 +123,10 @@ def run_pre_processing(
         surface = vtk_triangulate_surface(surface)
 
         # Check the mesh if there is redundant nodes or NaN triangles.
-        ToolRepairSTL.surfaceOverview(surface)
-        ToolRepairSTL.foundAndDeleteNaNTriangles(surface)
-        surface = ToolRepairSTL.cleanTheSurface(surface)
-        foundNaN = ToolRepairSTL.foundAndDeleteNaNTriangles(surface)
+        print_surface_info(surface)
+        find_and_delete_nan_triangles(surface)
+        surface = clean_surface(surface)
+        foundNaN = find_and_delete_nan_triangles(surface)
         if foundNaN:
             raise RuntimeError(
                 (
@@ -207,9 +170,8 @@ def run_pre_processing(
         regions = get_regions_to_refine(capped_surface, region_points, base_path)
         for i in range(len(regions) // 3):
             print(
-                "--- Region to refine ({}): {:.3f} {:.3f} {:.3f}".format(
-                    i + 1, regions[3 * i], regions[3 * i + 1], regions[3 * i + 2]
-                )
+                f"--- Region to refine ({i + 1}): " +
+                f"{regions[3 * i]:.3f} {regions[3 * i + 1]:.3f} {regions[3 * i + 2]:.3f}\n"
             )
 
         centerline_region, _, _ = compute_centerlines(
@@ -223,10 +185,10 @@ def run_pre_processing(
         # Extract the region centerline
         refine_region_centerline = []
         info = get_parameters(base_path)
-        num_anu = info["number_of_regions"]
+        number_of_refinement_regions = info["number_of_regions"]
 
         # Compute mean distance between points
-        for i in range(num_anu):
+        for i in range(number_of_refinement_regions):
             if not path.isfile(file_name_region_centerlines.format(i)):
                 line = extract_single_line(centerline_region, i)
                 locator = get_vtk_point_locator(centerlines)
@@ -251,7 +213,7 @@ def run_pre_processing(
                     read_polydata(file_name_region_centerlines.format(i))
                 )
 
-        # Merge the sac centerline
+        # Merge the refined region centerline
         region_centerlines = vtk_merge_polydata(refine_region_centerline)
 
         for region in refine_region_centerline:
@@ -308,13 +270,9 @@ def run_pre_processing(
 
             if num_outlets != num_outlets_after:
                 write_polydata(surface, file_name_surface_smooth)
-                print(
-                    (
-                        "ERROR: Automatic clipping failed. You have to open {} and "
-                        + "manually clipp the branch which still is capped. "
-                        + "Overwrite the current {} and restart the script."
-                    ).format(file_name_surface_smooth, file_name_surface_smooth)
-                )
+                print(f"ERROR: Automatic clipping failed. You have to open {file_name_surface_smooth} and " +
+                      "manually clipp the branch which still is capped. " +
+                      f"Overwrite the current {file_name_surface_smooth} and restart the script.")
                 sys.exit(0)
 
             surface = surface_uncapped
@@ -329,9 +287,7 @@ def run_pre_processing(
             surface = read_polydata(file_name_surface_smooth)
 
     elif smoothing_method in ["laplace", "taubin"]:
-        print(
-            "--- Smooth surface: {} smoothing\n".format(smoothing_method.capitalize())
-        )
+        print(f"--- Smooth surface: {smoothing_method.capitalize()} smoothing\n")
         if not path.isfile(file_name_surface_smooth):
             surface = vmtk_smooth_surface(
                 surface,
@@ -349,25 +305,39 @@ def run_pre_processing(
     elif smoothing_method == "no_smooth" or None:
         print("--- No smoothing of surface\n")
 
+    if edge_length is not None and moving_mesh:
+        if path.exists(file_name_remeshed):
+            remeshed = read_polydata(file_name_remeshed)
+        else:
+            print("\n--- Remeshing surface for moving mesh\n")
+            surface = dist_sphere_constant(surface, centerlines, region_center, misr_max,
+                                           file_name_distance_to_sphere_initial, edge_length)
+
+            remeshed = remesh_surface(surface, edge_length, "edgelengtharray")
+            remeshed = vtk_clean_polydata(remeshed)
+            write_polydata(remeshed, file_name_remeshed)
+    else:
+        remeshed = surface
+
     # Add flow extensions
     if add_flow_extensions:
         if not path.isfile(file_name_model_flow_ext):
             print("--- Adding flow extensions\n")
             # Add extension normal on boundary for atrium models
             extension = "centerlinedirection" if is_atrium else "boundarynormal"
-            surface_extended = add_flow_extension(
-                surface,
-                centerlines,
-                include_outlet=False,
-                extension_length=inlet_flow_extension_length,
-                extension_mode=extension,
-            )
-            surface_extended = add_flow_extension(
-                surface_extended,
-                centerlines,
-                include_outlet=True,
-                extension_length=outlet_flow_extension_length,
-            )
+            if is_atrium:
+                # Flip lengths if model is atrium
+                inlet_flow_extension_length, outlet_flow_extension_length = \
+                    outlet_flow_extension_length, inlet_flow_extension_length
+
+            # Add extensions to inlet (artery) / outlet (atrium)
+            surface_extended = add_flow_extension(remeshed, centerlines, is_inlet=True,
+                                                  extension_length=inlet_flow_extension_length)
+
+            # Add extensions to outlets (artery) / inlets (Atrium)
+            surface_extended = add_flow_extension(surface_extended, centerlines, is_inlet=False,
+                                                  extension_length=outlet_flow_extension_length,
+                                                  extension_mode=extension)
 
             surface_extended = vmtk_smooth_surface(
                 surface_extended, "laplace", iterations=200
@@ -378,13 +348,26 @@ def run_pre_processing(
     else:
         surface_extended = surface
 
-    # Capp surface with flow extensions
-    capped_surface = vmtk_cap_polydata(surface_extended)
+    # Create displacement input file for moving mesh simulations
+    if moving_mesh:
+        print("--- Computing mesh displacement and saving points to file")
+        # Get a point mapper
+        distance, point_map = get_point_map(remeshed, surface_extended)
+
+        # Project displacement between surfaces
+        points = project_displacement(clamp_boundaries, distance, folder_extended_surfaces, folder_moved_surfaces,
+                                      point_map, surface, surface_extended, remeshed, scale_factor)
+
+        # Save displacement to numpy array
+        save_displacement(file_name_displacement_points, points)
 
     # Get new centerlines with the flow extensions
     if add_flow_extensions:
         if not path.isfile(file_name_flow_centerlines):
             print("--- Compute the model centerlines with flow extension.\n")
+            # Capp surface with flow extensions
+            capped_surface = vmtk_cap_polydata(surface_extended)
+
             # Compute the centerlines.
             if has_outlet:
                 inlet, outlets = get_centers_for_meshing(
@@ -423,43 +406,27 @@ def run_pre_processing(
 
     # Choose input for the mesh
     print("--- Computing distance to sphere\n")
-    if meshing_method == "constant":
-        if not path.isfile(file_name_distance_to_sphere_const):
-            distance_to_sphere = dist_sphere_constant(
-                surface_extended,
-                centerlines,
-                region_center,
-                misr_max,
-                file_name_distance_to_sphere_const,
-                edge_length,
-            )
+    if path.isfile(file_name_distance_to_sphere):
+        distance_to_sphere = read_polydata(file_name_distance_to_sphere)
+    else:
+        if meshing_method == "constant":
+            distance_to_sphere = dist_sphere_constant(surface_extended, centerlines, region_center, misr_max,
+                                                      file_name_distance_to_sphere, edge_length)
+        elif meshing_method == "curvature":
+            distance_to_sphere = dist_sphere_curvature(surface_extended, centerlines, region_center, misr_max,
+                                                       file_name_distance_to_sphere, coarsening_factor)
+        elif meshing_method == "diameter":
+            distance_to_sphere = dist_sphere_diam(surface_extended, centerlines, region_center, misr_max,
+                                                  file_name_distance_to_sphere, coarsening_factor)
+        elif meshing_method == "geodesic":
+            if edge_length is None:
+                print("Edge length needs to supplied when using Geodesic meshing")
+                sys.exit(0)
+            distance_to_sphere = dist_sphere_geodesic(surface_extended, region_center, max_geodesic_distance,
+                                                      file_name_distance_to_sphere, edge_length)
         else:
-            distance_to_sphere = read_polydata(file_name_distance_to_sphere_const)
-
-    elif meshing_method == "curvature":
-        if not path.isfile(file_name_distance_to_sphere_curv):
-            distance_to_sphere = dist_sphere_curvature(
-                surface_extended,
-                centerlines,
-                region_center,
-                misr_max,
-                file_name_distance_to_sphere_curv,
-                coarsening_factor,
-            )
-        else:
-            distance_to_sphere = read_polydata(file_name_distance_to_sphere_curv)
-    elif meshing_method == "diameter":
-        if not path.isfile(file_name_distance_to_sphere_diam):
-            distance_to_sphere = dist_sphere_diam(
-                surface_extended,
-                centerlines,
-                region_center,
-                misr_max,
-                file_name_distance_to_sphere_diam,
-                coarsening_factor,
-            )
-        else:
-            distance_to_sphere = read_polydata(file_name_distance_to_sphere_diam)
+            print(f"Method '{meshing_method}' is not a valid meshing method")
+            sys.exit(0)
 
     # Compute mesh
     if not path.isfile(file_name_vtu_mesh):
@@ -497,15 +464,14 @@ def run_pre_processing(
     else:
         mesh = read_polydata(file_name_vtu_mesh)
 
-    network, probe_points = setup_model_network(
-        centerlines, file_name_probe_points, region_center, verbose_print
-    )
+    network, probe_points = setup_model_network(centerlines, file_name_probe_points, region_center, verbose_print,
+                                                is_atrium)
 
     # Load updated parameters following meshing
     parameters = get_parameters(base_path)
 
     print("--- Computing flow rates and flow split, and setting boundary IDs\n")
-    mean_inflow_rate = compute_flow_rate(is_atrium, inlet, parameters)
+    mean_inflow_rate = compute_flow_rate(is_atrium, inlet, parameters, flow_rate_factor)
 
     find_boundaries(
         base_path, mean_inflow_rate, network, mesh, verbose_print, is_atrium
@@ -530,20 +496,10 @@ def run_pre_processing(
 
     print("--- Removing unused pre-processing files")
     files_to_remove = [
-        file_name_centerlines,
-        file_name_refine_region_centerlines,
-        file_name_region_centerlines,
-        file_name_distance_to_sphere_diam,
-        file_name_distance_to_sphere_const,
-        file_name_distance_to_sphere_curv,
-        file_name_voronoi,
-        file_name_voronoi_smooth,
-        file_name_voronoi_surface,
-        file_name_surface_smooth,
-        file_name_model_flow_ext,
-        file_name_clipped_model,
-        file_name_flow_centerlines,
-        file_name_surface_name,
+        file_name_centerlines, file_name_refine_region_centerlines, file_name_region_centerlines,
+        file_name_distance_to_sphere, file_name_remeshed, file_name_distance_to_sphere_initial,
+        file_name_voronoi, file_name_voronoi_smooth, file_name_voronoi_surface, file_name_surface_smooth,
+        file_name_model_flow_ext, file_name_clipped_model, file_name_flow_centerlines, file_name_surface_name,
     ]
     for file in files_to_remove:
         if path.exists(file):
@@ -634,18 +590,15 @@ def read_command_line(input_path=None):
         help="Number of smoothing iterations for Laplace and Taubin type smoothing.",
     )
 
-    parser.add_argument(
-        "-m",
-        "--meshing-method",
-        type=str,
-        choices=["diameter", "curvature", "constant"],
-        default="diameter",
-        help="Determines method of meshing. The method 'constant' is supplied with a constant edge "
-        + "length controlled by the -el argument, resulting in a constant density mesh. "
-        + "The 'curvature' method and 'diameter' method produces a variable density mesh,"
-        + " based on the surface curvature and the distance from the "
-        + "centerline to the surface, respectively.",
-    )
+    parser.add_argument('-m', '--meshing-method',
+                        type=str,
+                        choices=["diameter", "curvature", "constant", "geodesic"],
+                        default="diameter",
+                        help="Determines method of meshing. The method 'constant' is supplied with a constant edge " +
+                             "length controlled by the -el argument, resulting in a constant density mesh. " +
+                             "The 'curvature' method and 'diameter' method produces a variable density mesh," +
+                             " based on the surface curvature and the distance from the " +
+                             "centerline to the surface, respectively.")
 
     parser.add_argument(
         "-el",
@@ -751,6 +704,27 @@ def read_command_line(input_path=None):
         help="Resampling step used to resample centerline in [m].",
     )
 
+    parser.add_argument('-fr', '--flow-rate-factor',
+                        default=0.27,
+                        type=float,
+                        help="Flow rate factor.")
+
+    parser.add_argument('-mm', '--moving-mesh',
+                        action="store_true",
+                        default=False,
+                        help="If true, assumes a dynamic/moving mesh and will perform computation of projection " +
+                             "between moved surfaces located in the '[filename_model]_moved' folder.")
+
+    parser.add_argument('-cl', '--clamp-boundaries',
+                        action="store_true",
+                        default=False,
+                        help="Clamps boundaries at inlet(s) and outlet(s) if true. Only used for moving mesh.")
+
+    parser.add_argument('-gd', '--max-geodesic-distance',
+                        default=10,
+                        type=float,
+                        help="Maximum distance when performing geodesic distance. In [mm].")
+
     # Parse path to get default values
     if required:
         args = parser.parse_args()
@@ -784,28 +758,16 @@ def read_command_line(input_path=None):
 
     verbose_print(args)
 
-    return dict(
-        input_model=args.input_model,
-        verbose_print=verbose_print,
-        smoothing_method=args.smoothing_method,
-        smoothing_factor=args.smoothing_factor,
-        smoothing_iterations=args.smoothing_iterations,
-        meshing_method=args.meshing_method,
-        refine_region=args.refine_region,
-        is_atrium=args.is_atrium,
-        add_flow_extensions=args.add_flowextensions,
-        config_path=args.config_path,
-        edge_length=args.edge_length,
-        coarsening_factor=args.coarsening_factor,
-        inlet_flow_extension_length=args.inlet_flowextension,
-        visualize=args.visualize,
-        region_points=args.region_points,
-        compress_mesh=args.compress_mesh,
-        outlet_flow_extension_length=args.outlet_flowextension,
-        add_boundary_layer=args.add_boundary_layer,
-        scale_factor=args.scale_factor,
-        resampling_step=args.resampling_step,
-    )
+    return dict(input_model=args.input_model, verbose_print=verbose_print, smoothing_method=args.smoothing_method,
+                smoothing_factor=args.smoothing_factor, smoothing_iterations=args.smoothing_iterations,
+                meshing_method=args.meshing_method, refine_region=args.refine_region, is_atrium=args.is_atrium,
+                add_flow_extensions=args.add_flowextensions, config_path=args.config_path, edge_length=args.edge_length,
+                coarsening_factor=args.coarsening_factor, inlet_flow_extension_length=args.inlet_flowextension,
+                visualize=args.visualize, region_points=args.region_points, compress_mesh=args.compress_mesh,
+                outlet_flow_extension_length=args.outlet_flowextension, add_boundary_layer=args.add_boundary_layer,
+                scale_factor=args.scale_factor, resampling_step=args.resampling_step,
+                flow_rate_factor=args.flow_rate_factor, moving_mesh=args.moving_mesh,
+                clamp_boundaries=args.clamp_boundaries, max_geodesic_distance=args.max_geodesic_distance)
 
 
 def main_meshing():

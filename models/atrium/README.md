@@ -4,10 +4,10 @@ The provided left atrium model is collected from the Left Atrial Segmentation Ch
 The model meshing and probe points can be computed using automatedPreProcessing with the following command:
 
 ```
-python automatedPreProcessing/automatedPreProcessing.py -m diameter -i test/Case_test_atrium/atrium.vtp -c 1.3
+python automatedPreProcessing/automatedPreProcessing.py -m diameter -i models/atrium/atrium.vtp -c 1.3
 ```
 
-Note: Aneurysm workflow is intended for artery models. Therefore, boundary conditions for other models will be wrong. Adapting to other vascular models, such as the atrium, is work in progress.  
+Note: Boundary conditions for other than vascular models are still work in progress.
 
 ---
 

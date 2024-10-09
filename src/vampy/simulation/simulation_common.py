@@ -4,12 +4,13 @@ import numpy as np
 from dolfin import MPI, Constant, HDF5File, Measure, assemble, assign
 
 
-def get_file_paths(folder):
+def get_file_paths(folder, additional_variables=[]):
     """
     Create folder where data and solutions (velocity, mesh, pressure) is stored
 
     Args:
         folder (str): Path to data storage location
+        additional_variables (list): List of additional variables to store
 
     Returns:
         files (dict): Contains filepaths for respective solution files
@@ -18,12 +19,11 @@ def get_file_paths(folder):
     if MPI.rank(MPI.comm_world) == 0:
         if not path.exists(common_path):
             makedirs(common_path)
+    variables = ["p", "u", "u_mean", "mesh"] + additional_variables
+    files = {}
 
-    file_p = path.join(common_path, "p.h5")
-    file_u = path.join(common_path, "u.h5")
-    file_u_mean = path.join(common_path, "u_mean.h5")
-    file_mesh = path.join(common_path, "mesh.h5")
-    files = {"u": file_u, "u_mean": file_u_mean, "p": file_p, "mesh": file_mesh}
+    for variable in variables:
+        files[variable] = path.join(common_path, f"{variable}.h5")
 
     return files
 
@@ -64,29 +64,17 @@ def print_mesh_information(mesh):
 
     if MPI.rank(MPI.comm_world) == 0:
         print("=== Mesh information ===")
-        print(
-            "X range: {} to {} (delta: {:.4f})".format(
-                min(xmin), max(xmax), max(xmax) - min(xmin)
-            )
-        )
-        print(
-            "Y range: {} to {} (delta: {:.4f})".format(
-                min(ymin), max(ymax), max(ymax) - min(ymin)
-            )
-        )
-        print(
-            "Z range: {} to {} (delta: {:.4f})".format(
-                min(zmin), max(zmax), max(zmax) - min(zmin)
-            )
-        )
-        print("Number of cells: {}".format(sum(num_cells)))
-        print("Number of cells per processor: {}".format(int(np.mean(num_cells))))
-        print("Number of edges: {}".format(sum(num_edges)))
-        print("Number of faces: {}".format(sum(num_faces)))
-        print("Number of facets: {}".format(sum(num_facets)))
-        print("Number of vertices: {}".format(sum(num_vertices)))
-        print("Volume: {:.4f}".format(volume))
-        print("Number of cells per volume: {:.4f}".format(sum(num_cells) / volume))
+        print(f"X range: {min(xmin)} to {max(xmax)} (delta: {max(xmax) - min(xmin):.4f})")
+        print(f"Y range: {min(ymin)} to {max(ymax)} (delta: {max(ymax) - min(ymin):.4f})")
+        print(f"Z range: {min(zmin)} to {max(zmax)} (delta: {max(zmax) - min(zmin):.4f})")
+        print(f"Number of cells: {sum(num_cells)}")
+        print(f"Number of cells per processor: {int(np.mean(num_cells))}")
+        print(f"Number of edges: {sum(num_edges)}")
+        print(f"Number of faces: {sum(num_faces)}")
+        print(f"Number of facets: {sum(num_facets)}")
+        print(f"Number of vertices: {sum(num_vertices)}")
+        print(f"Volume: {volume:.4f}")
+        print(f"Number of cells per volume: {sum(num_cells) / volume:.4f}")
 
 
 def store_u_mean(
@@ -129,3 +117,99 @@ def store_u_mean(
     # Save u_mean
     with HDF5File(MPI.comm_world, u_mean_path, "w") as u_mean_file:
         u_mean_file.write(u_mean, "u_mean")
+
+
+def store_velocity_and_pressure_h5(NS_parameters, U, p_, tstep, u_, u_mean0, u_mean1, u_mean2, D=None, du_=None):
+    """
+    Store the velocity and pressure values to an HDF5 file.
+
+    Args:
+        NS_parameters (dict): A dictionary containing the parameters for Navier-Stokes equations.
+        U (Function): A vector function space to assign the velocity components.
+        p_ (Function): The pressure function.
+        tstep (int): The current time step.
+        u_ (List[Function]): A list containing the velocity components.
+        u_mean0 (Function): The accumulated x-component of the velocity.
+        u_mean1 (Function): The accumulated y-component of the velocity.
+        u_mean2 (Function): The accumulated z-component of the velocity.
+        du_ (List[Function]): List of deformation components
+        D (Function): A vector function space to assign the deformation components.
+
+    Returns:
+        None
+    """
+    # Assign velocity components to vector solution
+    for i in range(3):
+        assign(U.sub(i), u_[i])
+
+    # Get save paths
+    p_path = NS_parameters['files']['p']
+    u_path = NS_parameters['files']['u']
+    file_mode = "w" if not path.exists(p_path) else "a"
+
+    # Save pressure
+    with HDF5File(MPI.comm_world, p_path, file_mode=file_mode) as viz_p:
+        viz_p.write(p_, "/pressure", tstep)
+
+    # Save velocity
+    with HDF5File(MPI.comm_world, u_path, file_mode=file_mode) as viz_u:
+        viz_u.write(U, "/velocity", tstep)
+
+    # Accumulate velocity
+    u_mean0.vector().axpy(1, u_[0].vector())
+    u_mean1.vector().axpy(1, u_[1].vector())
+    u_mean2.vector().axpy(1, u_[2].vector())
+
+    # Save deformation if present
+    if D is not None and du_ is not None:
+        for i in range(3):
+            assign(D.sub(i), du_[i])
+
+        # Save path to deformation
+        d_path = NS_parameters['files']['d']
+
+        # Save deformation
+        with HDF5File(MPI.comm_world, d_path, file_mode=file_mode) as viz_d:
+            viz_d.write(D, "/deformation", tstep)
+
+
+def dump_probes(eval_dict, newfolder, tstep):
+    """
+    Save variables along the centerline for CFD simulation diagnostics and light-weight post-processing.
+
+    Args:
+        eval_dict (dict): Dictionary with probe arrays for velocity components and pressure along the centerline.
+        newfolder (str): The path to the folder where the probe data will be saved.
+        tstep (float): The current time step.
+
+    Returns:
+        None
+    """
+    # Construct the file path for probes
+    filepath = path.join(newfolder, "Probes")
+
+    # Ensure the directory exists on the master process
+    if MPI.rank(MPI.comm_world) == 0 and not path.exists(filepath):
+        makedirs(filepath)
+
+    # Extract probe arrays for each variable
+    variables = ["centerline_u_x_probes", "centerline_u_y_probes", "centerline_u_z_probes", "centerline_p_probes"]
+    arrs = {var: eval_dict[var].array() for var in variables}
+
+    # Dump stats on the master process
+    if MPI.rank(MPI.comm_world) == 0:
+        filenames = {
+            "centerline_u_x_probes": f"u_x_{tstep}.probes",
+            "centerline_u_y_probes": f"u_y_{tstep}.probes",
+            "centerline_u_z_probes": f"u_z_{tstep}.probes",
+            "centerline_p_probes": f"p_{tstep}.probes"
+        }
+        for var, arr in arrs.items():
+            arr.dump(path.join(filepath, filenames[var]))
+
+    # Ensure all processes have dumped data before clearing
+    MPI.barrier(MPI.comm_world)
+
+    # Clear stats
+    for var in variables:
+        eval_dict[var].clear()

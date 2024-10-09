@@ -1,21 +1,17 @@
-name: CI
+name: VaMPy CI
 
 on:
   push:
-    # The CI is executed on every push on every branch
     branches:
       - master
   pull_request:
-    # The CI is executed on every pull request to the main branch
     branches:
       - master
-
   schedule:
-    # The CI is executed every day at 8am
-    - cron: "0 8 * * *"
+    - cron: '0 8 * * *'
 
 env:
-  CACHE_NUMBER: 3 # Increase to reset cache
+  CACHE_NUMBER: 12 # Increase to reset cache
 
 jobs:
   check-code:
@@ -47,25 +43,19 @@ jobs:
           - os: macos-latest
             label: osx-64
             prefix: /Users/runner/miniconda3/envs/vampy
-
     name: Test VaMPy on ${{ matrix.label }}
     runs-on: ${{ matrix.os }}
-
-    # https://github.com/marketplace/actions/setup-miniconda#use-a-default-shell
     defaults:
       run:
         shell: bash -el {0}
 
     steps:
-      - name: Checkout
-        uses: actions/checkout@v3
+      - uses: actions/checkout@v3
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.8'
 
-      - name: Upgrade pip and setuptools
-        run: |
-          python3 -m pip install pip setuptools --upgrade
-
-      # See: https://github.com/marketplace/actions/setup-miniconda
-      - name: Setup Mambaforge
+      - name: Setup and install with Mambaforge
         uses: conda-incubator/setup-miniconda@v2
         with:
           miniforge-variant: Mambaforge
@@ -73,27 +63,24 @@ jobs:
           channels: conda-forge
           activate-environment: vampy
           use-mamba: true
+          environment-file: environment-test.yml
+        id: mamba
 
-      - name: Set cache date
-        run: echo "DATE=$(date +'%Y%m%d')" >> $GITHUB_ENV
-
-      - uses: actions/cache@v2
+      - uses: actions/cache@v3
         with:
           path: ${{ matrix.prefix }}
-          key: ${{ matrix.label }}-conda-${{ hashFiles('environment.yml') }}-${{ env.DATE }}-${{ env.CACHE_NUMBER }}
-        id: cache
+          key: ${{ matrix.label }}-${{ env.CACHE_NUMBER }}-${{ hashFiles('environment-test.yml') }}
+          restore-keys: ${{ matrix.label }}-${{ env.CACHE_NUMBER }}-
 
-      - name: Update environment
-        run: mamba env update -n vampy -f environment.yml
-        if: steps.cache.outputs.cache-hit != 'true'
+      - run: mamba env update -n vampy -f environment-test.yml
 
       - name: Install VaMPy
-        run: python3 -m pip install .[test]
+        run: mamba run -n vampy python -m pip install '.[test]'
 
       - name: Run tests
-        run: python3 -m pytest tests
+        run: mamba run -n vampy python -m pytest tests
 
-      - name: Upload coverage report to codecov
+      - name: Upload coverage report to Codecov
         if: matrix.os == 'ubuntu-latest'
         uses: codecov/codecov-action@v3
         with:

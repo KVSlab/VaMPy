@@ -1,41 +1,24 @@
 import gzip
+import json
 from os import path
 
 import numpy as np
-from morphman import (
-    create_vtk_array,
-    extract_single_line,
-    get_centerline_tolerance,
-    get_curvilinear_coordinate,
-    get_distance,
-    get_number_of_arrays,
-    get_parameters,
-    get_point_data_array,
-    get_uncapped_surface,
-    get_vtk_array,
-    get_vtk_point_locator,
-    read_polydata,
-    vmtk_smooth_surface,
-    vmtkscripts,
-    vtk,
-    vtk_clean_polydata,
-    vtk_compute_connectivity,
-    vtk_compute_mass_properties,
-    vtk_compute_threshold,
-    vtk_extract_feature_edges,
-    vtk_triangulate_surface,
-    write_parameters,
-    write_polydata,
-)
-from vmtk import vtkvmtk
+import vtkmodules.numpy_interface.dataset_adapter as dsa
+from morphman import vtk_clean_polydata, vtk_triangulate_surface, get_parameters, write_parameters, read_polydata, \
+    vmtkscripts, vtk, write_polydata,  get_curvilinear_coordinate, vtk_compute_threshold, get_vtk_array, \
+    get_distance, get_number_of_arrays, vmtk_smooth_surface, get_point_data_array, create_vtk_array, \
+    get_vtk_point_locator, vtk_extract_feature_edges, get_uncapped_surface, vtk_compute_connectivity, \
+    vtk_compute_mass_properties, extract_single_line, get_centerline_tolerance
 
 from vampy.automatedPreprocessing import ImportData
 from vampy.automatedPreprocessing.NetworkBoundaryConditions import FlowSplitting
 from vampy.automatedPreprocessing.vmtk_pointselector import vmtkPickPointSeedSelector
-
+from vmtk import vtkvmtk
 # Global array names
 distanceToSpheresArrayName = "DistanceToSpheres"
-radiusArrayName = "MaximumInscribedSphereRadius"
+radiusArrayName = 'MaximumInscribedSphereRadius'
+cellEntityArrayName = "CellEntityIds"
+dijkstraArrayName = "DijkstraDistanceToPoints"
 
 
 def get_regions_to_refine(surface, provided_points, dir_path):
@@ -235,10 +218,10 @@ def compute_centers_for_meshing(surface, is_atrium, case_path=None, test_capped=
 
         write_parameters(info, case_path)
 
-    boundary_center = center[boundary_id].tolist()  # center of the outlet
+    boundary_center = center[boundary_id].tolist()  # center of the inlet (artery) / outlet (atrium)
     center.pop(boundary_id)
 
-    center_ = [item for sublist in center for item in sublist]  # centers of the inlets
+    center_ = [item for sublist in center for item in sublist]  # centers of the outlets (artery) / inlets (atrium)
 
     return center_, boundary_center
 
@@ -484,7 +467,7 @@ def dist_sphere_diam(surface, centerlines, region_center, misr_max, save_path, f
     distance_to_sphere.GetPointData().AddArray(elements_vtk)
     element_size = diameter_array / element_size
 
-    # Reduce element size in aneurysm
+    # Reduce element size in refinement region
     for i in range(len(region_center)):
         distance_to_sphere = compute_distance_to_sphere(
             distance_to_sphere,
@@ -735,9 +718,7 @@ def find_boundaries(
     write_parameters(info, model_path)
 
 
-def setup_model_network(
-    centerlines, file_name_probe_points, region_center, verbose_print
-):
+def setup_model_network(centerlines, file_name_probe_points, region_center, verbose_print, is_atrium):
     """
     Sets up network used for network boundary condition model.
 
@@ -746,6 +727,7 @@ def setup_model_network(
         file_name_probe_points (str): Save path of probe points
         region_center (list): List of points representing region of refinement
         verbose_print (bool): Prints additional info if True
+        is_atrium (bool): Determines if model is atrium or artery
 
     Returns:
         network (Network): Network model
@@ -767,39 +749,44 @@ def setup_model_network(
 
         print("--- Saving probes points in: %s\n" % file_name_probe_points)
         probe_points = np.array(listProbePoints)
-        probe_points.dump(file_name_probe_points)
+        with open(file_name_probe_points, 'w') as outfile:
+            json.dump(probe_points.tolist(), outfile)
     else:
-        probe_points = np.load(file_name_probe_points, allow_pickle=True)
+        with open(file_name_probe_points, 'r') as infile:
+            probe_points = np.array(json.load(infile))
 
     # Set the flow split and inlet boundary condition
     # Compute the outlet boundary condition percentages.
     flowSplitting = FlowSplitting()
+    if not is_atrium and network.GetNumberOfOutlet() > 1:
+        flowSplitting.ComputeAlphas(network, verbose_print)
+        flowSplitting.ComputeBetas(network, verbose_print)
     flowSplitting.ComputeGammas(network, verbose_print)
     flowSplitting.CheckTotalFlowRate(network, verbose_print)
 
     return network, probe_points
 
 
-def compute_flow_rate(is_atrium, inlet, parameters):
+def compute_flow_rate(is_atrium, inlet, parameters, flow_rate_factor):
     """
-    Computes mean flow rate used as boundary condition for pulsatile flow condition
+    Computes mean flow rate used as a boundary condition for pulsatile flow condition
 
     Args:
         is_atrium (bool): Determines if model is atrium or artery
         inlet (list): List of points representing midpoint of boundaries
         parameters (dict): Dictionary containing model parameters
+        flow_rate_factor (float): Factor to adjust flow rate calculation
 
     Returns:
         mean_inflow_rate (float): Mean inflow rate
     """
     # FIXME: Add plausible boundary conditions for atrial flow
-    flow_rate_factor = 0.27
     if is_atrium:
-        Total_inlet_area = 0
+        total_inlet_area = 0.0
         num_inlets = len(inlet) // 3
         for i in range(num_inlets):
-            Total_inlet_area += parameters["inlet%s_area" % i]
-        mean_inflow_rate = flow_rate_factor * Total_inlet_area
+            total_inlet_area += parameters["inlet%s_area" % i]
+        mean_inflow_rate = flow_rate_factor * total_inlet_area
     else:
         mean_inflow_rate = flow_rate_factor * parameters["inlet_area"]
 
@@ -837,7 +824,7 @@ def write_mesh(
     writer.SetFileName(file_name_xml_mesh)
     writer.SetBoundaryDataArrayName("CellEntityIds")
     writer.SetBoundaryDataIdOffset(-1)
-    writer.SetStoreCellMarkers(0)
+    writer.SetStoreCellMarkers(1)
 
     print("--- Writing Dolfin file")
     writer.Write()
@@ -853,20 +840,14 @@ def write_mesh(
         gzfile.close()
 
 
-def add_flow_extension(
-    surface,
-    centerlines,
-    include_outlet,
-    extension_length=2.0,
-    extension_mode="boundarynormal",
-):
+def add_flow_extension(surface, centerlines, is_inlet, extension_length=2.0, extension_mode="boundarynormal"):
     """
     Adds flow extensions to either all inlets or all outlets with specified extension length.
 
     Args:
         surface (vtkPolyData): Surface model to extend
-        centerlines (vtkPolyData): Centerlines in model
-        include_outlet (bool): Determines if outlet should be included or not
+        centerlines (vtkPolyData): Centerlines in model.
+        is_inlet (bool): Determines if inlet or outlet is to be extended.
         extension_length (float): Determines length of flow extensions.
                                 Factor is multiplied with MISR at relevant boundary
         extension_mode (str): Determines how extensions are place, either normal to boundary
@@ -885,14 +866,15 @@ def add_flow_extension(
     lengths = []
     for i in range(boundaries.GetNumberOfCells()):
         lengths.append(get_curvilinear_coordinate(boundaries.GetCell(i))[-1])
-    outlet_id = lengths.index(max(lengths))
+
+    inlet_id = lengths.index(max(lengths))
 
     # Exclude outlet or inlets
     boundaryIds = vtk.vtkIdList()
     for i in range(centerlines.GetNumberOfLines() + 1):
-        if include_outlet and i == outlet_id:
+        if is_inlet and i == inlet_id:
             boundaryIds.InsertNextId(i)
-        if not include_outlet and i != outlet_id:
+        if not is_inlet and i != inlet_id:
             boundaryIds.InsertNextId(i)
 
     flowExtensionsFilter = vtkvmtk.vtkvmtkPolyDataFlowExtensionsFilter()
@@ -976,3 +958,96 @@ def check_if_closed_surface(surface):
 
     cells = vtk_extract_feature_edges(surface)
     return cells.GetNumberOfCells() == 0
+
+
+def remesh_surface(surface, edge_length, element_size_mode="edgelength", exclude=None):
+    """
+    Remeshes a given surface based on the specified parameters.
+
+    Args:
+        surface (vtkPolyData): The input surface to be remeshed.
+        edge_length (float): The target edge length for remeshing.
+        element_size_mode (str, optional): Determines the method for sizing elements during remeshing.
+        exclude (list, optional): A list of entity IDs to be excluded during remeshing. Defaults to None.
+
+    Returns:
+        remeshed_surface (vtkPolyData): The remeshed surface.
+    """
+    surface = dsa.WrapDataObject(surface)
+    if cellEntityArrayName not in surface.CellData.keys():
+        surface.CellData.append(np.zeros(surface.VTKObject.GetNumberOfCells()) + 1, cellEntityArrayName)
+
+    remeshing = vmtkscripts.vmtkSurfaceRemeshing()
+    remeshing.Surface = surface.VTKObject
+    remeshing.CellEntityIdsArrayName = cellEntityArrayName
+    remeshing.TargetEdgeLength = edge_length
+    remeshing.MaxEdgeLength = 1e6
+    remeshing.MinEdgeLength = 0.0
+    remeshing.TargetEdgeLengthFactor = 1.0
+    remeshing.TriangleSplitFactor = 5.0
+    remeshing.ElementSizeMode = element_size_mode
+    if element_size_mode == "edgelength":
+        remeshing.TargetEdgeLengthArrayName = ""
+    else:
+        remeshing.TargetEdgeLengthArrayName = "Size"  # Variable size mesh
+
+    if exclude is not None:
+        remeshing.ExcludeEntityIds = exclude
+
+    remeshing.Execute()
+
+    remeshed_surface = remeshing.Surface
+
+    return remeshed_surface
+
+
+def dist_sphere_geodesic(surface, region_center, max_distance, save_path, edge_length):
+    """
+        Determines the target edge length for each cell on the surface, including
+        potential refinement or coarsening of certain user specified areas.
+        Level of refinement/coarseness is determined based on user selected region and the geodesic distance from it.
+        Args:
+            surface (vtkPolyData): Input surface model
+            region_center (list): Point representing region to refine
+            save_path (str): Location to store processed surface
+            edge_length (float): Target edge length
+            max_distance (float): Max distance of geodesic measure
+        Returns:
+            surface (vtkPolyData): Processed surface model with info on cell specific target edge length
+        """
+
+    # Define refine region point ID
+    locator = get_vtk_point_locator(surface)
+    point = region_center[0]
+    region_id = locator.FindClosestPoint(point)
+    region_ids = vtk.vtkIdList()
+    region_ids.InsertNextId(region_id)
+
+    # Compute geodesic distance to point
+    dijkstra = vtkvmtk.vtkvmtkPolyDataDijkstraDistanceToPoints()
+    dijkstra.SetInputData(surface)
+    dijkstra.SetSeedIds(region_ids)
+    dijkstra.SetDistanceOffset(0)
+    dijkstra.SetDistanceScale(1)
+    dijkstra.SetMinDistance(0)
+    dijkstra.SetMaxDistance(max_distance)
+    dijkstra.SetDijkstraDistanceToPointsArrayName(dijkstraArrayName)
+    dijkstra.Update()
+    geodesic_distance = dijkstra.GetOutput()
+
+    # Create smooth transition between LAA and LA lumen
+    N = surface.GetNumberOfPoints()
+    dist_array = geodesic_distance.GetPointData().GetArray(dijkstraArrayName)
+    for i in range(N):
+        dist = dist_array.GetComponent(i, 0) / max_distance
+        newDist = 1 / 3 * edge_length * (1 + 2 * dist ** 3)
+        dist_array.SetComponent(i, 0, newDist)
+
+    # Set element size based on geodesic distance
+    element_size = get_point_data_array(dijkstraArrayName, geodesic_distance)
+    vtk_array = create_vtk_array(element_size, "Size")
+    geodesic_distance.GetPointData().AddArray(vtk_array)
+
+    write_polydata(geodesic_distance, save_path)
+
+    return geodesic_distance
