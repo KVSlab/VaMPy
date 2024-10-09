@@ -1,6 +1,8 @@
 from os import path, remove
 
-from vampy.automatedPostprocessing.compute_velocity_and_pressure import compute_velocity_and_pressure
+from vampy.automatedPostprocessing.compute_velocity_and_pressure import (
+    compute_velocity_and_pressure,
+)
 
 
 def test_compute_velocity_and_pressure():
@@ -13,7 +15,9 @@ def test_compute_velocity_and_pressure():
     step = 1
 
     # Run post-processing
-    compute_velocity_and_pressure(results_path, dt, save_frequency, velocity_degree, pressure_degree, step)
+    compute_velocity_and_pressure(
+        results_path, dt, save_frequency, velocity_degree, pressure_degree, step
+    )
 
     # Check that output files exist
     metric_names = ["velocity", "pressure"]

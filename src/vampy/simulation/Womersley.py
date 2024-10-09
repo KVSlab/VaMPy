@@ -20,7 +20,14 @@
 import math
 
 import numpy as np
-from dolfin import UserExpression, assemble, Constant, FacetNormal, SpatialCoordinate, Measure
+from dolfin import (
+    Constant,
+    FacetNormal,
+    Measure,
+    SpatialCoordinate,
+    UserExpression,
+    assemble,
+)
 from scipy.integrate import simpson
 from scipy.interpolate import UnivariateSpline
 from scipy.special import jn
@@ -29,9 +36,9 @@ from scipy.special import jn
 def x_to_r2(x, c, n):
     """Compute r**2 from a coordinate x, center point c, and normal vector n.
 
-        r is defined as the distance from c to x', where x' is
-        the projection of x onto the plane defined by c and n.
-        """
+    r is defined as the distance from c to x', where x' is
+    the projection of x onto the plane defined by c and n.
+    """
     # Steps:
     rv = x - c
     rvn = rv.dot(n)
@@ -72,7 +79,7 @@ def compute_boundary_geometry_acrn(mesh, ind, facet_domains):
 
 
 def fourier_coefficients(x, y, T, N):
-    '''From x-array and y-spline and period T, calculate N complex Fourier coefficients.'''
+    """From x-array and y-spline and period T, calculate N complex Fourier coefficients."""
     omega = 2 * np.pi / T
     ck = []
     ck.append(1 / T * simpson(y(x), x=x))
@@ -96,8 +103,18 @@ def fourier_coefficients(x, y, T, N):
 class WomersleyComponent(UserExpression):
     # Subclassing the expression class restricts the number of arguments, args
     # is therefore a dict of arguments.
-    def __init__(self, radius, center, normal, normal_component, period, nu, element, Q=None,
-                 V=None):
+    def __init__(
+        self,
+        radius,
+        center,
+        normal,
+        normal_component,
+        period,
+        nu,
+        element,
+        Q=None,
+        V=None,
+    ):
         # Spatial args
         self.radius = radius
         self.center = center
@@ -114,7 +131,9 @@ class WomersleyComponent(UserExpression):
             self.Vn = V
             self.N = len(self.Vn)
         else:
-            raise ValueError("Invalid transient data type, missing argument 'Q' or 'V'.")
+            raise ValueError(
+                "Invalid transient data type, missing argument 'Q' or 'V'."
+            )
 
         # Physical args
         self.nu = nu
@@ -130,7 +149,7 @@ class WomersleyComponent(UserExpression):
         super().__init__(element=element)
 
     def _precompute_bessel_functions(self):
-        '''Calculate the Bessel functions of the Womersley profile'''
+        """Calculate the Bessel functions of the Womersley profile"""
         self.omega = 2 * np.pi / self.period
         self.ns = np.arange(1, self.N)
 
@@ -142,27 +161,32 @@ class WomersleyComponent(UserExpression):
 
         # Compute vectorized for 1...N-1 (keeping element 0 in arrays to make indexing work out later)
         alpha[1:] = self.radius * np.sqrt(self.ns * (self.omega / self.nu))
-        self.beta[1:] = alpha[1:] * np.sqrt(1j ** 3)
+        self.beta[1:] = alpha[1:] * np.sqrt(1j**3)
         self.jn0_betas[1:] = jn(0, self.beta[1:])
         self.jn1_betas[1:] = jn(1, self.beta[1:])
 
     def _precompute_r_dependent_coeffs(self, y):
-        pir2 = np.pi * self.radius ** 2
+        pir2 = np.pi * self.radius**2
         # Compute intermediate terms for womersley function
         r_dependent_coeffs = np.zeros(self.N, dtype=np.complex_)
-        if hasattr(self, 'Vn'):
-            r_dependent_coeffs[0] = self.Vn[0] * (1 - y ** 2)
+        if hasattr(self, "Vn"):
+            r_dependent_coeffs[0] = self.Vn[0] * (1 - y**2)
             for n in self.ns:
                 jn0b = self.jn0_betas[n]
-                r_dependent_coeffs[n] = self.Vn[n] * (jn0b - jn(0, self.beta[n] * y)) / (jn0b - 1.0)
-        elif hasattr(self, 'Qn'):
-            r_dependent_coeffs[0] = (2 * self.Qn[0] / pir2) * (1 - y ** 2)
+                r_dependent_coeffs[n] = (
+                    self.Vn[n] * (jn0b - jn(0, self.beta[n] * y)) / (jn0b - 1.0)
+                )
+        elif hasattr(self, "Qn"):
+            r_dependent_coeffs[0] = (2 * self.Qn[0] / pir2) * (1 - y**2)
             for n in self.ns:
                 bn = self.beta[n]
                 j0bn = self.jn0_betas[n]
                 j1bn = self.jn1_betas[n]
-                r_dependent_coeffs[n] = (self.Qn[n] / pir2) * (j0bn - jn(0,
-                                                                         bn * y)) / (j0bn - (2.0 / bn) * j1bn)
+                r_dependent_coeffs[n] = (
+                    (self.Qn[n] / pir2)
+                    * (j0bn - jn(0, bn * y))
+                    / (j0bn - (2.0 / bn) * j1bn)
+                )
         else:
             raise ValueError("Missing Vn or Qn!")
         return r_dependent_coeffs
@@ -193,8 +217,20 @@ class WomersleyComponent(UserExpression):
         value[0] = -self.normal_component * self.scale_value * wom
 
 
-def make_womersley_bcs(t, Q, nu, center, radius, normal, element, coeffstype="Q",
-                       N=1001, num_fourier_coefficients=20, Cn=None, **NS_namespace):
+def make_womersley_bcs(
+    t,
+    Q,
+    nu,
+    center,
+    radius,
+    normal,
+    element,
+    coeffstype="Q",
+    N=1001,
+    num_fourier_coefficients=20,
+    Cn=None,
+    **NS_namespace
+):
     """
     Generate a list of expressions for the components of a Womersley profile.
     Users can specify either the flow rate or fourier coefficients of the flow rate
@@ -216,7 +252,9 @@ def make_womersley_bcs(t, Q, nu, center, radius, normal, element, coeffstype="Q"
         # Compute fourier coefficients of transient profile
         timedisc = np.linspace(0, period, N)
 
-        Cn = fourier_coefficients(timedisc, transient_profile, period, num_fourier_coefficients)
+        Cn = fourier_coefficients(
+            timedisc, transient_profile, period, num_fourier_coefficients
+        )
 
     # Create Expressions for each direction
     expressions = []
@@ -227,7 +265,10 @@ def make_womersley_bcs(t, Q, nu, center, radius, normal, element, coeffstype="Q"
         elif coeffstype == "V":
             V = Cn
             Q = None
-        expressions.append(WomersleyComponent(radius, center, normal, ncomp, period, nu,
-                                              element, Q=Q, V=V))
+        expressions.append(
+            WomersleyComponent(
+                radius, center, normal, ncomp, period, nu, element, Q=Q, V=V
+            )
+        )
 
     return expressions

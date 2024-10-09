@@ -1,18 +1,40 @@
 import shutil
 from os import path
 
-from vampy.automatedPostprocessing.compute_hemodynamic_indices import compute_hemodynamic_indices
+from vampy.automatedPostprocessing.compute_hemodynamic_indices import (
+    compute_hemodynamic_indices,
+)
 
 
 def test_compute_hemodynamic_indices():
     # Path to test results and params
-    results_path, nu, rho, dt, T, velocity_degree, save_frequency, start_cycle, step, indices_path = \
-        get_default_parameters()
+    (
+        results_path,
+        nu,
+        rho,
+        dt,
+        T,
+        velocity_degree,
+        save_frequency,
+        start_cycle,
+        step,
+        indices_path,
+    ) = get_default_parameters()
     average_over_cycles = False
 
     # Run post-processing
-    compute_hemodynamic_indices(results_path, nu, rho, dt, T, velocity_degree, save_frequency, start_cycle, step,
-                                average_over_cycles)
+    compute_hemodynamic_indices(
+        results_path,
+        nu,
+        rho,
+        dt,
+        T,
+        velocity_degree,
+        save_frequency,
+        start_cycle,
+        step,
+        average_over_cycles,
+    )
 
     # Check that output folder exists
     assert path.exists(indices_path) and path.isdir(indices_path)
@@ -33,16 +55,36 @@ def test_compute_hemodynamic_indices():
 
 def test_compute_hemodynamic_indices_averaged_over_one_cycle():
     # Path to test results and params
-    results_path, nu, rho, dt, T, velocity_degree, save_frequency, start_cycle, step, indices_path \
-        = get_default_parameters()
+    (
+        results_path,
+        nu,
+        rho,
+        dt,
+        T,
+        velocity_degree,
+        save_frequency,
+        start_cycle,
+        step,
+        indices_path,
+    ) = get_default_parameters()
 
     # Average over cycle 1
     average_over_cycles = True
     cycle = 1
 
     # Run post-processing
-    compute_hemodynamic_indices(results_path, nu, rho, dt, T, velocity_degree, save_frequency,
-                                start_cycle, step, average_over_cycles)
+    compute_hemodynamic_indices(
+        results_path,
+        nu,
+        rho,
+        dt,
+        T,
+        velocity_degree,
+        save_frequency,
+        start_cycle,
+        step,
+        average_over_cycles,
+    )
 
     # Check that output folder exists
     assert path.exists(indices_path) and path.isdir(indices_path)
@@ -82,7 +124,18 @@ def get_default_parameters():
     start_cycle = 1
     step = 1
 
-    return results_path, nu, rho, dt, T, velocity_degree, save_frequency, start_cycle, step, indices_path
+    return (
+        results_path,
+        nu,
+        rho,
+        dt,
+        T,
+        velocity_degree,
+        save_frequency,
+        start_cycle,
+        step,
+        indices_path,
+    )
 
 
 if __name__ == "__main__":

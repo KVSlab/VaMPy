@@ -21,8 +21,8 @@ class VtkPointCloud:  # pragma: no cover
         mapper.SetInputData(self.vtkPolyData)
         self.vtkActor = vtk.vtkActor()
         self.vtkActor.SetMapper(mapper)
-        self.vtkActor.GetProperty().SetPointSize(9.)
-        self.vtkActor.GetProperty().SetColor(1., .0, .0)
+        self.vtkActor.GetProperty().SetPointSize(9.0)
+        self.vtkActor.GetProperty().SetColor(1.0, 0.0, 0.0)
 
     def addPoint(self, point):
         if self.vtkPoints.GetNumberOfPoints() < self.maxNumPoints:
@@ -44,7 +44,7 @@ class VtkPointCloud:  # pragma: no cover
 class DisplayModel(object):  # pragma: no cover
     def polyDataToActor(self, polyData, opacity=1.0):
         """Wrap the provided vtkPolyData object in a mapper and an actor,
-        returning the actor. """
+        returning the actor."""
         mapper = vtk.vtkPolyDataMapper()
         if vtk.VTK_MAJOR_VERSION > 5:
             mapper.SetInputData(polyData)
@@ -54,7 +54,7 @@ class DisplayModel(object):  # pragma: no cover
         actor.SetMapper(mapper)
         actor.GetProperty().SetOpacity(opacity)
 
-        return (actor)
+        return actor
 
     def setLight(self, renderer):
         lightKit = vtk.vtkLightKit()
@@ -71,9 +71,9 @@ class DisplayModel(object):  # pragma: no cover
             lightKit.SetHeadlightWarmth(0.5)
 
         # intensity ratios
-        lightKit.SetKeyToFillRatio(2.)
-        lightKit.SetKeyToHeadRatio(7.)
-        lightKit.SetKeyToBackRatio(1000.)
+        lightKit.SetKeyToFillRatio(2.0)
+        lightKit.SetKeyToHeadRatio(7.0)
+        lightKit.SetKeyToBackRatio(1000.0)
         lightKit.AddLightsToRenderer(renderer)
 
     def renderWindow(self, renderer, titleWindow):
@@ -92,10 +92,11 @@ class DisplayModel(object):  # pragma: no cover
         interactor.Initialize()
         interactor.Start()
 
-    def DisplayProbesAndModel(self, centerline, fileNameCenterline,
-                              listProbePoints, model=None):
+    def DisplayProbesAndModel(
+        self, centerline, fileNameCenterline, listProbePoints, model=None
+    ):
         """Displays a model and the corresponding probe points along
-        the centerline. """
+        the centerline."""
 
         if model is None:
             isDisplayingModel = False
@@ -127,15 +128,20 @@ class DisplayModel(object):  # pragma: no cover
             opacity = 0.25
             ren.AddActor(self.polyDataToActor(model, opacity))
         ren.AddActor(self.polyDataToActor(centerline))
-        ren.SetBackground(.2, .3, .4)
+        ren.SetBackground(0.2, 0.3, 0.4)
         renWindows.SetSize(700, 700)
 
         # Create a text actor.
         txt = vtk.vtkTextActor()
-        guiText = ("Centerline file name: "
-                   + repr(fileNameCenterline.rsplit('/', 1)[-1]) + "\n"
-                   + "Number of probes: " + repr(len(listProbePoints)) + "\n"
-                   + "Q to exit.")
+        guiText = (
+            "Centerline file name: "
+            + repr(fileNameCenterline.rsplit("/", 1)[-1])
+            + "\n"
+            + "Number of probes: "
+            + repr(len(listProbePoints))
+            + "\n"
+            + "Q to exit."
+        )
         txt.SetInputData(guiText)
         txtprop = txt.GetTextProperty()
         txtprop.SetFontFamilyToArial()

@@ -36,7 +36,9 @@ def find_and_delete_nan_triangles(surface):
         killThisTriangle = False
         nPointsForThisCell = surface.GetCell(i).GetPoints().GetNumberOfPoints()
         if nPointsForThisCell > 3:
-            print("> WARNING: found Cell with more than 3 points: there is more than triangles.")
+            print(
+                "> WARNING: found Cell with more than 3 points: there is more than triangles."
+            )
         for j in range(0, nPointsForThisCell):
             x = [0.0, 0.0, 0.0]
             surface.GetCell(i).GetPoints().GetPoint(j, x)
@@ -77,4 +79,4 @@ def clean_surface(surface):
     print("> Done.")
     print("> ")
 
-    return (outputPolyData)
+    return outputPolyData

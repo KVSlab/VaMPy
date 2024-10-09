@@ -16,7 +16,7 @@ class VtkText:
         self.text.SetDisplayPosition(10, 2)
 
 
-class vmtkSeedSelector():  # pragma: no cover
+class vmtkSeedSelector:  # pragma: no cover
     def __init__(self):
         self._Surface = None
         self._SeedIds = None
@@ -51,18 +51,24 @@ class vmtkPickPointSeedSelector(vmtkSeedSelector):  # pragma: no cover
 
     def PickCallback(self, obj):
         picker = vtk.vtkCellPicker()
-        picker.SetTolerance(1E-4 * self._Surface.GetLength())
+        picker.SetTolerance(1e-4 * self._Surface.GetLength())
         eventPosition = self.vmtkRenderer.RenderWindowInteractor.GetEventPosition()
-        result = picker.Pick(float(eventPosition[0]), float(eventPosition[1]), 0.0, self.vmtkRenderer.Renderer)
+        result = picker.Pick(
+            float(eventPosition[0]),
+            float(eventPosition[1]),
+            0.0,
+            self.vmtkRenderer.Renderer,
+        )
         if result == 0:
             return
         pickPosition = picker.GetPickPosition()
         pickedCellPointIds = self._Surface.GetCell(picker.GetCellId()).GetPointIds()
-        minDistance = 1E10
+        minDistance = 1e10
         pickedSeedId = -1
         for i in range(pickedCellPointIds.GetNumberOfIds()):
-            distance = vtk.vtkMath.Distance2BetweenPoints(pickPosition,
-                                                          self._Surface.GetPoint(pickedCellPointIds.GetId(i)))
+            distance = vtk.vtkMath.Distance2BetweenPoints(
+                pickPosition, self._Surface.GetPoint(pickedCellPointIds.GetId(i))
+            )
             if distance < minDistance:
                 minDistance = distance
                 pickedSeedId = pickedCellPointIds.GetId(i)
@@ -82,7 +88,7 @@ class vmtkPickPointSeedSelector(vmtkSeedSelector):  # pragma: no cover
 
     def Execute(self):
         if self._Surface is None:
-            self.PrintError('vmtkPickPointSeedSelector Error: Surface not set.')
+            self.PrintError("vmtkPickPointSeedSelector Error: Surface not set.")
             return
 
         self._TargetSeedIds.Initialize()
@@ -116,8 +122,8 @@ class vmtkPickPointSeedSelector(vmtkSeedSelector):  # pragma: no cover
         self.SeedActor.PickableOff()
         self.vmtkRenderer.Renderer.AddActor(self.SeedActor)
 
-        self.vmtkRenderer.AddKeyBinding('u', 'Undo.', self.UndoCallback)
-        self.vmtkRenderer.AddKeyBinding('space', 'Add points.', self.PickCallback)
+        self.vmtkRenderer.AddKeyBinding("u", "Undo.", self.UndoCallback)
+        self.vmtkRenderer.AddKeyBinding("space", "Add points.", self.PickCallback)
         surfaceMapper = vtk.vtkPolyDataMapper()
         if version < 6:
             surfaceMapper.SetInput(self._Surface)
@@ -130,7 +136,7 @@ class vmtkPickPointSeedSelector(vmtkSeedSelector):  # pragma: no cover
 
         self.vmtkRenderer.Renderer.AddActor(surfaceActor)
 
-        text = 'Please position the mouse and press space to add the top of the region of interest, \'u\' to undo\n'
+        text = "Please position the mouse and press space to add the top of the region of interest, 'u' to undo\n"
         guiText = VtkText(text)
         self.vmtkRenderer.Renderer.AddActor(guiText.text)
 

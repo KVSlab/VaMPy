@@ -4,16 +4,24 @@ import pickle
 from pprint import pprint
 
 import numpy as np
-from dolfin import set_log_level, MPI
+from dolfin import MPI, set_log_level
 
 from vampy.simulation.Probe import Probes  # type: ignore
-from vampy.simulation.Womersley import make_womersley_bcs, compute_boundary_geometry_acrn
-from vampy.simulation.simulation_common import get_file_paths, store_u_mean, print_mesh_information, \
-    store_velocity_and_pressure_h5, dump_probes
+from vampy.simulation.simulation_common import (
+    dump_probes,
+    get_file_paths,
+    print_mesh_information,
+    store_u_mean,
+    store_velocity_and_pressure_h5,
+)
+from vampy.simulation.Womersley import (
+    compute_boundary_geometry_acrn,
+    make_womersley_bcs,
+)
 
 # Check for oasis and oasismove
-package_name_oasis = 'oasis'
-package_name_oasismove = 'oasismove'
+package_name_oasis = "oasis"
+package_name_oasismove = "oasismove"
 oasis_exists = importlib.util.find_spec(package_name_oasis)
 oasismove_exists = importlib.util.find_spec(package_name_oasismove)
 if oasismove_exists:
@@ -28,7 +36,9 @@ set_log_level(50)
 comm = MPI.comm_world
 
 
-def problem_parameters(commandline_kwargs, NS_parameters, NS_expressions, **NS_namespace):
+def problem_parameters(
+    commandline_kwargs, NS_parameters, NS_expressions, **NS_namespace
+):
     """
     Problem file for running CFD simulation in arterial models consisting of one inlet, and two or more outlets.
     A Womersley velocity profile is applied at the inlet, and a flow split pressure condition is applied at the outlets,
@@ -45,9 +55,9 @@ def problem_parameters(commandline_kwargs, NS_parameters, NS_expressions, **NS_n
     """
     if "restart_folder" in commandline_kwargs.keys():
         restart_folder = commandline_kwargs["restart_folder"]
-        f = open(path.join(restart_folder, 'params.dat'), 'rb')
+        f = open(path.join(restart_folder, "params.dat"), "rb")
         NS_parameters.update(pickle.load(f))
-        NS_parameters['restart_folder'] = restart_folder
+        NS_parameters["restart_folder"] = restart_folder
     else:
         # Parameters are in mm and ms
         cardiac_cycle = float(commandline_kwargs.get("cardiac_cycle", 951))
@@ -77,7 +87,7 @@ def problem_parameters(commandline_kwargs, NS_parameters, NS_expressions, **NS_n
             velocity_degree=1,  # Polynomial order of finite element for velocity. Normally linear (1) or quadratic (2)
             pressure_degree=1,  # Polynomial order of finite element for pressure. Normally linear (1)
             use_krylov_solvers=True,
-            krylov_solvers=dict(monitor_convergence=False)
+            krylov_solvers=dict(monitor_convergence=False),
         )
 
     mesh_file = NS_parameters["mesh_path"].split("/")[-1]
@@ -98,8 +108,21 @@ def mesh(mesh_path, **NS_namespace):
     return mesh
 
 
-def create_bcs(t, NS_expressions, V, Q, area_ratio, area_inlet, mesh, mesh_path, nu, id_in, id_out, pressure_degree,
-               **NS_namespace):
+def create_bcs(
+    t,
+    NS_expressions,
+    V,
+    Q,
+    area_ratio,
+    area_inlet,
+    mesh,
+    mesh_path,
+    nu,
+    id_in,
+    id_out,
+    pressure_degree,
+    **NS_namespace,
+):
     # Mesh function
     boundary = MeshFunction("size_t", mesh, mesh.geometry().dim() - 1, mesh.domains())
 
@@ -108,24 +131,31 @@ def create_bcs(t, NS_expressions, V, Q, area_ratio, area_inlet, mesh, mesh_path,
     with open(info) as f:
         info = json.load(f)
 
-    id_in[:] = info['inlet_id']
-    id_out[:] = info['outlet_ids']
+    id_in[:] = info["inlet_id"]
+    id_out[:] = info["outlet_ids"]
     id_wall = min(id_in + id_out) - 1
 
-    Q_mean = info['mean_flow_rate']
+    Q_mean = info["mean_flow_rate"]
 
-    area_ratio[:] = info['area_ratio']
-    area_inlet.append(info['inlet_area'])
+    area_ratio[:] = info["area_ratio"]
+    area_inlet.append(info["inlet_area"])
 
     # Load normalized time and flow rate values
-    t_values, Q_ = np.loadtxt(path.join(path.dirname(path.abspath(__file__)), "ICA_values")).T
-    Q_values = Q_mean * Q_  # Specific flow rate = Normalized flow wave form * Prescribed flow rate
+    t_values, Q_ = np.loadtxt(
+        path.join(path.dirname(path.abspath(__file__)), "ICA_values")
+    ).T
+    Q_values = (
+        Q_mean * Q_
+    )  # Specific flow rate = Normalized flow wave form * Prescribed flow rate
     t_values *= 1000  # Scale time in normalised flow wave form to [ms]
-    _, tmp_center, tmp_radius, tmp_normal = compute_boundary_geometry_acrn(mesh, id_in[0], boundary)
+    _, tmp_center, tmp_radius, tmp_normal = compute_boundary_geometry_acrn(
+        mesh, id_in[0], boundary
+    )
 
     # Create Womersley boundary condition at inlet
-    inlet = make_womersley_bcs(t_values, Q_values, nu, tmp_center, tmp_radius, tmp_normal,
-                               V.ufl_element())
+    inlet = make_womersley_bcs(
+        t_values, Q_values, nu, tmp_center, tmp_radius, tmp_normal, V.ufl_element()
+    )
     NS_expressions["inlet"] = inlet
 
     # Initialize inlet expressions with initial time
@@ -150,7 +180,9 @@ def create_bcs(t, NS_expressions, V, Q, area_ratio, area_inlet, mesh, mesh_path,
         bc_p.append(bc)
         NS_expressions[ID] = outflow
         if MPI.rank(comm) == 0:
-            print(f"Boundary ID={ID}, pressure: {p_initial:.5f}, area fraction: {area_ratio[i]:0.5f}")
+            print(
+                f"Boundary ID={ID}, pressure: {p_initial:.5f}, area fraction: {area_ratio[i]:0.5f}"
+            )
 
     # No slip condition at wall
     wall = Constant(0.0)
@@ -160,15 +192,28 @@ def create_bcs(t, NS_expressions, V, Q, area_ratio, area_inlet, mesh, mesh_path,
     bc_inlet = [DirichletBC(V, inlet[i], boundary, id_in[0]) for i in range(3)]
 
     # Return boundary conditions in dictionary
-    return dict(u0=[bc_inlet[0], bc_wall],
-                u1=[bc_inlet[1], bc_wall],
-                u2=[bc_inlet[2], bc_wall],
-                p=bc_p)
+    return dict(
+        u0=[bc_inlet[0], bc_wall],
+        u1=[bc_inlet[1], bc_wall],
+        u2=[bc_inlet[2], bc_wall],
+        p=bc_p,
+    )
 
 
 # Oasis hook called before simulation start
-def pre_solve_hook(mesh, V, Q, newfolder, mesh_path, restart_folder, velocity_degree, cardiac_cycle,
-                   save_solution_after_cycle, dt, **NS_namespace):
+def pre_solve_hook(
+    mesh,
+    V,
+    Q,
+    newfolder,
+    mesh_path,
+    restart_folder,
+    velocity_degree,
+    cardiac_cycle,
+    save_solution_after_cycle,
+    dt,
+    **NS_namespace,
+):
     # Mesh function
     boundary = MeshFunction("size_t", mesh, mesh.geometry().dim() - 1, mesh.domains())
 
@@ -176,7 +221,7 @@ def pre_solve_hook(mesh, V, Q, newfolder, mesh_path, restart_folder, velocity_de
     n = FacetNormal(mesh)
     eval_dict = {}
     rel_path = mesh_path.split(".xml")[0] + "_probe_point.json"
-    with open(rel_path, 'r') as infile:
+    with open(rel_path, "r") as infile:
         probe_points = np.array(json.load(infile))
 
     # Store points file in checkpoint
@@ -210,22 +255,55 @@ def pre_solve_hook(mesh, V, Q, newfolder, mesh_path, restart_folder, velocity_de
     # Time step when solutions for post-processing should start being saved
     save_solution_at_tstep = int(cardiac_cycle * save_solution_after_cycle / dt)
 
-    return dict(eval_dict=eval_dict, boundary=boundary, n=n, U=U, u_mean=u_mean, u_mean0=u_mean0, u_mean1=u_mean1,
-                u_mean2=u_mean2, save_solution_at_tstep=save_solution_at_tstep)
+    return dict(
+        eval_dict=eval_dict,
+        boundary=boundary,
+        n=n,
+        U=U,
+        u_mean=u_mean,
+        u_mean0=u_mean0,
+        u_mean1=u_mean1,
+        u_mean2=u_mean2,
+        save_solution_at_tstep=save_solution_at_tstep,
+    )
 
 
 # Oasis hook called after each time step
-def temporal_hook(u_, p_, mesh, tstep, dump_probe_frequency, eval_dict, newfolder, id_in, id_out, boundary, n,
-                  save_solution_frequency, NS_parameters, NS_expressions, area_ratio, t, save_solution_at_tstep,
-                  U, area_inlet, nu, u_mean0, u_mean1, u_mean2, **NS_namespace):
+def temporal_hook(
+    u_,
+    p_,
+    mesh,
+    tstep,
+    dump_probe_frequency,
+    eval_dict,
+    newfolder,
+    id_in,
+    id_out,
+    boundary,
+    n,
+    save_solution_frequency,
+    NS_parameters,
+    NS_expressions,
+    area_ratio,
+    t,
+    save_solution_at_tstep,
+    U,
+    area_inlet,
+    nu,
+    u_mean0,
+    u_mean1,
+    u_mean2,
+    **NS_namespace,
+):
     # Update boundary condition to current time
     for uc in NS_expressions["inlet"]:
         uc.set_t(t)
 
     # Compute flux and update pressure condition
     if tstep > 2:
-        Q_ideals, Q_in, Q_outs = update_pressure_condition(NS_expressions, area_ratio, boundary, id_in, id_out, mesh, n,
-                                                           tstep, u_)
+        Q_ideals, Q_in, Q_outs = update_pressure_condition(
+            NS_expressions, area_ratio, boundary, id_in, id_out, mesh, n, tstep, u_
+        )
 
     # Compute flow rates and updated pressure at outlets, and mean velocity and Reynolds number at inlet
     if MPI.rank(comm) == 0 and tstep % 10 == 0:
@@ -233,11 +311,15 @@ def temporal_hook(u_, p_, mesh, tstep, dump_probe_frequency, eval_dict, newfolde
         diam_inlet = np.sqrt(4 * area_inlet[0] / np.pi)
         Re = U_mean * diam_inlet / nu
         print("=" * 10, "Time step " + str(tstep), "=" * 10)
-        print(f"Sum of Q_out = {sum(Q_outs):.4f}, Q_in = {Q_in:.4f}, mean velocity (inlet): {U_mean:.4f}, " +
-              f"Reynolds number (inlet): {Re:.4f}")
+        print(
+            f"Sum of Q_out = {sum(Q_outs):.4f}, Q_in = {Q_in:.4f}, mean velocity (inlet): {U_mean:.4f}, "
+            + f"Reynolds number (inlet): {Re:.4f}"
+        )
         for i, out_id in enumerate(id_out):
-            print(f"For outlet with boundary ID={out_id}: target flow rate: {Q_ideals[i]:.4f} mL/s, " +
-                  f"computed flow rate: {Q_outs[i]:.4f} mL/s, pressure updated to: {NS_expressions[out_id].p:.4f}")
+            print(
+                f"For outlet with boundary ID={out_id}: target flow rate: {Q_ideals[i]:.4f} mL/s, "
+                + f"computed flow rate: {Q_outs[i]:.4f} mL/s, pressure updated to: {NS_expressions[out_id].p:.4f}"
+            )
         print()
 
     # Sample velocity and pressure in points/probes
@@ -252,14 +334,34 @@ def temporal_hook(u_, p_, mesh, tstep, dump_probe_frequency, eval_dict, newfolde
 
     # Save velocity and pressure for post-processing
     if tstep % save_solution_frequency == 0 and tstep >= save_solution_at_tstep:
-        store_velocity_and_pressure_h5(NS_parameters, U, p_, tstep, u_, u_mean0, u_mean1, u_mean2)
+        store_velocity_and_pressure_h5(
+            NS_parameters, U, p_, tstep, u_, u_mean0, u_mean1, u_mean2
+        )
 
 
 # Oasis hook called after the simulation has finished
-def theend_hook(u_mean, u_mean0, u_mean1, u_mean2, T, dt, save_solution_at_tstep, save_solution_frequency,
-                **NS_namespace):
-    store_u_mean(T, dt, save_solution_at_tstep, save_solution_frequency, u_mean, u_mean0, u_mean1, u_mean2,
-                 NS_parameters)
+def theend_hook(
+    u_mean,
+    u_mean0,
+    u_mean1,
+    u_mean2,
+    T,
+    dt,
+    save_solution_at_tstep,
+    save_solution_frequency,
+    **NS_namespace,
+):
+    store_u_mean(
+        T,
+        dt,
+        save_solution_at_tstep,
+        save_solution_frequency,
+        u_mean,
+        u_mean0,
+        u_mean1,
+        u_mean2,
+        NS_parameters,
+    )
 
 
 def beta(err, p):
@@ -278,15 +380,17 @@ def beta(err, p):
         if err >= 0.1:
             return 0.5
         else:
-            return 1 - 5 * err ** 2
+            return 1 - 5 * err**2
     else:
         if err >= 0.1:
             return 1.5
         else:
-            return 1 + 5 * err ** 2
+            return 1 + 5 * err**2
 
 
-def update_pressure_condition(NS_expressions, area_ratio, boundary, id_in, id_out, mesh, n, tstep, u_):
+def update_pressure_condition(
+    NS_expressions, area_ratio, boundary, id_in, id_out, mesh, n, tstep, u_
+):
     """
     Use a dual-pressure boundary condition as pressure condition at outlet.
     """
@@ -328,6 +432,6 @@ def update_pressure_condition(NS_expressions, area_ratio, boundary, id_in, id_ou
             if p_old > 2 and delta < 0:
                 NS_expressions[out_id].p = p_old
             else:
-                NS_expressions[out_id].p = p_old * beta(R_err, p_old) * M_err ** E
+                NS_expressions[out_id].p = p_old * beta(R_err, p_old) * M_err**E
 
     return Q_ideals, Q_in, Q_outs

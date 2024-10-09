@@ -1,14 +1,46 @@
 from os import path
 
 import numpy as np
-from dolfin import FunctionSpace, Function, MPI, VectorFunctionSpace, Timer, project, sqrt, inner, HDF5File, XDMFFile, \
-    assign, CellDiameter, Mesh, TestFunction, list_timings, TimingClear, TimingType
-from vampy.automatedPostprocessing.postprocessing_common import read_command_line, get_dataset_names, \
-    rate_of_dissipation, rate_of_strain
+from dolfin import (
+    MPI,
+    CellDiameter,
+    Function,
+    FunctionSpace,
+    HDF5File,
+    Mesh,
+    TestFunction,
+    Timer,
+    TimingClear,
+    TimingType,
+    VectorFunctionSpace,
+    XDMFFile,
+    assign,
+    inner,
+    list_timings,
+    project,
+    sqrt,
+)
+
+from vampy.automatedPostprocessing.postprocessing_common import (
+    get_dataset_names,
+    rate_of_dissipation,
+    rate_of_strain,
+    read_command_line,
+)
 
 
-def compute_flow_and_simulation_metrics(folder, nu, dt, velocity_degree, T, times_to_average, save_frequency,
-                                        start_cycle, step, average_over_cycles):
+def compute_flow_and_simulation_metrics(
+    folder,
+    nu,
+    dt,
+    velocity_degree,
+    T,
+    times_to_average,
+    save_frequency,
+    start_cycle,
+    step,
+    average_over_cycles,
+):
     """
     Computes several flow field characteristics and metrics for the velocity field.
     Reads in the .h5 soution stored in the 'Solution' folder within the results' folder,
@@ -51,7 +83,7 @@ def compute_flow_and_simulation_metrics(folder, nu, dt, velocity_degree, T, time
         mesh_file.read(mesh, "mesh", False)
 
     # Function space
-    DG = FunctionSpace(mesh, 'DG', 0)
+    DG = FunctionSpace(mesh, "DG", 0)
     V = VectorFunctionSpace(mesh, "CG", velocity_degree)
     Vv = FunctionSpace(mesh, "CG", velocity_degree)
 
@@ -64,34 +96,77 @@ def compute_flow_and_simulation_metrics(folder, nu, dt, velocity_degree, T, time
 
     # Read velocity and compute cycle averaged velocity
     if not path.exists(file_path_u_avg):
-        compute_u_avg(dataset_names, file_path_u_avg, file_u, number_of_cycles, saved_time_steps_per_cycle, start_cycle,
-                      u, u_avg)
+        compute_u_avg(
+            dataset_names,
+            file_path_u_avg,
+            file_u,
+            number_of_cycles,
+            saved_time_steps_per_cycle,
+            start_cycle,
+            u,
+            u_avg,
+        )
 
     # Perform phase averaging (Average over cycles at specified time point(s))
     if len(times_to_average) != 0:
-        dataset_dict, dataset_dict_avg, number_of_files = \
-            get_files_for_phase_averaging(times_to_average, dt, save_frequency, step, number_of_cycles, start_cycle,
-                                          saved_time_steps_per_cycle, dataset_names)
+        dataset_dict, dataset_dict_avg, number_of_files = get_files_for_phase_averaging(
+            times_to_average,
+            dt,
+            save_frequency,
+            step,
+            number_of_cycles,
+            start_cycle,
+            saved_time_steps_per_cycle,
+            dataset_names,
+        )
     # Perform cycle averaging (Average per cycle) and time averaging (Average of all cycles)
     else:
-        dataset_dict, dataset_dict_avg, number_of_files = \
-            get_files_for_cycle_averaging(dataset_names, file_path_u_avg, number_of_cycles, saved_time_steps_per_cycle,
-                                          start_cycle)
+        dataset_dict, dataset_dict_avg, number_of_files = get_files_for_cycle_averaging(
+            dataset_names,
+            file_path_u_avg,
+            number_of_cycles,
+            saved_time_steps_per_cycle,
+            start_cycle,
+        )
         if average_over_cycles:
             cycles_to_average = [cycle + 1 for cycle in range(number_of_cycles)]
 
     # Compute flow and simulation metrics
     for time_to_average, dataset in dataset_dict.items():
         if len(times_to_average) != 0 and MPI.rank(MPI.comm_world) == 0:
-            print(f"Phase averaging results over {number_of_files} cycles at t={time_to_average} ms")
+            print(
+                f"Phase averaging results over {number_of_files} cycles at t={time_to_average} ms"
+            )
 
-        define_functions_and_iterate_dataset(time_to_average, dataset, dataset_dict_avg[time_to_average], dt, file_u,
-                                             file_path_u_avg, file_path_u, mesh, nu, number_of_files, DG, V, Vv,
-                                             cycles_to_average, saved_time_steps_per_cycle)
+        define_functions_and_iterate_dataset(
+            time_to_average,
+            dataset,
+            dataset_dict_avg[time_to_average],
+            dt,
+            file_u,
+            file_path_u_avg,
+            file_path_u,
+            mesh,
+            nu,
+            number_of_files,
+            DG,
+            V,
+            Vv,
+            cycles_to_average,
+            saved_time_steps_per_cycle,
+        )
 
 
-def compute_u_avg(dataset_names, file_path_u_avg, file_u, n_cycles, saved_time_steps_per_cycle,
-                  start_cycle, u, u_avg):
+def compute_u_avg(
+    dataset_names,
+    file_path_u_avg,
+    file_u,
+    n_cycles,
+    saved_time_steps_per_cycle,
+    start_cycle,
+    u,
+    u_avg,
+):
     """
     Iterate over saved time steps and compute average velocity based on save sampling parameters
 
@@ -119,7 +194,7 @@ def compute_u_avg(dataset_names, file_path_u_avg, file_u, n_cycles, saved_time_s
             u_avg.vector().axpy(1, u.vector())
 
         # Average over pre-defined amount of cycles
-        u_avg.vector()[:] /= (n_cycles - start_cycle + 1)
+        u_avg.vector()[:] /= n_cycles - start_cycle + 1
 
         if MPI.rank(MPI.comm_world) == 0:
             print("=" * 10, f"Computing average velocity at time: {time} ms", "=" * 10)
@@ -134,8 +209,13 @@ def compute_u_avg(dataset_names, file_path_u_avg, file_u, n_cycles, saved_time_s
         u_avg.vector().zero()
 
 
-def get_files_for_cycle_averaging(dataset_names, file_path_u_avg, number_of_cycles, saved_time_steps_per_cycle,
-                                  start_cycle):
+def get_files_for_cycle_averaging(
+    dataset_names,
+    file_path_u_avg,
+    number_of_cycles,
+    saved_time_steps_per_cycle,
+    start_cycle,
+):
     """
     Retrieves the dataset dictionaries for cycle averaging.
 
@@ -157,7 +237,10 @@ def get_files_for_cycle_averaging(dataset_names, file_path_u_avg, number_of_cycl
 
     # Create similar dataset for the mean velocity
     file_u_avg = HDF5File(MPI.comm_world, file_path_u_avg, "r")
-    dataset_dict_avg = {"": get_dataset_names(file_u_avg, start=0, step=1) * (number_of_cycles - start_cycle + 1)}
+    dataset_dict_avg = {
+        "": get_dataset_names(file_u_avg, start=0, step=1)
+        * (number_of_cycles - start_cycle + 1)
+    }
 
     # Get number of files based on the sliced dataset names
     number_of_files = len(dataset_dict[""])
@@ -165,8 +248,16 @@ def get_files_for_cycle_averaging(dataset_names, file_path_u_avg, number_of_cycl
     return dataset_dict, dataset_dict_avg, number_of_files
 
 
-def get_files_for_phase_averaging(times_to_average, dt, save_frequency, step, number_of_cycles, start_cycle,
-                                  saved_time_steps_per_cycle, dataset_names):
+def get_files_for_phase_averaging(
+    times_to_average,
+    dt,
+    save_frequency,
+    step,
+    number_of_cycles,
+    start_cycle,
+    saved_time_steps_per_cycle,
+    dataset_names,
+):
     """
     Generates dataset dictionaries for phase averaging based on the selected times.
 
@@ -189,10 +280,14 @@ def get_files_for_phase_averaging(times_to_average, dt, save_frequency, step, nu
     dataset_dict_avg = {}
 
     # Iterate over selected times to average over
+    time_index = start_cycle - 1
     for t in times_to_average:
         # Find corresponding IDs for dataset_name list
         time_id = int(t / dt / save_frequency / step)
-        time_ids = [time_id + saved_time_steps_per_cycle * k for k in range(number_of_cycles)][start_cycle - 1:]
+        time_ids = [
+            time_id + saved_time_steps_per_cycle * k for k in range(number_of_cycles)
+        ]
+        time_ids = time_ids[time_index:]
 
         # Get dataset_names at corresponding times
         dataset_dict[f"_{t}"] = [dataset_names[max(0, j - 1)] for j in time_ids]
@@ -204,9 +299,23 @@ def get_files_for_phase_averaging(times_to_average, dt, save_frequency, step, nu
     return dataset_dict, dataset_dict_avg, number_of_files
 
 
-def define_functions_and_iterate_dataset(time_to_average, dataset, dataset_avg, dt, file_u, file_path_u_avg,
-                                         file_path_u, mesh, nu, number_of_files, DG, V, Vv, cycles_to_average,
-                                         saved_time_steps_per_cycle):
+def define_functions_and_iterate_dataset(
+    time_to_average,
+    dataset,
+    dataset_avg,
+    dt,
+    file_u,
+    file_path_u_avg,
+    file_path_u,
+    mesh,
+    nu,
+    number_of_files,
+    DG,
+    V,
+    Vv,
+    cycles_to_average,
+    saved_time_steps_per_cycle,
+):
     """
     Defines functions and vector functions for all metrics to be computed, iterates through dataset and computes
     several flow and simulation metrics.
@@ -302,28 +411,67 @@ def define_functions_and_iterate_dataset(time_to_average, dataset, dataset_avg, 
         number_of_files = len(cycles_to_average)
 
     save_path = save_path.replace("Solutions", "FlowMetrics")
-    metric_names = ["characteristic_edge_length", "u_time_avg", "l_plus", "t_plus", "CFL", "strain", "length_scale",
-                    "time_scale", "velocity_scale", "dissipation", "kinetic_energy", "turbulent_kinetic_energy",
-                    "turbulent_dissipation"]
+    metric_names = [
+        "characteristic_edge_length",
+        "u_time_avg",
+        "l_plus",
+        "t_plus",
+        "CFL",
+        "strain",
+        "length_scale",
+        "time_scale",
+        "velocity_scale",
+        "dissipation",
+        "kinetic_energy",
+        "turbulent_kinetic_energy",
+        "turbulent_dissipation",
+    ]
 
-    metric_variables_cycle_avg = [characteristic_edge_length, u_time_cycle_avg, l_plus_cycle_avg, t_plus_cycle_avg,
-                                  CFL_cycle_avg, strain_cycle_avg, length_scale_cycle_avg, time_scale_cycle_avg,
-                                  velocity_scale_cycle_avg, dissipation_cycle_avg, kinetic_energy_cycle_avg,
-                                  turbulent_kinetic_energy_cycle_avg, turbulent_dissipation_cycle_avg]
+    metric_variables_cycle_avg = [
+        characteristic_edge_length,
+        u_time_cycle_avg,
+        l_plus_cycle_avg,
+        t_plus_cycle_avg,
+        CFL_cycle_avg,
+        strain_cycle_avg,
+        length_scale_cycle_avg,
+        time_scale_cycle_avg,
+        velocity_scale_cycle_avg,
+        dissipation_cycle_avg,
+        kinetic_energy_cycle_avg,
+        turbulent_kinetic_energy_cycle_avg,
+        turbulent_dissipation_cycle_avg,
+    ]
 
-    metric_variables_avg = [characteristic_edge_length, u_time_avg, l_plus_avg, t_plus_avg, CFL_avg, strain_avg,
-                            length_scale_avg, time_scale_avg, velocity_scale_avg, dissipation_avg, kinetic_energy_avg,
-                            turbulent_kinetic_energy_avg, turbulent_dissipation_avg]
+    metric_variables_avg = [
+        characteristic_edge_length,
+        u_time_avg,
+        l_plus_avg,
+        t_plus_avg,
+        CFL_avg,
+        strain_avg,
+        length_scale_avg,
+        time_scale_avg,
+        velocity_scale_avg,
+        dissipation_avg,
+        kinetic_energy_avg,
+        turbulent_kinetic_energy_avg,
+        turbulent_dissipation_avg,
+    ]
 
     metric_dict_cycle = dict(zip(metric_names, metric_variables_cycle_avg))
     metric_dict = dict(zip(metric_names, metric_variables_avg))
 
-    counters_to_save = [saved_time_steps_per_cycle * cycle for cycle in cycles_to_average]
+    counters_to_save = [
+        saved_time_steps_per_cycle * cycle for cycle in cycles_to_average
+    ]
     cycle_names = [""] + ["_cycle_{:02d}".format(cycle) for cycle in cycles_to_average]
     metrics = {}
     for cycle_name in cycle_names:
         for vn in metric_dict.keys():
-            metrics[vn + cycle_name] = XDMFFile(MPI.comm_world, save_path % (vn, cycle_name))
+            metrics[vn + cycle_name] = XDMFFile(
+                MPI.comm_world, save_path % (vn, cycle_name)
+            )
             metrics[vn + cycle_name].parameters["rewrite_function_mesh"] = False
             metrics[vn + cycle_name].parameters["flush_output"] = True
 
@@ -334,7 +482,7 @@ def define_functions_and_iterate_dataset(time_to_average, dataset, dataset_avg, 
         print("=" * 10, "Starting post processing", "=" * 10)
 
     counter = 0
-    tolerance = 1E-12
+    tolerance = 1e-12
     for data, data_avg in zip(dataset, dataset_avg):
         counter += 1
 
@@ -356,7 +504,11 @@ def define_functions_and_iterate_dataset(time_to_average, dataset, dataset_avg, 
         # Compute CFL
         t0 = Timer("CFL number")
         u_mag = project(sqrt(inner(u, u)), DG)
-        CFL.vector().set_local(u_mag.vector().get_local() / characteristic_edge_length.vector().get_local() * dt)
+        CFL.vector().set_local(
+            u_mag.vector().get_local()
+            / characteristic_edge_length.vector().get_local()
+            * dt
+        )
         CFL.vector().apply("insert")
         CFL_cycle_avg.vector().axpy(1, CFL.vector())
         t0.stop()
@@ -370,14 +522,16 @@ def define_functions_and_iterate_dataset(time_to_average, dataset, dataset_avg, 
         # Compute l+
         t0 = Timer("l plus")
         u_star = np.sqrt(strain.vector().get_local() * nu)
-        l_plus.vector().set_local(u_star * characteristic_edge_length.vector().get_local() / nu)
+        l_plus.vector().set_local(
+            u_star * characteristic_edge_length.vector().get_local() / nu
+        )
         l_plus.vector().apply("insert")
         l_plus_cycle_avg.vector().axpy(1, l_plus.vector())
         t0.stop()
 
         # Compute t+
         t0 = Timer("t plus")
-        t_plus.vector().set_local(u_star ** 2 * dt / nu)
+        t_plus.vector().set_local(u_star**2 * dt / nu)
         t_plus.vector().apply("insert")
         t_plus_cycle_avg.vector().axpy(1, t_plus.vector())
         t0.stop()
@@ -403,7 +557,7 @@ def define_functions_and_iterate_dataset(time_to_average, dataset, dataset_avg, 
 
         # Compute length scale
         t0 = Timer("Length scale")
-        length_scale.vector().set_local((nu ** 3 / (eps + tolerance)) ** (1. / 4))
+        length_scale.vector().set_local((nu**3 / (eps + tolerance)) ** (1.0 / 4))
         length_scale.vector().apply("insert")
         length_scale_cycle_avg.vector().axpy(1, length_scale.vector())
         t0.stop()
@@ -417,7 +571,7 @@ def define_functions_and_iterate_dataset(time_to_average, dataset, dataset_avg, 
 
         # Compute velocity scale
         t0 = Timer("Velocity scale")
-        velocity_scale.vector().set_local((eps * nu) ** (1. / 4))
+        velocity_scale.vector().set_local((eps * nu) ** (1.0 / 4))
         velocity_scale.vector().apply("insert")
         velocity_scale_cycle_avg.vector().axpy(1, velocity_scale.vector())
         t0.stop()
@@ -432,7 +586,13 @@ def define_functions_and_iterate_dataset(time_to_average, dataset, dataset_avg, 
             assign(u2, u.sub(2))
 
         kinetic_energy.vector().set_local(
-            0.5 * (u0.vector().get_local() ** 2 + u1.vector().get_local() ** 2 + u2.vector().get_local() ** 2))
+            0.5
+            * (
+                u0.vector().get_local() ** 2
+                + u1.vector().get_local() ** 2
+                + u2.vector().get_local() ** 2
+            )
+        )
         kinetic_energy.vector().apply("insert")
         kinetic_energy_cycle_avg.vector().axpy(1, kinetic_energy.vector())
         t0.stop()
@@ -445,11 +605,17 @@ def define_functions_and_iterate_dataset(time_to_average, dataset, dataset_avg, 
             assign(u2_prime, u_prime.sub(2))
 
         turbulent_kinetic_energy.vector().set_local(
-            0.5 * (u0_prime.vector().get_local() ** 2
-                   + u1_prime.vector().get_local() ** 2
-                   + u2_prime.vector().get_local() ** 2))
+            0.5
+            * (
+                u0_prime.vector().get_local() ** 2
+                + u1_prime.vector().get_local() ** 2
+                + u2_prime.vector().get_local() ** 2
+            )
+        )
         turbulent_kinetic_energy.vector().apply("insert")
-        turbulent_kinetic_energy_cycle_avg.vector().axpy(1, turbulent_kinetic_energy.vector())
+        turbulent_kinetic_energy_cycle_avg.vector().axpy(
+            1, turbulent_kinetic_energy.vector()
+        )
         t0.stop()
 
         if counter % 10 == 0:
@@ -467,11 +633,14 @@ def define_functions_and_iterate_dataset(time_to_average, dataset, dataset_avg, 
 
             # Store solution
             for name, metric in metric_dict_cycle.items():
-                metrics[name + "_cycle_{:02d}".format(cycle)].write_checkpoint(metric, name)
+                metrics[name + "_cycle_{:02d}".format(cycle)].write_checkpoint(
+                    metric, name
+                )
 
             # Append solution to total solution
-            for metric_avg, metric_cycle_avg in zip(list(metric_dict.values())[1:],
-                                                    list(metric_dict_cycle.values())[1:]):
+            for metric_avg, metric_cycle_avg in zip(
+                list(metric_dict.values())[1:], list(metric_dict_cycle.values())[1:]
+            ):
                 metric_cycle_avg.vector().apply("insert")
                 metric_avg.vector().axpy(1, metric_cycle_avg.vector())
 
@@ -482,7 +651,9 @@ def define_functions_and_iterate_dataset(time_to_average, dataset, dataset_avg, 
             counters_to_save.pop(0)
 
     # Get average over sampled time steps
-    metrics_dict_to_save = metric_dict if len(cycles_to_average) != 0 else metric_dict_cycle
+    metrics_dict_to_save = (
+        metric_dict if len(cycles_to_average) != 0 else metric_dict_cycle
+    )
     if len(cycles_to_average) != 0:
         number_of_files = len(cycles_to_average)
 
@@ -518,16 +689,36 @@ def define_functions_and_iterate_dataset(time_to_average, dataset, dataset_avg, 
 
 
 def main_metrics():
-    folder, nu, _, dt, velocity_degree, _, _, T, save_frequency, times_to_average, start_cycle, step, \
-        average_over_cycles = read_command_line()
+    (
+        folder,
+        nu,
+        _,
+        dt,
+        velocity_degree,
+        _,
+        _,
+        T,
+        save_frequency,
+        times_to_average,
+        start_cycle,
+        step,
+        average_over_cycles,
+        _,
+    ) = read_command_line()
 
-    compute_flow_and_simulation_metrics(folder, nu, dt, velocity_degree, T, times_to_average, save_frequency,
-                                        start_cycle, step, average_over_cycles)
+    compute_flow_and_simulation_metrics(
+        folder,
+        nu,
+        dt,
+        velocity_degree,
+        T,
+        times_to_average,
+        save_frequency,
+        start_cycle,
+        step,
+        average_over_cycles,
+    )
 
 
-if __name__ == '__main__':
-    folder, nu, _, dt, velocity_degree, _, _, T, save_frequency, times_to_average, start_cycle, step, \
-        average_over_cycles = read_command_line()
-
-    compute_flow_and_simulation_metrics(folder, nu, dt, velocity_degree, T, times_to_average, save_frequency,
-                                        start_cycle, step, average_over_cycles)
+if __name__ == "__main__":
+    main_metrics()

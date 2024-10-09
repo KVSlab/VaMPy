@@ -1,8 +1,24 @@
 import argparse
 from time import time
 
-from dolfin import parameters, MPI, assemble, interpolate, Measure, FacetNormal, Identity, VectorFunctionSpace, \
-    BoundaryMesh, Function, FacetArea, TestFunction, FunctionSpace, grad, inner, sqrt
+from dolfin import (
+    MPI,
+    BoundaryMesh,
+    FacetArea,
+    FacetNormal,
+    Function,
+    FunctionSpace,
+    Identity,
+    Measure,
+    TestFunction,
+    VectorFunctionSpace,
+    assemble,
+    grad,
+    inner,
+    interpolate,
+    parameters,
+    sqrt,
+)
 
 try:
     parameters["allow_extrapolation"] = True
@@ -12,81 +28,145 @@ except NameError:
 
 def read_command_line():
     """Read arguments from commandline"""
-    parser = argparse.ArgumentParser(formatter_class=argparse.ArgumentDefaultsHelpFormatter,
-                                     description="Automated post-processing for vascular modeling.")
+    parser = argparse.ArgumentParser(
+        formatter_class=argparse.ArgumentDefaultsHelpFormatter,
+        description="Automated post-processing for vascular modeling.",
+    )
 
-    parser.add_argument('-c', '--case',
-                        type=str,
-                        default="simulation/results_folder/model/data/1/Solutions",
-                        help="Path to simulation results.",
-                        metavar="PATH")
+    parser.add_argument(
+        "-c",
+        "--case",
+        type=str,
+        default="simulation/results_folder/model/data/1/Solutions",
+        help="Path to simulation results.",
+        metavar="PATH",
+    )
 
-    parser.add_argument('-nu', '--nu',
-                        type=float,
-                        default=3.3018e-3,
-                        help="Kinematic viscosity used in simulation. Measured in [mm^2/ms].")
+    parser.add_argument(
+        "-nu",
+        "--nu",
+        type=float,
+        default=3.3018e-3,
+        help="Kinematic viscosity used in simulation. Measured in [mm^2/ms].",
+    )
 
-    parser.add_argument('-r', '--rho',
-                        type=float,
-                        default=1060,
-                        help="Fluid density used in simulation. Measured in [kg/m^3].")
+    parser.add_argument(
+        "-r",
+        "--rho",
+        type=float,
+        default=1060,
+        help="Fluid density used in simulation. Measured in [kg/m^3].",
+    )
 
-    parser.add_argument('-T', '--T',
-                        type=float,
-                        default=951,
-                        help="Duration of one cardiac cycle. Measured in [ms].")
+    parser.add_argument(
+        "-T",
+        "--T",
+        type=float,
+        default=951,
+        help="Duration of one cardiac cycle. Measured in [ms].",
+    )
 
-    parser.add_argument('-dt', '--dt',
-                        type=float,
-                        default=0.0951,
-                        help="Time step of simulation. Measured in [ms].")
+    parser.add_argument(
+        "-dt",
+        "--dt",
+        type=float,
+        default=0.0951,
+        help="Time step of simulation. Measured in [ms].",
+    )
 
-    parser.add_argument('-vd', '--velocity-degree',
-                        type=int,
-                        default=1,
-                        help="Degree of velocity element.")
+    parser.add_argument(
+        "-vd",
+        "--velocity-degree",
+        type=int,
+        default=1,
+        help="Degree of velocity element.",
+    )
 
-    parser.add_argument('-pd', '--pressure-degree',
-                        type=int,
-                        default=1,
-                        help="Degree of pressure element.")
+    parser.add_argument(
+        "-pd",
+        "--pressure-degree",
+        type=int,
+        default=1,
+        help="Degree of pressure element.",
+    )
 
-    parser.add_argument('-sf', '--save-frequency',
-                        type=int,
-                        default=5,
-                        help="Frequency of saving velocity to file.")
+    parser.add_argument(
+        "-sf",
+        "--save-frequency",
+        type=int,
+        default=5,
+        help="Frequency of saving velocity to file.",
+    )
 
-    parser.add_argument('-pf', '--probe-frequency',
-                        type=int,
-                        default=100,
-                        help="Frequency of saving probes to file.")
+    parser.add_argument(
+        "-pf",
+        "--probe-frequency",
+        type=int,
+        default=100,
+        help="Frequency of saving probes to file.",
+    )
 
-    parser.add_argument('-ta', '--times-to-average',
-                        type=float,
-                        default=[],
-                        nargs="+",
-                        help="Time(s) during cardiac cycle to average, in the interval [0,T). Measured in [ms].")
+    parser.add_argument(
+        "-ta",
+        "--times-to-average",
+        type=float,
+        default=[],
+        nargs="+",
+        help="Time(s) during cardiac cycle to average, in the interval [0,T). Measured in [ms].",
+    )
 
-    parser.add_argument('-sc', '--start-cycle',
-                        type=int,
-                        default=2,
-                        help="Start post-processing from this cardiac cycle.")
+    parser.add_argument(
+        "-pp",
+        "--probes-to-plot",
+        type=int,
+        default=[],
+        nargs="+",
+        help="List of integers corresponding to probe numbers. "
+        + "The probes are to visualized in separate probe plots. ",
+    )
 
-    parser.add_argument('-ss', '--sample-step',
-                        type=int,
-                        default=1,
-                        help="Step size that determines how many times data is sampled.")
+    parser.add_argument(
+        "-sc",
+        "--start-cycle",
+        type=int,
+        default=2,
+        help="Start post-processing from this cardiac cycle.",
+    )
 
-    parser.add_argument('-ac', '--average-over-cycles',
-                        default=False,
-                        action='store_true',
-                        help="Computes average over all cycles if True.")
+    parser.add_argument(
+        "-ss",
+        "--sample-step",
+        type=int,
+        default=1,
+        help="Step size that determines how many times data is sampled.",
+    )
+
+    parser.add_argument(
+        "-ac",
+        "--average-over-cycles",
+        default=False,
+        action="store_true",
+        help="Computes average over all cycles if True.",
+    )
 
     args = parser.parse_args()
 
-    return args.case, args.nu, args.rho, args.dt, args.velocity_degree, args.pressure_degree, args.probe_frequency, \
-        args.T, args.save_frequency, args.times_to_average, args.start_cycle, args.sample_step, \
-        args.average_over_cycles
+    return (
+        args.case,
+        args.nu,
+        args.rho,
+        args.dt,
+        args.velocity_degree,
+        args.pressure_degree,
+        args.probe_frequency,
+        args.T,
+        args.save_frequency,
+        args.times_to_average,
+        args.start_cycle,
+        args.sample_step,
+        args.average_over_cycles,
+        args.probes_to_plot,
+    )
 
 
 def epsilon(u):
@@ -159,8 +239,8 @@ class STRESS:
             mesh (Mesh): The mesh on which to compute stress.
         """
         boundary_ds = Measure("ds", domain=mesh)
-        boundary_mesh = BoundaryMesh(mesh, 'exterior')
-        self.bmV = VectorFunctionSpace(boundary_mesh, 'CG', 1)
+        boundary_mesh = BoundaryMesh(mesh, "exterior")
+        self.bmV = VectorFunctionSpace(boundary_mesh, "CG", 1)
 
         # Compute stress tensor
         sigma = (2 * nu * epsilon(u)) - (p * Identity(len(u)))
@@ -174,9 +254,11 @@ class STRESS:
         Ft = F - (Fn * n)  # vector-valued
 
         # Integrate against piecewise constants on the boundary
-        scalar = FunctionSpace(mesh, 'DG', 0)
-        vector = VectorFunctionSpace(mesh, 'CG', 1)
-        scaling = FacetArea(mesh)  # Normalise the computed stress relative to the size of the element
+        scalar = FunctionSpace(mesh, "DG", 0)
+        vector = VectorFunctionSpace(mesh, "CG", 1)
+        scaling = FacetArea(
+            mesh
+        )  # Normalise the computed stress relative to the size of the element
 
         v = TestFunction(scalar)
         w = TestFunction(vector)
@@ -216,8 +298,14 @@ class STRESS:
         return pow(inner(u, u), 0.5)
 
 
-def get_dataset_names(data_file, num_files=100000, step=1, start=0, print_info=True,
-                      vector_filename="/velocity/vector_%d"):
+def get_dataset_names(
+    data_file,
+    num_files=100000,
+    step=1,
+    start=0,
+    print_info=True,
+    vector_filename="/velocity/vector_%d",
+):
     """
     Read velocity fields datasets and extract names of files
 

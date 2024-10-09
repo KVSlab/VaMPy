@@ -10,12 +10,12 @@ __all__ = ["Probes"]
 
 import cppimport
 from mpi4py.MPI import COMM_WORLD as comm
-from numpy import zeros, squeeze, save
+from numpy import save, squeeze, zeros
 
 ProbeObject = object
 
 try:
-    probe11 = cppimport.imp('probe.probe11')
+    probe11 = cppimport.imp("probe.probe11")
     ProbeObject = probe11.Probes
     print("Successfully imported probe.probe11")
 except ImportError as e:

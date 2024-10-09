@@ -1,8 +1,20 @@
 from os import path
 
-from dolfin import parameters, FunctionSpace, XDMFFile, MPI, VectorFunctionSpace, HDF5File, Mesh, Function
+from dolfin import (
+    MPI,
+    Function,
+    FunctionSpace,
+    HDF5File,
+    Mesh,
+    VectorFunctionSpace,
+    XDMFFile,
+    parameters,
+)
 
-from vampy.automatedPostprocessing.postprocessing_common import read_command_line, get_dataset_names
+from vampy.automatedPostprocessing.postprocessing_common import (
+    get_dataset_names,
+    read_command_line,
+)
 
 try:
     parameters["reorder_dofs_serial"] = False
@@ -10,7 +22,9 @@ except NameError:
     pass
 
 
-def compute_velocity_and_pressure(folder, dt, save_frequency, velocity_degree, pressure_degree, step):
+def compute_velocity_and_pressure(
+    folder, dt, save_frequency, velocity_degree, pressure_degree, step
+):
     """
     Loads velocity and pressure from compressed .h5 CFD solution and
     converts and saves to .xdmf format for visualization (in e.g. ParaView).
@@ -37,10 +51,16 @@ def compute_velocity_and_pressure(folder, dt, save_frequency, velocity_degree, p
         file_d = HDF5File(MPI.comm_world, file_path_d, "r")
 
     # Read in datasets
-    dataset_u = get_dataset_names(file_u, step=step, vector_filename="/velocity/vector_%d")
-    dataset_p = get_dataset_names(file_p, step=step, vector_filename="/pressure/vector_%d")
+    dataset_u = get_dataset_names(
+        file_u, step=step, vector_filename="/velocity/vector_%d"
+    )
+    dataset_p = get_dataset_names(
+        file_p, step=step, vector_filename="/pressure/vector_%d"
+    )
     if file_d is not None:
-        dataset_d = get_dataset_names(file_d, step=step, vector_filename="/deformation/vector_%d")
+        dataset_d = get_dataset_names(
+            file_d, step=step, vector_filename="/deformation/vector_%d"
+        )
 
     # Read mesh saved as HDF5 format
     mesh = Mesh()
@@ -110,10 +130,42 @@ def compute_velocity_and_pressure(folder, dt, save_frequency, velocity_degree, p
 
 
 def main_convert():
-    folder, _, _, dt, velocity_degree, pressure_degree, _, _, save_frequency, _, _, step, _ = read_command_line()
-    compute_velocity_and_pressure(folder, dt, save_frequency, velocity_degree, pressure_degree, step)
+    (
+        folder,
+        _,
+        _,
+        dt,
+        velocity_degree,
+        pressure_degree,
+        _,
+        _,
+        save_frequency,
+        _,
+        _,
+        step,
+        _,
+    ) = read_command_line()
+    compute_velocity_and_pressure(
+        folder, dt, save_frequency, velocity_degree, pressure_degree, step
+    )
 
 
-if __name__ == '__main__':
-    folder, _, _, dt, velocity_degree, pressure_degree, _, _, save_frequency, _, _, step, _ = read_command_line()
-    compute_velocity_and_pressure(folder, dt, save_frequency, velocity_degree, pressure_degree, step)
+if __name__ == "__main__":
+    (
+        folder,
+        _,
+        _,
+        dt,
+        velocity_degree,
+        pressure_degree,
+        _,
+        _,
+        save_frequency,
+        _,
+        _,
+        step,
+        _,
+    ) = read_command_line()
+    compute_velocity_and_pressure(
+        folder, dt, save_frequency, velocity_degree, pressure_degree, step
+    )

@@ -6,10 +6,10 @@ from vtk.numpy_interface import dataset_adapter as dsa
 
 from vampy.automatedPreprocessing.preprocessing_common import scale_surface
 
-
 ##############################################################
 # A Collection of utility scripts for moving mesh generation #
 ##############################################################
+
 
 def get_point_map(remeshed, remeshed_extended, profile="linear"):
     """
@@ -33,15 +33,31 @@ def get_point_map(remeshed, remeshed_extended, profile="linear"):
     num_ext = remeshed_extended.Points.shape[0] - remeshed.Points.shape[0]
 
     # Get locators
-    inner_feature = vtk_compute_connectivity(vtk_extract_feature_edges(remeshed.VTKObject))
-    outer_feature = vtk_compute_connectivity(vtk_extract_feature_edges(remeshed_extended.VTKObject))
+    inner_feature = vtk_compute_connectivity(
+        vtk_extract_feature_edges(remeshed.VTKObject)
+    )
+    outer_feature = vtk_compute_connectivity(
+        vtk_extract_feature_edges(remeshed_extended.VTKObject)
+    )
     locator_remeshed = get_vtk_point_locator(remeshed.VTKObject)
 
-    n_features = outer_feature.GetPointData().GetArray("RegionId").GetValue(outer_feature.GetNumberOfPoints() - 1)
+    n_features = (
+        outer_feature.GetPointData()
+        .GetArray("RegionId")
+        .GetValue(outer_feature.GetNumberOfPoints() - 1)
+    )
     inner_features = np.array(
-        [vtk_compute_threshold(inner_feature, "RegionId", i, i + 0.1, source=0) for i in range(n_features + 1)])
+        [
+            vtk_compute_threshold(inner_feature, "RegionId", i, i + 0.1, source=0)
+            for i in range(n_features + 1)
+        ]
+    )
     outer_features = np.array(
-        [vtk_compute_threshold(outer_feature, "RegionId", i, i + 0.1, source=0) for i in range(n_features + 1)])
+        [
+            vtk_compute_threshold(outer_feature, "RegionId", i, i + 0.1, source=0)
+            for i in range(n_features + 1)
+        ]
+    )
 
     inner_regions = [dsa.WrapDataObject(feature) for feature in inner_features]
     inner_locators = [get_vtk_point_locator(feature) for feature in inner_features]
@@ -50,7 +66,9 @@ def get_point_map(remeshed, remeshed_extended, profile="linear"):
     outer_regions = [dsa.WrapDataObject(feature) for feature in outer_features]
     outer_locators = [get_vtk_point_locator(feature) for feature in outer_features]
     outer_points = [feature.GetNumberOfPoints() for feature in outer_features]
-    boundary_map = {i: j for i, j in zip(np.argsort(inner_points), np.argsort(outer_points))}
+    boundary_map = {
+        i: j for i, j in zip(np.argsort(inner_points), np.argsort(outer_points))
+    }
 
     # Get distance and point map
     distances = np.zeros(num_ext)
@@ -82,14 +100,20 @@ def get_point_map(remeshed, remeshed_extended, profile="linear"):
         inner_id = inner_locators[regionId].FindClosestPoint(point)
         outer_id = outer_locators[regionId_out].FindClosestPoint(point)
 
-        dist_to_boundary = get_distance(point, outer_regions[regionId_out].Points[outer_id])
-        dist_between_boundaries = get_distance(inner_regions[regionId].Points[inner_id],
-                                               outer_regions[regionId_out].Points[outer_id])
+        dist_to_boundary = get_distance(
+            point, outer_regions[regionId_out].Points[outer_id]
+        )
+        dist_between_boundaries = get_distance(
+            inner_regions[regionId].Points[inner_id],
+            outer_regions[regionId_out].Points[outer_id],
+        )
         if profile == "linear":
-            distances[i] = (dist_to_boundary / dist_between_boundaries)
+            distances[i] = dist_to_boundary / dist_between_boundaries
         elif profile == "sine":
             distances[i] = easing_cos(dist_to_boundary, dist_between_boundaries)
-        point_map[i] = locator_remeshed.FindClosestPoint(inner_regions[regionId].Points[inner_id])
+        point_map[i] = locator_remeshed.FindClosestPoint(
+            inner_regions[regionId].Points[inner_id]
+        )
 
     # Let the points corresponding to the caps have distance 0
     point_map = point_map.astype(int)
@@ -107,11 +131,21 @@ def easing_cos(dist_b, dist_bb):
     Returns:
         distances (ndarray): Sinusoidal profile based on distance between point and boundary
     """
-    return - 0.5 * (np.cos(np.pi * dist_b / dist_bb) - 1)
+    return -0.5 * (np.cos(np.pi * dist_b / dist_bb) - 1)
 
 
-def move_surface_model(surface, original, remeshed, remeshed_extended, distance, point_map, file_path, i, points,
-                       clamp_boundaries):
+def move_surface_model(
+    surface,
+    original,
+    remeshed,
+    remeshed_extended,
+    distance,
+    point_map,
+    file_path,
+    i,
+    points,
+    clamp_boundaries,
+):
     """
     Computes and applies the displacement between the original and the given surface, then projects this
     displacement onto a remeshed surface. The displaced points of the remeshed surface are then saved
@@ -158,10 +192,11 @@ def move_surface_model(surface, original, remeshed, remeshed_extended, distance,
 
     # Manipulate displacement in the extensions
     displacement = new_surface.PointData["displacement"]
+    n_points = remeshed.Points.shape[0]
     if clamp_boundaries:
-        displacement[remeshed.Points.shape[0]:] = distance * displacement[point_map]
+        displacement[n_points:] = distance * displacement[point_map]
     else:
-        displacement[remeshed.Points.shape[0]:] = displacement[point_map]
+        displacement[n_points:] = displacement[point_map]
 
     # Move the mesh points
     new_surface.Points += displacement
@@ -197,8 +232,17 @@ def save_displacement(file_name_displacement_points, points, number_of_points=10
     points.dump(file_name_displacement_points)
 
 
-def project_displacement(clamp_boundaries, distance, folder_extended_surfaces, folder_moved_surfaces, point_map,
-                         surface, surface_extended, remeshed, scale_factor):
+def project_displacement(
+    clamp_boundaries,
+    distance,
+    folder_extended_surfaces,
+    folder_moved_surfaces,
+    point_map,
+    surface,
+    surface_extended,
+    remeshed,
+    scale_factor,
+):
     """
     Projects the displacement of moved surfaces located in a specified folder onto an extended surface. The projected
     surfaces are then saved to a designated output directory.
@@ -220,7 +264,13 @@ def project_displacement(clamp_boundaries, distance, folder_extended_surfaces, f
         (num_points, 3, num_surfaces).
     """
     # Add extents to all surfaces
-    extended_surfaces = sorted([f for f in listdir(folder_moved_surfaces) if f.endswith(".vtp") or f.endswith(".stl")])
+    extended_surfaces = sorted(
+        [
+            f
+            for f in listdir(folder_moved_surfaces)
+            if f.endswith(".vtp") or f.endswith(".stl")
+        ]
+    )
     if not path.exists(folder_extended_surfaces):
         mkdir(folder_extended_surfaces)
 
@@ -240,6 +290,16 @@ def project_displacement(clamp_boundaries, distance, folder_extended_surfaces, f
 
         new_path = path.join(folder_extended_surfaces, model_path.split("/")[-1])
         if not path.exists(new_path):
-            move_surface_model(tmp_surface, surface, remeshed, surface_extended, distance, point_map, new_path, i,
-                               points, clamp_boundaries)
+            move_surface_model(
+                tmp_surface,
+                surface,
+                remeshed,
+                surface_extended,
+                distance,
+                point_map,
+                new_path,
+                i,
+                points,
+                clamp_boundaries,
+            )
     return points
