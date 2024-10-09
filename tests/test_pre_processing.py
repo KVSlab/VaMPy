@@ -54,15 +54,18 @@ def test_mesh_model_with_one_inlet_and_two_outlets():
     model_path = "tests/test_data/artery/artery.stl"
     # Get default input parameters
     common_input = read_command_line(model_path)
-    common_input.update(dict(meshing_method="curvature",
-                             smoothing_method="taubin",
-                             refine_region=False,
-                             coarsening_factor=1.9,
-                             visualize=False,
-                             compress_mesh=False,
-                             outlet_flow_extension_length=1,
-                             inlet_flow_extension_length=1
-                             ))
+    common_input.update(
+        dict(
+            meshing_method="curvature",
+            smoothing_method="taubin",
+            refine_region=False,
+            coarsening_factor=1.9,
+            visualize=False,
+            compress_mesh=False,
+            outlet_flow_extension_length=1,
+            inlet_flow_extension_length=1,
+        )
+    )
     # Run pre processing
     run_pre_processing(**common_input)
 
@@ -90,14 +93,17 @@ def test_mesh_model_with_one_inlet_and_one_outlet():
     model_path = "tests/test_data/vein/vein.stl"
     # Get default input parameters
     common_input = read_command_line(model_path)
-    common_input.update(dict(meshing_method="diameter",
-                             refine_region=False,
-                             coarsening_factor=1.3,
-                             visualize=False,
-                             compress_mesh=False,
-                             outlet_flow_extension_length=.5,
-                             inlet_flow_extension_length=.5
-                             ))
+    common_input.update(
+        dict(
+            meshing_method="diameter",
+            refine_region=False,
+            coarsening_factor=1.3,
+            visualize=False,
+            compress_mesh=False,
+            outlet_flow_extension_length=0.5,
+            inlet_flow_extension_length=0.5,
+        )
+    )
 
     # Run pre processing
     run_pre_processing(**common_input)
@@ -127,16 +133,19 @@ def test_mesh_model_with_geodesic_meshing():
     # Get default input parameters
     common_input = read_command_line(model_path)
     region_point = [33.6612, 32.8443, 40.9184]
-    common_input.update(dict(meshing_method="geodesic",
-                             max_geodesic_distance=2.5,
-                             edge_length=0.5,
-                             refine_region=True,
-                             region_points=region_point,
-                             visualize=False,
-                             compress_mesh=False,
-                             outlet_flow_extension_length=1,
-                             inlet_flow_extension_length=1
-                             ))
+    common_input.update(
+        dict(
+            meshing_method="geodesic",
+            max_geodesic_distance=2.5,
+            edge_length=0.5,
+            refine_region=True,
+            region_points=region_point,
+            visualize=False,
+            compress_mesh=False,
+            outlet_flow_extension_length=1,
+            inlet_flow_extension_length=1,
+        )
+    )
 
     # Run pre processing
     run_pre_processing(**common_input)

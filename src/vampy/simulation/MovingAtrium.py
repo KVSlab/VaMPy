@@ -1,23 +1,33 @@
 import json
 import pickle
 from os import makedirs
-from dolfin import set_log_level, UserExpression
 
+from dolfin import UserExpression, set_log_level
 from oasismove.problems.NSfracStep import *
 from oasismove.problems.NSfracStep.MovingCommon import get_visualization_writers
-from scipy.interpolate import splrep, splev
+from scipy.interpolate import splev, splrep
 from scipy.spatial import KDTree
 
 from vampy.simulation.Probe import Probes  # type: ignore
-from vampy.simulation.Womersley import make_womersley_bcs, compute_boundary_geometry_acrn
-from vampy.simulation.simulation_common import store_u_mean, get_file_paths, print_mesh_information, \
-    store_velocity_and_pressure_h5, dump_probes
+from vampy.simulation.simulation_common import (
+    dump_probes,
+    get_file_paths,
+    print_mesh_information,
+    store_u_mean,
+    store_velocity_and_pressure_h5,
+)
+from vampy.simulation.Womersley import (
+    compute_boundary_geometry_acrn,
+    make_womersley_bcs,
+)
 
 # FEniCS specific command to control the desired level of logging, here set to critical errors
 set_log_level(50)
 
 
-def problem_parameters(commandline_kwargs, scalar_components, NS_parameters, **NS_namespace):
+def problem_parameters(
+    commandline_kwargs, scalar_components, NS_parameters, **NS_namespace
+):
     """
     Problem file for running CFD simulation in left atrial models consisting of arbitrary number of pulmonary veins (PV)
     (normally 3 to 7), and one outlet being the mitral valve. A Womersley velocity profile is applied at the inlets,
@@ -36,10 +46,10 @@ def problem_parameters(commandline_kwargs, scalar_components, NS_parameters, **N
     if "restart_folder" in commandline_kwargs.keys():
         restart_folder = commandline_kwargs["restart_folder"]
         mesh_path = commandline_kwargs["mesh_path"]
-        f = open(path.join(restart_folder, 'params.dat'), 'rb')
+        f = open(path.join(restart_folder, "params.dat"), "rb")
         NS_parameters.update(pickle.load(f))
-        NS_parameters['restart_folder'] = restart_folder
-        NS_parameters['mesh_path'] = mesh_path
+        NS_parameters["restart_folder"] = restart_folder
+        NS_parameters["mesh_path"] = mesh_path
         globals().update(NS_parameters)
     else:
         # Override some problem specific parameters
@@ -84,10 +94,12 @@ def problem_parameters(commandline_kwargs, scalar_components, NS_parameters, **N
             velocity_degree=1,
             pressure_degree=1,
             use_krylov_solvers=True,
-            krylov_solvers={'monitor_convergence': False,
-                            'report': False,
-                            'relative_tolerance': 1e-8,
-                            'absolute_tolerance': 1e-8}
+            krylov_solvers={
+                "monitor_convergence": False,
+                "report": False,
+                "relative_tolerance": 1e-8,
+                "absolute_tolerance": 1e-8,
+            },
         )
 
     if track_blood:
@@ -137,7 +149,7 @@ class MeshMotionMapping(UserExpression):
         self.counter += 1
         _, index = self.tree.query(x)
         # FIXME: Set spline parameter objectively
-        s = 1E-2
+        s = 1e-2
         x_ = splrep(self.time, self.points[index, 0, :], s=s, per=True)
         y_ = splrep(self.time, self.points[index, 1, :], s=s, per=True)
         z_ = splrep(self.time, self.points[index, 2, :], s=s, per=True)
@@ -158,20 +170,37 @@ class WallMotion(UserExpression):
     def eval(self, values, _):
         self.counter += 1
         # No motion for inlet/outlet
-        values[:] = splev(self.t % self.cycle, self.motion[self.counter][self.direction], der=1)
+        values[:] = splev(
+            self.t % self.cycle, self.motion[self.counter][self.direction], der=1
+        )
         if self.counter == self.max_counter:
             self.counter = -1
 
 
-def create_bcs(NS_expressions, dynamic_mesh, x_, cardiac_cycle, backflow_facets, mesh, mesh_path, nu, t,
-               V, Q, id_in, id_out, track_blood, **NS_namespace):
+def create_bcs(
+    NS_expressions,
+    dynamic_mesh,
+    x_,
+    cardiac_cycle,
+    backflow_facets,
+    mesh,
+    mesh_path,
+    nu,
+    t,
+    V,
+    Q,
+    id_in,
+    id_out,
+    track_blood,
+    **NS_namespace,
+):
     if mesh_path.endswith(".xml") or mesh_path.endswith(".xml.gz"):
         mesh_filename = ".xml"
     elif mesh_path.endswith(".h5"):
         mesh_filename = ".h5"
 
     rank = MPI.rank(MPI.comm_world)
-    coords = ['x', 'y', 'z']
+    coords = ["x", "y", "z"]
     # Variables needed during the simulation
     boundary = MeshFunction("size_t", mesh, mesh.geometry().dim() - 1, mesh.domains())
     if mesh_path.endswith(".h5"):
@@ -183,12 +212,12 @@ def create_bcs(NS_expressions, dynamic_mesh, x_, cardiac_cycle, backflow_facets,
     with open(info_path) as f:
         info = json.load(f)
 
-    id_in[:] = info['inlet_ids']
-    id_out[:] = info['outlet_id']
+    id_in[:] = info["inlet_ids"]
+    id_out[:] = info["outlet_id"]
     id_wall = min(id_in + id_out) - 1
 
     # Apply backflow at the outlet (Mitral valve)
-    backflow_facets[:] = info['outlet_id']
+    backflow_facets[:] = info["outlet_id"]
 
     # Find corresponding areas
     ds_new = Measure("ds", domain=mesh, subdomain_data=boundary)
@@ -205,18 +234,22 @@ def create_bcs(NS_expressions, dynamic_mesh, x_, cardiac_cycle, backflow_facets,
         # Use default flow rate
         flow_rate_path = path.join(path.dirname(path.abspath(__file__)), "PV_values")
         # Load normalized time and flow rate values
-        Q_mean = info['mean_flow_rate']
+        Q_mean = info["mean_flow_rate"]
         t_values, Q_ = np.loadtxt(flow_rate_path).T
         Q_ *= Q_mean
 
     t_values *= 1000  # Scale time in normalised flow wave form to [ms]
 
     for ID in id_in:
-        tmp_area, tmp_center, tmp_radius, tmp_normal = compute_boundary_geometry_acrn(mesh, ID, boundary)
+        tmp_area, tmp_center, tmp_radius, tmp_normal = compute_boundary_geometry_acrn(
+            mesh, ID, boundary
+        )
         Q_scaled = Q_ * tmp_area / area_total
 
         # Create Womersley boundary condition at inlets
-        inlet = make_womersley_bcs(t_values, Q_scaled, nu, tmp_center, tmp_radius, tmp_normal, V.ufl_element())
+        inlet = make_womersley_bcs(
+            t_values, Q_scaled, nu, tmp_center, tmp_radius, tmp_normal, V.ufl_element()
+        )
         NS_expressions[f"inlet_{ID}"] = inlet
 
     # Initial condition
@@ -227,7 +260,10 @@ def create_bcs(NS_expressions, dynamic_mesh, x_, cardiac_cycle, backflow_facets,
     # Create inlet boundary conditions
     bc_inlets = {}
     for ID in id_in:
-        bc_inlet = [DirichletBC(V, NS_expressions[f"inlet_{ID}"][i], boundary, ID) for i in range(3)]
+        bc_inlet = [
+            DirichletBC(V, NS_expressions[f"inlet_{ID}"][i], boundary, ID)
+            for i in range(3)
+        ]
         bc_inlets[ID] = bc_inlet
 
     # Set outlet boundary conditions, assuming one outlet (Mitral Valve)
@@ -238,12 +274,16 @@ def create_bcs(NS_expressions, dynamic_mesh, x_, cardiac_cycle, backflow_facets,
         # Moving walls
         if rank == 0:
             print("Loading displacement points")
-        points = np.load(mesh_path.split(mesh_filename)[0] + "_points.np", allow_pickle=True)
+        points = np.load(
+            mesh_path.split(mesh_filename)[0] + "_points.np", allow_pickle=True
+        )
         if rank == 0:
             print("Creating splines for displacement")
 
         # Define wall movement
-        motion_mapping = MeshMotionMapping(points, cardiac_cycle, element=V.ufl_element())
+        motion_mapping = MeshMotionMapping(
+            points, cardiac_cycle, element=V.ufl_element()
+        )
         bc_tmp = DirichletBC(V, motion_mapping, boundary, id_wall)
         bc_tmp.apply(x_["u0"])
         x_["u0"].zero()
@@ -259,10 +299,20 @@ def create_bcs(NS_expressions, dynamic_mesh, x_, cardiac_cycle, backflow_facets,
             print("Creating wall boundary conditions")
 
         for i, coord in enumerate(coords):
-            wall_ = WallMotion(t, wall_motion, wall_counter_max, i, cardiac_cycle, element=V.ufl_element())
+            wall_ = WallMotion(
+                t,
+                wall_motion,
+                wall_counter_max,
+                i,
+                cardiac_cycle,
+                element=V.ufl_element(),
+            )
             NS_expressions["wall_%s" % coord] = wall_
 
-        bc_wall = [DirichletBC(V, NS_expressions["wall_%s" % coord], boundary, id_wall) for coord in coords]
+        bc_wall = [
+            DirichletBC(V, NS_expressions["wall_%s" % coord], boundary, id_wall)
+            for coord in coords
+        ]
     else:
         # No slip on walls
         bc_wall = [DirichletBC(V, Constant(0.0), boundary, id_wall)] * len(coords)
@@ -280,9 +330,23 @@ def create_bcs(NS_expressions, dynamic_mesh, x_, cardiac_cycle, backflow_facets,
         return dict(u0=bc_u0, u1=bc_u1, u2=bc_u2, p=bc_p)
 
 
-def pre_solve_hook(u_components, id_in, id_out, dynamic_mesh, V, Q, cardiac_cycle, dt,
-                   save_solution_after_cycle, mesh_path, mesh, newfolder, velocity_degree,
-                   restart_folder, **NS_namespace):
+def pre_solve_hook(
+    u_components,
+    id_in,
+    id_out,
+    dynamic_mesh,
+    V,
+    Q,
+    cardiac_cycle,
+    dt,
+    save_solution_after_cycle,
+    mesh_path,
+    mesh,
+    newfolder,
+    velocity_degree,
+    restart_folder,
+    **NS_namespace,
+):
     id_wall = min(id_in + id_out) - 1
     # Extract diameter at mitral valve
     if mesh_path.endswith(".xml") or mesh_path.endswith(".xml.gz"):
@@ -294,14 +358,14 @@ def pre_solve_hook(u_components, id_in, id_out, dynamic_mesh, V, Q, cardiac_cycl
     with open(info_path) as f:
         info = json.load(f)
 
-    outlet_area = info['outlet_area']
+    outlet_area = info["outlet_area"]
     D_mitral = np.sqrt(4 * outlet_area / np.pi)
 
     # Create point for evaluation
     n = FacetNormal(mesh)
     eval_dict = {}
     rel_path = mesh_path.split(mesh_filename)[0] + "_probe_point.json"
-    with open(rel_path, 'r') as infile:
+    with open(rel_path, "r") as infile:
         probe_points = np.array(json.load(infile))
 
     # Store points file in checkpoint
@@ -315,7 +379,7 @@ def pre_solve_hook(u_components, id_in, id_out, dynamic_mesh, V, Q, cardiac_cycl
 
     if restart_folder is None:
         # Get files to store results
-        files = get_file_paths(newfolder, ['brt', 'd'])
+        files = get_file_paths(newfolder, ["brt", "d"])
         NS_parameters.update(dict(files=files))
     else:
         files = NS_namespace["files"]
@@ -331,7 +395,7 @@ def pre_solve_hook(u_components, id_in, id_out, dynamic_mesh, V, Q, cardiac_cycl
             makedirs(probes_folder)
 
     # Define xdmf writers
-    viz_U, viz_blood = get_visualization_writers(newfolder, ['velocity', 'blood'])
+    viz_U, viz_blood = get_visualization_writers(newfolder, ["velocity", "blood"])
 
     # Extract dof map and coordinates
     coordinates = mesh.coordinates()
@@ -374,10 +438,27 @@ def pre_solve_hook(u_components, id_in, id_out, dynamic_mesh, V, Q, cardiac_cycl
     else:
         bc_mesh = {}
 
-    return dict(outlet_area=outlet_area, id_wall=id_wall, D_mitral=D_mitral, n=n, eval_dict=eval_dict, U=U, D=D,
-                u_mean=u_mean, u_mean0=u_mean0, u_mean1=u_mean1, u_mean2=u_mean2, boundary=boundary, bc_mesh=bc_mesh,
-                coordinates=coordinates, viz_U=viz_U, save_solution_at_tstep=save_solution_at_tstep, dof_map=dof_map,
-                probes_folder=probes_folder, viz_blood=viz_blood)
+    return dict(
+        outlet_area=outlet_area,
+        id_wall=id_wall,
+        D_mitral=D_mitral,
+        n=n,
+        eval_dict=eval_dict,
+        U=U,
+        D=D,
+        u_mean=u_mean,
+        u_mean0=u_mean0,
+        u_mean1=u_mean1,
+        u_mean2=u_mean2,
+        boundary=boundary,
+        bc_mesh=bc_mesh,
+        coordinates=coordinates,
+        viz_U=viz_U,
+        save_solution_at_tstep=save_solution_at_tstep,
+        dof_map=dof_map,
+        probes_folder=probes_folder,
+        viz_blood=viz_blood,
+    )
 
 
 def update_boundary_conditions(t, dynamic_mesh, NS_expressions, id_in, **NS_namespace):
@@ -392,10 +473,42 @@ def update_boundary_conditions(t, dynamic_mesh, NS_expressions, id_in, **NS_name
             NS_expressions[f"wall_{coord}"].t = t
 
 
-def temporal_hook(mesh, id_wall, id_out, cardiac_cycle, dt, t, save_solution_frequency, u_, id_in, tstep, newfolder,
-                  eval_dict, dump_probe_frequency, p_, save_solution_at_tstep, nu, D_mitral, U, u_mean0, u_mean1,
-                  u_mean2, save_flow_metrics_frequency, save_volume_frequency, save_solution_frequency_xdmf, viz_U,
-                  boundary, outlet_area, q_, w_, viz_blood, track_blood, D, du_, **NS_namespace):
+def temporal_hook(
+    mesh,
+    id_wall,
+    id_out,
+    cardiac_cycle,
+    dt,
+    t,
+    save_solution_frequency,
+    u_,
+    id_in,
+    tstep,
+    newfolder,
+    eval_dict,
+    dump_probe_frequency,
+    p_,
+    save_solution_at_tstep,
+    nu,
+    D_mitral,
+    U,
+    u_mean0,
+    u_mean1,
+    u_mean2,
+    save_flow_metrics_frequency,
+    save_volume_frequency,
+    save_solution_frequency_xdmf,
+    viz_U,
+    boundary,
+    outlet_area,
+    q_,
+    w_,
+    viz_blood,
+    track_blood,
+    D,
+    du_,
+    **NS_namespace,
+):
     if tstep % save_volume_frequency == 0:
         compute_volume(mesh, t, newfolder)
 
@@ -405,12 +518,29 @@ def temporal_hook(mesh, id_wall, id_out, cardiac_cycle, dt, t, save_solution_fre
 
         viz_U.write(U, t)
         if track_blood:
-            viz_blood.write(q_['blood'], t)
+            viz_blood.write(q_["blood"], t)
 
     if tstep % save_flow_metrics_frequency == 0:
         h = mesh.hmin()
-        compute_flow_quantities(u_, D_mitral, nu, mesh, t, tstep, dt, h, outlet_area, boundary, id_out, id_in, id_wall,
-                                period=cardiac_cycle, newfolder=newfolder, dynamic_mesh=False, write_to_file=True)
+        compute_flow_quantities(
+            u_,
+            D_mitral,
+            nu,
+            mesh,
+            t,
+            tstep,
+            dt,
+            h,
+            outlet_area,
+            boundary,
+            id_out,
+            id_in,
+            id_wall,
+            period=cardiac_cycle,
+            newfolder=newfolder,
+            dynamic_mesh=False,
+            write_to_file=True,
+        )
 
     # Sample velocity and pressure in points/probes
     eval_dict["centerline_u_x_probes"](u_[0])
@@ -424,11 +554,31 @@ def temporal_hook(mesh, id_wall, id_out, cardiac_cycle, dt, t, save_solution_fre
 
     # Save velocity and pressure for post-processing
     if tstep % save_solution_frequency == 0 and tstep >= save_solution_at_tstep:
-        store_velocity_and_pressure_h5(NS_parameters, U, p_, tstep, u_, u_mean0, u_mean1, u_mean2, D, du_)
+        store_velocity_and_pressure_h5(
+            NS_parameters, U, p_, tstep, u_, u_mean0, u_mean1, u_mean2, D, du_
+        )
 
 
 # Oasis hook called after the simulation has finished
-def theend_hook(u_mean, u_mean0, u_mean1, u_mean2, T, dt, save_solution_at_tstep, save_solution_frequency,
-                **NS_namespace):
-    store_u_mean(T, dt, save_solution_at_tstep, save_solution_frequency, u_mean, u_mean0, u_mean1, u_mean2,
-                 NS_parameters)
+def theend_hook(
+    u_mean,
+    u_mean0,
+    u_mean1,
+    u_mean2,
+    T,
+    dt,
+    save_solution_at_tstep,
+    save_solution_frequency,
+    **NS_namespace,
+):
+    store_u_mean(
+        T,
+        dt,
+        save_solution_at_tstep,
+        save_solution_frequency,
+        u_mean,
+        u_mean0,
+        u_mean1,
+        u_mean2,
+        NS_parameters,
+    )

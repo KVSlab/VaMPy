@@ -26,8 +26,19 @@ def test_artery_problem(num_processors, save_cwd):
     # Navigate to the simulation directory
     chdir("src/vampy/simulation")
 
-    cmd = ["mpirun", "-np", f"{num_processors}", "oasismove", "NSfracStep", "solver=IPCS_ABCN", f"T={T}", f"dt={dt}",
-           "problem=Artery", f"mesh_path={mesh_path}", "dump_probe_frequency=10"]
+    cmd = [
+        "mpirun",
+        "-np",
+        f"{num_processors}",
+        "oasismove",
+        "NSfracStep",
+        "solver=IPCS_ABCN",
+        f"T={T}",
+        f"dt={dt}",
+        "problem=Artery",
+        f"mesh_path={mesh_path}",
+        "dump_probe_frequency=10",
+    ]
 
     # Run Oasis
     result = subprocess.run(cmd, capture_output=True, text=True)
@@ -45,7 +56,7 @@ def test_artery_problem(num_processors, save_cwd):
     expected_pressure_1 = 0.38403
     expected_pressure_2 = 0.61597
 
-    tol = 1E-16
+    tol = 1e-16
 
     assert abs(pressures[0] - expected_pressure_1) < tol
     assert abs(pressures[1] - expected_pressure_2) < tol
@@ -60,7 +71,7 @@ def test_artery_problem(num_processors, save_cwd):
     expected_flow_rate_2 = 0.7219
 
     # Lower tolerance in parallel due to round off errors
-    tol = 1E-3
+    tol = 1e-3
 
     assert abs(flow_rates[0] - expected_flow_rate_1) < tol
     assert abs(flow_rates[1] - expected_flow_rate_2) < tol
@@ -75,8 +86,15 @@ def test_atrium_problem(save_cwd):
     # Navigate to the simulation directory
     chdir("src/vampy/simulation")
 
-    cmd = ["oasismove", "NSfracStep", 'solver=IPCS_ABCN', f"T={T}", f"dt={dt}", "problem=Atrium",
-           f"mesh_path={mesh_path}"]
+    cmd = [
+        "oasismove",
+        "NSfracStep",
+        "solver=IPCS_ABCN",
+        f"T={T}",
+        f"dt={dt}",
+        "problem=Atrium",
+        f"mesh_path={mesh_path}",
+    ]
 
     # Run Oasis
     result = subprocess.run(cmd, capture_output=True, text=True)
@@ -93,7 +111,7 @@ def test_atrium_problem(save_cwd):
     expected_max_velocity = 0.378
     expected_mean_velocity = 0.171
 
-    tol = 1E-16
+    tol = 1e-16
 
     assert abs(velocities[0] - expected_max_velocity) < tol
     assert abs(velocities[1] - expected_mean_velocity) < tol
@@ -108,8 +126,16 @@ def test_moving_atrium_problem(save_cwd):
     # Navigate to the simulation directory
     chdir("src/vampy/simulation")
 
-    cmd = ["oasismove", "NSfracStepMove", f"T={T}", f"dt={dt}", "problem=MovingAtrium", f"mesh_path={mesh_path}",
-           "save_flow_metrics_frequency=10", 'track_blood=False']
+    cmd = [
+        "oasismove",
+        "NSfracStepMove",
+        f"T={T}",
+        f"dt={dt}",
+        "problem=MovingAtrium",
+        f"mesh_path={mesh_path}",
+        "save_flow_metrics_frequency=10",
+        "track_blood=False",
+    ]
 
     # Run Oasis
     result = subprocess.run(cmd, capture_output=True, text=True)
@@ -127,7 +153,7 @@ def test_moving_atrium_problem(save_cwd):
     expected_max_velocity = 0.388
     expected_mean_velocity = 0.163
 
-    tol = 1E-16
+    tol = 1e-16
 
     assert abs(velocities[0] - expected_max_velocity) < tol
     assert abs(velocities[1] - expected_mean_velocity) < tol

@@ -4,16 +4,24 @@ import pickle
 from pprint import pprint
 
 import numpy as np
-from dolfin import set_log_level, MPI
+from dolfin import MPI, set_log_level
 
 from vampy.simulation.Probe import Probes  # type: ignore
-from vampy.simulation.Womersley import make_womersley_bcs, compute_boundary_geometry_acrn
-from vampy.simulation.simulation_common import get_file_paths, store_u_mean, print_mesh_information, \
-    store_velocity_and_pressure_h5, dump_probes
+from vampy.simulation.simulation_common import (
+    dump_probes,
+    get_file_paths,
+    print_mesh_information,
+    store_u_mean,
+    store_velocity_and_pressure_h5,
+)
+from vampy.simulation.Womersley import (
+    compute_boundary_geometry_acrn,
+    make_womersley_bcs,
+)
 
 # Check for oasis and oasismove
-package_name_oasis = 'oasis'
-package_name_oasismove = 'oasismove'
+package_name_oasis = "oasis"
+package_name_oasismove = "oasismove"
 oasis_exists = importlib.util.find_spec(package_name_oasis)
 oasismove_exists = importlib.util.find_spec(package_name_oasismove)
 if oasismove_exists:
@@ -140,11 +148,14 @@ def create_bcs(
         Q_mean * Q_
     )  # Specific flow rate = Normalized flow wave form * Prescribed flow rate
     t_values *= 1000  # Scale time in normalised flow wave form to [ms]
-    _, tmp_center, tmp_radius, tmp_normal = compute_boundary_geometry_acrn(mesh, id_in[0], boundary)
+    _, tmp_center, tmp_radius, tmp_normal = compute_boundary_geometry_acrn(
+        mesh, id_in[0], boundary
+    )
 
     # Create Womersley boundary condition at inlet
-    inlet = make_womersley_bcs(t_values, Q_values, nu, tmp_center, tmp_radius, tmp_normal,
-                               V.ufl_element())
+    inlet = make_womersley_bcs(
+        t_values, Q_values, nu, tmp_center, tmp_radius, tmp_normal, V.ufl_element()
+    )
     NS_expressions["inlet"] = inlet
 
     # Initialize inlet expressions with initial time
@@ -169,7 +180,9 @@ def create_bcs(
         bc_p.append(bc)
         NS_expressions[ID] = outflow
         if MPI.rank(comm) == 0:
-            print(f"Boundary ID={ID}, pressure: {p_initial:.5f}, area fraction: {area_ratio[i]:0.5f}")
+            print(
+                f"Boundary ID={ID}, pressure: {p_initial:.5f}, area fraction: {area_ratio[i]:0.5f}"
+            )
 
     # No slip condition at wall
     wall = Constant(0.0)
@@ -208,7 +221,7 @@ def pre_solve_hook(
     n = FacetNormal(mesh)
     eval_dict = {}
     rel_path = mesh_path.split(".xml")[0] + "_probe_point.json"
-    with open(rel_path, 'r') as infile:
+    with open(rel_path, "r") as infile:
         probe_points = np.array(json.load(infile))
 
     # Store points file in checkpoint
@@ -298,11 +311,15 @@ def temporal_hook(
         diam_inlet = np.sqrt(4 * area_inlet[0] / np.pi)
         Re = U_mean * diam_inlet / nu
         print("=" * 10, "Time step " + str(tstep), "=" * 10)
-        print(f"Sum of Q_out = {sum(Q_outs):.4f}, Q_in = {Q_in:.4f}, mean velocity (inlet): {U_mean:.4f}, " +
-              f"Reynolds number (inlet): {Re:.4f}")
+        print(
+            f"Sum of Q_out = {sum(Q_outs):.4f}, Q_in = {Q_in:.4f}, mean velocity (inlet): {U_mean:.4f}, "
+            + f"Reynolds number (inlet): {Re:.4f}"
+        )
         for i, out_id in enumerate(id_out):
-            print(f"For outlet with boundary ID={out_id}: target flow rate: {Q_ideals[i]:.4f} mL/s, " +
-                  f"computed flow rate: {Q_outs[i]:.4f} mL/s, pressure updated to: {NS_expressions[out_id].p:.4f}")
+            print(
+                f"For outlet with boundary ID={out_id}: target flow rate: {Q_ideals[i]:.4f} mL/s, "
+                + f"computed flow rate: {Q_outs[i]:.4f} mL/s, pressure updated to: {NS_expressions[out_id].p:.4f}"
+            )
         print()
 
     # Sample velocity and pressure in points/probes
@@ -317,7 +334,9 @@ def temporal_hook(
 
     # Save velocity and pressure for post-processing
     if tstep % save_solution_frequency == 0 and tstep >= save_solution_at_tstep:
-        store_velocity_and_pressure_h5(NS_parameters, U, p_, tstep, u_, u_mean0, u_mean1, u_mean2)
+        store_velocity_and_pressure_h5(
+            NS_parameters, U, p_, tstep, u_, u_mean0, u_mean1, u_mean2
+        )
 
 
 # Oasis hook called after the simulation has finished

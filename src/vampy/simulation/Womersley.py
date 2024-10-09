@@ -20,7 +20,14 @@
 import math
 
 import numpy as np
-from dolfin import UserExpression, assemble, Constant, FacetNormal, SpatialCoordinate, Measure
+from dolfin import (
+    Constant,
+    FacetNormal,
+    Measure,
+    SpatialCoordinate,
+    UserExpression,
+    assemble,
+)
 from scipy.integrate import simpson
 from scipy.interpolate import UnivariateSpline
 from scipy.special import jn
@@ -162,8 +169,8 @@ class WomersleyComponent(UserExpression):
         pir2 = np.pi * self.radius**2
         # Compute intermediate terms for womersley function
         r_dependent_coeffs = np.zeros(self.N, dtype=np.complex_)
-        if hasattr(self, 'Vn'):
-            r_dependent_coeffs[0] = self.Vn[0] * (1 - y ** 2)
+        if hasattr(self, "Vn"):
+            r_dependent_coeffs[0] = self.Vn[0] * (1 - y**2)
             for n in self.ns:
                 jn0b = self.jn0_betas[n]
                 r_dependent_coeffs[n] = (
@@ -210,8 +217,20 @@ class WomersleyComponent(UserExpression):
         value[0] = -self.normal_component * self.scale_value * wom
 
 
-def make_womersley_bcs(t, Q, nu, center, radius, normal, element, coeffstype="Q",
-                       N=1001, num_fourier_coefficients=20, Cn=None, **NS_namespace):
+def make_womersley_bcs(
+    t,
+    Q,
+    nu,
+    center,
+    radius,
+    normal,
+    element,
+    coeffstype="Q",
+    N=1001,
+    num_fourier_coefficients=20,
+    Cn=None,
+    **NS_namespace
+):
     """
     Generate a list of expressions for the components of a Womersley profile.
     Users can specify either the flow rate or fourier coefficients of the flow rate
@@ -233,7 +252,9 @@ def make_womersley_bcs(t, Q, nu, center, radius, normal, element, coeffstype="Q"
         # Compute fourier coefficients of transient profile
         timedisc = np.linspace(0, period, N)
 
-        Cn = fourier_coefficients(timedisc, transient_profile, period, num_fourier_coefficients)
+        Cn = fourier_coefficients(
+            timedisc, transient_profile, period, num_fourier_coefficients
+        )
 
     # Create Expressions for each direction
     expressions = []

@@ -16,7 +16,7 @@ class VtkText:
         self.text.SetDisplayPosition(10, 2)
 
 
-class vmtkSeedSelector():  # pragma: no cover
+class vmtkSeedSelector:  # pragma: no cover
     def __init__(self):
         self._Surface = None
         self._SeedIds = None

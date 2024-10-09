@@ -1,9 +1,11 @@
-from . import automated_preprocessing
-from . import preprocessing_common
-from . import DisplayData
-from . import ImportData
-from . import NetworkBoundaryConditions
-from . import simulate
-from . import repair_tools
-from . import visualize
-from . import vmtk_pointselector
+from . import (
+    DisplayData,
+    ImportData,
+    NetworkBoundaryConditions,
+    automated_preprocessing,
+    preprocessing_common,
+    repair_tools,
+    simulate,
+    visualize,
+    vmtk_pointselector,
+)

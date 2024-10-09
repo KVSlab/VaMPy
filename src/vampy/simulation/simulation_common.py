@@ -64,9 +64,15 @@ def print_mesh_information(mesh):
 
     if MPI.rank(MPI.comm_world) == 0:
         print("=== Mesh information ===")
-        print(f"X range: {min(xmin)} to {max(xmax)} (delta: {max(xmax) - min(xmin):.4f})")
-        print(f"Y range: {min(ymin)} to {max(ymax)} (delta: {max(ymax) - min(ymin):.4f})")
-        print(f"Z range: {min(zmin)} to {max(zmax)} (delta: {max(zmax) - min(zmin):.4f})")
+        print(
+            f"X range: {min(xmin)} to {max(xmax)} (delta: {max(xmax) - min(xmin):.4f})"
+        )
+        print(
+            f"Y range: {min(ymin)} to {max(ymax)} (delta: {max(ymax) - min(ymin):.4f})"
+        )
+        print(
+            f"Z range: {min(zmin)} to {max(zmax)} (delta: {max(zmax) - min(zmin):.4f})"
+        )
         print(f"Number of cells: {sum(num_cells)}")
         print(f"Number of cells per processor: {int(np.mean(num_cells))}")
         print(f"Number of edges: {sum(num_edges)}")
@@ -119,7 +125,9 @@ def store_u_mean(
         u_mean_file.write(u_mean, "u_mean")
 
 
-def store_velocity_and_pressure_h5(NS_parameters, U, p_, tstep, u_, u_mean0, u_mean1, u_mean2, D=None, du_=None):
+def store_velocity_and_pressure_h5(
+    NS_parameters, U, p_, tstep, u_, u_mean0, u_mean1, u_mean2, D=None, du_=None
+):
     """
     Store the velocity and pressure values to an HDF5 file.
 
@@ -143,8 +151,8 @@ def store_velocity_and_pressure_h5(NS_parameters, U, p_, tstep, u_, u_mean0, u_m
         assign(U.sub(i), u_[i])
 
     # Get save paths
-    p_path = NS_parameters['files']['p']
-    u_path = NS_parameters['files']['u']
+    p_path = NS_parameters["files"]["p"]
+    u_path = NS_parameters["files"]["u"]
     file_mode = "w" if not path.exists(p_path) else "a"
 
     # Save pressure
@@ -166,7 +174,7 @@ def store_velocity_and_pressure_h5(NS_parameters, U, p_, tstep, u_, u_mean0, u_m
             assign(D.sub(i), du_[i])
 
         # Save path to deformation
-        d_path = NS_parameters['files']['d']
+        d_path = NS_parameters["files"]["d"]
 
         # Save deformation
         with HDF5File(MPI.comm_world, d_path, file_mode=file_mode) as viz_d:
@@ -193,7 +201,12 @@ def dump_probes(eval_dict, newfolder, tstep):
         makedirs(filepath)
 
     # Extract probe arrays for each variable
-    variables = ["centerline_u_x_probes", "centerline_u_y_probes", "centerline_u_z_probes", "centerline_p_probes"]
+    variables = [
+        "centerline_u_x_probes",
+        "centerline_u_y_probes",
+        "centerline_u_z_probes",
+        "centerline_p_probes",
+    ]
     arrs = {var: eval_dict[var].array() for var in variables}
 
     # Dump stats on the master process
@@ -202,7 +215,7 @@ def dump_probes(eval_dict, newfolder, tstep):
             "centerline_u_x_probes": f"u_x_{tstep}.probes",
             "centerline_u_y_probes": f"u_y_{tstep}.probes",
             "centerline_u_z_probes": f"u_z_{tstep}.probes",
-            "centerline_p_probes": f"p_{tstep}.probes"
+            "centerline_p_probes": f"p_{tstep}.probes",
         }
         for var, arr in arrs.items():
             arr.dump(path.join(filepath, filenames[var]))

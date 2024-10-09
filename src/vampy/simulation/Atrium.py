@@ -4,16 +4,24 @@ import pickle
 from pprint import pprint
 
 import numpy as np
-from dolfin import set_log_level, MPI
+from dolfin import MPI, set_log_level
 
 from vampy.simulation.Probe import Probes  # type: ignore
-from vampy.simulation.Womersley import make_womersley_bcs, compute_boundary_geometry_acrn
-from vampy.simulation.simulation_common import store_u_mean, get_file_paths, print_mesh_information, \
-    store_velocity_and_pressure_h5, dump_probes
+from vampy.simulation.simulation_common import (
+    dump_probes,
+    get_file_paths,
+    print_mesh_information,
+    store_u_mean,
+    store_velocity_and_pressure_h5,
+)
+from vampy.simulation.Womersley import (
+    compute_boundary_geometry_acrn,
+    make_womersley_bcs,
+)
 
 # Check for oasis and oasismove
-package_name_oasis = 'oasis'
-package_name_oasismove = 'oasismove'
+package_name_oasis = "oasis"
+package_name_oasismove = "oasismove"
 oasis_exists = importlib.util.find_spec(package_name_oasis)
 oasismove_exists = importlib.util.find_spec(package_name_oasismove)
 if oasismove_exists:
@@ -34,7 +42,7 @@ def problem_parameters(
     scalar_components,
     Schmidt,
     NS_expressions,
-    **NS_namespace
+    **NS_namespace,
 ):
     """
     Problem file for running CFD simulation in left atrial models consisting of arbitrary number of pulmonary veins (PV)
@@ -143,7 +151,9 @@ def create_bcs(
         Q_scaled = Q_values * tmp_area / area_total
 
         # Create Womersley boundary condition at inlet
-        inlet = make_womersley_bcs(t_values, Q_scaled, nu, tmp_center, tmp_radius, tmp_normal, V.ufl_element())
+        inlet = make_womersley_bcs(
+            t_values, Q_scaled, nu, tmp_center, tmp_radius, tmp_normal, V.ufl_element()
+        )
         NS_expressions[f"inlet_{ID}"] = inlet
 
     # Initial condition
@@ -154,7 +164,10 @@ def create_bcs(
     # Create inlet boundary conditions
     bc_inlets = {}
     for ID in id_in:
-        bc_inlet = [DirichletBC(V, NS_expressions[f"inlet_{ID}"][i], boundary, ID) for i in range(3)]
+        bc_inlet = [
+            DirichletBC(V, NS_expressions[f"inlet_{ID}"][i], boundary, ID)
+            for i in range(3)
+        ]
         bc_inlets[ID] = bc_inlet
 
     # Set outlet boundary conditions, assuming one outlet (Mitral Valve)
@@ -182,7 +195,7 @@ def pre_solve_hook(
     newfolder,
     velocity_degree,
     restart_folder,
-    **NS_namespace
+    **NS_namespace,
 ):
     # Extract diameter at mitral valve
     info_path = mesh_path.split(".xml")[0] + "_info.json"
@@ -196,7 +209,7 @@ def pre_solve_hook(
     n = FacetNormal(mesh)
     eval_dict = {}
     rel_path = mesh_path.split(".xml")[0] + "_probe_point.json"
-    with open(rel_path, 'r') as infile:
+    with open(rel_path, "r") as infile:
         probe_points = np.array(json.load(infile))
 
     # Store points file in checkpoint
@@ -263,7 +276,7 @@ def temporal_hook(
     u_mean0,
     u_mean1,
     u_mean2,
-    **NS_namespace
+    **NS_namespace,
 ):
     # Update inlet condition
     for ID in id_in:
@@ -313,7 +326,9 @@ def temporal_hook(
 
     # Save velocity and pressure for post-processing
     if tstep % save_solution_frequency == 0 and tstep >= save_solution_at_tstep:
-        store_velocity_and_pressure_h5(NS_parameters, U, p_, tstep, u_, u_mean0, u_mean1, u_mean2)
+        store_velocity_and_pressure_h5(
+            NS_parameters, U, p_, tstep, u_, u_mean0, u_mean1, u_mean2
+        )
 
 
 # Oasis hook called after the simulation has finished
@@ -326,7 +341,7 @@ def theend_hook(
     dt,
     save_solution_at_tstep,
     save_solution_frequency,
-    **NS_namespace
+    **NS_namespace,
 ):
     store_u_mean(
         T,
