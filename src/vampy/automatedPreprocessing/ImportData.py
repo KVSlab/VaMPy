@@ -15,28 +15,28 @@ import numpy as np
 import vtk
 
 # Array names used by VMTK.
-BLANKINGARRAYNAME = 'Blanking'
-GROUPIDSARRAYNAME = 'GroupIds'
-RADIUSARRAYNAME = 'MaximumInscribedSphereRadius'
-SECTIONARRAYNAME = 'CenterlineSectionArea'
+BLANKINGARRAYNAME = "Blanking"
+GROUPIDSARRAYNAME = "GroupIds"
+RADIUSARRAYNAME = "MaximumInscribedSphereRadius"
+SECTIONARRAYNAME = "CenterlineSectionArea"
 
 
 def loadFile(fileName):
-    """Load the given file, and return a vtkPolyData object for it. """
+    """Load the given file, and return a vtkPolyData object for it."""
     fileType = fileName[-3:]
-    if fileType == '':
-        raise RuntimeError('The file does not have an extension')
-    if fileType == 'stl':
+    if fileType == "":
+        raise RuntimeError("The file does not have an extension")
+    if fileType == "stl":
         reader = vtk.vtkSTLReader()
         reader.MergingOn()
-    elif fileType == 'vtk':
+    elif fileType == "vtk":
         reader = vtk.vtkPolyDataReader()
-    elif fileType == 'vtp':
+    elif fileType == "vtp":
         reader = vtk.vtkXMLPolyDataReader()
-    elif fileType == 'vtu':
+    elif fileType == "vtu":
         reader = vtk.vtkUnstructuredGridReader()
     else:
-        raise RuntimeError('Unknown file type %s' % fileType)
+        raise RuntimeError("Unknown file type %s" % fileType)
     reader.SetFileName(fileName)
     reader.Update()
     polyData = reader.GetOutput()
@@ -71,7 +71,7 @@ def GetBlankedGroupsIdList(centerline):
 
 
 def GetRedundantBlankedIdList(centerline, blankedGroupsIdList):
-    """ Get the redundant blanked segments.
+    """Get the redundant blanked segments.
 
     Nominally, the x0 and x1 coordinates should be the same. Thus, the
     computed distance should be exactly 0.0.
@@ -105,18 +105,33 @@ def GetRedundantBlankedIdList(centerline, blankedGroupsIdList):
             if otherBranchIndex in redundantBranchesIndex:
                 continue
             centerline.GetCell(otherBranchIndex).GetPoints().GetPoint(0, otherX0)
-            otherNpts = centerline.GetCell(otherBranchIndex).GetPoints().GetNumberOfPoints()
-            centerline.GetCell(otherBranchIndex).GetPoints().GetPoint(otherNpts - 1, otherX1)
-            if vtk.vtkMath.Distance2BetweenPoints(currentX0, otherX0) < tol and \
-                    vtk.vtkMath.Distance2BetweenPoints(currentX1, otherX1) < tol:
+            otherNpts = (
+                centerline.GetCell(otherBranchIndex).GetPoints().GetNumberOfPoints()
+            )
+            centerline.GetCell(otherBranchIndex).GetPoints().GetPoint(
+                otherNpts - 1, otherX1
+            )
+            if (
+                vtk.vtkMath.Distance2BetweenPoints(currentX0, otherX0) < tol
+                and vtk.vtkMath.Distance2BetweenPoints(currentX1, otherX1) < tol
+            ):
                 redundantBranchesIndex.append(otherBranchIndex)
                 if vtk.vtkMath.Distance2BetweenPoints(currentX0, otherX0) > minLength:
-                    print('WARNING: POTENTIAL ISSUE DURING THE MERGING OF REDUNDANTS BLANKED SEGMENTS.')
-                    print('         A distance between segments is suspicious.')
-                    print('         The blanked segments of VTK Cell Id ' + repr(currentBranchIndex))
-                    print('         and, VTK Cell Id ' + repr(otherBranchIndex) + ' will be merged.')
-                    print('         The segments points should be identical.  ')
-                    print('         Please check if this action was expected.')
+                    print(
+                        "WARNING: POTENTIAL ISSUE DURING THE MERGING OF REDUNDANTS BLANKED SEGMENTS."
+                    )
+                    print("         A distance between segments is suspicious.")
+                    print(
+                        "         The blanked segments of VTK Cell Id "
+                        + repr(currentBranchIndex)
+                    )
+                    print(
+                        "         and, VTK Cell Id "
+                        + repr(otherBranchIndex)
+                        + " will be merged."
+                    )
+                    print("         The segments points should be identical.  ")
+                    print("         Please check if this action was expected.")
                     print()
 
     return redundantBranchesIndex
@@ -156,12 +171,22 @@ def ComputeGeometricTolerance(centerline):
             point1 = [0.0, 0.0, 0.0]
             centerline.GetCell(i).GetPoints().GetPoint(k, point0)
             centerline.GetCell(i).GetPoints().GetPoint(k + 1, point1)
-            if math.sqrt(vtk.vtkMath.Distance2BetweenPoints(point0, point1)) < minLength:
+            if (
+                math.sqrt(vtk.vtkMath.Distance2BetweenPoints(point0, point1))
+                < minLength
+            ):
                 if math.sqrt(vtk.vtkMath.Distance2BetweenPoints(point0, point1)) == 0.0:
                     continue
-                minLength = math.sqrt(vtk.vtkMath.Distance2BetweenPoints(point0, point1))
-            if math.sqrt(vtk.vtkMath.Distance2BetweenPoints(point0, point1)) > maxLength:
-                maxLength = math.sqrt(vtk.vtkMath.Distance2BetweenPoints(point0, point1))
+                minLength = math.sqrt(
+                    vtk.vtkMath.Distance2BetweenPoints(point0, point1)
+                )
+            if (
+                math.sqrt(vtk.vtkMath.Distance2BetweenPoints(point0, point1))
+                > maxLength
+            ):
+                maxLength = math.sqrt(
+                    vtk.vtkMath.Distance2BetweenPoints(point0, point1)
+                )
 
     return minLength, maxLength
 
@@ -223,7 +248,7 @@ def ComputeGroupRadius(centerline, branchGroupId):
 
 
 def ComputeBranchRadius(centerline, branchId):
-    """Return the radius for a branch with index branchId. """
+    """Return the radius for a branch with index branchId."""
     length = 0.0
     resistance = 0.0
     radiusArray = centerline.GetPointData().GetArray(RADIUSARRAYNAME)
@@ -236,7 +261,7 @@ def ComputeBranchRadius(centerline, branchId):
         dx = math.sqrt(vtk.vtkMath.Distance2BetweenPoints(point0, point1))
         length += dx
         r = radiusArray.GetComponent(centerline.GetCell(branchId).GetPointId(k), 0)
-        resistance += dx / r ** 4.0
+        resistance += dx / r**4.0
     branchRadius = (length / resistance) ** 0.25
 
     return branchRadius
@@ -254,8 +279,13 @@ def GetListsUniqueBlankedBranches(blankedGroupsIdList, redundantBlankedBranchesI
     return blankedGroupsIndex, blankedUniqueBranchesIndex
 
 
-def SetNetworkStructure(centerline, network, verboseprint,
-                        isConnectivityNeeded=True, isRadiusInletNeeded=True):
+def SetNetworkStructure(
+    centerline,
+    network,
+    verboseprint,
+    isConnectivityNeeded=True,
+    isRadiusInletNeeded=True,
+):
     """Fills a network structure with a vtkPolyData object.
 
     Each element has an unique index. The groups length and radius are
@@ -270,6 +300,7 @@ def SetNetworkStructure(centerline, network, verboseprint,
     verboseprint("> Filling the network structure with the raw data.")
     if not (IsArrayDefined(centerline, GROUPIDSARRAYNAME)):
         from vmtk import vmtkscripts
+
         centerlines = vmtkscripts.vmtkBranchExtractor()
         centerlines.Centerlines = centerline
         centerlines.RadiusArrayName = RADIUSARRAYNAME
@@ -279,11 +310,12 @@ def SetNetworkStructure(centerline, network, verboseprint,
     # Treat the splitted centerline.
     maxGroupId = GetMaxGroupId(centerline)
     blankedGroupsIdList = GetBlankedGroupsIdList(centerline)
-    redundantBlankedBranchesIdList = GetRedundantBlankedIdList(centerline,
-                                                               blankedGroupsIdList)
-    blankedGroupsIndex, blankedUniqueBranchesIndex = \
-        GetListsUniqueBlankedBranches(blankedGroupsIdList,
-                                      redundantBlankedBranchesIdList)
+    redundantBlankedBranchesIdList = GetRedundantBlankedIdList(
+        centerline, blankedGroupsIdList
+    )
+    blankedGroupsIndex, blankedUniqueBranchesIndex = GetListsUniqueBlankedBranches(
+        blankedGroupsIdList, redundantBlankedBranchesIdList
+    )
     indexUniqueBranches = 0
     for i in range(0, maxGroupId + 1):
         x0List = []
@@ -294,19 +326,26 @@ def SetNetworkStructure(centerline, network, verboseprint,
             for j in range(0, len(blankedGroupsIndex)):
                 if blankedGroupsIndex[j] == i:
                     el = Element(Id=indexUniqueBranches)
-                    el.SetMeanRadius(ComputeBranchRadius(centerline,
-                                                         blankedUniqueBranchesIndex[j]))
-                    el.SetLength(ComputeBranchLength(centerline,
-                                                     blankedUniqueBranchesIndex[j]))
+                    el.SetMeanRadius(
+                        ComputeBranchRadius(centerline, blankedUniqueBranchesIndex[j])
+                    )
+                    el.SetLength(
+                        ComputeBranchLength(centerline, blankedUniqueBranchesIndex[j])
+                    )
                     el.SetBlanking(1)
-                    npts = centerline.GetCell(blankedUniqueBranchesIndex[j]). \
-                        GetPoints().GetNumberOfPoints()
+                    npts = (
+                        centerline.GetCell(blankedUniqueBranchesIndex[j])
+                        .GetPoints()
+                        .GetNumberOfPoints()
+                    )
                     x0 = [0.0, 0.0, 0.0]
                     x1 = [0.0, 0.0, 0.0]
-                    centerline.GetCell(blankedUniqueBranchesIndex[j]). \
-                        GetPoints().GetPoint(0, x0)
-                    centerline.GetCell(blankedUniqueBranchesIndex[j]). \
-                        GetPoints().GetPoint(npts - 1, x1)
+                    centerline.GetCell(
+                        blankedUniqueBranchesIndex[j]
+                    ).GetPoints().GetPoint(0, x0)
+                    centerline.GetCell(
+                        blankedUniqueBranchesIndex[j]
+                    ).GetPoints().GetPoint(npts - 1, x1)
                     x0List = []
                     x1List = []
                     VtkCellIdList = []
@@ -319,9 +358,15 @@ def SetNetworkStructure(centerline, network, verboseprint,
                     el.SetVtkGroupIdList(VtkGroupIdList)
                     el.SetVtkCellIdList(VtkCellIdList)
                     network.AddElement(el)
-                    verboseprint("> Edge Id " + repr(indexUniqueBranches)
-                                 + ", Length = " + repr(el.GetLength()) + " and Radius = "
-                                 + repr(el.GetMeanRadius()) + ".")
+                    verboseprint(
+                        "> Edge Id "
+                        + repr(indexUniqueBranches)
+                        + ", Length = "
+                        + repr(el.GetLength())
+                        + " and Radius = "
+                        + repr(el.GetMeanRadius())
+                        + "."
+                    )
                     indexUniqueBranches += 1
         else:
             el = Element(Id=indexUniqueBranches)
@@ -348,9 +393,15 @@ def SetNetworkStructure(centerline, network, verboseprint,
             el.SetVtkGroupIdList(VtkGroupIdList)
             el.SetVtkCellIdList(VtkCellIdList)
             network.AddElement(el)
-            verboseprint("> Edge Id " + repr(indexUniqueBranches)
-                         + ", Length = " + repr(el.GetLength()) + " and Radius = "
-                         + repr(el.GetMeanRadius()) + ".")
+            verboseprint(
+                "> Edge Id "
+                + repr(indexUniqueBranches)
+                + ", Length = "
+                + repr(el.GetLength())
+                + " and Radius = "
+                + repr(el.GetMeanRadius())
+                + "."
+            )
             indexUniqueBranches += 1
     verboseprint("> ")
 
@@ -359,7 +410,8 @@ def SetNetworkStructure(centerline, network, verboseprint,
         ComputeConnectivity(network, minLength, verboseprint)
     SetRadiusX0(centerline, network, verboseprint)
     network.SetNetworkInletRadius(
-        ComputeInletAverageRadius(centerline, 0.0, verboseprint))
+        ComputeInletAverageRadius(centerline, 0.0, verboseprint)
+    )
 
     return centerline
 
@@ -393,16 +445,26 @@ def ComputeConnectivity(network, tolerance, verboseprint):
                 for x0 in otherBranch.GetInPointsx0():
                     if vtk.vtkMath.Distance2BetweenPoints(x0, x1) < tol:
                         if vtk.vtkMath.Distance2BetweenPoints(x0, x1) > tolerance:
-                            print('WARNING: POTENTIAL CONNECTIVITY ISSUE. ')
-                            print('         A distance between connected points is suspicious.')
-                            print('         The segment(s) of CELL ID VTK ' + repr(treatedBranch.GetVtkCellIdList()))
-                            print('         and, the segment(s) of CELL ID VTK ' + repr(
-                                otherBranch.GetVtkCellIdList()) + ' will be considered')
-                            print('         as connected. Please check if this action was expected.')
+                            print("WARNING: POTENTIAL CONNECTIVITY ISSUE. ")
+                            print(
+                                "         A distance between connected points is suspicious."
+                            )
+                            print(
+                                "         The segment(s) of CELL ID VTK "
+                                + repr(treatedBranch.GetVtkCellIdList())
+                            )
+                            print(
+                                "         and, the segment(s) of CELL ID VTK "
+                                + repr(otherBranch.GetVtkCellIdList())
+                                + " will be considered"
+                            )
+                            print(
+                                "         as connected. Please check if this action was expected."
+                            )
                             print()
                         otherBranch.SetInOutPointsIds(
-                            treatedBranch.GetOutPointsx1Id(),
-                            otherBranch.GetId() + 2)
+                            treatedBranch.GetOutPointsx1Id(), otherBranch.GetId() + 2
+                        )
                         otherBranch.SetBehindSegment(treatedBranch.GetId())
                         treatedBranch.SetFrontSegment(otherBranch.GetId())
                         atLeastOneFound = True
@@ -410,8 +472,8 @@ def ComputeConnectivity(network, tolerance, verboseprint):
         if not (atLeastOneFound):
             treatedBranch.SetIfOutlet(True)
             treatedBranch.SetInOutPointsIds(
-                treatedBranch.GetInPointsx0Id(),
-                treatedBranch.GetId() + 2)
+                treatedBranch.GetInPointsx0Id(), treatedBranch.GetId() + 2
+            )
 
 
 def SetRadiusX0(centerline, network, verboseprint):
@@ -435,8 +497,9 @@ def ComputeInletAverageRadius(centerline, desiredLength, verboseprint):
     length = 0.0
     resistance = 0.0
     radiusArray = centerline.GetPointData().GetArray(RADIUSARRAYNAME)
-    npts = GetIndexCenterlineForADefinedLength(centerline, branchId,
-                                               desiredLength, verboseprint)
+    npts = GetIndexCenterlineForADefinedLength(
+        centerline, branchId, desiredLength, verboseprint
+    )
     for k in range(0, npts - 1):
         point0 = [0.0, 0.0, 0.0]
         point1 = [0.0, 0.0, 0.0]
@@ -448,7 +511,8 @@ def ComputeInletAverageRadius(centerline, desiredLength, verboseprint):
         resistance += dx / r ** (4.0)
     if npts < 2:
         branchMeanRadius = radiusArray.GetComponent(
-            centerline.GetCell(branchId).GetPointId(0), 0)
+            centerline.GetCell(branchId).GetPointId(0), 0
+        )
     else:
         branchMeanRadius = (length / resistance) ** (0.25)
 
@@ -469,8 +533,9 @@ def ComputeInletAverageCrossSectionArea(centerline, desiredLength, verboseprint)
     length = 0.0
     resistance = 0.0
     sectionArray = centerline.GetPointData().GetArray(SECTIONARRAYNAME)
-    npts = GetIndexCenterlineForADefinedLength(centerline, branchId,
-                                               desiredLength, verboseprint)
+    npts = GetIndexCenterlineForADefinedLength(
+        centerline, branchId, desiredLength, verboseprint
+    )
     for k in range(1, npts - 1):
         point0 = [0.0, 0.0, 0.0]
         point1 = [0.0, 0.0, 0.0]
@@ -492,10 +557,11 @@ def ComputeInletAverageCrossSectionArea(centerline, desiredLength, verboseprint)
     return branchMeanRadius
 
 
-def GetIndexCenterlineForADefinedLength(centerline, branchId, desiredLength,
-                                        verboseprint):
+def GetIndexCenterlineForADefinedLength(
+    centerline, branchId, desiredLength, verboseprint
+):
     """Get the index of the point such as the desired distance between the index and
-    the beginning of the branch is reached. """
+    the beginning of the branch is reached."""
 
     length = 0.0
     done = False
@@ -520,7 +586,7 @@ def GetIndexCenterlineForADefinedLength(centerline, branchId, desiredLength,
 
 
 def GetListProbePoints(centerline, network, verboseprint):
-    """Get points on a centerline spaced by the inlet diameter. """
+    """Get points on a centerline spaced by the inlet diameter."""
 
     diameterInlet = 2.0 * network.GetNetworkInletRadius()
     pointsList = []
@@ -534,8 +600,9 @@ def GetListProbePoints(centerline, network, verboseprint):
         while not (done):
             x = [0.0, 0.0, 0.0]
             desiredLength = float(ctr) * diameterInlet
-            idx = GetIndexCenterlineForADefinedLength(centerline, branchId, desiredLength,
-                                                      verboseprint)
+            idx = GetIndexCenterlineForADefinedLength(
+                centerline, branchId, desiredLength, verboseprint
+            )
             if idx is None:
                 break
             centerline.GetCell(branchId).GetPoints().GetPoint(idx, x)
@@ -544,7 +611,7 @@ def GetListProbePoints(centerline, network, verboseprint):
             if idx == npts - 2:
                 done = True
 
-    return (pointsList)
+    return pointsList
 
 
 class Element(object):
@@ -655,7 +722,7 @@ class Element(object):
         return self.inletRadius
 
     def GetMeanArea(self):
-        meanArea = np.pi * (self.meanRadius ** 2.0)
+        meanArea = np.pi * (self.meanRadius**2.0)
         return meanArea
 
     def GetInPointsx0(self):

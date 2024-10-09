@@ -1,9 +1,24 @@
 from os import path
 
-from dolfin import Function, VectorFunctionSpace, FunctionSpace, parameters, MPI, HDF5File, Mesh, XDMFFile, \
-    BoundaryMesh, project, inner
+from dolfin import (
+    MPI,
+    BoundaryMesh,
+    Function,
+    FunctionSpace,
+    HDF5File,
+    Mesh,
+    VectorFunctionSpace,
+    XDMFFile,
+    inner,
+    parameters,
+    project,
+)
 
-from vampy.automatedPostprocessing.postprocessing_common import STRESS, read_command_line, get_dataset_names
+from vampy.automatedPostprocessing.postprocessing_common import (
+    STRESS,
+    get_dataset_names,
+    read_command_line,
+)
 
 try:
     parameters["reorder_dofs_serial"] = False
@@ -11,8 +26,18 @@ except NameError:
     pass
 
 
-def compute_hemodynamic_indices(folder, nu, rho, dt, T, velocity_degree, save_frequency, start_cycle, step,
-                                average_over_cycles):
+def compute_hemodynamic_indices(
+    folder,
+    nu,
+    rho,
+    dt,
+    T,
+    velocity_degree,
+    save_frequency,
+    start_cycle,
+    step,
+    average_over_cycles,
+):
     """
     Loads velocity fields from completed CFD simulation,
     and computes and saves the following hemodynamic quantities:
@@ -57,7 +82,7 @@ def compute_hemodynamic_indices(folder, nu, rho, dt, T, velocity_degree, save_fr
     with HDF5File(MPI.comm_world, mesh_path.__str__(), "r") as mesh_file:
         mesh_file.read(mesh, "mesh", False)
 
-    bm = BoundaryMesh(mesh, 'exterior')
+    bm = BoundaryMesh(mesh, "exterior")
 
     if MPI.rank(MPI.comm_world) == 0:
         print("Defining function spaces")
@@ -105,7 +130,9 @@ def compute_hemodynamic_indices(folder, nu, rho, dt, T, velocity_degree, save_fr
 
     # Set number of cycles to average over
     cycles_to_average = list(range(1, n_cycles + 1)) if average_over_cycles else []
-    counters_to_save = [saved_time_steps_per_cycle * cycle for cycle in cycles_to_average]
+    counters_to_save = [
+        saved_time_steps_per_cycle * cycle for cycle in cycles_to_average
+    ]
     cycle_names = [""] + ["_cycle_{:02d}".format(cycle) for cycle in cycles_to_average]
 
     # Create XDMF files for saving indices
@@ -121,7 +148,9 @@ def compute_hemodynamic_indices(folder, nu, rho, dt, T, velocity_degree, save_fr
     indices = {}
     for cycle_name in cycle_names:
         for index in index_names + ["WSS"]:
-            indices[index + cycle_name] = XDMFFile(MPI.comm_world, fullname % (index, cycle_name))
+            indices[index + cycle_name] = XDMFFile(
+                MPI.comm_world, fullname % (index, cycle_name)
+            )
             indices[index + cycle_name].parameters["rewrite_function_mesh"] = False
             indices[index + cycle_name].parameters["flush_output"] = True
             indices[index + cycle_name].parameters["functions_share_mesh"] = True
@@ -155,7 +184,9 @@ def compute_hemodynamic_indices(folder, nu, rho, dt, T, velocity_degree, save_fr
         # Compute TWSSG
         if MPI.rank(MPI.comm_world) == 0:
             print("Compute TWSSG")
-        twssg.vector().set_local((tau.vector().get_local() - tau_prev.vector().get_local()) / dt)
+        twssg.vector().set_local(
+            (tau.vector().get_local() - tau_prev.vector().get_local()) / dt
+        )
         twssg.vector().apply("insert")
         twssg_ = project(inner(twssg, twssg) ** (1 / 2), U_b1)
         TWSSG_avg.vector().axpy(1, twssg_.vector())
@@ -225,19 +256,21 @@ def compute_hemodynamic_indices(folder, nu, rho, dt, T, velocity_degree, save_fr
     index_dict = index_dict if len(cycles_to_average) != 0 else index_dict_cycle
     WSS_mean = WSS_mean if len(cycles_to_average) != 0 else WSS_mean_avg
 
-    index_dict['TWSSG'].vector()[:] = index_dict['TWSSG'].vector()[:] / n
-    index_dict['TAWSS'].vector()[:] = index_dict['TAWSS'].vector()[:] / n
+    index_dict["TWSSG"].vector()[:] = index_dict["TWSSG"].vector()[:] / n
+    index_dict["TAWSS"].vector()[:] = index_dict["TAWSS"].vector()[:] / n
     WSS_mean.vector()[:] = WSS_mean.vector()[:] / n
     wss_mean = project(inner(WSS_mean, WSS_mean) ** (1 / 2), U_b1)
     wss_mean_vec = wss_mean.vector().get_local()
-    tawss_vec = index_dict['TAWSS'].vector().get_local()
+    tawss_vec = index_dict["TAWSS"].vector().get_local()
 
     # Compute RRT, OSI, and ECAP based on mean and absolute WSS
-    index_dict['RRT'].vector().set_local(1 / wss_mean_vec)
-    index_dict['OSI'].vector().set_local(0.5 * (1 - wss_mean_vec / tawss_vec))
-    index_dict['ECAP'].vector().set_local(index_dict['OSI'].vector().get_local() / tawss_vec)
+    index_dict["RRT"].vector().set_local(1 / wss_mean_vec)
+    index_dict["OSI"].vector().set_local(0.5 * (1 - wss_mean_vec / tawss_vec))
+    index_dict["ECAP"].vector().set_local(
+        index_dict["OSI"].vector().get_local() / tawss_vec
+    )
 
-    for index in ['RRT', 'OSI', 'ECAP']:
+    for index in ["RRT", "OSI", "ECAP"]:
         index_dict[index].vector().apply("insert")
 
     # Rename displayed variable names
@@ -254,12 +287,36 @@ def compute_hemodynamic_indices(folder, nu, rho, dt, T, velocity_degree, save_fr
 
 
 def main_hemo():
-    folder, nu, rho, dt, velocity_degree, _, _, T, save_frequency, _, start_cycle, step, average_over_cycles, _ \
-        = read_command_line()
+    (
+        folder,
+        nu,
+        rho,
+        dt,
+        velocity_degree,
+        _,
+        _,
+        T,
+        save_frequency,
+        _,
+        start_cycle,
+        step,
+        average_over_cycles,
+        _,
+    ) = read_command_line()
 
-    compute_hemodynamic_indices(folder, nu, rho, dt, T, velocity_degree, save_frequency, start_cycle,
-                                step, average_over_cycles)
+    compute_hemodynamic_indices(
+        folder,
+        nu,
+        rho,
+        dt,
+        T,
+        velocity_degree,
+        save_frequency,
+        start_cycle,
+        step,
+        average_over_cycles,
+    )
 
 
-if __name__ == '__main__':
+if __name__ == "__main__":
     main_hemo()

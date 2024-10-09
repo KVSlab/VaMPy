@@ -15,7 +15,15 @@ def test_visualize_all_probes():
     spectrogram_path = path.join(probe_path, "spectrogram.png")
 
     # Run post-processing
-    visualize_probes(probe_path, probe_frequency, T, dt, probes_to_plot=[], show_figure=False, save_figure=True)
+    visualize_probes(
+        probe_path,
+        probe_frequency,
+        T,
+        dt,
+        probes_to_plot=[],
+        show_figure=False,
+        save_figure=True,
+    )
 
     # Check that output image exists
     for file_path in [u_p_path, ke_path, spectrum_path, spectrogram_path]:
@@ -35,7 +43,15 @@ def test_visualize_two_probes():
     probe_frequency = 100
 
     # Run post-processing
-    visualize_probes(probe_path, probe_frequency, T, dt, probes_to_plot=probes, show_figure=False, save_figure=True)
+    visualize_probes(
+        probe_path,
+        probe_frequency,
+        T,
+        dt,
+        probes_to_plot=probes,
+        show_figure=False,
+        save_figure=True,
+    )
 
     # Check that output image exists
     for probe in probes:

@@ -1,7 +1,7 @@
-from os import path, makedirs
+from os import makedirs, path
 
 import numpy as np
-from dolfin import MPI, assemble, Constant, assign, HDF5File, Measure
+from dolfin import MPI, Constant, HDF5File, Measure, assemble, assign
 
 
 def get_file_paths(folder):
@@ -64,9 +64,21 @@ def print_mesh_information(mesh):
 
     if MPI.rank(MPI.comm_world) == 0:
         print("=== Mesh information ===")
-        print("X range: {} to {} (delta: {:.4f})".format(min(xmin), max(xmax), max(xmax) - min(xmin)))
-        print("Y range: {} to {} (delta: {:.4f})".format(min(ymin), max(ymax), max(ymax) - min(ymin)))
-        print("Z range: {} to {} (delta: {:.4f})".format(min(zmin), max(zmax), max(zmax) - min(zmin)))
+        print(
+            "X range: {} to {} (delta: {:.4f})".format(
+                min(xmin), max(xmax), max(xmax) - min(xmin)
+            )
+        )
+        print(
+            "Y range: {} to {} (delta: {:.4f})".format(
+                min(ymin), max(ymax), max(ymax) - min(ymin)
+            )
+        )
+        print(
+            "Z range: {} to {} (delta: {:.4f})".format(
+                min(zmin), max(zmax), max(zmax) - min(zmin)
+            )
+        )
         print("Number of cells: {}".format(sum(num_cells)))
         print("Number of cells per processor: {}".format(int(np.mean(num_cells))))
         print("Number of edges: {}".format(sum(num_edges)))
@@ -77,8 +89,17 @@ def print_mesh_information(mesh):
         print("Number of cells per volume: {:.4f}".format(sum(num_cells) / volume))
 
 
-def store_u_mean(T, dt, save_solution_at_tstep, save_solution_frequency, u_mean, u_mean0, u_mean1, u_mean2,
-                 NS_parameters):
+def store_u_mean(
+    T,
+    dt,
+    save_solution_at_tstep,
+    save_solution_frequency,
+    u_mean,
+    u_mean0,
+    u_mean1,
+    u_mean2,
+    NS_parameters,
+):
     """
     Store the time averaged velocity into file u_mean
 
@@ -93,7 +114,7 @@ def store_u_mean(T, dt, save_solution_at_tstep, save_solution_frequency, u_mean,
         u_mean2 (Function): Function storing z-component
     """
     # Get the file path
-    files = NS_parameters['files']
+    files = NS_parameters["files"]
     u_mean_path = files["u_mean"]
 
     # Divide the accumulated velocity by the number of steps

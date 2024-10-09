@@ -1,6 +1,15 @@
 from pathlib import Path
 
-from dolfin import parameters, FunctionSpace, XDMFFile, MPI, VectorFunctionSpace, HDF5File, Mesh, Function
+from dolfin import (
+    MPI,
+    Function,
+    FunctionSpace,
+    HDF5File,
+    Mesh,
+    VectorFunctionSpace,
+    XDMFFile,
+    parameters,
+)
 
 from vampy.automatedPostprocessing.postprocessing_common import read_command_line
 
@@ -10,7 +19,9 @@ except NameError:
     pass
 
 
-def compute_velocity_and_pressure(case_path, dt, velocity_degree, pressure_degree, step):
+def compute_velocity_and_pressure(
+    case_path, dt, velocity_degree, pressure_degree, step
+):
     """
     Loads velocity and pressure from compressed .h5 CFD solution and
     converts and saves to .xdmf format for visualization (in e.g. ParaView).
@@ -92,9 +103,11 @@ def compute_velocity_and_pressure(case_path, dt, velocity_degree, pressure_degre
 
 
 def main_convert():
-    folder, _, _, dt, velocity_degree, pressure_degree, _, _, _, _, _, step, _, _ = read_command_line()
+    folder, _, _, dt, velocity_degree, pressure_degree, _, _, _, _, _, step, _, _ = (
+        read_command_line()
+    )
     compute_velocity_and_pressure(folder, dt, velocity_degree, pressure_degree, step)
 
 
-if __name__ == '__main__':
+if __name__ == "__main__":
     main_convert()

@@ -2,21 +2,35 @@ import json
 import pickle
 from os import makedirs
 from pprint import pprint
-from dolfin import set_log_level, MPI
 
 import numpy as np
+from dolfin import MPI, set_log_level
 from oasis.problems.NSfracStep import *
 
 from vampy.simulation.Probe import Probes  # type: ignore
-from vampy.simulation.Womersley import make_womersley_bcs, compute_boundary_geometry_acrn
-from vampy.simulation.simulation_common import store_u_mean, get_file_paths, print_mesh_information
+from vampy.simulation.simulation_common import (
+    get_file_paths,
+    print_mesh_information,
+    store_u_mean,
+)
+from vampy.simulation.Womersley import (
+    compute_boundary_geometry_acrn,
+    make_womersley_bcs,
+)
 
 # FEniCS specific command to control the desired level of logging, here set to critical errors
 set_log_level(50)
 comm = MPI.comm_world
 
 
-def problem_parameters(commandline_kwargs, NS_parameters, scalar_components, Schmidt, NS_expressions, **NS_namespace):
+def problem_parameters(
+    commandline_kwargs,
+    NS_parameters,
+    scalar_components,
+    Schmidt,
+    NS_expressions,
+    **NS_namespace
+):
     """
     Problem file for running CFD simulation in left atrial models consisting of arbitrary number of pulmonary veins (PV)
     (normally 3 to 7), and one outlet being the mitral valve. A Womersley velocity profile is applied at the inlets,
@@ -32,9 +46,9 @@ def problem_parameters(commandline_kwargs, NS_parameters, scalar_components, Sch
     """
     if "restart_folder" in commandline_kwargs.keys():
         restart_folder = commandline_kwargs["restart_folder"]
-        f = open(path.join(restart_folder, 'params.dat'), 'rb')
+        f = open(path.join(restart_folder, "params.dat"), "rb")
         NS_parameters.update(pickle.load(f))
-        NS_parameters['restart_folder'] = restart_folder
+        NS_parameters["restart_folder"] = restart_folder
     else:
         # Override some problem specific parameters
         # Parameters are in mm and ms
@@ -64,7 +78,7 @@ def problem_parameters(commandline_kwargs, NS_parameters, scalar_components, Sch
             velocity_degree=1,
             pressure_degree=1,
             use_krylov_solvers=True,
-            krylov_solvers=dict(monitor_convergence=False)
+            krylov_solvers=dict(monitor_convergence=False),
         )
 
     mesh_file = NS_parameters["mesh_path"].split("/")[-1]
@@ -85,7 +99,9 @@ def mesh(mesh_path, **NS_namespace):
     return atrium_mesh
 
 
-def create_bcs(NS_expressions, mesh, mesh_path, nu, t, V, Q, id_in, id_out, **NS_namespace):
+def create_bcs(
+    NS_expressions, mesh, mesh_path, nu, t, V, Q, id_in, id_out, **NS_namespace
+):
     # Variables needed during the simulation
     boundary = MeshFunction("size_t", mesh, mesh.geometry().dim() - 1, mesh.domains())
 
@@ -94,11 +110,11 @@ def create_bcs(NS_expressions, mesh, mesh_path, nu, t, V, Q, id_in, id_out, **NS
     with open(info_path) as f:
         info = json.load(f)
 
-    id_in[:] = info['inlet_ids']
-    id_out[:] = info['outlet_id']
+    id_in[:] = info["inlet_ids"]
+    id_out[:] = info["outlet_id"]
     id_wall = min(id_in + id_out) - 1
 
-    Q_mean = info['mean_flow_rate']
+    Q_mean = info["mean_flow_rate"]
 
     # Find corresponding areas
     ds = Measure("ds", domain=mesh, subdomain_data=boundary)
@@ -107,17 +123,32 @@ def create_bcs(NS_expressions, mesh, mesh_path, nu, t, V, Q, id_in, id_out, **NS
         area_total += assemble(Constant(1.0) * ds(ID))
 
     # Load normalized time and flow rate values
-    t_values, Q_ = np.loadtxt(path.join(path.dirname(path.abspath(__file__)), "PV_values")).T
-    Q_values = Q_mean * Q_  # Specific flow rate = Normalized flow wave form * Prescribed flow rate
+    t_values, Q_ = np.loadtxt(
+        path.join(path.dirname(path.abspath(__file__)), "PV_values")
+    ).T
+    Q_values = (
+        Q_mean * Q_
+    )  # Specific flow rate = Normalized flow wave form * Prescribed flow rate
     t_values *= 1000  # Scale time in normalised flow wave form to [ms]
 
     for ID in id_in:
-        tmp_area, tmp_center, tmp_radius, tmp_normal = compute_boundary_geometry_acrn(mesh, ID, boundary)
+        tmp_area, tmp_center, tmp_radius, tmp_normal = compute_boundary_geometry_acrn(
+            mesh, ID, boundary
+        )
         Q_scaled = Q_values * tmp_area / area_total
 
         # Create Womersley boundary condition at inlet
-        inlet = make_womersley_bcs(t_values, Q_scaled, mesh, nu, tmp_area, tmp_center, tmp_radius, tmp_normal,
-                                   V.ufl_element())
+        inlet = make_womersley_bcs(
+            t_values,
+            Q_scaled,
+            mesh,
+            nu,
+            tmp_area,
+            tmp_center,
+            tmp_radius,
+            tmp_normal,
+            V.ufl_element(),
+        )
         NS_expressions["inlet_{}".format(ID)] = inlet
 
     # Initial condition
@@ -128,7 +159,10 @@ def create_bcs(NS_expressions, mesh, mesh_path, nu, t, V, Q, id_in, id_out, **NS
     # Create inlet boundary conditions
     bc_inlets = {}
     for ID in id_in:
-        bc_inlet = [DirichletBC(V, NS_expressions["inlet_{}".format(ID)][i], boundary, ID) for i in range(3)]
+        bc_inlet = [
+            DirichletBC(V, NS_expressions["inlet_{}".format(ID)][i], boundary, ID)
+            for i in range(3)
+        ]
         bc_inlets[ID] = bc_inlet
 
     # Set outlet boundary conditions, assuming one outlet (Mitral Valve)
@@ -145,21 +179,34 @@ def create_bcs(NS_expressions, mesh, mesh_path, nu, t, V, Q, id_in, id_out, **NS
     return dict(u0=bc_u0, u1=bc_u1, u2=bc_u2, p=bc_p)
 
 
-def pre_solve_hook(V, Q, cardiac_cycle, dt, save_solution_after_cycle, mesh_path, mesh, newfolder, velocity_degree,
-                   restart_folder, **NS_namespace):
+def pre_solve_hook(
+    V,
+    Q,
+    cardiac_cycle,
+    dt,
+    save_solution_after_cycle,
+    mesh_path,
+    mesh,
+    newfolder,
+    velocity_degree,
+    restart_folder,
+    **NS_namespace
+):
     # Extract diameter at mitral valve
     info_path = mesh_path.split(".xml")[0] + "_info.json"
     with open(info_path) as f:
         info = json.load(f)
 
-    outlet_area = info['outlet_area']
+    outlet_area = info["outlet_area"]
     D_mitral = np.sqrt(4 * outlet_area / np.pi)
 
     # Create point for evaluation
     n = FacetNormal(mesh)
     eval_dict = {}
     rel_path = mesh_path.split(".xml")[0] + "_probe_point"
-    probe_points = np.load(rel_path, encoding='latin1', fix_imports=True, allow_pickle=True)
+    probe_points = np.load(
+        rel_path, encoding="latin1", fix_imports=True, allow_pickle=True
+    )
 
     # Store points file in checkpoint
     if MPI.rank(MPI.comm_world) == 0:
@@ -192,13 +239,41 @@ def pre_solve_hook(V, Q, cardiac_cycle, dt, save_solution_after_cycle, mesh_path
     # Time step when solutions for post-processing should start being saved
     save_solution_at_tstep = int(cardiac_cycle * save_solution_after_cycle / dt)
 
-    return dict(D_mitral=D_mitral, n=n, eval_dict=eval_dict, U=U, u_mean=u_mean, u_mean0=u_mean0, u_mean1=u_mean1,
-                u_mean2=u_mean2, save_solution_at_tstep=save_solution_at_tstep)
+    return dict(
+        D_mitral=D_mitral,
+        n=n,
+        eval_dict=eval_dict,
+        U=U,
+        u_mean=u_mean,
+        u_mean0=u_mean0,
+        u_mean1=u_mean1,
+        u_mean2=u_mean2,
+        save_solution_at_tstep=save_solution_at_tstep,
+    )
 
 
-def temporal_hook(mesh, dt, t, save_solution_frequency, u_, NS_expressions, id_in, tstep, newfolder,
-                  eval_dict, dump_probe_frequency, p_, save_solution_at_tstep, nu, D_mitral, U, u_mean0, u_mean1,
-                  u_mean2, **NS_namespace):
+def temporal_hook(
+    mesh,
+    dt,
+    t,
+    save_solution_frequency,
+    u_,
+    NS_expressions,
+    id_in,
+    tstep,
+    newfolder,
+    eval_dict,
+    dump_probe_frequency,
+    p_,
+    save_solution_at_tstep,
+    nu,
+    D_mitral,
+    U,
+    u_mean0,
+    u_mean1,
+    u_mean2,
+    **NS_namespace
+):
     # Update inlet condition
     for ID in id_in:
         for i in [0, 1, 2]:
@@ -227,9 +302,13 @@ def temporal_hook(mesh, dt, t, save_solution_frequency, u_, NS_expressions, id_i
 
             CFL_mean = u_mean * dt / h
             CFL_max = u_max * dt / h
-            info = 'Time = {0:2.4e}, timestep = {1:6d}, max Reynolds number={2:2.3f}, mean Reynolds number={3:2.3f}' + \
-                   ', max velocity={4:2.3f}, mean velocity={5:2.3f}, max CFL={6:2.3f}, mean CFL={7:2.3f}'
-            info_green(info.format(t, tstep, Re_max, Re_mean, u_max, u_mean, CFL_max, CFL_mean))
+            info = (
+                "Time = {0:2.4e}, timestep = {1:6d}, max Reynolds number={2:2.3f}, mean Reynolds number={3:2.3f}"
+                + ", max velocity={4:2.3f}, mean velocity={5:2.3f}, max CFL={6:2.3f}, mean CFL={7:2.3f}"
+            )
+            info_green(
+                info.format(t, tstep, Re_max, Re_mean, u_max, u_mean, CFL_max, CFL_mean)
+            )
 
     # Sample velocity and pressure in points/probes
     eval_dict["centerline_u_x_probes"](u_[0])
@@ -273,9 +352,9 @@ def temporal_hook(mesh, dt, t, save_solution_frequency, u_, NS_expressions, id_i
         assign(U.sub(2), u_[2])
 
         # Get save paths
-        files = NS_parameters['files']
-        p_path = files['p']
-        u_path = files['u']
+        files = NS_parameters["files"]
+        p_path = files["p"]
+        u_path = files["u"]
         file_mode = "w" if not path.exists(p_path) else "a"
 
         # Save pressure
@@ -295,7 +374,25 @@ def temporal_hook(mesh, dt, t, save_solution_frequency, u_, NS_expressions, id_i
 
 
 # Oasis hook called after the simulation has finished
-def theend_hook(u_mean, u_mean0, u_mean1, u_mean2, T, dt, save_solution_at_tstep, save_solution_frequency,
-                **NS_namespace):
-    store_u_mean(T, dt, save_solution_at_tstep, save_solution_frequency, u_mean, u_mean0, u_mean1, u_mean2,
-                 NS_parameters)
+def theend_hook(
+    u_mean,
+    u_mean0,
+    u_mean1,
+    u_mean2,
+    T,
+    dt,
+    save_solution_at_tstep,
+    save_solution_frequency,
+    **NS_namespace
+):
+    store_u_mean(
+        T,
+        dt,
+        save_solution_at_tstep,
+        save_solution_frequency,
+        u_mean,
+        u_mean0,
+        u_mean1,
+        u_mean2,
+        NS_parameters,
+    )

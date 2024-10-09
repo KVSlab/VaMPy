@@ -6,10 +6,18 @@ import numpy as np
 from vampy.automatedPostprocessing.postprocessing_common import read_command_line
 
 # Plotting variables
-colors = ['red', 'blue', 'purple']
+colors = ["red", "blue", "purple"]
 
 
-def visualize_probes(case_path, probe_saving_frequency, T, dt, probes_to_plot, show_figure=False, save_figure=False):
+def visualize_probes(
+    case_path,
+    probe_saving_frequency,
+    T,
+    dt,
+    probes_to_plot,
+    show_figure=False,
+    save_figure=False,
+):
     """
     Loads probe points from completed CFD simulation and visualizes (1) velocity (magnitude), mean velocity,
     and pressure, (2) kinetic energy, turbulent kinetic energy, and turbulence intensity, (3) kinetic energy spectrum,
@@ -24,27 +32,77 @@ def visualize_probes(case_path, probe_saving_frequency, T, dt, probes_to_plot, s
         show_figure: Shows figure if True.
         save_figure: Saves figure if True.
     """
-    max_P, max_U, n_cols, n_probes, n_rows, pressures, velocity, velocity_u, velocity_v, velocity_w, n_timesteps \
-        = load_probes(case_path, probe_saving_frequency)
+    (
+        max_P,
+        max_U,
+        n_cols,
+        n_probes,
+        n_rows,
+        pressures,
+        velocity,
+        velocity_u,
+        velocity_v,
+        velocity_w,
+        n_timesteps,
+    ) = load_probes(case_path, probe_saving_frequency)
 
-    mean_velocity, kinetic_energy, turbulent_kinetic_energy, turbulence_intensity, max_ke, max_tke \
-        = compute_mean_velocity_and_kinetic_energy(T, dt, n_timesteps, n_probes, velocity, velocity_u, velocity_v,
-                                                   velocity_w)
+    (
+        mean_velocity,
+        kinetic_energy,
+        turbulent_kinetic_energy,
+        turbulence_intensity,
+        max_ke,
+        max_tke,
+    ) = compute_mean_velocity_and_kinetic_energy(
+        T, dt, n_timesteps, n_probes, velocity, velocity_u, velocity_v, velocity_w
+    )
 
-    kinetic_energy_spectrum, freq, max_kes = compute_energy_spectrum(n_probes, velocity_u, velocity_v, velocity_w, dt)
+    kinetic_energy_spectrum, freq, max_kes = compute_energy_spectrum(
+        n_probes, velocity_u, velocity_v, velocity_w, dt
+    )
 
     if not probes_to_plot:
         # Plot all probes in same plot
-        plot_all_probes(n_probes, n_rows, n_cols, case_path, max_P, max_U, mean_velocity, n_timesteps, pressures,
-                        velocity, kinetic_energy, max_ke, max_tke, turbulent_kinetic_energy, turbulence_intensity, freq,
-                        kinetic_energy_spectrum, max_kes, velocity_u, save_figure, show_figure)
+        plot_all_probes(
+            n_probes,
+            n_rows,
+            n_cols,
+            case_path,
+            max_P,
+            max_U,
+            mean_velocity,
+            n_timesteps,
+            pressures,
+            velocity,
+            kinetic_energy,
+            max_ke,
+            max_tke,
+            turbulent_kinetic_energy,
+            turbulence_intensity,
+            freq,
+            kinetic_energy_spectrum,
+            max_kes,
+            velocity_u,
+            save_figure,
+            show_figure,
+        )
     else:
         # Plot probes in separate plots
         for k in probes_to_plot:
             fig, ((ax1, ax2), (ax3, ax4)) = plt.subplots(2, 2)
-            plot_velocity_and_pressure(k, ax1, max_P, max_U, mean_velocity, n_timesteps, pressures, velocity)
-            plot_kinetic_energy(k, ax2, kinetic_energy, max_ke, max_tke, n_timesteps, turbulent_kinetic_energy,
-                                turbulence_intensity)
+            plot_velocity_and_pressure(
+                k, ax1, max_P, max_U, mean_velocity, n_timesteps, pressures, velocity
+            )
+            plot_kinetic_energy(
+                k,
+                ax2,
+                kinetic_energy,
+                max_ke,
+                max_tke,
+                n_timesteps,
+                turbulent_kinetic_energy,
+                turbulence_intensity,
+            )
             plot_energy_spectrum(k, ax3, freq, kinetic_energy_spectrum, max_kes)
             plot_spectrogram(k, ax4, velocity_u)
 
@@ -71,9 +129,29 @@ def save_and_show_plot(case_path, filename, save, show):
         plt.show()
 
 
-def plot_all_probes(n_probes, n_rows, n_cols, case_path, max_P, max_U, mean_velocity, n_timesteps, pressures,
-                    velocity, kinetic_energy, max_ke, max_tke, turbulent_kinetic_energy, turbulence_intensity, freq,
-                    kinetic_energy_spectrum, max_kes, velocity_u, save_figure, show_figure):
+def plot_all_probes(
+    n_probes,
+    n_rows,
+    n_cols,
+    case_path,
+    max_P,
+    max_U,
+    mean_velocity,
+    n_timesteps,
+    pressures,
+    velocity,
+    kinetic_energy,
+    max_ke,
+    max_tke,
+    turbulent_kinetic_energy,
+    turbulence_intensity,
+    freq,
+    kinetic_energy_spectrum,
+    max_kes,
+    velocity_u,
+    save_figure,
+    show_figure,
+):
     """
     Plots data for all probes.
 
@@ -83,14 +161,24 @@ def plot_all_probes(n_probes, n_rows, n_cols, case_path, max_P, max_U, mean_velo
     # Plot velocity and pressure
     for k in range(n_probes):
         ax = plt.subplot(n_rows, n_cols, k + 1)
-        plot_velocity_and_pressure(k, ax, max_P, max_U, mean_velocity, n_timesteps, pressures, velocity)
+        plot_velocity_and_pressure(
+            k, ax, max_P, max_U, mean_velocity, n_timesteps, pressures, velocity
+        )
     save_and_show_plot(case_path, "velocity_and_pressure.png", save_figure, show_figure)
 
     # Plot kinetic energy
     for k in range(n_probes):
         ax = plt.subplot(n_rows, n_cols, k + 1)
-        plot_kinetic_energy(k, ax, kinetic_energy, max_ke, max_tke, n_timesteps, turbulent_kinetic_energy,
-                            turbulence_intensity)
+        plot_kinetic_energy(
+            k,
+            ax,
+            kinetic_energy,
+            max_ke,
+            max_tke,
+            n_timesteps,
+            turbulent_kinetic_energy,
+            turbulence_intensity,
+        )
     save_and_show_plot(case_path, "kinetic_energy.png", save_figure, show_figure)
 
     # Plot energy spectrum
@@ -106,7 +194,7 @@ def plot_all_probes(n_probes, n_rows, n_cols, case_path, max_P, max_U, mean_velo
     save_and_show_plot(case_path, "spectrogram.png", save_figure, show_figure)
 
 
-def plot_spectrogram(k, ax, velocity, color_map='jet', font_size=12):
+def plot_spectrogram(k, ax, velocity, color_map="jet", font_size=12):
     """
     Plots spectrogram at probe points.
 
@@ -125,7 +213,7 @@ def plot_spectrogram(k, ax, velocity, color_map='jet', font_size=12):
     ax.set_xlabel("Time [ms]", fontsize=font_size)
 
     # Set title to probe number
-    ax.set_title('Probe {}'.format(k + 1), y=1.0, pad=-14)
+    ax.set_title("Probe {}".format(k + 1), y=1.0, pad=-14)
 
 
 def plot_energy_spectrum(k, ax, freq, kinetic_energy_spectrum, max_kes):
@@ -159,8 +247,14 @@ def plot_energy_spectrum(k, ax, freq, kinetic_energy_spectrum, max_kes):
     ax.plot(freq, kinetic_energy_spectrum[k], color=colors[1], label="")
     ax.set_xscale("log")
     ax.set_yscale("log")
-    ax.annotate('$k^{-5/3}$', xy=(np.mean(freq) / 4, np.mean(kinetic_energy_spectrum[k])), xycoords='data',
-                textcoords='data', color='black', fontsize=15)
+    ax.annotate(
+        "$k^{-5/3}$",
+        xy=(np.mean(freq) / 4, np.mean(kinetic_energy_spectrum[k])),
+        xycoords="data",
+        textcoords="data",
+        color="black",
+        fontsize=15,
+    )
 
     # Set axis limits
     ax.set_ylim(None, max_kes * 1.1)
@@ -171,11 +265,19 @@ def plot_energy_spectrum(k, ax, freq, kinetic_energy_spectrum, max_kes):
     ax.set_xlabel("k", fontsize=12)
 
     # Set title to probe number
-    ax.set_title('Probe {}'.format(k + 1), y=1.0, pad=-14)
+    ax.set_title("Probe {}".format(k + 1), y=1.0, pad=-14)
 
 
-def plot_kinetic_energy(k, ax, kinetic_energy, max_ke, max_tke, n_timesteps, turbulent_kinetic_energy,
-                        turbulence_intensity):
+def plot_kinetic_energy(
+    k,
+    ax,
+    kinetic_energy,
+    max_ke,
+    max_tke,
+    n_timesteps,
+    turbulent_kinetic_energy,
+    turbulence_intensity,
+):
     """
     Plots kinetic energy and turbulent kinetic energy at probe points.
 
@@ -196,7 +298,7 @@ def plot_kinetic_energy(k, ax, kinetic_energy, max_ke, max_tke, n_timesteps, tur
     ax_twinx.plot(time_interval, turbulence_intensity[k], color=colors[2], label="")
 
     # Set axis limits
-    ax.set_ylim(-1E-2, max_ke * 1.1)
+    ax.set_ylim(-1e-2, max_ke * 1.1)
     ax.set_xlim(min(time_interval), max(time_interval))
 
     # Set axis labels
@@ -205,14 +307,16 @@ def plot_kinetic_energy(k, ax, kinetic_energy, max_ke, max_tke, n_timesteps, tur
     ax.set_xlabel("Time [s]", fontsize=12)
 
     # Color axis ticks
-    ax.tick_params(axis='y', which='major', labelsize=12)
-    ax_twinx.tick_params(axis='y', which='major', labelsize=12, labelcolor=colors[2])
+    ax.tick_params(axis="y", which="major", labelsize=12)
+    ax_twinx.tick_params(axis="y", which="major", labelsize=12, labelcolor=colors[2])
 
     # Set title to probe number
-    ax.set_title('Probe {}'.format(k + 1), y=1.0, pad=-14)
+    ax.set_title("Probe {}".format(k + 1), y=1.0, pad=-14)
 
 
-def plot_velocity_and_pressure(k, ax, max_P, max_U, mean_velocity, n_timesteps, pressures, velocity):
+def plot_velocity_and_pressure(
+    k, ax, max_P, max_U, mean_velocity, n_timesteps, pressures, velocity
+):
     """
     Plots velocity magnitude and pressure at probe points.
 
@@ -230,12 +334,12 @@ def plot_velocity_and_pressure(k, ax, max_P, max_U, mean_velocity, n_timesteps, 
     ax_twinx = ax.twinx()
     time_interval = np.linspace(0, n_timesteps, n_timesteps)
     ax.plot(time_interval, velocity[k], color=colors[0], label="")
-    ax.plot(time_interval, mean_velocity[k], color=colors[2], linestyle='--', label="")
+    ax.plot(time_interval, mean_velocity[k], color=colors[2], linestyle="--", label="")
     ax_twinx.plot(time_interval, pressures[k], color=colors[1], label="")
 
     # Set axis limits
-    ax.set_ylim(-1E-2, max_U * 1.5)
-    ax_twinx.set_ylim(-1E-2, max_P * 1.5)
+    ax.set_ylim(-1e-2, max_U * 1.5)
+    ax_twinx.set_ylim(-1e-2, max_P * 1.5)
     ax.set_xlim(min(time_interval), max(time_interval))
 
     # Set axis labels
@@ -244,15 +348,16 @@ def plot_velocity_and_pressure(k, ax, max_P, max_U, mean_velocity, n_timesteps, 
     ax.set_xlabel("Time [s]", fontsize=12)
 
     # Color axis ticks
-    ax.tick_params(axis='y', which='major', labelsize=12, labelcolor=colors[0])
-    ax_twinx.tick_params(axis='y', which='major', labelsize=12, labelcolor=colors[1])
+    ax.tick_params(axis="y", which="major", labelsize=12, labelcolor=colors[0])
+    ax_twinx.tick_params(axis="y", which="major", labelsize=12, labelcolor=colors[1])
 
     # Set title to probe number
-    ax.set_title('Probe {}'.format(k + 1), y=1.0, pad=-14)
+    ax.set_title("Probe {}".format(k + 1), y=1.0, pad=-14)
 
 
-def compute_mean_velocity_and_kinetic_energy(T, dt, n_timesteps, n_probes, velocity, velocity_u, velocity_v,
-                                             velocity_w):
+def compute_mean_velocity_and_kinetic_energy(
+    T, dt, n_timesteps, n_probes, velocity, velocity_u, velocity_v, velocity_w
+):
     """
     Computes mean velocity and kinetic energy at probe points.
 
@@ -301,24 +406,33 @@ def compute_mean_velocity_and_kinetic_energy(T, dt, n_timesteps, n_probes, veloc
         u_mean_w = np.tile(u_mean_w, n_cycles)
 
         # Calculate total kinetic energy
-        kinetic_energy[k] = 0.5 * (u ** 2 + v ** 2 + w ** 2)
+        kinetic_energy[k] = 0.5 * (u**2 + v**2 + w**2)
 
         # Calculate fluctuating velocity
         fluctuating_velocity_u = u - u_mean_u
         fluctuating_velocity_v = v - u_mean_v
         fluctuating_velocity_w = w - u_mean_w
 
-        turbulent_kinetic_energy[k] = 0.5 * ((fluctuating_velocity_u ** 2) +
-                                             (fluctuating_velocity_v ** 2) +
-                                             (fluctuating_velocity_w ** 2))
+        turbulent_kinetic_energy[k] = 0.5 * (
+            (fluctuating_velocity_u**2)
+            + (fluctuating_velocity_v**2)
+            + (fluctuating_velocity_w**2)
+        )
         u_prime = np.sqrt(2 / 3 * turbulent_kinetic_energy[k])
-        U_bar = np.sqrt(u_mean_u ** 2 + u_mean_v ** 2 + u_mean_w ** 2)
+        U_bar = np.sqrt(u_mean_u**2 + u_mean_v**2 + u_mean_w**2)
         turbulence_intensity[k] = u_prime / U_bar
 
     max_ke = np.max(kinetic_energy)
     max_tke = np.max(turbulent_kinetic_energy)
 
-    return mean_velocity, kinetic_energy, turbulent_kinetic_energy, turbulence_intensity, max_ke, max_tke
+    return (
+        mean_velocity,
+        kinetic_energy,
+        turbulent_kinetic_energy,
+        turbulence_intensity,
+        max_ke,
+        max_tke,
+    )
 
 
 def load_probes(case_path, probe_saving_frequency):
@@ -411,7 +525,19 @@ def load_probes(case_path, probe_saving_frequency):
         print("-- No data to visualize. Exiting..")
         exit()
 
-    return max_P, max_U, n_cols, n_probes, n_rows, pressures, velocity, velocity_u, velocity_v, velocity_w, n_timesteps
+    return (
+        max_P,
+        max_U,
+        n_cols,
+        n_probes,
+        n_rows,
+        pressures,
+        velocity,
+        velocity_u,
+        velocity_v,
+        velocity_w,
+        n_timesteps,
+    )
 
 
 def load_probe_data(case_path, tstep):
@@ -492,8 +618,8 @@ def compute_energy_spectrum(n_probes, velocity_u, velocity_v, velocity_w, dt):
         freqs = np.fft.fftfreq(N, dt)
 
         # Store positive values of total kinetic energy spectrum
-        freq = freqs[:N // 2]
-        E_total = E_total[:N // 2]
+        freq = freqs[: N // 2]
+        E_total = E_total[: N // 2]
 
         kinetic_energy_spectrum.append(E_total)
 
@@ -508,9 +634,13 @@ def compute_energy_spectrum(n_probes, velocity_u, velocity_v, velocity_w, dt):
 
 def main_probe():
     # Read command line arguments
-    folder, _, _, dt, _, _, probe_freq, T, _, _, _, _, _, probes_to_plot = read_command_line()
-    visualize_probes(folder, probe_freq, T, dt, probes_to_plot, show_figure=True, save_figure=True)
+    folder, _, _, dt, _, _, probe_freq, T, _, _, _, _, _, probes_to_plot = (
+        read_command_line()
+    )
+    visualize_probes(
+        folder, probe_freq, T, dt, probes_to_plot, show_figure=True, save_figure=True
+    )
 
 
-if __name__ == '__main__':
+if __name__ == "__main__":
     main_probe()

@@ -2,8 +2,10 @@ from os import path
 
 from dolfin import Mesh
 
-from vampy.automatedPreprocessing.automated_preprocessing import read_command_line, \
-    run_pre_processing
+from vampy.automatedPreprocessing.automated_preprocessing import (
+    read_command_line,
+    run_pre_processing,
+)
 from vampy.automatedPreprocessing.preprocessing_common import read_polydata
 
 
@@ -11,15 +13,18 @@ def test_mesh_model_with_one_inlet():
     model_path = "tests/test_data/tube/tube.stl"
     # Get default input parameters
     common_input = read_command_line(model_path)
-    common_input.update(dict(meshing_method="diameter",
-                             smoothing_method="taubin",
-                             refine_region=False,
-                             coarsening_factor=1.3,
-                             visualize=False,
-                             compress_mesh=False,
-                             outlet_flow_extension_length=1,
-                             inlet_flow_extension_length=1
-                             ))
+    common_input.update(
+        dict(
+            meshing_method="diameter",
+            smoothing_method="taubin",
+            refine_region=False,
+            coarsening_factor=1.3,
+            visualize=False,
+            compress_mesh=False,
+            outlet_flow_extension_length=1,
+            inlet_flow_extension_length=1,
+        )
+    )
 
     # Run pre processing
     run_pre_processing(**common_input)
@@ -46,15 +51,18 @@ def test_mesh_model_with_one_inlet_and_two_outlets():
     model_path = "tests/test_data/artery/artery.stl"
     # Get default input parameters
     common_input = read_command_line(model_path)
-    common_input.update(dict(meshing_method="diameter",
-                             smoothing_method="taubin",
-                             refine_region=False,
-                             coarsening_factor=1.3,
-                             visualize=False,
-                             compress_mesh=False,
-                             outlet_flow_extension_length=1,
-                             inlet_flow_extension_length=1
-                             ))
+    common_input.update(
+        dict(
+            meshing_method="diameter",
+            smoothing_method="taubin",
+            refine_region=False,
+            coarsening_factor=1.3,
+            visualize=False,
+            compress_mesh=False,
+            outlet_flow_extension_length=1,
+            inlet_flow_extension_length=1,
+        )
+    )
 
     # Run pre processing
     run_pre_processing(**common_input)

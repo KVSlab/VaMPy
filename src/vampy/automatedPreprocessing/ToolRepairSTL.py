@@ -39,10 +39,18 @@ def DumpQualityStats(iq, arrayname):
     range.append(an.GetComponent(0, 2))
     average = an.GetComponent(0, 1)
     stdDev = math.sqrt(math.fabs(an.GetComponent(0, 3)))
-    outStr = '%s%g%s%g%s%g\n%s%g%s%g' % (
-        '  cardinality: ', cardinality,
-        '  , range: ', range[0], '  -  ', range[1],
-        '  average: ', average, '  , standard deviation: ', stdDev)
+    outStr = "%s%g%s%g%s%g\n%s%g%s%g" % (
+        "  cardinality: ",
+        cardinality,
+        "  , range: ",
+        range[0],
+        "  -  ",
+        range[1],
+        "  average: ",
+        average,
+        "  , standard deviation: ",
+        stdDev,
+    )
     print(outStr)
     return outStr
 
@@ -67,7 +75,9 @@ def foundAndDeleteNaNTriangles(mesh):
         killThisTriangle = False
         nPointsForThisCell = mesh.GetCell(i).GetPoints().GetNumberOfPoints()
         if nPointsForThisCell > 3:
-            print("> WARNING: found Cell with more than 3 points: there is more than triangles.")
+            print(
+                "> WARNING: found Cell with more than 3 points: there is more than triangles."
+            )
         for j in range(0, nPointsForThisCell):
             x = [0.0, 0.0, 0.0]
             mesh.GetCell(i).GetPoints().GetPoint(j, x)
@@ -108,7 +118,7 @@ def cleanTheSurface(mesh):
     print("> Done.")
     print("> ")
 
-    return (outputPolyData)
+    return outputPolyData
 
 
 def closeAllTheHolesOnTheSurface(mesh):
@@ -125,7 +135,7 @@ def closeAllTheHolesOnTheSurface(mesh):
     print("> Done.")
     print("> ")
 
-    return (outputPolyData)
+    return outputPolyData
 
 
 def cleanTheSurfaceUnstructGrid(mesh):
@@ -141,7 +151,7 @@ def cleanTheSurfaceUnstructGrid(mesh):
     print("> Done.")
     print("> ")
 
-    return (outputPolyData)
+    return outputPolyData
 
 
 def writeSTLfile(outputPolyData, outputFileName, ascii):
@@ -167,7 +177,9 @@ def checkIfThereIsHoles(outputBisPolyData):
     featureEdges.Update()
     numberOfOpenEdges = featureEdges.GetOutput().GetNumberOfCells()
     if numberOfOpenEdges > 0:
-        print("> The surface is open. It might be only the outlets if you did not try to close the surface.")
+        print(
+            "> The surface is open. It might be only the outlets if you did not try to close the surface."
+        )
     else:
         print("> The surface is closed, there is no holes.")
     print(">")
@@ -182,14 +194,16 @@ def checkIfThereIsNonTriangleCells(outputBisPolyData):
         print("> ERROR: There are elements that are not triangles")
 
 
-def repairSTL(inputFileName, outputFileName, closeHoles, checkHoles, checkQuality, ascii):
+def repairSTL(
+    inputFileName, outputFileName, closeHoles, checkHoles, checkQuality, ascii
+):
     # Open file.
     mesh = loadFile(inputFileName)
 
     if checkQuality:
         quality = computeQualityMesh(mesh, vtk.VTK_QUALITY_ASPECT_RATIO)
 
-        print(DumpQualityStats(quality, 'Quality'))
+        print(DumpQualityStats(quality, "Quality"))
 
     # Check the number of pts and cells.
     surfaceOverview(mesh)
@@ -223,35 +237,74 @@ def repairSTL(inputFileName, outputFileName, closeHoles, checkHoles, checkQualit
 
         checkIfThereIsNonTriangleCells(outputBisPolyData)
 
-    if not (outputFileName == ''):
+    if not (outputFileName == ""):
         writeSTLfile(outputBisPolyData, outputFileName, ascii)
 
 
 if __name__ == "__main__":
     parser = argparse.ArgumentParser(
-        description="ToolRepairSTL: correct an STL surface with NaN points and/or redundant nodes.")
-    parser.add_argument('-i', '--input', type=str, required=True,
-                        dest='inputFileName',
-                        help="Input file containing the surface data in a STL format.")
-    parser.add_argument('-o', '--output', type=str, required=False,
-                        default='', dest='outputFileName',
-                        help="Output file containing the cleaned surface data in a STL format.")
-    parser.add_argument('-p', '--patchesholes', required=False,
-                        default=False,
-                        dest='closeHoles', action="store_true",
-                        help="Set this argument to true if you want to patch up the potential holes of the surface.")
-    parser.add_argument('-c', '--checkholes', required=False,
-                        default=False,
-                        dest='checkholes', action="store_true",
-                        help="Set this argument to true if you want to check up the potential holes of the surface.")
-    parser.add_argument('-a', '--ascii', required=False,
-                        default=False,
-                        dest='ascii', action="store_true",
-                        help="Set this argument to true if you want the output STL wrote in ASCII.")
-    parser.add_argument('-q', '--checkquality', required=False,
-                        default=False,
-                        dest='checkQuality', action="store_true",
-                        help="Set this argument to true if you want to check up the potential holes of the surface.")
+        description="ToolRepairSTL: correct an STL surface with NaN points and/or redundant nodes."
+    )
+    parser.add_argument(
+        "-i",
+        "--input",
+        type=str,
+        required=True,
+        dest="inputFileName",
+        help="Input file containing the surface data in a STL format.",
+    )
+    parser.add_argument(
+        "-o",
+        "--output",
+        type=str,
+        required=False,
+        default="",
+        dest="outputFileName",
+        help="Output file containing the cleaned surface data in a STL format.",
+    )
+    parser.add_argument(
+        "-p",
+        "--patchesholes",
+        required=False,
+        default=False,
+        dest="closeHoles",
+        action="store_true",
+        help="Set this argument to true if you want to patch up the potential holes of the surface.",
+    )
+    parser.add_argument(
+        "-c",
+        "--checkholes",
+        required=False,
+        default=False,
+        dest="checkholes",
+        action="store_true",
+        help="Set this argument to true if you want to check up the potential holes of the surface.",
+    )
+    parser.add_argument(
+        "-a",
+        "--ascii",
+        required=False,
+        default=False,
+        dest="ascii",
+        action="store_true",
+        help="Set this argument to true if you want the output STL wrote in ASCII.",
+    )
+    parser.add_argument(
+        "-q",
+        "--checkquality",
+        required=False,
+        default=False,
+        dest="checkQuality",
+        action="store_true",
+        help="Set this argument to true if you want to check up the potential holes of the surface.",
+    )
 
     args = parser.parse_args()
-    repairSTL(args.inputFileName, args.outputFileName, args.closeHoles, args.checkholes, args.checkQuality, args.ascii)
+    repairSTL(
+        args.inputFileName,
+        args.outputFileName,
+        args.closeHoles,
+        args.checkholes,
+        args.checkQuality,
+        args.ascii,
+    )
