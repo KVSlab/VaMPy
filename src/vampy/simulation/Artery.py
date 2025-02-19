@@ -1,21 +1,31 @@
+import importlib.util
 import json
-import os
 import pickle
 from pprint import pprint
-from dolfin import set_log_level
 
-if os.environ.get('OASIS_MODE') == 'TESTING':
-    from oasismove.problems.NSfracStep import *
-else:
-    from oasis.problems.NSfracStep import *
+import numpy as np
+from dolfin import set_log_level, MPI
 
 from vampy.simulation.Probe import Probes  # type: ignore
 from vampy.simulation.Womersley import make_womersley_bcs, compute_boundary_geometry_acrn
 from vampy.simulation.simulation_common import get_file_paths, store_u_mean, print_mesh_information, \
     store_velocity_and_pressure_h5, dump_probes
 
+# Check for oasis and oasismove
+package_name_oasis = 'oasis'
+package_name_oasismove = 'oasismove'
+oasis_exists = importlib.util.find_spec(package_name_oasis)
+oasismove_exists = importlib.util.find_spec(package_name_oasismove)
+if oasismove_exists:
+    from oasismove.problems.NSfracStep import *
+elif oasis_exists:
+    from oasis.problems.NSfracStep import *
+else:
+    print("Neither oasis nor oasismove is installed. Exiting simulation..")
+
 # FEniCS specific command to control the desired level of logging, here set to critical errors
 set_log_level(50)
+comm = MPI.comm_world
 
 
 def problem_parameters(commandline_kwargs, NS_parameters, NS_expressions, **NS_namespace):
@@ -74,7 +84,7 @@ def problem_parameters(commandline_kwargs, NS_parameters, NS_expressions, **NS_n
     case_name = mesh_file.split(".")[0]
     NS_parameters["folder"] = path.join(NS_parameters["folder"], case_name)
 
-    if MPI.rank(MPI.comm_world) == 0:
+    if MPI.rank(comm) == 0:
         print("=== Starting simulation for case: {} ===".format(case_name))
         print("Running with the following parameters:")
         pprint(NS_parameters)
@@ -130,7 +140,7 @@ def create_bcs(t, NS_expressions, V, Q, area_ratio, area_inlet, mesh, mesh_path,
         area_out.append(assemble(Constant(1.0) * dsi))
 
     bc_p = []
-    if MPI.rank(MPI.comm_world) == 0:
+    if MPI.rank(comm) == 0:
         print("=== Initial pressure and area fraction ===")
 
     for i, ID in enumerate(id_out):
@@ -139,7 +149,7 @@ def create_bcs(t, NS_expressions, V, Q, area_ratio, area_inlet, mesh, mesh_path,
         bc = DirichletBC(Q, outflow, boundary, ID)
         bc_p.append(bc)
         NS_expressions[ID] = outflow
-        if MPI.rank(MPI.comm_world) == 0:
+        if MPI.rank(comm) == 0:
             print(f"Boundary ID={ID}, pressure: {p_initial:.5f}, area fraction: {area_ratio[i]:0.5f}")
 
     # No slip condition at wall
@@ -170,7 +180,7 @@ def pre_solve_hook(mesh, V, Q, newfolder, mesh_path, restart_folder, velocity_de
         probe_points = np.array(json.load(infile))
 
     # Store points file in checkpoint
-    if MPI.rank(MPI.comm_world) == 0:
+    if MPI.rank(comm) == 0:
         probe_points.dump(path.join(newfolder, "Checkpoint", "points"))
 
     eval_dict["centerline_u_x_probes"] = Probes(probe_points.flatten(), V)
@@ -186,7 +196,7 @@ def pre_solve_hook(mesh, V, Q, newfolder, mesh_path, restart_folder, velocity_de
         files = NS_namespace["files"]
 
     # Save mesh as HDF5 file for post-processing
-    with HDF5File(MPI.comm_world, files["mesh"], "w") as mesh_file:
+    with HDF5File(comm, files["mesh"], "w") as mesh_file:
         mesh_file.write(mesh, "mesh")
 
     # Create vector function for storing velocity
@@ -218,7 +228,7 @@ def temporal_hook(u_, p_, mesh, tstep, dump_probe_frequency, eval_dict, newfolde
                                                            tstep, u_)
 
     # Compute flow rates and updated pressure at outlets, and mean velocity and Reynolds number at inlet
-    if MPI.rank(MPI.comm_world) == 0 and tstep % 10 == 0:
+    if MPI.rank(comm) == 0 and tstep % 10 == 0:
         U_mean = Q_in / area_inlet[0]
         diam_inlet = np.sqrt(4 * area_inlet[0] / np.pi)
         Re = U_mean * diam_inlet / nu

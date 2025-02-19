@@ -334,6 +334,7 @@ def define_functions_and_iterate_dataset(time_to_average, dataset, dataset_avg, 
         print("=" * 10, "Starting post processing", "=" * 10)
 
     counter = 0
+    tolerance = 1E-12
     for data, data_avg in zip(dataset, dataset_avg):
         counter += 1
 
@@ -402,14 +403,14 @@ def define_functions_and_iterate_dataset(time_to_average, dataset, dataset_avg, 
 
         # Compute length scale
         t0 = Timer("Length scale")
-        length_scale.vector().set_local((nu ** 3 / eps) ** (1. / 4))
+        length_scale.vector().set_local((nu ** 3 / (eps + tolerance)) ** (1. / 4))
         length_scale.vector().apply("insert")
         length_scale_cycle_avg.vector().axpy(1, length_scale.vector())
         t0.stop()
 
         # Compute time scale
         t0 = Timer("Time scale")
-        time_scale.vector().set_local((nu / eps) ** 0.5)
+        time_scale.vector().set_local((nu / (eps + tolerance)) ** 0.5)
         time_scale.vector().apply("insert")
         time_scale_cycle_avg.vector().axpy(1, time_scale.vector())
         t0.stop()

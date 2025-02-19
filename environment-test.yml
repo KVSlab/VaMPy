@@ -6,11 +6,12 @@ channels:
 dependencies:
   - fenics
   - morphman
-  - paramiko
-  - pip
   - python >=3.8
-  - git
+  - pip==24.2
   - pip:
-      - scipy
-      - cppimport
+      - matplotlib
+      - scipy==1.14.1
+      - numpy==1.24.4
+      - cppimport==22.8.2
+      - paramiko==3.4.1
       - git+https://github.com/KVSlab/OasisMove

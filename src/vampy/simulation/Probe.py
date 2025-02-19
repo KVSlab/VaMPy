@@ -15,11 +15,12 @@ from numpy import zeros, squeeze, save
 ProbeObject = object
 
 try:
-    probe11 = cppimport.imp('vampy.simulation.probe.probe11')
+    probe11 = cppimport.imp('probe.probe11')
     ProbeObject = probe11.Probes
     print("Successfully imported probe.probe11")
-except ImportError:
+except ImportError as e:
     print("Failed to import probe.probe11")
+    print(f"Error message: {e}")
 
 
 # Give the compiled classes some additional pythonic functionality
