@@ -1,3 +1,5 @@
+# Copyright (c) 2025 Simula Research Laboratory
+# SPDX-License-Identifier: GPL-3.0-or-later
 from os import path, remove
 
 from vampy.automatedPostprocessing.compute_velocity_and_pressure import compute_velocity_and_pressure
