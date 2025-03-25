@@ -29,11 +29,14 @@ geometries.
 
 Installation
 ------------
-VaMPy is a Python package for Python >= 3.8, with main dependencies to [morphMan](https://github.com/KVSlab/morphMan)
-and [Oasis](https://github.com/mikaem/Oasis). VaMPy and its dependencies can be installed with `conda` on Linux and
-macOS as explained [here](https://kvslab.github.io/VaMPy/conda.html). The package can also be installed and run through
-its latest `Docker` image supported by Windows, Linux, and macOS, and
-explained [here](https://kvslab.github.io/VaMPy/docker.html).
+VaMPy is a Python package for Python >= 3.8, with main dependencies to [morphMan](https://github.com/KVSlab/morphMan) and [Oasis](https://github.com/mikaem/Oasis). VaMPy and its dependencies can be installed with `conda` on n Linux and  
+macOS using the following command:
+
+```
+conda create -n your_environment -c conda-forge vampy
+```
+
+More details on installation via `conda` can be found [here](https://kvslab.github.io/VaMPy/conda.html). The package can also be installed and run through its latest `Docker` image supported by Windows, Linux, and macOS, and explained [here](https://kvslab.github.io/VaMPy/docker.html).
 
 Documentation
 -------------
