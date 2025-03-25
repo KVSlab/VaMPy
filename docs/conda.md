@@ -15,6 +15,22 @@ installation of all the dependencies.
 
 ## Installation on Linux or macOS
 
+The easiest way to install `VaMPy` and its dependencies is via `conda-forge`. Run the following command in your terminal:
+
+```
+conda create -n your_environment -c conda-forge vampy
+```
+
+Once the installation is complete, activate the newly created environment:
+
+```
+conda activate your_environment
+```
+
+### Alternative: Manual Installation from Source
+
+If you prefer to install `VaMPy` from source, follow these steps:
+
 ### Step 1:  Clone the `VaMPy` repository
 
 Start by downloading and navigating to the root directory of `VaMPy` with the following command in your terminal:
